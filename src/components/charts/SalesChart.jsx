@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import dayjs from 'dayjs'
 import {
   LineChart,
@@ -34,6 +35,25 @@ const MONTH_OPTIONS = Array.from({ length: 7 }, (_, i) => ({
   label: i === 0 ? 'This month' : i === 1 ? '1 month ago' : `${i} months ago`,
 }))
 
+const useChartColors = () => {
+  const [themeVersion, setThemeVersion] = useState(0)
+  useEffect(() => {
+    const onThemeChange = () => setThemeVersion((v) => v + 1)
+    window.addEventListener('themechange', onThemeChange)
+    return () => window.removeEventListener('themechange', onThemeChange)
+  }, [])
+  return useMemo(() => {
+    const isDark = document.documentElement.classList.contains('dark')
+    return {
+      grid: isDark ? '#334155' : '#e2e8f0',
+      tick: isDark ? '#94a3b8' : '#64748b',
+      line: isDark ? '#e2e8f0' : '#0f172a',
+      tooltipBg: isDark ? '#1e293b' : 'white',
+      tooltipBorder: isDark ? '#334155' : '#e2e8f0',
+    }
+  }, [themeVersion])
+}
+
 const SalesChart = ({
   data: dataProp,
   loading = false,
@@ -43,6 +63,7 @@ const SalesChart = ({
   selectedMonthOffset = 0,
   onMonthOffsetChange,
 }) => {
+  const colors = useChartColors()
   const chartMonth = dayjs().subtract(selectedMonthOffset, 'month')
   const data = dataProp ?? buildChartDataFromApi([], chartMonth.year(), chartMonth.month())
   const monthName = chartMonth.format('MMMM')
@@ -93,18 +114,18 @@ const SalesChart = ({
           <div className="h-64 sm:h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
                 <XAxis
                   dataKey="label"
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  tickLine={{ stroke: '#cbd5e1' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
+                  tick={{ fontSize: 12, fill: colors.tick }}
+                  tickLine={{ stroke: colors.grid }}
+                  axisLine={{ stroke: colors.grid }}
                 />
                 <YAxis
                   tickFormatter={formatCurrency}
-                  tick={{ fontSize: 12, fill: '#64748b' }}
-                  tickLine={{ stroke: '#cbd5e1' }}
-                  axisLine={{ stroke: '#e2e8f0' }}
+                  tick={{ fontSize: 12, fill: colors.tick }}
+                  tickLine={{ stroke: colors.grid }}
+                  axisLine={{ stroke: colors.grid }}
                 />
                 <Tooltip
                   formatter={(value) => [formatCurrency(value), 'Daily sales']}
@@ -112,8 +133,8 @@ const SalesChart = ({
                     payload?.[0]?.payload?.label ?? label
                   }
                   contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e2e8f0',
+                    backgroundColor: colors.tooltipBg,
+                    border: `1px solid ${colors.tooltipBorder}`,
                     borderRadius: '8px',
                     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
@@ -121,10 +142,10 @@ const SalesChart = ({
                 <Line
                   type="monotone"
                   dataKey="daily"
-                  stroke="#0f172a"
+                  stroke={colors.line}
                   strokeWidth={2}
-                  dot={{ fill: '#0f172a', strokeWidth: 0, r: 3 }}
-                  activeDot={{ r: 5, fill: '#0f172a', stroke: '#fff', strokeWidth: 2 }}
+                  dot={{ fill: colors.line, strokeWidth: 0, r: 3 }}
+                  activeDot={{ r: 5, fill: colors.line, stroke: colors.tooltipBg, strokeWidth: 2 }}
                 />
               </LineChart>
             </ResponsiveContainer>

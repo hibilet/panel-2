@@ -1,4 +1,21 @@
+import { useEffect, useState } from 'react'
+
+import { getStoredTheme, setTheme } from '../../../lib/theme'
+
 const Settings = () => {
+  const [darkMode, setDarkMode] = useState(false)
+
+  useEffect(() => {
+    const stored = getStoredTheme()
+    setDarkMode(stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches))
+  }, [])
+
+  const handleDarkModeChange = (e) => {
+    const checked = e.target.checked
+    setDarkMode(checked)
+    setTheme(checked ? 'dark' : 'light')
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
       <div className="space-y-6">
@@ -38,7 +55,12 @@ const Settings = () => {
               <span className="text-slate-700">Email notifications</span>
             </label>
             <label className="flex cursor-pointer items-center gap-3">
-              <input type="checkbox" className="h-4 w-4 rounded border-slate-300" />
+              <input
+                type="checkbox"
+                checked={darkMode}
+                onChange={handleDarkModeChange}
+                className="h-4 w-4 rounded border-slate-300"
+              />
               <span className="text-slate-700">Dark mode</span>
             </label>
           </div>
