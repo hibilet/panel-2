@@ -41,9 +41,12 @@ const buildWeeklyMatrixFromSalesReport = (apiData = []) => {
   return Object.values(byName)
 }
 
+const currentMonthStart = () => dayjs().startOf('month').format('YYYY-MM-DD')
+
 const Dashboard = () => {
   const [todaySales, setTodaySales] = useState(null)
-  const [todayTransactions, setTodayTransactions] = useState(null)
+  const [mtdSales, setMtdSales] = useState(null)
+  const [mtdProductsSold, setMtdProductsSold] = useState(null)
   const [activeSalesCount, setActiveSalesCount] = useState(null)
   const [sales, setSales] = useState([])
   const [chartData, setChartData] = useState(null)
@@ -70,16 +73,23 @@ const Dashboard = () => {
       status: 'success',
       test: 'true',
     })
+    const mtdStart = currentMonthStart()
 
     Promise.all([
       get(`/dashboards/transactions/between?start=${today}&end=${today}&sale=all&${params}`),
+      get(`/dashboards/transactions/between?start=${mtdStart}&end=${today}&sale=all&${params}`),
       get('/sales'),
       get('/transactions/search?limit=5&skip=0&status=success'),
     ])
-      .then(([todayRes, salesRes, transactionsRes]) => {
+      .then(([todayRes, mtdRes, salesRes, transactionsRes]) => {
         const todayData = todayRes.data?.[0]
         setTodaySales(todayData?.total ?? 0)
-        setTodayTransactions(todayData?.count ?? 0)
+
+        const mtdData = mtdRes.data ?? []
+        const mtdTotal = mtdData.reduce((sum, d) => sum + (d.total ?? 0), 0)
+        const mtdCount = mtdData.reduce((sum, d) => sum + (d.count ?? 0), 0)
+        setMtdSales(mtdTotal)
+        setMtdProductsSold(mtdCount)
 
         const salesList = salesRes.data ?? []
         setActiveSalesCount(salesList.filter((s) => s.status === 'active').length)
@@ -150,7 +160,8 @@ const Dashboard = () => {
 
   const loading =
     todaySales === null &&
-    todayTransactions === null &&
+    mtdSales === null &&
+    mtdProductsSold === null &&
     activeSalesCount === null
 
   if (loading && !error) {
@@ -185,20 +196,22 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Transactions</p>
+            <p className="text-sm text-slate-500">MTD Sales</p>
             <p className="mt-1 text-2xl font-bold text-slate-900">
-              {todayTransactions ?? 0}
+              {formatCurrency(mtdSales ?? 0)}
             </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Active Links</p>
+            <p className="text-sm text-slate-500">MTD Products Sold</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {mtdProductsSold ?? 0}
+            </p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <p className="text-sm text-slate-500">Active Sales</p>
             <p className="mt-1 text-2xl font-bold text-slate-900">
               {activeSalesCount ?? 0}
             </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Accounts</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
           </div>
         </div>
       </section>

@@ -41,7 +41,8 @@ const Navbar = () => {
   )
 
   return (
-    <header className="sticky top-0 z-50 mx-auto max-w-5xl border-b border-slate-200 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <div className="mx-auto max-w-5xl py-4">
           <h1 className="text-xl font-semibold text-slate-900">HIBilet Panel</h1>
           <nav aria-label="Main navigation" className="relative mt-4">
             {/* Desktop: tabs with space between */}
@@ -88,6 +89,7 @@ const Navbar = () => {
               </div>
             </div>
           </nav>
+      </div>
     </header>
   )
 }

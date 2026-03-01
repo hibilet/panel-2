@@ -5,6 +5,7 @@ import Navbar from '../../components/global/Navbar'
 import Dashboard from './Dashboard'
 import Sales from './Sales'
 import Sale from './Sales/Sale'
+import SaleNew from './Sales/SaleNew'
 import Transactions from './Transactions'
 import Transaction from './Transactions/Transaction'
 import Links from './Links'
@@ -23,6 +24,7 @@ const App = () => {
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/sales" component={Sales} />
+          <Route path="/sales/new" component={SaleNew} />
           <Route path="/sales/:id" component={Sale} />
           <Route path="/transactions" component={Transactions} />
           <Route path="/transactions/:id" component={Transaction} />
