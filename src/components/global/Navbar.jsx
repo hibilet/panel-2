@@ -3,10 +3,10 @@ import { Link, useLocation } from 'wouter'
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: 'fa-gauge-high' },
+  { path: '/accounts', label: 'Accounts', icon: 'fa-users' },
   { path: '/sales', label: 'Sales', icon: 'fa-cart-shopping' },
   { path: '/transactions', label: 'Transactions', icon: 'fa-receipt' },
   { path: '/links', label: 'Links', icon: 'fa-link' },
-  { path: '/accounts', label: 'Accounts', icon: 'fa-users' },
   { path: '/reports', label: 'Reports', icon: 'fa-chart-line' },
   { path: '/settings', label: 'Settings', icon: 'fa-gear' },
 ]

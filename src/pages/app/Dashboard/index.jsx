@@ -1,4 +1,9 @@
+import SalesChart from '../../../components/charts/SalesChart'
+import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
+
 const Dashboard = () => {
+  const weeklyEvents = [] // placeholder
+
   return (
     <div className="mx-auto max-w-5xl">
       <section aria-labelledby="stats-heading" className="mb-8">
@@ -21,6 +26,15 @@ const Dashboard = () => {
             <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
           </div>
         </div>
+      </section>
+
+      <SalesChart />
+
+      <section aria-labelledby="weekly-events-heading" className="mb-8">
+        <h2 id="weekly-events-heading" className="mb-4 text-lg font-medium text-slate-900">
+          Weekly event sale matrix
+        </h2>
+        <WeeklyEventSaleMatrix data={weeklyEvents} />
       </section>
 
       <section aria-labelledby="recent-heading">
