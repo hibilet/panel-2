@@ -1,8 +1,177 @@
+import { useEffect, useState } from 'react'
+import dayjs from 'dayjs'
+
+import { Link } from 'wouter'
+import { get } from '../../../lib/client'
 import SalesChart from '../../../components/charts/SalesChart'
+import TransactionsTable from '../../../components/tables/TransactionsTable'
 import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
 
+const formatCurrency = (value) =>
+  value != null ? `₺${Number(value).toLocaleString()}` : '₺0'
+
+const buildChartDataFromApi = (apiData = [], year, month) => {
+  const daysInMonth = dayjs().year(year).month(month).daysInMonth()
+  const byDate = Object.fromEntries(
+    (apiData ?? []).map((d) => [d.date, d])
+  )
+  const data = []
+  const monthName = dayjs().month(month).format('MMM')
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = dayjs().year(year).month(month).date(day).format('YYYY-MM-DD')
+    const dayData = byDate[dateStr]
+    const daily = dayData ? dayData.total : 0
+    data.push({
+      date: `${day}`,
+      label: `${day} ${monthName}`,
+      daily,
+    })
+  }
+  return data
+}
+
+const buildWeeklyMatrixFromSalesReport = (apiData = []) => {
+  const byName = {}
+  for (const item of apiData ?? []) {
+    if (!byName[item.name]) byName[item.name] = { eventName: item.name }
+    const dayOfWeek = dayjs(item.day).day()
+    const key = `weekday${dayOfWeek === 0 ? 7 : dayOfWeek}`
+    byName[item.name][key] = (byName[item.name][key] ?? 0) + (item.count ?? 0)
+  }
+  return Object.values(byName)
+}
+
 const Dashboard = () => {
-  const weeklyEvents = [] // placeholder
+  const [todaySales, setTodaySales] = useState(null)
+  const [todayTransactions, setTodayTransactions] = useState(null)
+  const [activeSalesCount, setActiveSalesCount] = useState(null)
+  const [sales, setSales] = useState([])
+  const [chartData, setChartData] = useState(null)
+  const [chartLoading, setChartLoading] = useState(true)
+  const [selectedSale, setSelectedSale] = useState('all')
+  const [selectedMonthOffset, setSelectedMonthOffset] = useState(0)
+  const [selectedWeekOffset, setSelectedWeekOffset] = useState(0)
+  const [weeklyEvents, setWeeklyEvents] = useState([])
+  const [weeklyMatrixLoading, setWeeklyMatrixLoading] = useState(true)
+  const [recentTransactions, setRecentTransactions] = useState([])
+  const [error, setError] = useState(null)
+
+  const today = dayjs().format('YYYY-MM-DD')
+  const chartMonth = dayjs().subtract(selectedMonthOffset, 'month')
+  const monthStart = chartMonth.startOf('month').format('YYYY-MM-DD')
+  const monthEnd = chartMonth.endOf('month').format('YYYY-MM-DD')
+  const currentWeekMonday = dayjs().subtract((dayjs().day() + 6) % 7, 'day')
+  const selectedWeekMonday = currentWeekMonday.subtract(selectedWeekOffset, 'week')
+  const weekStart = selectedWeekMonday.format('YYYY-MM-DD')
+  const weekEnd = selectedWeekMonday.add(6, 'day').format('YYYY-MM-DD')
+
+  useEffect(() => {
+    const params = new URLSearchParams({
+      status: 'success',
+      test: 'true',
+    })
+
+    Promise.all([
+      get(`/dashboards/transactions/between?start=${today}&end=${today}&sale=all&${params}`),
+      get('/sales'),
+      get('/transactions/search?limit=5&skip=0&status=success'),
+    ])
+      .then(([todayRes, salesRes, transactionsRes]) => {
+        const todayData = todayRes.data?.[0]
+        setTodaySales(todayData?.total ?? 0)
+        setTodayTransactions(todayData?.count ?? 0)
+
+        const salesList = salesRes.data ?? []
+        setActiveSalesCount(salesList.filter((s) => s.status === 'active').length)
+        setSales(salesList)
+
+        setRecentTransactions(transactionsRes.data ?? [])
+      })
+      .catch((err) => {
+        setError(err?.message ?? 'Failed to load dashboard')
+      })
+  }, [today])
+
+  useEffect(() => {
+    let cancelled = false
+    queueMicrotask(() => {
+      if (!cancelled) setWeeklyMatrixLoading(true)
+    })
+
+    get(`/sales/reports/sales?period=week&start=${weekStart}&end=${weekEnd}&countType=nominal&sale=`)
+      .then((res) => {
+        if (!cancelled) {
+          setWeeklyEvents(buildWeeklyMatrixFromSalesReport(res.data ?? []))
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setWeeklyEvents([])
+      })
+      .finally(() => {
+        if (!cancelled) setWeeklyMatrixLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [weekStart, weekEnd])
+
+  useEffect(() => {
+    const params = new URLSearchParams({
+      status: 'success',
+      sale: selectedSale,
+      test: 'true',
+    })
+
+    let cancelled = false
+    queueMicrotask(() => {
+      if (!cancelled) setChartLoading(true)
+    })
+
+    get(`/dashboards/transactions/between?start=${monthStart}&end=${monthEnd}&${params}`)
+      .then((res) => {
+        if (cancelled) return
+        const now = dayjs()
+        setChartData(
+          buildChartDataFromApi(res.data ?? [], now.year(), now.month())
+        )
+      })
+      .catch(() => {
+        if (!cancelled) setChartData([])
+      })
+      .finally(() => {
+        if (!cancelled) setChartLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedSale, monthStart, monthEnd])
+
+  const loading =
+    todaySales === null &&
+    todayTransactions === null &&
+    activeSalesCount === null
+
+  if (loading && !error) {
+    return (
+      <div className="mx-auto max-w-5xl">
+        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
+          Loading…
+        </div>
+      </div>
+    )
+  }
+
+  if (error && todaySales === null) {
+    return (
+      <div className="mx-auto max-w-5xl">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+          {error}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -11,15 +180,21 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-500">Today&apos;s Sales</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">₺0</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {formatCurrency(todaySales ?? 0)}
+            </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-500">Transactions</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {todayTransactions ?? 0}
+            </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-500">Active Links</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">0</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">
+              {activeSalesCount ?? 0}
+            </p>
           </div>
           <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
             <p className="text-sm text-slate-500">Accounts</p>
@@ -28,21 +203,68 @@ const Dashboard = () => {
         </div>
       </section>
 
-      <SalesChart />
+      <SalesChart
+        data={chartData}
+        loading={chartLoading}
+        sales={sales}
+        selectedSale={selectedSale}
+        onSaleChange={setSelectedSale}
+        selectedMonthOffset={selectedMonthOffset}
+        onMonthOffsetChange={setSelectedMonthOffset}
+      />
 
       <section aria-labelledby="weekly-events-heading" className="mb-8">
-        <h2 id="weekly-events-heading" className="mb-4 text-lg font-medium text-slate-900">
-          Weekly event sale matrix
-        </h2>
-        <WeeklyEventSaleMatrix data={weeklyEvents} />
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="weekly-events-heading" className="text-lg font-medium text-slate-900">
+            Weekly event sale matrix
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedWeekOffset((o) => Math.min(o + 1, 6))}
+              disabled={selectedWeekOffset >= 6}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Previous week"
+            >
+              ‹
+            </button>
+            <span className="min-w-[180px] text-center text-sm text-slate-600">
+              {selectedWeekMonday.format('MMM D')} – {selectedWeekMonday.add(6, 'day').format('MMM D, YYYY')}
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelectedWeekOffset((o) => Math.max(o - 1, 0))}
+              disabled={selectedWeekOffset <= 0}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+              aria-label="Next week"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+        {weeklyMatrixLoading ? (
+          <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
+            <p className="text-slate-500">Loading…</p>
+          </div>
+        ) : (
+          <WeeklyEventSaleMatrix data={weeklyEvents} valueFormat="count" />
+        )}
       </section>
 
       <section aria-labelledby="recent-heading">
-        <h2 id="recent-heading" className="mb-4 text-lg font-medium text-slate-900">
-          Recent activity
-        </h2>
-        <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-center text-slate-500">No recent activity</p>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 id="recent-heading" className="text-lg font-medium text-slate-900">
+            Recent activity
+          </h2>
+          <Link
+            href="/transactions"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            View all →
+          </Link>
+        </div>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          <TransactionsTable data={recentTransactions} bare />
         </div>
       </section>
     </div>

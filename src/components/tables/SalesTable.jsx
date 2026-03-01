@@ -10,6 +10,9 @@ const SalesTable = ({ data = [] }) => {
         <thead>
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+              Start date
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
               Name
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -24,9 +27,6 @@ const SalesTable = ({ data = [] }) => {
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
               Revenue
             </th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Start date
-            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white">
@@ -39,6 +39,9 @@ const SalesTable = ({ data = [] }) => {
           ) : (
             data.map((row) => (
               <tr key={row.id ?? row.name} className="hover:bg-slate-50">
+                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                  {row.startDate ? formatDate(row.startDate) : '—'}
+                </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
                   {row.name}
                 </td>
@@ -53,9 +56,6 @@ const SalesTable = ({ data = [] }) => {
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-slate-900">
                   {row.revenue != null ? formatCurrency(row.revenue) : '—'}
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                  {row.startDate ? formatDate(row.startDate) : '—'}
                 </td>
               </tr>
             ))

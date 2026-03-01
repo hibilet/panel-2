@@ -3,16 +3,16 @@ import dayjs from 'dayjs'
 const statusStyles = {
   pending: 'bg-amber-100 text-amber-800',
   completed: 'bg-emerald-100 text-emerald-800',
+  success: 'bg-emerald-100 text-emerald-800',
   failed: 'bg-red-100 text-red-800',
   refunded: 'bg-slate-100 text-slate-600',
 }
 
-const TransactionsTable = ({ data = [] }) => {
+const TransactionsTable = ({ data = [], bare = false }) => {
   const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY, HH:mm')
 
-  return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+  const table = (
       <table className="min-w-full divide-y divide-slate-200">
         <thead>
           <tr>
@@ -23,7 +23,7 @@ const TransactionsTable = ({ data = [] }) => {
               Name
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Sale
+              Owner
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
               Subtotal
@@ -53,10 +53,10 @@ const TransactionsTable = ({ data = [] }) => {
                   {row.name}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                  {row.sale ?? '—'}
+                  {row.owner ?? row.sale ?? '—'}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-slate-900">
-                  {row.subtotal != null ? formatCurrency(row.subtotal) : '—'}
+                  {(row.paid ?? row.subtotal) != null ? formatCurrency(row.paid ?? row.subtotal) : '—'}
                 </td>
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
                   {row.createdAt ? formatDate(row.createdAt) : '—'}
@@ -75,6 +75,15 @@ const TransactionsTable = ({ data = [] }) => {
           )}
         </tbody>
       </table>
+  )
+
+  if (bare) {
+    return <div className="overflow-x-auto">{table}</div>
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+      {table}
     </div>
   )
 }

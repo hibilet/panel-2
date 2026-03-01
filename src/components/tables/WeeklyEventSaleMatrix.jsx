@@ -3,9 +3,14 @@ import dayjs from 'dayjs'
 // weekday 1 = Mon, 2 = Tue, ..., 6 = Sat, 7 = Sun (dayjs: 0=Sun, 1=Mon, ..., 6=Sat)
 const WEEKDAY_DAYJS = [1, 2, 3, 4, 5, 6, 0]
 
-const WeeklyEventSaleMatrix = ({ data = [] }) => {
-  const formatCurrency = (value) =>
-    value != null ? `₺${Number(value).toLocaleString()}` : '—'
+const formatCurrency = (value) =>
+  value != null ? `₺${Number(value).toLocaleString()}` : '—'
+
+const formatCount = (value) =>
+  value != null ? Number(value).toLocaleString() : '—'
+
+const WeeklyEventSaleMatrix = ({ data = [], valueFormat = 'currency' }) => {
+  const formatCell = valueFormat === 'count' ? formatCount : formatCurrency
 
   const weekdayLabels = WEEKDAY_DAYJS.map((d) => dayjs().day(d).format('ddd'))
 
@@ -48,7 +53,7 @@ const WeeklyEventSaleMatrix = ({ data = [] }) => {
                     key={d}
                     className="whitespace-nowrap px-4 py-3 text-center text-sm text-slate-600"
                   >
-                    {formatCurrency(row[`weekday${i + 1}`] ?? row[`weekday_${i + 1}`])}
+                    {formatCell(row[`weekday${i + 1}`] ?? row[`weekday_${i + 1}`])}
                   </td>
                 ))}
               </tr>
