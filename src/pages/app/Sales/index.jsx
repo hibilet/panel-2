@@ -53,16 +53,6 @@ const Sales = () => {
       .catch((err) => setError(err?.message ?? 'Failed to delete'))
   }
 
-  if (loading && sales.length === 0) {
-    return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading…
-        </div>
-      </div>
-    )
-  }
-
   if (error && sales.length === 0) {
     return (
       <div className="mx-auto max-w-5xl">
@@ -106,6 +96,7 @@ const Sales = () => {
         data={sales}
         extended={showMore}
         onDelete={showMore ? handleDelete : undefined}
+        loading={loading}
       />
 
       <div className="flex flex-col gap-4">
@@ -118,16 +109,12 @@ const Sales = () => {
         </button>
         {showPastEvents && (
           <>
-            {pastLoading ? (
-              <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-                Loading past events…
-              </div>
-            ) : pastError ? (
+            {pastError ? (
               <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
                 {pastError}
               </div>
             ) : (
-              <SalesTable data={pastSales} extended={false} />
+              <SalesTable data={pastSales} extended={false} loading={pastLoading} />
             )}
           </>
         )}

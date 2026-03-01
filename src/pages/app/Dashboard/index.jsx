@@ -6,6 +6,7 @@ import { get } from '../../../lib/client'
 import SalesChart from '../../../components/charts/SalesChart'
 import TransactionsTable from '../../../components/tables/TransactionsTable'
 import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
+import { StatCard } from '../../../components/shared'
 
 const formatCurrency = (value) =>
   value != null ? `₺${Number(value).toLocaleString()}` : '₺0'
@@ -158,21 +159,11 @@ const Dashboard = () => {
     }
   }, [selectedSale, monthStart, monthEnd])
 
-  const loading =
+  const statsLoading =
     todaySales === null &&
     mtdSales === null &&
     mtdProductsSold === null &&
     activeSalesCount === null
-
-  if (loading && !error) {
-    return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading…
-        </div>
-      </div>
-    )
-  }
 
   if (error && todaySales === null) {
     return (
@@ -189,30 +180,26 @@ const Dashboard = () => {
       <section aria-labelledby="stats-heading" className="mb-8">
         <h2 id="stats-heading" className="sr-only">Quick stats</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Today&apos;s Sales</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {formatCurrency(todaySales ?? 0)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">MTD Sales</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {formatCurrency(mtdSales ?? 0)}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">MTD Products Sold</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {mtdProductsSold ?? 0}
-            </p>
-          </div>
-          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <p className="text-sm text-slate-500">Active Sales</p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {activeSalesCount ?? 0}
-            </p>
-          </div>
+          <StatCard
+            label="Today's Sales"
+            value={formatCurrency(todaySales ?? 0)}
+            loading={statsLoading}
+          />
+          <StatCard
+            label="MTD Sales"
+            value={formatCurrency(mtdSales ?? 0)}
+            loading={statsLoading}
+          />
+          <StatCard
+            label="MTD Products Sold"
+            value={mtdProductsSold ?? 0}
+            loading={statsLoading}
+          />
+          <StatCard
+            label="Active Sales"
+            value={activeSalesCount ?? 0}
+            loading={statsLoading}
+          />
         </div>
       </section>
 
@@ -255,13 +242,11 @@ const Dashboard = () => {
             </button>
           </div>
         </div>
-        {weeklyMatrixLoading ? (
-          <div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white py-16">
-            <p className="text-slate-500">Loading…</p>
-          </div>
-        ) : (
-          <WeeklyEventSaleMatrix data={weeklyEvents} valueFormat="count" />
-        )}
+        <WeeklyEventSaleMatrix
+          data={weeklyEvents}
+          valueFormat="count"
+          loading={weeklyMatrixLoading}
+        />
       </section>
 
       <section aria-labelledby="recent-heading">
@@ -277,7 +262,11 @@ const Dashboard = () => {
           </Link>
         </div>
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <TransactionsTable data={recentTransactions} bare />
+          <TransactionsTable
+            data={recentTransactions}
+            bare
+            loading={statsLoading}
+          />
         </div>
       </section>
     </div>

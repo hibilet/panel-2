@@ -70,6 +70,8 @@ const SalesChart = ({
   const year = chartMonth.year()
 
   const formatCurrency = (value) => `₺${value.toLocaleString()}`
+  const hasData = !loading && data?.length > 0
+  const dropdownsDisabled = !hasData
 
   return (
     <section aria-labelledby="sales-chart-heading" className="mb-8">
@@ -81,7 +83,8 @@ const SalesChart = ({
           <select
             value={selectedMonthOffset}
             onChange={(e) => onMonthOffsetChange?.(Number(e.target.value))}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300"
+            disabled={dropdownsDisabled}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Select month"
           >
             {MONTH_OPTIONS.map((opt) => (
@@ -93,7 +96,8 @@ const SalesChart = ({
           <select
             value={selectedSale}
             onChange={(e) => onSaleChange?.(e.target.value)}
-            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300"
+            disabled={dropdownsDisabled}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Filter by sale"
           >
             <option value="all">All sales</option>
@@ -107,8 +111,9 @@ const SalesChart = ({
       </div>
       <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         {loading ? (
-          <div className="flex h-64 items-center justify-center sm:h-80">
-            <p className="text-slate-500">Loading chart…</p>
+          <div className="flex h-64 flex-col gap-4 sm:h-80">
+            <div className="h-4 w-40 animate-shimmer rounded" />
+            <div className="min-h-[200px] flex-1 animate-shimmer rounded" />
           </div>
         ) : (
           <div className="h-64 sm:h-80">

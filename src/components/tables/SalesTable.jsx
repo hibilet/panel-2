@@ -1,12 +1,46 @@
 import dayjs from 'dayjs'
 
-const SalesTable = ({ data = [], extended = false, onDelete }) => {
+const SalesTable = ({ data = [], extended = false, onDelete, loading = false }) => {
   const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY')
 
   const baseCols = 6
   const extendedCols = baseCols + (extended ? 3 : 0)
   const totalCols = extendedCols
+  const showShimmer = loading || data.length === 0
+
+  if (showShimmer) {
+    return (
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table className="min-w-full divide-y divide-slate-200">
+          <thead>
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Start date</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Name</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Venue</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Views</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Reservations</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Revenue</th>
+              {extended && <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Delete</th>}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200 bg-white">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <tr key={i}>
+                <td className="px-4 py-3"><div className="h-4 w-24 animate-shimmer rounded" /></td>
+                <td className="px-4 py-3"><div className="h-4 w-40 animate-shimmer rounded" /></td>
+                <td className="px-4 py-3"><div className="h-4 w-28 animate-shimmer rounded" /></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-4 w-16 animate-shimmer rounded" /></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-4 w-16 animate-shimmer rounded" /></td>
+                <td className="px-4 py-3 text-right"><div className="ml-auto h-4 w-24 animate-shimmer rounded" /></td>
+                {extended && <td className="px-4 py-3"><div className="mx-auto h-5 w-14 animate-shimmer rounded-full" /></td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
 
   return (
     <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
@@ -47,14 +81,7 @@ const SalesTable = ({ data = [], extended = false, onDelete }) => {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white">
-          {data.length === 0 ? (
-            <tr>
-              <td colSpan={totalCols} className="px-4 py-8 text-center text-slate-500">
-                No sales yet
-              </td>
-            </tr>
-          ) : (
-            data.map((row) => (
+          {data.map((row) => (
               <tr key={row.id ?? row.name} className="hover:bg-slate-50">
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
                   {row.startDate ? formatDate(row.startDate) : '—'}
@@ -100,8 +127,7 @@ const SalesTable = ({ data = [], extended = false, onDelete }) => {
                   </>
                 )}
               </tr>
-            ))
-          )}
+            ))}
         </tbody>
       </table>
     </div>

@@ -8,9 +8,51 @@ const statusStyles = {
   refunded: 'bg-slate-100 text-slate-600',
 }
 
-const TransactionsTable = ({ data = [], bare = false }) => {
+const TransactionsTable = ({ data = [], bare = false, loading = false }) => {
   const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY, HH:mm')
+
+  const showShimmer = loading || data.length === 0
+
+  if (showShimmer) {
+    const shimmerRows = (
+      <tbody className="divide-y divide-slate-200 bg-white">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <tr key={i}>
+            <td className="px-4 py-3"><div className="h-4 w-20 animate-shimmer rounded font-mono" /></td>
+            <td className="px-4 py-3"><div className="h-4 w-36 animate-shimmer rounded" /></td>
+            <td className="px-4 py-3"><div className="h-4 w-24 animate-shimmer rounded" /></td>
+            <td className="px-4 py-3 text-right"><div className="ml-auto h-4 w-24 animate-shimmer rounded" /></td>
+            <td className="px-4 py-3"><div className="h-4 w-36 animate-shimmer rounded" /></td>
+            <td className="px-4 py-3"><div className="h-5 w-20 animate-shimmer rounded-full" /></td>
+          </tr>
+        ))}
+      </tbody>
+    )
+    const loadingTable = (
+      <table className="min-w-full divide-y divide-slate-200">
+        <thead>
+          <tr>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">ID</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Name</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Owner</th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Subtotal</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Created at</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
+          </tr>
+        </thead>
+        {shimmerRows}
+      </table>
+    )
+    if (bare) {
+      return <div className="overflow-x-auto">{loadingTable}</div>
+    }
+    return (
+      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        {loadingTable}
+      </div>
+    )
+  }
 
   const table = (
       <table className="min-w-full divide-y divide-slate-200">
@@ -47,7 +89,7 @@ const TransactionsTable = ({ data = [], bare = false }) => {
             data.map((row) => (
               <tr key={row.id} className="hover:bg-slate-50">
                 <td className="whitespace-nowrap px-4 py-3 font-mono text-sm text-slate-600">
-                  {row.id}
+                  {row.id.slice(-8)}
                 </td>
                 <td className="px-4 py-3 text-sm font-medium text-slate-900">
                   {row.name}

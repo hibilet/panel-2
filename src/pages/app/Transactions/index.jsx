@@ -31,16 +31,6 @@ const Transactions = () => {
       })
   }, [page])
 
-  if (loading && data.length === 0) {
-    return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading…
-        </div>
-      </div>
-    )
-  }
-
   if (error && data.length === 0) {
     return (
       <div className="mx-auto max-w-5xl">
@@ -54,7 +44,7 @@ const Transactions = () => {
   return (
     <div className="mx-auto max-w-5xl">
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <TransactionsTable data={data} bare />
+        <TransactionsTable data={data} bare loading={loading} />
         <Pagination
           total={total}
           limit={LIMIT}

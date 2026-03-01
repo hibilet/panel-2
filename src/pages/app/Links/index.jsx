@@ -26,17 +26,7 @@ const Links = () => {
       })
   }, [])
 
-  if (loading) {
-    return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
-          Loading…
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
+  if (error && !loading) {
     return (
       <div className="mx-auto max-w-5xl">
         <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
@@ -48,7 +38,7 @@ const Links = () => {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <LinksTable data={data} />
+      <LinksTable data={data} loading={loading} />
     </div>
   )
 }
