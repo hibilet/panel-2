@@ -1,5 +1,13 @@
+import { Switch, Route } from 'wouter'
+
+import Splash from './Splash'
+
 const Auth = () => {
-  return <div>Auth</div>
+  return (
+    <Switch>
+      <Route path="/" component={Splash} />
+    </Switch>
+  )
 }
 
 export default Auth
