@@ -77,6 +77,8 @@
   "dashboard.monthAgo": "1 month ago",
   "dashboard.monthsAgo": "$0 months ago",
   "dashboard.dailySales": "Daily sales",
+  "dashboard.salesChartSelectedMonth": "Selected month",
+  "dashboard.salesChartThisMonth": "This month",
 
   "table.sale.startDate": "Start date",
   "table.sale.name": "Name",

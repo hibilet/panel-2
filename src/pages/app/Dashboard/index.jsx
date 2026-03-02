@@ -49,6 +49,7 @@ const Dashboard = () => {
   const [mtdSales, setMtdSales] = useState(null)
   const [mtdProductsSold, setMtdProductsSold] = useState(null)
   const [chartData, setChartData] = useState(null)
+  const [currentMonthChartData, setCurrentMonthChartData] = useState(null)
 
   const activeSalesCount = sales.filter((s) => s.status === 'active').length
   const [chartLoading, setChartLoading] = useState(true)
@@ -135,12 +136,14 @@ const Dashboard = () => {
     })
 
     const targetMonth = dayjs(monthStart)
+    const isCurrentMonth = selectedMonthOffset === 0
+
     get(`/dashboards/transactions/between?start=${monthStart}&end=${monthEnd}&${params}`)
       .then((res) => {
         if (cancelled) return
-        setChartData(
-          buildChartDataFromApi(res.data ?? [], targetMonth.year(), targetMonth.month())
-        )
+        const data = buildChartDataFromApi(res.data ?? [], targetMonth.year(), targetMonth.month())
+        setChartData(data)
+        if (isCurrentMonth) setCurrentMonthChartData(data)
       })
       .catch(() => {
         if (!cancelled) setChartData([])
@@ -152,7 +155,33 @@ const Dashboard = () => {
     return () => {
       cancelled = true
     }
-  }, [selectedSale, monthStart, monthEnd])
+  }, [selectedSale, monthStart, monthEnd, selectedMonthOffset])
+
+  useEffect(() => {
+    if (selectedMonthOffset === 0 || currentMonthChartData) return
+
+    const params = new URLSearchParams({
+      status: 'success',
+      sale: selectedSale,
+      test: 'true',
+    })
+    const currentMonthStartStr = dayjs().startOf('month').format('YYYY-MM-DD')
+    const currentMonthEndStr = dayjs().endOf('month').format('YYYY-MM-DD')
+
+    let cancelled = false
+    get(`/dashboards/transactions/between?start=${currentMonthStartStr}&end=${currentMonthEndStr}&${params}`)
+      .then((res) => {
+        if (cancelled) return
+        const now = dayjs()
+        const data = buildChartDataFromApi(res.data ?? [], now.year(), now.month())
+        setCurrentMonthChartData(data)
+      })
+      .catch(() => {})
+
+    return () => {
+      cancelled = true
+    }
+  }, [selectedMonthOffset, currentMonthChartData, selectedSale])
 
   const statsLoading =
     (todaySales === null &&
@@ -200,6 +229,7 @@ const Dashboard = () => {
 
       <SalesChart
         data={chartData}
+        compareData={selectedMonthOffset > 0 ? currentMonthChartData : null}
         loading={chartLoading}
         sales={sales}
         selectedSale={selectedSale}

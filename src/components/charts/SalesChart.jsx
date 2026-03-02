@@ -8,8 +8,18 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts'
 import strings, { formatCurrency } from '../../localization'
+
+const mergeWithCompareData = (data = [], compareData = []) => {
+  if (!compareData?.length) return data
+  const byDay = Object.fromEntries(compareData.map((d) => [d.date, d.daily]))
+  return data.map((row) => ({
+    ...row,
+    currentDaily: byDay[row.date] ?? null,
+  }))
+}
 
 const buildChartDataFromApi = (apiData = [], year, month) => {
   const daysInMonth = dayjs().year(year).month(month).daysInMonth()
@@ -43,20 +53,26 @@ const useChartColors = () => {
     window.addEventListener('themechange', onThemeChange)
     return () => window.removeEventListener('themechange', onThemeChange)
   }, [])
-  return useMemo(() => {
-    const isDark = document.documentElement.classList.contains('dark')
-    return {
-      grid: isDark ? '#334155' : '#e2e8f0',
-      tick: isDark ? '#94a3b8' : '#64748b',
-      line: isDark ? '#e2e8f0' : '#0f172a',
-      tooltipBg: isDark ? '#1e293b' : 'white',
-      tooltipBorder: isDark ? '#334155' : '#e2e8f0',
-    }
-  }, [themeVersion])
+  return useMemo(
+    () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      void themeVersion
+      return {
+        grid: isDark ? '#334155' : '#e2e8f0',
+        tick: isDark ? '#94a3b8' : '#64748b',
+        line: isDark ? '#e2e8f0' : '#0f172a',
+        compareLine: isDark ? '#38bdf8' : '#0ea5e9',
+        tooltipBg: isDark ? '#1e293b' : 'white',
+        tooltipBorder: isDark ? '#334155' : '#e2e8f0',
+      }
+    },
+    [themeVersion]
+  )
 }
 
 const SalesChart = ({
   data: dataProp,
+  compareData = null,
   loading = false,
   sales = [],
   selectedSale = 'all',
@@ -66,7 +82,9 @@ const SalesChart = ({
 }) => {
   const colors = useChartColors()
   const chartMonth = dayjs().subtract(selectedMonthOffset, 'month')
-  const data = dataProp ?? buildChartDataFromApi([], chartMonth.year(), chartMonth.month())
+  const rawData = dataProp ?? buildChartDataFromApi([], chartMonth.year(), chartMonth.month())
+  const data = mergeWithCompareData(rawData, compareData)
+  const hasCompare = compareData?.length > 0
   const monthName = chartMonth.format('MMMM')
   const year = chartMonth.year()
 
@@ -133,7 +151,7 @@ const SalesChart = ({
                   axisLine={{ stroke: colors.grid }}
                 />
                 <Tooltip
-                  formatter={(value) => [formatCurrency(value), strings('dashboard.dailySales')]}
+                  formatter={(value, name) => [formatCurrency(value), name]}
                   labelFormatter={(label, payload) =>
                     payload?.[0]?.payload?.label ?? label
                   }
@@ -144,14 +162,35 @@ const SalesChart = ({
                     boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
                 />
+                {hasCompare && (
+                  <Legend
+                    wrapperStyle={{ fontSize: 12 }}
+                    iconType="line"
+                    iconSize={10}
+                  />
+                )}
                 <Line
                   type="monotone"
                   dataKey="daily"
+                  name={strings('dashboard.salesChartSelectedMonth')}
                   stroke={colors.line}
                   strokeWidth={2}
                   dot={{ fill: colors.line, strokeWidth: 0, r: 3 }}
                   activeDot={{ r: 5, fill: colors.line, stroke: colors.tooltipBg, strokeWidth: 2 }}
                 />
+                {hasCompare && (
+                  <Line
+                    type="monotone"
+                    dataKey="currentDaily"
+                    name={strings('dashboard.salesChartThisMonth')}
+                    stroke={colors.compareLine}
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={{ fill: colors.compareLine, strokeWidth: 0, r: 3 }}
+                    activeDot={{ r: 5, fill: colors.compareLine, stroke: colors.tooltipBg, strokeWidth: 2 }}
+                    connectNulls
+                  />
+                )}
               </LineChart>
             </ResponsiveContainer>
           </div>

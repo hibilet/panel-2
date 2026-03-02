@@ -76,6 +76,8 @@
   "dashboard.monthAgo": "1 ay önce",
   "dashboard.monthsAgo": "$0 ay önce",
   "dashboard.dailySales": "Günlük satışlar",
+  "dashboard.salesChartSelectedMonth": "Seçilen ay",
+  "dashboard.salesChartThisMonth": "Bu ay",
 
   "table.sale.startDate": "Başlangıç tarihi",
   "table.sale.name": "Ad",
