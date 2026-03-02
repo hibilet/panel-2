@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 
 import { Link } from 'wouter'
 import { get } from '../../../lib/client'
+import { useApp } from '../../../context'
 import SalesChart from '../../../components/charts/SalesChart'
 import TransactionsTable from '../../../components/tables/TransactionsTable'
 import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
@@ -45,12 +46,13 @@ const buildWeeklyMatrixFromSalesReport = (apiData = []) => {
 const currentMonthStart = () => dayjs().startOf('month').format('YYYY-MM-DD')
 
 const Dashboard = () => {
+  const { sales, loading: appLoading } = useApp()
   const [todaySales, setTodaySales] = useState(null)
   const [mtdSales, setMtdSales] = useState(null)
   const [mtdProductsSold, setMtdProductsSold] = useState(null)
-  const [activeSalesCount, setActiveSalesCount] = useState(null)
-  const [sales, setSales] = useState([])
   const [chartData, setChartData] = useState(null)
+
+  const activeSalesCount = sales.filter((s) => s.status === 'active').length
   const [chartLoading, setChartLoading] = useState(true)
   const [selectedSale, setSelectedSale] = useState('all')
   const [selectedMonthOffset, setSelectedMonthOffset] = useState(0)
@@ -79,10 +81,9 @@ const Dashboard = () => {
     Promise.all([
       get(`/dashboards/transactions/between?start=${today}&end=${today}&sale=all&${params}`),
       get(`/dashboards/transactions/between?start=${mtdStart}&end=${today}&sale=all&${params}`),
-      get('/sales'),
       get('/transactions/search?limit=5&skip=0&status=success'),
     ])
-      .then(([todayRes, mtdRes, salesRes, transactionsRes]) => {
+      .then(([todayRes, mtdRes, transactionsRes]) => {
         const todayData = todayRes.data?.[0]
         setTodaySales(todayData?.total ?? 0)
 
@@ -91,10 +92,6 @@ const Dashboard = () => {
         const mtdCount = mtdData.reduce((sum, d) => sum + (d.count ?? 0), 0)
         setMtdSales(mtdTotal)
         setMtdProductsSold(mtdCount)
-
-        const salesList = salesRes.data ?? []
-        setActiveSalesCount(salesList.filter((s) => s.status === 'active').length)
-        setSales(salesList)
 
         setRecentTransactions(transactionsRes.data ?? [])
       })
@@ -160,10 +157,10 @@ const Dashboard = () => {
   }, [selectedSale, monthStart, monthEnd])
 
   const statsLoading =
-    todaySales === null &&
-    mtdSales === null &&
-    mtdProductsSold === null &&
-    activeSalesCount === null
+    (todaySales === null &&
+      mtdSales === null &&
+      mtdProductsSold === null) ||
+    appLoading
 
   if (error && todaySales === null) {
     return (

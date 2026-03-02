@@ -1,0 +1,528 @@
+import { useState, useEffect, useCallback } from 'react'
+import { useParams } from 'wouter'
+
+import { get, post, put, del } from '../../../../lib/client'
+import { useSale } from '../../../../context'
+import { Input, Select } from '../../../../components/inputs'
+import { EmptyState, SlidePanel } from '../../../../components/shared'
+
+const QR_API = 'https://api.qrserver.com/v1/create-qr-code/'
+const STATUS_OPTIONS = [
+  { value: 'active', label: '✅ Active' },
+  { value: 'inactive', label: '⛔ Inactive' },
+]
+
+const getInitialForm = (reader) => {
+  if (reader) {
+    return {
+      name: reader.name ?? '',
+      email: reader.email ?? '',
+      status: reader.status ?? 'active',
+    }
+  }
+  return {
+    name: '',
+    email: '',
+    status: 'active',
+  }
+}
+
+const SaleReaders = () => {
+  const { id } = useParams()
+  const { isNew } = useSale()
+
+  const [readers, setReaders] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [panelReader, setPanelReader] = useState(null)
+  const [saving, setSaving] = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [linkDialog, setLinkDialog] = useState(null)
+
+  const panelOpen = panelReader !== null
+  const isAdding = panelReader === 'new'
+
+  const fetchReaders = useCallback(() => {
+    if (isNew) return
+    setLoading(true)
+    setError(null)
+    get(`/accounts/search?sale=${id}&type=account.reader`)
+      .then((r) => setReaders(r.data ?? []))
+      .catch((err) => setError(err?.message ?? 'Failed to load readers'))
+      .finally(() => setLoading(false))
+  }, [id, isNew])
+
+  useEffect(() => {
+    if (isNew) {
+      setLoading(false)
+      setReaders([])
+      return
+    }
+    fetchReaders()
+  }, [fetchReaders, isNew])
+
+  const closePanel = useCallback(() => setPanelReader(null), [])
+
+  const handleSave = async (reader, payload) => {
+    setSaving(reader?.id ?? reader?._id ?? 'new')
+    setError(null)
+    try {
+      const readerId = reader?.id ?? reader?._id
+      if (readerId) {
+        await put(`/accounts/${readerId}`, payload)
+        setReaders((prev) =>
+          prev.map((r) => {
+            const rid = r.id ?? r._id
+            if (rid !== readerId) return r
+            return { ...r, ...payload }
+          })
+        )
+        closePanel()
+      } else {
+        const res = await post('/accounts', {
+          ...payload,
+          type: 'account.reader',
+          sale: id,
+        })
+        const created = res.data ?? payload
+        setReaders((prev) => [...prev, created])
+        closePanel()
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Failed to save reader')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleDelete = async (readerId) => {
+    if (!confirm('Delete this reader?')) return
+    setDeleting(readerId)
+    setError(null)
+    try {
+      await del(`/accounts/${readerId}`)
+      setReaders((prev) => prev.filter((r) => (r.id ?? r._id) !== readerId))
+      closePanel()
+    } catch (err) {
+      setError(err?.message ?? 'Failed to delete reader')
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape' && panelOpen) closePanel()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [panelOpen, closePanel])
+
+  if (loading && readers.length === 0 && !isNew) {
+    return (
+      <div className="space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded bg-slate-200" />
+        <div className="h-64 animate-pulse rounded-lg bg-slate-100" />
+      </div>
+    )
+  }
+
+  if (isNew) {
+    return (
+      <div className="mx-auto max-w-5xl">
+        <h1 className="text-2xl font-semibold text-slate-900">🤳🏻 Readers</h1>
+        <EmptyState
+          icon="fa-tablet-screen-button"
+          variant="amber"
+          title="Save the sale first"
+          description="Create and save the sale to manage readers."
+          className="mt-6"
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative">
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-medium text-slate-900">Readers</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              {readers.length} reader{readers.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPanelReader('new')}
+            className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+          >
+            <i className="fa-solid fa-plus" aria-hidden />
+            Add reader
+          </button>
+        </div>
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {readers.length === 0 ? (
+          <EmptyState
+            icon="fa-tablet-screen-button"
+            title="No readers yet"
+            description="Add reader accounts to check tickets at the door."
+            action={
+              <button
+                type="button"
+                onClick={() => setPanelReader('new')}
+                className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+              >
+                <i className="fa-solid fa-plus" aria-hidden />
+                Add reader
+              </button>
+            }
+          />
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Email
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Status
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Link
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {readers.map((reader) => {
+                  const readerId = reader.id ?? reader._id
+                  const statusLabel = reader.status === 'active' ? 'Active' : 'Inactive'
+                  return (
+                    <tr
+                      key={readerId}
+                      tabIndex={0}
+                      onClick={() => setPanelReader(reader)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setPanelReader(reader)
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
+                        {reader.name ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
+                        {reader.email ?? '—'}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+                            reader.status === 'active'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-slate-100 text-slate-600'
+                          }`}
+                        >
+                          {statusLabel}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setLinkDialog(reader)
+                          }}
+                          className="rounded border border-slate-300 bg-white px-2 py-1.5 text-sm hover:bg-slate-50"
+                          aria-label="Get link"
+                        >
+                          🔗
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <SlidePanel
+        isOpen={panelOpen}
+        onClose={closePanel}
+        aria-label={isAdding ? 'Add reader' : 'Edit reader'}
+      >
+        <ReaderPanel
+          key={isAdding ? 'new' : panelReader?.id ?? panelReader?._id ?? 'edit'}
+          reader={isAdding ? null : panelReader}
+          onSave={handleSave}
+          onDelete={handleDelete}
+          onClose={closePanel}
+          onGetLink={() => setLinkDialog(isAdding ? null : panelReader)}
+          saving={saving}
+          deleting={deleting}
+        />
+      </SlidePanel>
+
+      {linkDialog && (
+        <ReaderLinkDialog
+          reader={linkDialog}
+          onClose={() => setLinkDialog(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+const ReaderPanel = ({
+  reader,
+  onSave,
+  onDelete,
+  onClose,
+  onGetLink,
+  saving,
+  deleting,
+}) => {
+  const isNew = reader === null
+  const [form, setForm] = useState(() => getInitialForm(reader))
+
+  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const payload = {
+      name: form.name?.trim() || undefined,
+      email: form.email?.trim() || undefined,
+      status: form.status || 'active',
+    }
+    onSave(reader, payload)
+  }
+
+  return (
+    <div className="flex h-full flex-col">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
+        <h3 className="text-lg font-semibold text-slate-900">
+          {isNew ? 'New reader' : reader?.name || 'Edit reader'}
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          aria-label="Close"
+        >
+          <i className="fa-solid fa-xmark text-lg" aria-hidden />
+        </button>
+      </header>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-1 flex-col overflow-hidden"
+      >
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="space-y-5">
+            <div className="space-y-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Details
+              </h4>
+              <Input
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={(e) => update({ name: e.target.value })}
+                placeholder="Eg: John Doe"
+              />
+              <Input
+                label="Email"
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => update({ email: e.target.value })}
+                placeholder="Eg: john@doe.com"
+              />
+              <Select
+                label="Status"
+                name="status"
+                value={form.status}
+                onChange={(e) => update({ status: e.target.value })}
+                options={STATUS_OPTIONS}
+              />
+            </div>
+
+            {!isNew && reader && onGetLink && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Reader link
+                </h4>
+                <button
+                  type="button"
+                  onClick={onGetLink}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  🔗 Get QR / Link
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <footer className="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <i className="fa-solid fa-spinner fa-spin" aria-hidden />
+                  Saving…
+                </>
+              ) : (
+                <>{isNew ? 'Create reader' : 'Save changes'}</>
+              )}
+            </button>
+            {isNew ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onDelete(reader?.id ?? reader?._id)}
+                disabled={deleting}
+                className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting ? (
+                  <i className="fa-solid fa-spinner fa-spin" aria-hidden />
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            )}
+          </div>
+        </footer>
+      </form>
+    </div>
+  )
+}
+
+const ReaderLinkDialog = ({ reader, onClose }) => {
+  const [token, setToken] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [onClose])
+
+  useEffect(() => {
+    const payload = {
+      name: reader.name,
+      email: reader.email,
+      type: 'account.reader',
+      id: reader.id ?? reader._id,
+    }
+    post('/auth/token', payload)
+      .then((r) => setToken(r.data?.token ?? null))
+      .catch((err) => setError(err?.message ?? 'Failed to get token'))
+      .finally(() => setLoading(false))
+  }, [reader])
+
+  const handleCopyLink = async () => {
+    if (!token) return
+    try {
+      await navigator.clipboard.writeText(token)
+    } catch {
+      setError('Failed to copy to clipboard')
+    }
+  }
+
+  const qrUrl = token
+    ? `${QR_API}?size=200x200&data=${encodeURIComponent(token)}`
+    : null
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="reader-link-dialog-title"
+    >
+      <div
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+        aria-hidden
+        onClick={onClose}
+      />
+      <article className="relative z-10 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl">
+        <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <h2 id="reader-link-dialog-title" className="text-lg font-semibold text-slate-900">
+            {reader.name ?? 'Reader'}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+            aria-label="Close"
+          >
+            <i className="fa-solid fa-xmark text-lg" aria-hidden />
+          </button>
+        </header>
+        <section className="p-4">
+          <div className="flex flex-col items-center gap-4">
+            {loading && (
+              <div className="flex h-48 items-center justify-center">
+                <i className="fa-solid fa-spinner fa-spin text-3xl text-slate-400" aria-hidden />
+              </div>
+            )}
+            {error && (
+              <p className="text-sm text-red-600">{error}</p>
+            )}
+            {!loading && !error && (
+              <>
+                <p className="m-0 text-sm text-slate-600">Please read the QR code</p>
+                {qrUrl && (
+                  <img
+                    alt="QR code for reader"
+                    src={qrUrl}
+                    className="my-8 w-[35%] min-w-[140px] invert"
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+                )}
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  disabled={!token}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+                >
+                  📋 Copy Link
+                </button>
+              </>
+            )}
+          </div>
+        </section>
+      </article>
+    </div>
+  )
+}
+
+export default SaleReaders

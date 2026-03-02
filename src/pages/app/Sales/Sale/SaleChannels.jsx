@@ -1,0 +1,777 @@
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useParams } from 'wouter'
+import {
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts'
+
+import { get, post, put, del } from '../../../../lib/client'
+import { useSale } from '../../../../context'
+import { Input } from '../../../../components/inputs'
+import { EmptyState, SlidePanel } from '../../../../components/shared'
+
+const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
+const RESERVATION_LABELS = {
+  created: '➕ Created',
+  success: '✅ Success',
+  pending: '⏳ Pending',
+  cancelled: '⛔ Cancelled',
+}
+
+const API_BASE = import.meta.env.VITE_API_URL || ''
+const APP_BASE = import.meta.env.VITE_APP_URL || API_BASE.replace(/api[^.]*/, 'app')
+
+const getChannelLink = (channelId) => {
+  if (!channelId || !APP_BASE) return null
+  const base = APP_BASE.replace(/\/$/, '')
+  return `${base}/${channelId}`
+}
+
+const getInitialForm = (channel) => {
+  if (channel) {
+    return {
+      name: channel.name ?? '',
+    }
+  }
+  return { name: '' }
+}
+
+const SaleChannels = () => {
+  const { id } = useParams()
+  const { channels, setChannels, loading, isNew } = useSale()
+
+  const [error, setError] = useState(null)
+  const [panelChannel, setPanelChannel] = useState(null)
+  const [saving, setSaving] = useState(null)
+  const [deleting, setDeleting] = useState(null)
+  const [reportChannel, setReportChannel] = useState(null)
+  const [reportData, setReportData] = useState(null)
+  const [reportLoading, setReportLoading] = useState(false)
+
+  const panelOpen = panelChannel !== null
+  const isAdding = panelChannel === 'new'
+
+  const closePanel = useCallback(() => setPanelChannel(null), [])
+  const closeReport = useCallback(() => {
+    setReportChannel(null)
+    setReportData(null)
+  }, [])
+
+  const handleSave = async (channel, payload) => {
+    setSaving(channel?.id ?? 'new')
+    setError(null)
+    try {
+      if (channel?.id) {
+        await put(`/channels/${channel.id}`, payload)
+        setChannels((prev) =>
+          prev.map((c) => (c.id === channel.id ? { ...c, ...payload } : c))
+        )
+        closePanel()
+      } else {
+        const res = await post(`/sales/${id}/channels`, payload)
+        setChannels((prev) => [...prev, res.data])
+        closePanel()
+      }
+    } catch (err) {
+      setError(err?.message ?? 'Failed to save')
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const handleDelete = async (channelId) => {
+    if (!confirm('Delete this channel?')) return
+    setDeleting(channelId)
+    setError(null)
+    try {
+      await del(`/channels/${channelId}`)
+      setChannels((prev) => prev.filter((c) => c.id !== channelId))
+      closePanel()
+    } catch (err) {
+      setError(err?.message ?? 'Failed to delete')
+    } finally {
+      setDeleting(null)
+    }
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        if (reportChannel) closeReport()
+        else if (panelOpen) closePanel()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [panelOpen, closePanel, reportChannel, closeReport])
+
+  const isBaseChannel = (channel) => {
+    const name = (channel?.name ?? '').toLowerCase()
+    return name === 'base-sale' || name === 'base sale'
+  }
+
+  const handleReportsClick = async (channel) => {
+    setReportChannel(channel)
+    setReportData(null)
+    setReportLoading(true)
+    try {
+      const r = await get(`/channels/${channel.id}/report`)
+      setReportData(r.data ?? null)
+    } catch (err) {
+      setError(err?.message ?? 'Failed to load report')
+      setReportChannel(null)
+    } finally {
+      setReportLoading(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded bg-slate-200" />
+        <div className="space-y-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-16 animate-pulse rounded-lg border border-slate-200 bg-slate-50"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="relative">
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-medium text-slate-900">Sale channels</h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              {channels.length} channel{channels.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+          {!isNew && (
+            <button
+              type="button"
+              onClick={() => setPanelChannel('new')}
+              className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+            >
+              <i className="fa-solid fa-plus" aria-hidden />
+              Add channel
+            </button>
+          )}
+        </div>
+
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {isNew ? (
+          <EmptyState
+            icon="fa-bullhorn"
+            variant="amber"
+            title="Save the sale first"
+            description="Create and save the sale to add channels."
+          />
+        ) : channels.length === 0 ? (
+          <EmptyState
+            icon="fa-bullhorn"
+            title="No channels yet"
+            description="Add sale channels to track views and sales by source."
+            action={
+              <button
+                type="button"
+                onClick={() => setPanelChannel('new')}
+                className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+              >
+                <i className="fa-solid fa-plus" aria-hidden />
+                Add channel
+              </button>
+            }
+          />
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+            <table className="min-w-full divide-y divide-slate-200">
+              <thead>
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Name
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Views
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Sales
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Conv
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
+                    Link
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {channels.map((channel) => {
+                  const baseChannel = isBaseChannel(channel)
+                  const link = getChannelLink(channel.id)
+                  const conversion = (channel.views ?? 0) > 0
+                    ? `${(((channel.sales ?? 0) / channel.views) * 100).toFixed(1)}%`
+                    : 'N/A'
+                  return (
+                    <tr
+                      key={channel.id}
+                      tabIndex={0}
+                      onClick={() => setPanelChannel(channel)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          setPanelChannel(channel)
+                        }
+                      }}
+                      className="cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-900">
+                            {channel.name || 'Untitled'}
+                          </span>
+                          {baseChannel && (
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+                              Default
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-slate-600">
+                        {(channel.views ?? 0).toLocaleString()}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-slate-600">
+                        {(channel.sales ?? 0).toLocaleString()}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-slate-600">
+                        {conversion}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        {link ? (
+                          <span className="flex items-center gap-2">
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-sm text-slate-600 underline hover:text-slate-900"
+                            >
+                              Open
+                            </a>
+                            <CopyButton text={link} stopPropagation />
+                          </span>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {reportChannel && (
+        <ChannelReportDialog
+          channel={reportChannel}
+          data={reportData}
+          loading={reportLoading}
+          onClose={closeReport}
+        />
+      )}
+
+      <SlidePanel
+        isOpen={panelOpen}
+        onClose={closePanel}
+        aria-label={isAdding ? 'Add channel' : 'Edit channel'}
+      >
+        <ChannelPanel
+              key={isAdding ? 'new' : panelChannel?.id ?? 'edit'}
+              channel={isAdding ? null : panelChannel}
+              onSave={handleSave}
+              onDelete={handleDelete}
+              onClose={closePanel}
+              onReportsClick={handleReportsClick}
+              saving={saving}
+              deleting={deleting}
+            />
+      </SlidePanel>
+    </div>
+  )
+}
+
+const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
+  const printRef = useRef(null)
+
+  const handlePrint = () => {
+    if (!printRef.current) return
+    const printContent = printRef.current.innerHTML
+    const printWindow = window.open('', '_blank')
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${channel?.name ?? 'Channel'} Report</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="p-8">
+          <h1 class="text-2xl font-bold mb-6">${channel?.name ?? 'Channel'} Report</h1>
+          <div class="channel-report-print">${printContent}</div>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.focus()
+    setTimeout(() => {
+      printWindow.print()
+      printWindow.close()
+    }, 250)
+  }
+
+  const devicesData = (data?.devices ?? []).map((d) => ({
+    name: d.id,
+    value: d.count,
+  }))
+  const totalDevices = devicesData.reduce((s, d) => s + d.value, 0)
+
+  const reservationsData = (data?.reservations ?? []).map((r) => ({
+    name: RESERVATION_LABELS[r.id] ?? r.id,
+    value: r.count,
+  }))
+  const totalReservations = reservationsData.reduce((s, r) => s + r.value, 0)
+
+  const agesData = data?.attendeeAges
+    ? Object.entries(data.attendeeAges)
+        .map(([age, count]) => ({ age: Number(age), count }))
+        .sort((a, b) => a.age - b.age)
+    : []
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="report-dialog-title"
+    >
+      <div
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+        aria-hidden
+        onClick={onClose}
+      />
+      <div className="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
+          <h2 id="report-dialog-title" className="text-xl font-semibold text-slate-900">
+            {channel?.name ?? 'Channel'} Report
+          </h2>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handlePrint}
+              disabled={loading || !data}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+              aria-label="Print report"
+            >
+              <i className="fa-solid fa-print" aria-hidden />
+              Print
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+              aria-label="Close"
+            >
+              <i className="fa-solid fa-xmark text-lg" aria-hidden />
+            </button>
+          </div>
+        </header>
+
+        <div ref={printRef} className="flex-1 overflow-y-auto p-6">
+          {loading ? (
+            <div className="flex flex-col gap-6 py-12">
+              <div className="h-64 animate-pulse rounded-lg bg-slate-100" />
+              <div className="h-64 animate-pulse rounded-lg bg-slate-100" />
+              <div className="h-48 animate-pulse rounded-lg bg-slate-100" />
+            </div>
+          ) : !data ? (
+            <div className="py-12 text-center text-slate-500">
+              No report data available.
+            </div>
+          ) : (
+            <div className="space-y-8">
+              <div className="grid gap-6 sm:grid-cols-2">
+                <section className="rounded-xl border border-slate-200 bg-slate-50/50 p-5">
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    Devices by view
+                  </h3>
+                  <div className="h-72">
+                    {devicesData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={devicesData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, value }) =>
+                              `${name} (${totalDevices > 0 ? ((value / totalDevices) * 100).toFixed(1) : 0}%)`
+                            }
+                          >
+                            {devicesData.map((entry, idx) => (
+                              <Cell
+                                key={`${entry.name}-${entry.value}`}
+                                fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [
+                              value,
+                              totalDevices > 0
+                                ? `${((value / totalDevices) * 100).toFixed(1)}%`
+                                : '',
+                            ]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-slate-400">
+                        No device data
+                      </div>
+                    )}
+                  </div>
+                </section>
+
+                <section className="rounded-xl border border-slate-200 bg-slate-50/50 p-5">
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                    User interaction
+                  </h3>
+                  <div className="h-72">
+                    {reservationsData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={reservationsData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={50}
+                            outerRadius={100}
+                            paddingAngle={2}
+                            dataKey="value"
+                            nameKey="name"
+                            label={({ name, value }) =>
+                              `${name} (${totalReservations > 0 ? ((value / totalReservations) * 100).toFixed(1) : 0}%)`
+                            }
+                          >
+                            {reservationsData.map((entry, idx) => (
+                              <Cell
+                                key={`${entry.name}-${entry.value}`}
+                                fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                              />
+                            ))}
+                          </Pie>
+                          <Tooltip
+                            formatter={(value) => [
+                              value,
+                              totalReservations > 0
+                                ? `${((value / totalReservations) * 100).toFixed(1)}%`
+                                : '',
+                            ]}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex h-full items-center justify-center text-slate-400">
+                        No reservation data
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </div>
+
+              <section className="rounded-xl border border-slate-200 bg-slate-50/50 p-5">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-slate-500">
+                  Attendee ages
+                </h3>
+                <div className="h-64">
+                  {agesData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={agesData}
+                        margin={{ top: 10, right: 20, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis
+                          dataKey="age"
+                          tick={{ fontSize: 12, fill: '#64748b' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                        />
+                        <YAxis
+                          dataKey="count"
+                          tick={{ fontSize: 12, fill: '#64748b' }}
+                          tickLine={{ stroke: '#e2e8f0' }}
+                          axisLine={{ stroke: '#e2e8f0' }}
+                        />
+                        <Tooltip
+                          formatter={(value) => [value, 'Count']}
+                          labelFormatter={(label) => `Age: ${label}`}
+                        />
+                        <Bar
+                          dataKey="count"
+                          fill="#0088FE"
+                          radius={[4, 4, 0, 0]}
+                          name="Attendees"
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-slate-400">
+                      No age data
+                    </div>
+                  )}
+                </div>
+              </section>
+
+              <div className="flex flex-wrap gap-6 rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm">
+                <span className="font-medium text-slate-700">
+                  Views: {(data?.views ?? 0).toLocaleString()}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CopyButton = ({ text, stopPropagation }) => {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async (e) => {
+    if (stopPropagation) e.stopPropagation()
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // ignore
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+      aria-label={copied ? 'Copied' : 'Copy link'}
+      title="Copy link"
+    >
+      {copied ? (
+        <i className="fa-solid fa-check text-emerald-600" aria-hidden />
+      ) : (
+        <i className="fa-solid fa-copy" aria-hidden />
+      )}
+    </button>
+  )
+}
+
+const ChannelPanel = ({
+  channel,
+  onSave,
+  onDelete,
+  onClose,
+  onReportsClick,
+  saving,
+  deleting,
+}) => {
+  const isNew = channel === null
+  const isBase = channel && ['base-sale', 'base sale'].includes((channel?.name ?? '').toLowerCase())
+  const [form, setForm] = useState(() => getInitialForm(channel))
+
+  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const payload = {
+      name: form.name || undefined,
+    }
+    onSave(channel, payload)
+  }
+
+  const link = !isNew && channel ? getChannelLink(channel.id) : null
+
+  return (
+    <div className="flex h-full flex-col">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
+        <h3 className="text-lg font-semibold text-slate-900">
+          {isNew ? 'New channel' : channel?.name || 'Edit channel'}
+        </h3>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          aria-label="Close"
+        >
+          <i className="fa-solid fa-xmark text-lg" aria-hidden />
+        </button>
+      </header>
+
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-1 flex-col overflow-hidden"
+      >
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          <div className="space-y-5">
+            <div className="space-y-4">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                Details
+              </h4>
+              <Input
+                label="Name"
+                name="name"
+                value={form.name}
+                onChange={(e) => update({ name: e.target.value })}
+                placeholder="Eg: Instagram"
+                disabled={isBase}
+              />
+            </div>
+
+            {link && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Channel link
+                </h4>
+                <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <a
+                    href={link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="min-w-0 flex-1 truncate text-sm text-slate-600 underline hover:text-slate-900"
+                  >
+                    {link}
+                  </a>
+                  <CopyButton text={link} />
+                </div>
+              </div>
+            )}
+
+            {!isNew && channel && (
+              <div className="space-y-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Stats
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-sm font-medium text-slate-700">
+                      Views
+                    </span>
+                    <p className="mt-1 text-slate-600">
+                      {(channel.views ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="block text-sm font-medium text-slate-700">
+                      Sales
+                    </span>
+                    <p className="mt-1 text-slate-600">
+                      {(channel.sales ?? 0).toLocaleString()}
+                    </p>
+                  </div>
+                </div>
+                {onReportsClick && (
+                  <button
+                    type="button"
+                    onClick={() => onReportsClick(channel)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    <i className="fa-solid fa-chart-pie" aria-hidden />
+                    Reports
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <footer className="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <div className="flex flex-wrap gap-3">
+            {isBase ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Close
+              </button>
+            ) : (
+              <>
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+            >
+              {saving ? (
+                <>
+                  <i className="fa-solid fa-spinner fa-spin" aria-hidden />
+                  Saving…
+                </>
+              ) : (
+                <>{isNew ? 'Create channel' : 'Save changes'}</>
+              )}
+            </button>
+            {isNew ? (
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onDelete(channel.id)}
+                disabled={deleting}
+                className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {deleting ? (
+                  <i className="fa-solid fa-spinner fa-spin" aria-hidden />
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            )}
+              </>
+            )}
+          </div>
+        </footer>
+      </form>
+    </div>
+  )
+}
+
+export default SaleChannels

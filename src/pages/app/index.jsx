@@ -5,9 +5,7 @@ import Navbar from '../../components/global/Navbar'
 import Dashboard from './Dashboard'
 import Sales from './Sales'
 import Sale from './Sales/Sale'
-import SaleNew from './Sales/SaleNew'
 import Transactions from './Transactions'
-import Transaction from './Transactions/Transaction'
 import Links from './Links'
 import LinkDetail from './Links/Link'
 import Reports from './Reports'
@@ -24,10 +22,10 @@ const App = () => {
         <Switch>
           <Route path="/" component={Dashboard} />
           <Route path="/sales" component={Sales} />
-          <Route path="/sales/new" component={SaleNew} />
           <Route path="/sales/:id" component={Sale} />
+          <Route path="/sales/:id/:tab" component={Sale} />
           <Route path="/transactions" component={Transactions} />
-          <Route path="/transactions/:id" component={Transaction} />
+          <Route path="/transactions/:id" component={Transactions} />
           <Route path="/links" component={Links} />
           <Route path="/links/:id" component={LinkDetail} />
           <Route path="/reports" component={Reports} />

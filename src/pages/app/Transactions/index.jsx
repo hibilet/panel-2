@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
+import { useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
 import Pagination from '../../../components/tables/Pagination'
 import TransactionsTable from '../../../components/tables/TransactionsTable'
+import SlidePanel from '../../../components/shared/SlidePanel'
+import TransactionPanel from './Transaction'
 
 const LIMIT = 25
 
 const Transactions = () => {
+  const [, setLocation] = useLocation()
+  const { id } = useParams()
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -42,9 +47,15 @@ const Transactions = () => {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-5xl space-y-6">
+      <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <TransactionsTable data={data} bare loading={loading} />
+        <TransactionsTable
+          data={data}
+          bare
+          loading={loading}
+          onRowClick={(row) => row.id && setLocation(`/transactions/${row.id}`)}
+        />
         <Pagination
           total={total}
           limit={LIMIT}
@@ -52,6 +63,14 @@ const Transactions = () => {
           onPageChange={setPage}
         />
       </div>
+      <SlidePanel
+        isOpen={!!id}
+        onClose={() => setLocation('/transactions')}
+        title="Transaction Details"
+        aria-label="Transaction details"
+      >
+        {id && <TransactionPanel id={id} onClose={() => setLocation('/transactions')} />}
+      </SlidePanel>
     </div>
   )
 }

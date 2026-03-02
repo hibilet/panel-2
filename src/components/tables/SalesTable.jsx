@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-const SalesTable = ({ data = [], extended = false, onDelete, loading = false }) => {
+const SalesTable = ({ data = [], extended = false, onDelete, onRowClick, loading = false }) => {
   const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY')
 
@@ -82,7 +82,14 @@ const SalesTable = ({ data = [], extended = false, onDelete, loading = false }) 
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white">
           {data.map((row) => (
-              <tr key={row.id ?? row.name} className="hover:bg-slate-50">
+              <tr
+                key={row.id ?? row.name}
+                role={onRowClick && row.id ? 'button' : undefined}
+                tabIndex={onRowClick && row.id ? 0 : undefined}
+                onClick={onRowClick && row.id ? () => onRowClick(row) : undefined}
+                onKeyDown={onRowClick && row.id ? (e) => e.key === 'Enter' && onRowClick(row) : undefined}
+                className={`hover:bg-slate-50 ${onRowClick && row.id ? 'cursor-pointer' : ''}`}
+              >
                 <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
                   {row.startDate ? formatDate(row.startDate) : '—'}
                 </td>
@@ -107,7 +114,7 @@ const SalesTable = ({ data = [], extended = false, onDelete, loading = false }) 
                       {onDelete && row.id ? (
                         <button
                           type="button"
-                          onClick={() => onDelete(row.id)}
+                          onClick={(e) => { e.stopPropagation(); onDelete(row.id); }}
                           className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 hover:bg-red-200 active:bg-red-300 cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-red-300"
                           aria-label="Delete"
                           style={{ pointerEvents: 'auto' }}

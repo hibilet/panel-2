@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'wouter'
+import { useState, useEffect } from 'react'
+import { Link, useLocation } from 'wouter'
 
 import { get, del } from '../../../lib/client'
+import { useApp } from '../../../context'
 import SalesTable from '../../../components/tables/SalesTable'
 
 const mapRows = (rows) =>
@@ -11,25 +12,20 @@ const mapRows = (rows) =>
   }))
 
 const Sales = () => {
-  const [sales, setSales] = useState([])
+  const [, setLocation] = useLocation()
+  const { sales, loading, error: appError, refreshSales } = useApp()
+
   const [pastSales, setPastSales] = useState([])
-  const [loading, setLoading] = useState(true)
   const [pastLoading, setPastLoading] = useState(false)
   const [pastFetched, setPastFetched] = useState(false)
   const [showPastEvents, setShowPastEvents] = useState(false)
-  const [error, setError] = useState(null)
   const [pastError, setPastError] = useState(null)
   const [showMore, setShowMore] = useState(false)
   const [revenueMode, setRevenueMode] = useState(false)
 
   useEffect(() => {
-    setLoading(true)
-    const qs = revenueMode ? '?revenue=true' : ''
-    get(`/sales${qs}`)
-      .then((res) => setSales(mapRows(res.data)))
-      .catch((err) => setError(err?.message ?? 'Failed to load sales'))
-      .finally(() => setLoading(false))
-  }, [revenueMode])
+    if (revenueMode) refreshSales({ revenue: true })
+  }, [revenueMode, refreshSales])
 
   const handleViewPastEvents = () => {
     const next = !showPastEvents
@@ -49,15 +45,15 @@ const Sales = () => {
   const handleDelete = (id) => {
     if (!window.confirm('Are you sure you want to delete this sale?')) return
     del(`/sales/${id}`)
-      .then(() => setSales((prev) => prev.filter((r) => r.id !== id)))
-      .catch((err) => setError(err?.message ?? 'Failed to delete'))
+      .then(() => refreshSales({ revenue: revenueMode }))
+      .catch(() => {})
   }
 
-  if (error && sales.length === 0) {
+  if (appError && sales.length === 0) {
     return (
       <div className="mx-auto max-w-5xl">
         <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
-          {error}
+          {appError}
         </div>
       </div>
     )
@@ -71,7 +67,7 @@ const Sales = () => {
           <button
             type="button"
             onClick={() => setShowMore((v) => !v)}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
             Show More
           </button>
@@ -79,7 +75,7 @@ const Sales = () => {
             type="button"
             onClick={handleCalculateRevenues}
             disabled={loading}
-            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
             Calculate revenues
           </button>
@@ -96,6 +92,7 @@ const Sales = () => {
         data={sales}
         extended={showMore}
         onDelete={showMore ? handleDelete : undefined}
+        onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
         loading={loading}
       />
 
@@ -103,7 +100,7 @@ const Sales = () => {
         <button
           type="button"
           onClick={handleViewPastEvents}
-          className="self-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+          className="self-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
           {showPastEvents ? 'Hide Past Events' : 'View Past Events'}
         </button>
@@ -114,7 +111,12 @@ const Sales = () => {
                 {pastError}
               </div>
             ) : (
-              <SalesTable data={pastSales} extended={false} loading={pastLoading} />
+              <SalesTable
+                data={pastSales}
+                extended={false}
+                onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
+                loading={pastLoading}
+              />
             )}
           </>
         )}

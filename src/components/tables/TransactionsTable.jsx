@@ -8,7 +8,7 @@ const statusStyles = {
   refunded: 'bg-slate-100 text-slate-600',
 }
 
-const TransactionsTable = ({ data = [], bare = false, loading = false }) => {
+const TransactionsTable = ({ data = [], bare = false, loading = false, onRowClick }) => {
   const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY, HH:mm')
 
@@ -87,7 +87,14 @@ const TransactionsTable = ({ data = [], bare = false, loading = false }) => {
             </tr>
           ) : (
             data.map((row) => (
-              <tr key={row.id} className="hover:bg-slate-50">
+              <tr
+                key={row.id}
+                role={onRowClick ? 'button' : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                onKeyDown={onRowClick ? (e) => e.key === 'Enter' && onRowClick(row) : undefined}
+                className={`hover:bg-slate-50 ${onRowClick ? 'cursor-pointer' : ''}`}
+              >
                 <td className="whitespace-nowrap px-4 py-3 font-mono text-sm text-slate-600">
                   {row.id.slice(-8)}
                 </td>

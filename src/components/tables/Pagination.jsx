@@ -12,7 +12,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
     if (next !== currentPage) onPageChange(next)
   }
 
-  if (totalPages <= 1 && total <= limit) return null
+  const showNav = totalPages > 1 || total > limit
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
@@ -21,6 +21,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
         <span className="font-medium">{end}</span> of{' '}
         <span className="font-medium">{total}</span> results
       </p>
+      {showNav && (
       <nav className="flex items-center gap-1">
         <button
           type="button"
@@ -62,6 +63,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
           »»
         </button>
       </nav>
+      )}
     </div>
   )
 }
