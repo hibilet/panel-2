@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import strings from '../../localization'
+import { useApp } from '../../context'
 
 const navItems = [
   { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high' },
@@ -15,6 +16,7 @@ const navItems = [
 const Navbar = () => {
   const [location] = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
+  const { account } = useApp()
 
   const activeItem = navItems.find(({ path }) =>
     path === '/' ? location === path : location.startsWith(path)
@@ -44,7 +46,9 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="mx-auto max-w-5xl py-4">
-          <h1 className="text-xl font-semibold text-slate-900">{strings('app.name')}</h1>
+          <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
+            {account?.name ? strings('app.welcome', [account.name]) : strings('app.name')}
+          </h1>
           <nav aria-label="Main navigation" className="relative mt-4">
             <div className="hidden md:flex items-center gap-2" role="tablist">
               {navItems.map(({ path, labelKey, icon }) => {

@@ -10,6 +10,7 @@ const mapSalesRows = (rows) =>
   }))
 
 export const AppProvider = ({ children }) => {
+  const [account, setAccount] = useState(null)
   const [sales, setSales] = useState([])
   const [providers, setProviders] = useState([])
   const [agreements, setAgreements] = useState([])
@@ -22,12 +23,14 @@ export const AppProvider = ({ children }) => {
     setLoading(true)
     setError(null)
     try {
-      const [salesRes, providersRes, agreementsRes, venuesRes] = await Promise.all([
+      const [accountRes, salesRes, providersRes, agreementsRes, venuesRes] = await Promise.all([
+        get('/accounts/me').then((r) => r).catch(() => ({ data: null })),
         get('/sales'),
         get('/providers'),
         get('/agreements'),
         get('/venues'),
       ])
+      setAccount(accountRes?.data ?? null)
       setSales(mapSalesRows(salesRes.data ?? []))
       setProviders(providersRes.data ?? [])
       setAgreements(agreementsRes.data ?? [])
@@ -69,6 +72,7 @@ export const AppProvider = ({ children }) => {
   }, [])
 
   const value = {
+    account,
     sales,
     providers,
     agreements,

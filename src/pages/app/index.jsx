@@ -12,6 +12,8 @@ import Report from './Reports/Report'
 import Accounts from './Accounts'
 import Account from './Accounts/Account'
 import Settings from './Settings'
+import SettingsProviders from './Settings/Providers'
+import SettingsAgreements from './Settings/Agreements'
 
 const App = () => {
   return (
@@ -32,6 +34,10 @@ const App = () => {
           <Route path="/accounts" component={Accounts} />
           <Route path="/accounts/:id" component={Account} />
           <Route path="/settings" component={Settings} />
+          <Route path="/settings/providers" component={SettingsProviders} />
+          <Route path="/settings/providers/:id" component={SettingsProviders} />
+          <Route path="/settings/agreements" component={SettingsAgreements} />
+          <Route path="/settings/agreements/:id" component={SettingsAgreements} />
         </Switch>
       </main>
     </>
