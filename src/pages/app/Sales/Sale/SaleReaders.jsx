@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'wouter'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
+import DataTable from '../../../../components/tables/DataTable'
+import { readerColumns } from '../../../../components/tables/columns'
 import strings from '../../../../localization'
 
 const QR_API = 'https://api.qrserver.com/v1/create-qr-code/'
@@ -186,77 +189,12 @@ const SaleReaders = () => {
             }
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="min-w-full divide-y divide-slate-200">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('common.name')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.transaction.email')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('common.status')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.channel.link')}
-                    </th>
-                  </tr>
-                </thead>
-              <tbody className="divide-y divide-slate-100">
-                {readers.map((reader) => {
-                  const readerId = reader.id ?? reader._id
-                  const statusLabel = reader.status === 'active' ? strings('common.active') : strings('common.inactive')
-                  return (
-                    <tr
-                      key={readerId}
-                      tabIndex={0}
-                      onClick={() => setPanelReader(reader)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          setPanelReader(reader)
-                        }
-                      }}
-                      className="cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400"
-                    >
-                      <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
-                        {reader.name ?? '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                        {reader.email ?? '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            reader.status === 'active'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          {statusLabel}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setLinkDialog(reader)
-                          }}
-                          className="rounded border border-slate-300 bg-white px-2 py-1.5 text-sm hover:bg-slate-50"
-                          aria-label={strings('form.reader.ariaGetLink')}
-                        >
-                          🔗
-                        </button>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={readers}
+            columns={readerColumns((r) => setLinkDialog(r))}
+            getRowKey={(r) => r.id ?? r._id}
+            onRowClick={setPanelReader}
+          />
         )}
       </div>
 
@@ -297,16 +235,18 @@ const ReaderPanel = ({
   deleting,
 }) => {
   const isNew = reader === null
-  const [form, setForm] = useState(() => getInitialForm(reader))
+  const defaultValues = getInitialForm(reader)
+  const { register, handleSubmit, reset } = useForm({ defaultValues })
 
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  useEffect(() => {
+    reset(getInitialForm(reader))
+  }, [reader, reset])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const onFormSubmit = (formData) => {
     const payload = {
-      name: form.name?.trim() || undefined,
-      email: form.email?.trim() || undefined,
-      status: form.status || 'active',
+      name: formData.name?.trim() || undefined,
+      email: formData.email?.trim() || undefined,
+      status: formData.status || 'active',
     }
     onSave(reader, payload)
   }
@@ -328,7 +268,7 @@ const ReaderPanel = ({
       </header>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onFormSubmit)}
         className="flex flex-1 flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -339,24 +279,18 @@ const ReaderPanel = ({
               </h4>
               <Input
                 label={strings('common.name')}
-                name="name"
-                value={form.name}
-                onChange={(e) => update({ name: e.target.value })}
+                {...register('name')}
                 placeholder={strings('form.reader.namePlaceholder')}
               />
               <Input
                 label={strings('form.transaction.email')}
-                name="email"
                 type="email"
-                value={form.email}
-                onChange={(e) => update({ email: e.target.value })}
+                {...register('email')}
                 placeholder={strings('form.reader.emailPlaceholder')}
               />
               <Select
                 label={strings('common.status')}
-                name="status"
-                value={form.status}
-                onChange={(e) => update({ status: e.target.value })}
+                {...register('status')}
                 options={STATUS_OPTIONS}
               />
             </div>

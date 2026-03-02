@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useParams, useLocation } from 'wouter'
+import { useForm } from 'react-hook-form'
 
 import { post, put } from '../../../../lib/client'
 import { useApp, useSale } from '../../../../context'
@@ -11,6 +12,26 @@ const toDatetimeLocal = (iso) => {
   const d = new Date(iso)
   const pad = (n) => n.toString().padStart(2, '0')
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+const defaultValues = {
+  name: '',
+  start: '',
+  end: '',
+  hideStart: false,
+  hideEnd: false,
+  stopSaleAt: '',
+  ticketAdornment: '',
+  ticketAdornmentPosition: '',
+  ticketAdornmentSize: '',
+  venue: '',
+  plan: '',
+  minAge: 18,
+  provider: '',
+  currency: 'eur',
+  agreement: '',
+  category: 'concert',
+  rules: '',
 }
 
 const SaleBasic = () => {
@@ -25,32 +46,13 @@ const SaleBasic = () => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
-  const [form, setForm] = useState({
-    name: '',
-    start: '',
-    end: '',
-    hideStart: false,
-    hideEnd: false,
-    stopSaleAt: '',
-    ticketAdornment: '',
-    ticketAdornmentPosition: '',
-    ticketAdornmentSize: '',
-    venue: '',
-    plan: '',
-    minAge: 18,
-    provider: '',
-    currency: 'eur',
-    agreement: '',
-    category: 'concert',
-    rules: '',
-  })
-
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  const { register, handleSubmit, reset, watch, setValue } = useForm({ defaultValues })
+  const venue = watch('venue')
 
   useEffect(() => {
     if (!isNew && sale) {
       const agreementId = typeof sale.agreement === 'object' ? sale.agreement?.id : sale.agreement
-      setForm({
+      reset({
         name: sale.name ?? '',
         start: toDatetimeLocal(sale.start),
         end: toDatetimeLocal(sale.end),
@@ -70,65 +72,47 @@ const SaleBasic = () => {
         rules: sale.rules ?? '',
       })
     } else if (isNew) {
-      setForm({
-        name: '',
-        start: '',
-        end: '',
-        hideStart: false,
-        hideEnd: false,
-        stopSaleAt: '',
-        ticketAdornment: '',
-        ticketAdornmentPosition: '',
-        ticketAdornmentSize: '',
-        venue: '',
-        plan: '',
-        minAge: 18,
-        provider: '',
-        currency: 'eur',
-        agreement: '',
-        category: 'concert',
-        rules: '',
-      })
+      reset(defaultValues)
     }
-  }, [sale, isNew])
+  }, [sale, isNew, reset])
 
   useEffect(() => {
-    if (!form.venue) {
+    if (!venue) {
       setPlans([])
-      setForm((prev) => ({ ...prev, plan: '' }))
+      setValue('plan', '')
       return
     }
+    setValue('plan', '')
     setPlansLoading(true)
-    getVenuePlans(form.venue)
+    getVenuePlans(venue)
       .then((r) => setPlans(r ?? []))
       .catch(() => setPlans([]))
       .finally(() => setPlansLoading(false))
-  }, [form.venue, getVenuePlans])
+  }, [venue, getVenuePlans, setValue])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const onFormSubmit = async (formData) => {
     setError(null)
     setSaving(true)
     window.dispatchEvent(new CustomEvent('sale-basic-saving', { detail: { saving: true } }))
     try {
       const payload = {
-        name: form.name,
-        start: form.start ? new Date(form.start).toISOString() : undefined,
-        end: form.end ? new Date(form.end).toISOString() : undefined,
-        hideStart: form.hideStart,
-        hideEnd: form.hideEnd,
-        stopSaleAt: form.stopSaleAt ? new Date(form.stopSaleAt).toISOString() : undefined,
-        ticketAdornment: form.ticketAdornment || undefined,
-        ticketAdornmentPosition: form.ticketAdornmentPosition || undefined,
-        ticketAdornmentSize: form.ticketAdornmentSize || undefined,
-        venue: form.venue || undefined,
-        plan: form.plan || undefined,
-        minAge: form.minAge,
-        provider: form.provider || undefined,
-        currency: form.currency,
-        agreement: form.agreement || undefined,
-        category: form.category,
-        rules: form.rules,
+        name: formData.name,
+        start: formData.start ? new Date(formData.start).toISOString() : undefined,
+        end: formData.end ? new Date(formData.end).toISOString() : undefined,
+        hideStart: formData.hideStart,
+        hideEnd: formData.hideEnd,
+        stopSaleAt: formData.stopSaleAt ? new Date(formData.stopSaleAt).toISOString() : undefined,
+        ticketAdornment: formData.ticketAdornment || undefined,
+        ticketAdornmentPosition: formData.ticketAdornmentPosition || undefined,
+        ticketAdornmentSize: formData.ticketAdornmentSize || undefined,
+        venue: formData.venue || undefined,
+        plan: formData.plan || undefined,
+        minAge: formData.minAge,
+        provider: formData.provider || undefined,
+        currency: formData.currency,
+        agreement: formData.agreement || undefined,
+        category: formData.category,
+        rules: formData.rules,
       }
       if (isNew) {
         const res = await post('/sales', payload)
@@ -160,7 +144,7 @@ const SaleBasic = () => {
   return (
     <form
       id="sale-basic-form"
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onFormSubmit)}
       className="overflow-auto"
     >
       <div className="space-y-6">
@@ -180,55 +164,43 @@ const SaleBasic = () => {
           <div className="md:col-span-4">
             <Input
               label={strings('form.sale.eventName')}
-              name="name"
               type="text"
+              {...register('name')}
               placeholder={strings('form.sale.eventNamePlaceholder')}
-              value={form.name}
-              onChange={(e) => update({ name: e.target.value })}
             />
           </div>
           <div>
             <Input
               label={strings('form.sale.startDateTime')}
-              name="start"
               type="datetime-local"
+              {...register('start')}
               placeholder="Eg: 15/01/2024 20:00"
-              value={form.start}
-              onChange={(e) => update({ start: e.target.value })}
             />
             <Checkbox
               label={strings('form.sale.hideStartDate')}
-              name="hideStart"
-              checked={form.hideStart}
-              onChange={(e) => update({ hideStart: e.target.checked })}
+              {...register('hideStart')}
               className="mt-2"
             />
           </div>
           <div>
             <Input
               label={strings('form.sale.endDateTime')}
-              name="end"
               type="datetime-local"
+              {...register('end')}
               placeholder="Eg: 15/01/2024 23:00"
-              value={form.end}
-              onChange={(e) => update({ end: e.target.value })}
             />
             <Checkbox
               label={strings('form.sale.hideEndDate')}
-              name="hideEnd"
-              checked={form.hideEnd}
-              onChange={(e) => update({ hideEnd: e.target.checked })}
+              {...register('hideEnd')}
               className="mt-2"
             />
           </div>
           <div>
             <Input
               label={strings('form.sale.stopSaleAt')}
-              name="stopSaleAt"
               type="datetime-local"
+              {...register('stopSaleAt')}
               placeholder="Eg: 15/01/2024 23:00"
-              value={form.stopSaleAt}
-              onChange={(e) => update({ stopSaleAt: e.target.value })}
             />
           </div>
         </FormSection>
@@ -239,9 +211,8 @@ const SaleBasic = () => {
             <div className="mt-1 flex items-center gap-2">
               <Input
                 type="text"
+                {...register('ticketAdornment')}
                 placeholder={strings('form.sale.uploadImagePlaceholder')}
-                value={form.ticketAdornment}
-                onChange={(e) => update({ ticketAdornment: e.target.value })}
                 className="flex-1"
               />
               <input
@@ -251,7 +222,7 @@ const SaleBasic = () => {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0]
-                  if (f) update({ ticketAdornment: f.name })
+                  if (f) setValue('ticketAdornment', f.name)
                 }}
               />
               <button
@@ -266,9 +237,7 @@ const SaleBasic = () => {
           <section className="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
             <Select
               label={strings('form.sale.logoPosition')}
-              name="ticketAdornmentPosition"
-              value={form.ticketAdornmentPosition}
-              onChange={(e) => update({ ticketAdornmentPosition: e.target.value })}
+              {...register('ticketAdornmentPosition')}
               placeholder={strings('form.sale.selectPosition')}
               options={[
                 { value: 'top', label: strings('form.sale.position.top') },
@@ -279,9 +248,7 @@ const SaleBasic = () => {
             />
             <Select
               label={strings('form.sale.logoSize')}
-              name="ticketAdornmentSize"
-              value={form.ticketAdornmentSize}
-              onChange={(e) => update({ ticketAdornmentSize: e.target.value })}
+              {...register('ticketAdornmentSize')}
               placeholder={strings('form.sale.selectSize')}
               options={[
                 { value: 'small', label: strings('form.sale.size.small') },
@@ -295,9 +262,7 @@ const SaleBasic = () => {
         <FormSection title={strings('form.sale.venueSeating')} gridClassName="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Select
             label={strings('form.sale.venue')}
-            name="venue"
-            value={form.venue}
-            onChange={(e) => update({ venue: e.target.value, plan: '' })}
+            {...register('venue')}
             options={[
               { value: '', label: strings('form.sale.noVenue') },
               ...venues.map((v) => ({ value: v.id, label: v.name })),
@@ -305,10 +270,8 @@ const SaleBasic = () => {
           />
           <Select
             label={strings('form.sale.seatingPlan')}
-            name="plan"
-            value={form.plan}
-            onChange={(e) => update({ plan: e.target.value })}
-            disabled={!form.venue || plansLoading}
+            {...register('plan')}
+            disabled={!venue || plansLoading}
             options={[
               { value: '', label: strings('form.sale.noSeating') },
               ...plans.map((p) => ({ value: p.id, label: p.name })),
@@ -316,28 +279,22 @@ const SaleBasic = () => {
           />
           <Input
             label={strings('form.sale.minimumAge')}
-            name="minAge"
             type="number"
+            {...register('minAge', { valueAsNumber: true })}
             placeholder={strings('form.sale.minAgePlaceholder')}
-            value={form.minAge}
-            onChange={(e) => update({ minAge: Number(e.target.value) || 18 })}
           />
         </FormSection>
 
         <FormSection title={strings('form.sale.paymentLegal')} gridClassName="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Select
             label={strings('form.sale.transactionProvider')}
-            name="provider"
-            value={form.provider}
-            onChange={(e) => update({ provider: e.target.value })}
+            {...register('provider')}
             placeholder={strings('form.sale.selectProvider')}
             options={providers.map((p) => ({ value: p.id, label: p.name ?? p.id }))}
           />
           <Select
             label={strings('form.sale.currency')}
-            name="currency"
-            value={form.currency}
-            onChange={(e) => update({ currency: e.target.value })}
+            {...register('currency')}
             options={[
               { value: 'eur', label: strings('form.sale.currency.eur') },
               { value: 'chf', label: strings('form.sale.currency.chf') },
@@ -346,17 +303,13 @@ const SaleBasic = () => {
           />
           <Select
             label={strings('form.sale.salesAgreement')}
-            name="agreement"
-            value={form.agreement}
-            onChange={(e) => update({ agreement: e.target.value })}
+            {...register('agreement')}
             placeholder={strings('form.sale.selectAgreement')}
             options={agreements.map((a) => ({ value: a.id, label: a.name }))}
           />
           <Select
             label={strings('form.sale.eventCategory')}
-            name="category"
-            value={form.category}
-            onChange={(e) => update({ category: e.target.value })}
+            {...register('category')}
             options={[
               { value: 'concert', label: strings('form.sale.category.concert') },
               { value: 'festival', label: strings('form.sale.category.festival') },
@@ -369,10 +322,8 @@ const SaleBasic = () => {
         <FormSection gridClassName="grid grid-cols-1">
           <Textarea
             label={strings('form.sale.rules')}
-            name="rules"
+            {...register('rules')}
             placeholder={strings('form.sale.rulesPlaceholder')}
-            value={form.rules}
-            onChange={(e) => update({ rules: e.target.value })}
             className="min-h-[200px]"
           />
         </FormSection>

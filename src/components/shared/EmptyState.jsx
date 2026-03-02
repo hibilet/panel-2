@@ -17,7 +17,7 @@ const EmptyState = ({
 
   return (
     <div
-      className={`rounded-xl border-2 border-dashed p-12 text-center ${variants[variant]} ${className}`}
+      className={`rounded-xl border-2 border-dashed p-12 text-center animate-fade-in ${variants[variant]} ${className}`}
     >
       <div
         className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${iconVariants[variant]}`}

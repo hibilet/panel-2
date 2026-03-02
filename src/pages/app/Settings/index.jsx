@@ -67,7 +67,7 @@ const Settings = () => {
         {strings('page.settings.accountDetails')}
       </h2>
       {account && (
-        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm animate-fade-in dark:border-slate-700 dark:bg-slate-800">
           <dl className="grid gap-3 sm:grid-cols-2">
             <div>
               <dt className="text-sm font-medium text-slate-500 dark:text-slate-400">{strings('page.settings.name')}</dt>

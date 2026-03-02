@@ -60,3 +60,90 @@
   );
   background-size: 200% 100%;
 }
+
+/* Slide panel animation - enter/exit from right */
+@keyframes slide-panel-enter {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-panel-exit {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-panel-overlay-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-panel-overlay-exit {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.slide-panel {
+  animation: slide-panel-enter 250ms ease-out forwards;
+}
+
+.slide-panel[data-exiting] {
+  animation: slide-panel-exit 250ms ease-in forwards;
+}
+
+.slide-panel-overlay {
+  animation: slide-panel-overlay-enter 250ms ease-out forwards;
+}
+
+.slide-panel-overlay[data-exiting] {
+  animation: slide-panel-overlay-exit 250ms ease-in forwards;
+}
+
+/* Fade-in animation for content */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 200ms ease-out forwards;
+}
+
+/* Slide-up animation */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 250ms ease-out forwards;
+}

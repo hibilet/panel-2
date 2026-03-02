@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put } from '../../../../lib/client'
 import { Input, Textarea, AsyncSearchInput } from '../../../../components/inputs'
+import DataTable from '../../../../components/tables/DataTable'
+import { linkSalesColumns } from '../../../../components/tables/columns'
 import strings from '../../../../localization'
 import dayjs from 'dayjs'
 
@@ -10,29 +13,26 @@ const sortSalesByStart = (sales) =>
     .filter((s) => !s.deletedAt)
     .sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0))
 
+const defaultValues = { title: '', slug: '', description: '', image: '' }
+
 const LinkPanel = ({ id, onClose, onCreated }) => {
   const isNew = id === 'new'
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(!isNew)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({
-    title: '',
-    slug: '',
-    description: '',
-    image: '',
-  })
   const [sales, setSales] = useState([])
   const fileInputRef = useRef(null)
 
-  const updateForm = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  const { register, handleSubmit, reset, setValue, watch } = useForm({ defaultValues })
+  const formValues = watch()
 
   useEffect(() => {
     if (isNew) {
       setLoading(false)
       setError(null)
       setData(null)
-      setForm({ title: '', slug: '', description: '', image: '' })
+      reset(defaultValues)
       setSales([])
       return
     }
@@ -43,7 +43,7 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
         const d = res.data ?? null
         setData(d)
         if (d) {
-          setForm({
+          reset({
             title: d.title ?? '',
             slug: d.slug ?? '',
             description: d.description ?? '',
@@ -54,7 +54,7 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
       })
       .catch((err) => setError(err?.message ?? strings('error.failedLoadLink')))
       .finally(() => setLoading(false))
-  }, [id, isNew])
+  }, [id, isNew, reset])
 
   const searchEvents = useCallback(async (q) => {
     const res = await get(`/sales/search?q=${encodeURIComponent(q)}&limit=20`)
@@ -76,12 +76,11 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
     setSales((prev) => prev.filter((s) => s.id !== saleId))
   }
 
-  const handleSave = async (e) => {
-    e.preventDefault()
+  const onSave = async (formData) => {
     setSaving(true)
     setError(null)
     try {
-      const payload = { ...form, sales: sales.map((s) => s.id) }
+      const payload = { ...formData, sales: sales.map((s) => s.id) }
       if (isNew) {
         const res = await post('/links', payload)
         const created = res.data ?? null
@@ -89,7 +88,7 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
         if (created?.id) (onCreated ? onCreated(created.id) : onClose?.())
       } else {
         await put(`/links/${id}`, { ...data, ...payload })
-        setData((prev) => (prev ? { ...prev, ...form, sales } : null))
+        setData((prev) => (prev ? { ...prev, ...formData, sales } : null))
       }
     } catch (err) {
       setError(err?.message ?? strings('error.failedSave'))
@@ -102,7 +101,7 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
     const f = e.target.files?.[0]
     if (f) {
       // TODO: upload to storage and get URL
-      updateForm({ image: f.name })
+      setValue('image', f.name)
     }
   }
 
@@ -137,11 +136,11 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
           <main className="grid grid-cols-1">
             <section className="page-title">
               <h3 className="text-lg font-semibold text-slate-900">
-                {isNew ? strings('page.links.createNew') : (form.title || data?.title || strings('common.untitled'))} — {strings('page.links.details')}
+                {isNew ? strings('page.links.createNew') : (formValues.title || data?.title || strings('common.untitled'))} — {strings('page.links.details')}
               </h3>
             </section>
 
-            <form onSubmit={handleSave} className="space-y-6">
+            <form onSubmit={handleSubmit(onSave)} className="space-y-6">
               {error && (
                 <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
                   {error}
@@ -152,17 +151,13 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
                 <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Input
                     label={strings('form.link.title')}
-                    name="title"
+                    {...register('title')}
                     placeholder="Eg: Summer Festival 2024"
-                    value={form.title}
-                    onChange={(e) => updateForm({ title: e.target.value })}
                   />
                   <Input
                     label={strings('form.link.slug')}
-                    name="slug"
+                    {...register('slug')}
                     placeholder="Eg: summer-festival-2024"
-                    value={form.slug}
-                    onChange={(e) => updateForm({ slug: e.target.value })}
                   />
                 </fieldset>
 
@@ -185,10 +180,8 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
                 <fieldset className="grid grid-cols-1">
                   <Textarea
                     label={strings('form.link.description')}
-                    name="description"
+                    {...register('description')}
                     placeholder="Eg: Join us for an amazing summer festival..."
-                    value={form.description}
-                    onChange={(e) => updateForm({ description: e.target.value })}
                   />
                 </fieldset>
 
@@ -200,8 +193,7 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
                     <input
                       type="text"
                       placeholder={strings('form.sale.uploadImagePlaceholder')}
-                      value={form.image}
-                      onChange={(e) => updateForm({ image: e.target.value })}
+                      {...register('image')}
                       className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
                     />
                     <input
@@ -218,9 +210,9 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
                     >
                       {strings('form.sale.uploadImage')}
                     </button>
-                    {form.image && (
+                    {formValues.image && (
                       <img
-                        src={form.image}
+                        src={formValues.image}
                         alt="Preview"
                         className="h-12 w-12 shrink-0 rounded object-cover"
                       />
@@ -236,47 +228,12 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
                   {strings('form.link.sales')}
                 </span>
                 <div className="overflow-auto">
-                  <table className="min-w-full divide-y divide-slate-200">
-                    <thead>
-                      <tr>
-                        <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {strings('table.sale.name')}
-                        </th>
-                        <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {strings('table.sale.venue')}
-                        </th>
-                        <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {strings('form.link.startDate')}
-                        </th>
-                        <th scope="col" className="w-12 px-2 py-2" />
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200">
-                      {sales.map((sale) => (
-                        <tr key={sale.id} className="hover:bg-slate-50">
-                          <th scope="row" className="px-3 py-2 text-sm font-medium text-slate-900">
-                            {sale.name ?? '—'}
-                          </th>
-                          <td className="px-3 py-2 text-sm text-slate-600">
-                            {getVenueName(sale)}
-                          </td>
-                          <td className="px-3 py-2 text-sm text-slate-600">
-                            {formatStartDate(sale.start)}
-                          </td>
-                          <td className="px-2 py-2">
-                            <button
-                              type="button"
-                              onClick={handleRemoveSale(sale.id)}
-                              className="rounded border border-red-200 px-2 py-1 text-sm text-red-700 hover:bg-red-50"
-                              aria-label={strings('common.ariaDelete')}
-                            >
-                              <i className="fa-solid fa-trash" aria-hidden />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <DataTable
+                    data={sales}
+                    columns={linkSalesColumns(formatStartDate, getVenueName, handleRemoveSale)}
+                    getRowKey={(r) => r.id}
+                    bare
+                  />
                 </div>
 
                 <div className="mt-4">

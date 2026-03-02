@@ -1,19 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'wouter'
+import { useForm } from 'react-hook-form'
 
 import { post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
+import DataTable from '../../../../components/tables/DataTable'
+import { ticketColumns } from '../../../../components/tables/columns'
 import strings from '../../../../localization'
-
-const formatPrice = (value, currency = 'eur') => {
-  if (value == null) return '—'
-  return new Intl.NumberFormat('de-DE', {
-    style: 'currency',
-    currency: currency.toUpperCase(),
-  }).format(value)
-}
 
 const getInitialForm = (product) => {
   if (product) {
@@ -176,77 +171,12 @@ const SaleTickets = () => {
           />
         ) : (
           <>
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.name')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.category')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.price')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.stock')}
-                    </th>
-                    <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.reservations')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('table.ticket.status')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {products.map((product) => (
-                    <tr
-                      key={product.id}
-                      tabIndex={0}
-                      onClick={() => setPanelProduct(product)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault()
-                          setPanelProduct(product)
-                        }
-                      }}
-                      className="cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400"
-                    >
-                      <td className="whitespace-nowrap px-4 py-3">
-                        <span className="font-medium text-slate-900">
-                          {product.name || strings('common.untitled')}
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                        {product.category ?? '—'}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium text-slate-700">
-                        {formatPrice(product.price)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-slate-600">
-                        {product.stock ?? 0}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-right text-sm text-slate-600">
-                        {product.reservations ?? 0}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
-                            product.status === 'active'
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-600'
-                          }`}
-                        >
-                          {product.status === 'active' ? strings('common.active') : strings('common.inactive')}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              data={products}
+              columns={ticketColumns}
+              getRowKey={(r) => r.id}
+              onRowClick={setPanelProduct}
+            />
 
             {totals.stock > 0 && (
               <div className="flex flex-wrap gap-6 rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm">
@@ -291,22 +221,24 @@ const ProductPanel = ({
   deleting,
 }) => {
   const isNew = product === null
-  const [form, setForm] = useState(() => getInitialForm(product))
+  const defaultValues = getInitialForm(product)
+  const { register, handleSubmit, reset } = useForm({ defaultValues })
 
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  useEffect(() => {
+    reset(getInitialForm(product))
+  }, [product, reset])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  const onFormSubmit = (formData) => {
     const payload = {
-      name: form.name || undefined,
-      category: form.category || undefined,
-      promo: form.promo || undefined,
-      stock: form.stock ? Number(form.stock) : undefined,
-      productsToDeliver: form.productsToDeliver
-        ? Number(form.productsToDeliver)
+      name: formData.name || undefined,
+      category: formData.category || undefined,
+      promo: formData.promo || undefined,
+      stock: formData.stock ? Number(formData.stock) : undefined,
+      productsToDeliver: formData.productsToDeliver
+        ? Number(formData.productsToDeliver)
         : undefined,
-      price: form.price ? Number(form.price) : undefined,
-      status: form.status || 'active',
+      price: formData.price ? Number(formData.price) : undefined,
+      status: formData.status || 'active',
     }
     onSave(product, payload)
   }
@@ -331,7 +263,7 @@ const ProductPanel = ({
       </header>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onFormSubmit)}
         className="flex flex-1 flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -342,23 +274,17 @@ const ProductPanel = ({
               </h4>
               <Input
                 label={strings('common.name')}
-                name="name"
-                value={form.name}
-                onChange={(e) => update({ name: e.target.value })}
+                {...register('name')}
                 placeholder={strings('form.ticket.namePlaceholder')}
               />
               <Input
                 label={strings('table.ticket.category')}
-                name="category"
-                value={form.category}
-                onChange={(e) => update({ category: e.target.value })}
+                {...register('category')}
                 placeholder={strings('form.ticket.categoryPlaceholder')}
               />
               <Input
                 label={strings('form.ticket.promoText')}
-                name="promo"
-                value={form.promo}
-                onChange={(e) => update({ promo: e.target.value })}
+                {...register('promo')}
                 placeholder={strings('form.ticket.promoPlaceholder')}
               />
             </div>
@@ -370,28 +296,22 @@ const ProductPanel = ({
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label={strings('table.ticket.stock')}
-                  name="stock"
                   type="number"
-                  value={form.stock}
-                  onChange={(e) => update({ stock: e.target.value })}
+                  {...register('stock')}
                   placeholder={strings('form.ticket.stockPlaceholder')}
                 />
                 <Input
                   label={strings('form.ticket.ticketsToDeliver')}
-                  name="productsToDeliver"
                   type="number"
-                  value={form.productsToDeliver}
-                  onChange={(e) => update({ productsToDeliver: e.target.value })}
+                  {...register('productsToDeliver')}
                   placeholder="1"
                 />
               </div>
               <Input
                 label={strings('table.ticket.price')}
-                name="price"
                 type="number"
                 step="0.01"
-                value={form.price}
-                onChange={(e) => update({ price: e.target.value })}
+                {...register('price')}
                 placeholder={strings('form.ticket.pricePlaceholder')}
               />
             </div>
@@ -402,9 +322,7 @@ const ProductPanel = ({
               </h4>
               <Select
                 label={strings('form.ticket.visibility')}
-                name="status"
-                value={form.status}
-                onChange={(e) => update({ status: e.target.value })}
+                {...register('status')}
                 options={[
                   { value: 'active', label: strings('form.ticket.visibilityActive') },
                   { value: 'inactive', label: strings('form.ticket.visibilityInactive') },

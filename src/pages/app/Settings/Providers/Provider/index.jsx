@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put } from '../../../../../lib/client'
 import { Input, Select } from '../../../../../components/inputs'
@@ -21,6 +22,17 @@ const TYPE_OPTIONS = [
   { value: 'provider.stripe', labelKey: 'form.provider.typeStripe' },
 ]
 
+const defaultValues = {
+  name: '',
+  bank: '',
+  country: '',
+  currency: 'EUR',
+  type: '',
+  apiKey: '',
+  apiSecret: '',
+  webhookSecret: '',
+}
+
 const ProviderPanel = ({ id, onClose, onSaved }) => {
   const isNew = id === 'new'
   const [data, setData] = useState(null)
@@ -28,33 +40,15 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
-  const [form, setForm] = useState({
-    name: '',
-    bank: '',
-    country: '',
-    currency: 'EUR',
-    type: '',
-    apiKey: '',
-    apiSecret: '',
-    webhookSecret: '',
-  })
+  const { register, handleSubmit, reset, watch } = useForm({ defaultValues })
 
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  const showStripeFields = watch('type') === 'provider.stripe'
 
   useEffect(() => {
     if (isNew) {
       setLoading(false)
       setData(null)
-      setForm({
-        name: '',
-        bank: '',
-        country: '',
-        currency: 'EUR',
-        type: '',
-        apiKey: '',
-        apiSecret: '',
-        webhookSecret: '',
-      })
+      reset(defaultValues)
       return
     }
     setLoading(true)
@@ -64,7 +58,7 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
         const d = res.data ?? null
         setData(d)
         if (d) {
-          setForm({
+          reset({
             name: d.name ?? '',
             bank: d.bank ?? '',
             country: d.country ?? '',
@@ -78,22 +72,21 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
       })
       .catch((err) => setError(err?.message ?? strings('error.failedLoad')))
       .finally(() => setLoading(false))
-  }, [id, isNew])
+  }, [id, isNew, reset])
 
-  const handleSave = async (e) => {
-    e?.preventDefault?.()
+  const onSave = async (formData) => {
     setSaving(true)
     setError(null)
     try {
       const payload = {
-        name: form.name?.trim() || undefined,
-        bank: form.bank?.trim() || undefined,
-        country: form.country || undefined,
-        currency: form.currency || undefined,
-        type: form.type || undefined,
-        apiKey: form.apiKey?.trim() || undefined,
-        apiSecret: form.apiSecret?.trim() || undefined,
-        webhookSecret: form.webhookSecret?.trim() || undefined,
+        name: formData.name?.trim() || undefined,
+        bank: formData.bank?.trim() || undefined,
+        country: formData.country || undefined,
+        currency: formData.currency || undefined,
+        type: formData.type || undefined,
+        apiKey: formData.apiKey?.trim() || undefined,
+        apiSecret: formData.apiSecret?.trim() || undefined,
+        webhookSecret: formData.webhookSecret?.trim() || undefined,
       }
       if (isNew) {
         const res = await post('/providers', payload)
@@ -111,8 +104,6 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
       setSaving(false)
     }
   }
-
-  const showStripeFields = form.type === 'provider.stripe'
 
   if (loading) {
     return (
@@ -153,7 +144,7 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
         </button>
       </header>
 
-      <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-hidden">
+      <form onSubmit={handleSubmit(onSave)} className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="space-y-6">
             {error && (
@@ -165,9 +156,7 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
             <div className="grid grid-cols-1 gap-4">
               <Input
                 label={strings('form.provider.name')}
-                name="name"
-                value={form.name}
-                onChange={(e) => update({ name: e.target.value })}
+                {...register('name')}
                 placeholder={strings('form.provider.namePlaceholder')}
               />
             </div>
@@ -175,32 +164,24 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Input
                 label={strings('form.provider.bank')}
-                name="bank"
-                value={form.bank}
-                onChange={(e) => update({ bank: e.target.value })}
+                {...register('bank')}
                 placeholder={strings('form.provider.bankPlaceholder')}
               />
               <Select
                 label={strings('form.provider.country')}
-                name="country"
-                value={form.country}
-                onChange={(e) => update({ country: e.target.value })}
+                {...register('country')}
                 placeholder={strings('form.provider.selectCountry')}
                 options={COUNTRY_OPTIONS.map((o) => ({ value: o.value, label: strings(o.labelKey) }))}
               />
               <Select
                 label={strings('form.provider.currency')}
-                name="currency"
-                value={form.currency}
-                onChange={(e) => update({ currency: e.target.value })}
+                {...register('currency')}
                 placeholder={strings('form.provider.selectCurrency')}
                 options={CURRENCY_OPTIONS.map((o) => ({ value: o.value, label: strings(o.labelKey) }))}
               />
               <Select
                 label={strings('form.provider.type')}
-                name="type"
-                value={form.type}
-                onChange={(e) => update({ type: e.target.value })}
+                {...register('type')}
                 placeholder={strings('form.provider.selectType')}
                 options={TYPE_OPTIONS.map((o) => ({ value: o.value, label: strings(o.labelKey) }))}
               />
@@ -212,28 +193,22 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
                 <div className="grid grid-cols-1 gap-4">
                   <Input
                     label={strings('form.provider.apiKey')}
-                    name="apiKey"
                     type="text"
-                    value={form.apiKey}
-                    onChange={(e) => update({ apiKey: e.target.value })}
+                    {...register('apiKey')}
                     placeholder={strings('form.provider.apiKeyPlaceholder')}
                     autoComplete="off"
                   />
                   <Input
                     label={strings('form.provider.apiSecret')}
-                    name="apiSecret"
                     type="password"
-                    value={form.apiSecret}
-                    onChange={(e) => update({ apiSecret: e.target.value })}
+                    {...register('apiSecret')}
                     placeholder={strings('form.provider.apiSecretPlaceholder')}
                     autoComplete="off"
                   />
                   <Input
                     label={strings('form.provider.webhookSecret')}
-                    name="webhookSecret"
                     type="password"
-                    value={form.webhookSecret}
-                    onChange={(e) => update({ webhookSecret: e.target.value })}
+                    {...register('webhookSecret')}
                     placeholder={strings('form.provider.webhookSecretPlaceholder')}
                     autoComplete="off"
                   />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { get } from '../../../../lib/client'
 import dayjs from 'dayjs'
@@ -24,7 +25,6 @@ const TransactionPanel = ({ id, onClose }) => {
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
   const [emailDialogOpen, setEmailDialogOpen] = useState(false)
-  const [emailAddress, setEmailAddress] = useState('')
 
   useEffect(() => {
     setLoading(true)
@@ -42,18 +42,7 @@ const TransactionPanel = ({ id, onClose }) => {
   }
 
   const handleSendToAnotherEmail = () => {
-    setEmailAddress(data?.owner?.email ?? '')
     setEmailDialogOpen(true)
-  }
-
-  const handleSubmitAnotherEmail = (e) => {
-    e.preventDefault()
-    setSending(true)
-    // TODO: wire to actual API when available
-    setTimeout(() => {
-      setSending(false)
-      setEmailDialogOpen(false)
-    }, 800)
   }
 
   const handleCancelAll = () => {
@@ -203,18 +192,25 @@ const TransactionPanel = ({ id, onClose }) => {
 
       {emailDialogOpen && (
         <SendEmailDialog
-          email={emailAddress}
-          onEmailChange={setEmailAddress}
+          initialEmail={data?.owner?.email ?? ''}
           onClose={() => setEmailDialogOpen(false)}
-          onSubmit={handleSubmitAnotherEmail}
-          sending={sending}
+          setSending={setSending}
         />
       )}
     </div>
   )
 }
 
-const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) => {
+const SendEmailDialog = ({ initialEmail, onClose, setSending }) => {
+  const [sending, setSendingLocal] = useState(false)
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: { emailAddress: initialEmail ?? '' },
+  })
+
+  useEffect(() => {
+    reset({ emailAddress: initialEmail ?? '' })
+  }, [initialEmail, reset])
+
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') onClose()
@@ -222,6 +218,17 @@ const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) =
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
+
+  const onSubmit = () => {
+    setSendingLocal(true)
+    setSending?.(true)
+    // TODO: wire to actual API when available
+    setTimeout(() => {
+      setSendingLocal(false)
+      setSending?.(false)
+      onClose()
+    }, 800)
+  }
 
   return (
     <div
@@ -249,14 +256,12 @@ const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) =
             <i className="fa-solid fa-xmark text-lg" aria-hidden />
           </button>
         </header>
-        <form id="send-email-form" onSubmit={onSubmit} className="p-4">
+        <form id="send-email-form" onSubmit={handleSubmit(onSubmit)} className="p-4">
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium text-slate-700">{strings('form.transaction.email')}</span>
             <input
               type="email"
-              name="emailAddress"
-              value={email}
-              onChange={(e) => onEmailChange(e.target.value)}
+              {...register('emailAddress')}
               placeholder="Eg: john@doe.com"
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
             />

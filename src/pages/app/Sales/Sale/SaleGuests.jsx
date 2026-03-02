@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from 'wouter'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
+import DataTable from '../../../../components/tables/DataTable'
+import { guestColumns } from '../../../../components/tables/columns'
 import strings from '../../../../localization'
 import Pagination from '../../../../components/tables/Pagination'
 import * as XLSX from 'xlsx'
@@ -275,71 +278,21 @@ const SaleGuests = () => {
         ) : (
           <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
             <div ref={printRef} className="overflow-auto">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead>
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.guest.tableName')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.guest.tableEmail')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.guest.tableProduct')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.guest.tableQuantity')}
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      {strings('form.guest.tableCreated')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {guests.map((guest) => {
-                    const gid = guest._id ?? guest.id
-                    return (
-                      <tr
-                        key={gid}
-                        tabIndex={0}
-                        onClick={() => setPanelGuest(guest)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault()
-                            setPanelGuest(guest)
-                          }
-                        }}
-                        className="cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400"
-                      >
-                        <td className="whitespace-nowrap px-4 py-3 text-sm font-medium text-slate-900">
-                          {guest.name ?? '—'}
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                          {guest.email ?? '—'}
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                          {guest.product ?? '—'}
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                          {guest.count ?? 0}
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
-                          {formatDate(guest.createdAt)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr>
+              <DataTable
+                data={guests}
+                columns={guestColumns(formatDate)}
+                getRowKey={(r) => r._id ?? r.id}
+                onRowClick={setPanelGuest}
+                footer={
+                  <>
                     <td colSpan={3} className="px-4 py-3 text-sm text-slate-500" />
                     <td className="px-4 py-3 text-sm font-medium text-slate-700">
                       {totalQuantity} {strings('form.guest.total')}
                     </td>
                     <td />
-                  </tr>
-                </tfoot>
-              </table>
+                  </>
+                }
+              />
             </div>
             <Pagination
               total={total}
@@ -381,23 +334,21 @@ const GuestPanel = ({
   deleting,
 }) => {
   const isNew = guest === null
-  const [form, setForm] = useState(() => getInitialForm(guest, products))
+  const defaultValues = getInitialForm(guest, products)
+  const { register, handleSubmit, reset } = useForm({ defaultValues })
 
   useEffect(() => {
-    setForm(getInitialForm(guest, products))
-  }, [guest, products])
+    reset(getInitialForm(guest, products))
+  }, [guest, products, reset])
 
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const productId = form.product || (products[0]?.id ?? '')
+  const onFormSubmit = (formData) => {
+    const productId = formData.product || (products[0]?.id ?? '')
     const productMatch = products.find((p) => p.id === productId)
     const payload = {
-      name: form.name || undefined,
-      email: form.email || undefined,
-      product: productId || productMatch?.name || form.product,
-      count: form.quantity ? Number(form.quantity) : 1,
+      name: formData.name || undefined,
+      email: formData.email || undefined,
+      product: productId || productMatch?.name || formData.product,
+      count: formData.quantity ? Number(formData.quantity) : 1,
     }
     onSave(guest, payload)
   }
@@ -424,7 +375,7 @@ const GuestPanel = ({
       </header>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onFormSubmit)}
         className="flex flex-1 flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -435,34 +386,26 @@ const GuestPanel = ({
               </h4>
               <Input
                 label={strings('form.guest.guestName')}
-                name="name"
-                value={form.name}
-                onChange={(e) => update({ name: e.target.value })}
+                {...register('name')}
                 placeholder={strings('common.name')}
               />
               <Input
                 label={strings('form.guest.guestEmail')}
-                name="email"
                 type="email"
-                value={form.email}
-                onChange={(e) => update({ email: e.target.value })}
+                {...register('email')}
                 placeholder={strings('form.transaction.email')}
               />
               <Select
                 label={strings('form.guest.ticketType')}
-                name="product"
-                value={form.product}
-                onChange={(e) => update({ product: e.target.value })}
+                {...register('product')}
                 placeholder={strings('form.guest.selectTicketType')}
                 options={productOptions}
               />
               <Input
                 label={strings('form.guest.ticketQuantity')}
-                name="quantity"
                 type="number"
                 min={1}
-                value={form.quantity}
-                onChange={(e) => update({ quantity: e.target.value })}
+                {...register('quantity')}
                 placeholder={strings('form.guest.tableQuantity')}
               />
             </div>

@@ -1,3 +1,7 @@
+import { useState, useEffect } from 'react'
+
+const ANIM_DURATION = 250
+
 const SlidePanel = ({
   isOpen,
   onClose,
@@ -5,17 +9,37 @@ const SlidePanel = ({
   children,
   'aria-label': ariaLabel,
 }) => {
-  if (!isOpen) return null
+  const [isExiting, setIsExiting] = useState(false)
+  const show = isOpen || isExiting
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsExiting(false)
+    } else if (show) {
+      setIsExiting(true)
+      const t = setTimeout(() => setIsExiting(false), ANIM_DURATION)
+      return () => clearTimeout(t)
+    }
+  }, [isOpen, show])
+
+  if (!show) return null
+
+  const handleOverlayClick = () => {
+    if (isExiting) return
+    onClose?.()
+  }
 
   return (
     <>
       <div
-        className="fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px]"
+        className="slide-panel-overlay fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px]"
+        data-exiting={isExiting || undefined}
         aria-hidden
-        onClick={onClose}
+        onClick={handleOverlayClick}
       />
       <aside
-        className="fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto border-l border-slate-200 bg-white shadow-xl"
+        className="slide-panel fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto border-l border-slate-200 bg-white shadow-xl"
+        data-exiting={isExiting || undefined}
         aria-label={ariaLabel ?? title}
       >
         {children}

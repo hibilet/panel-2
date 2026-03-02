@@ -1,19 +1,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link, useLocation, useParams } from 'wouter'
-import dayjs from 'dayjs'
 
 import { get } from '../../../../lib/client'
 import strings from '../../../../localization'
 import SlidePanel from '../../../../components/shared/SlidePanel'
+import ProvidersTable from '../../../../components/tables/ProvidersTable'
 import ProviderPanel from './Provider'
-
-const formatDate = (date) => (date ? dayjs(date).format('D MMM YYYY, HH:mm') : '—')
-
-const formatType = (type) => {
-  if (!type) return '—'
-  const parts = String(type).split('.')
-  return parts[parts.length - 1] ?? type
-}
 
 const Providers = () => {
   const [, setLocation] = useLocation()
@@ -79,60 +71,11 @@ const Providers = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
-        {loading ? (
-          <div className="flex h-48 items-center justify-center">
-            <i className="fa-solid fa-spinner fa-spin text-3xl text-slate-400" aria-hidden />
-          </div>
-        ) : data.length === 0 ? (
-          <div className="flex h-48 items-center justify-center text-slate-500 dark:text-slate-400">
-            {strings('table.provider.noProviders')}
-          </div>
-        ) : (
-          <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
-            <thead className="bg-slate-50 dark:bg-slate-800/50">
-              <tr>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {strings('table.provider.name')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {strings('table.provider.bank')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {strings('table.provider.type')}
-                </th>
-                <th scope="col" className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  {strings('table.provider.createdAt')}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-200 bg-white dark:divide-slate-700 dark:bg-slate-800">
-              {data.map((row) => (
-                <tr
-                  key={row.id}
-                  onClick={() => row.id && setLocation(`/settings/providers/${row.id}`)}
-                  className="cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50"
-                >
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <span className="font-medium text-slate-900 dark:text-white">
-                      {row.name ?? '—'}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                    {row.bank ?? '—'}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                    {formatType(row.type)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600 dark:text-slate-300">
-                    {formatDate(row.createdAt)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <ProvidersTable
+        data={data}
+        loading={loading}
+        onRowClick={(row) => setLocation(`/settings/providers/${row.id}`)}
+      />
 
       <SlidePanel
         isOpen={!!id}

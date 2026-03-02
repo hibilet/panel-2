@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put } from '../../../../../lib/client'
 import { Input, Textarea } from '../../../../../components/inputs'
 import strings from '../../../../../localization'
+
+const defaultValues = { name: '', content: '' }
 
 const AgreementPanel = ({ id, onClose, onSaved }) => {
   const isNew = id === 'new'
@@ -11,18 +14,13 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
-  const [form, setForm] = useState({
-    name: '',
-    content: '',
-  })
-
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  const { register, handleSubmit, reset } = useForm({ defaultValues })
 
   useEffect(() => {
     if (isNew) {
       setLoading(false)
       setData(null)
-      setForm({ name: '', content: '' })
+      reset(defaultValues)
       return
     }
     setLoading(true)
@@ -32,7 +30,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
         const d = res.data ?? null
         setData(d)
         if (d) {
-          setForm({
+          reset({
             name: d.name ?? '',
             content: d.content ?? '',
           })
@@ -40,16 +38,15 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
       })
       .catch((err) => setError(err?.message ?? strings('error.failedLoad')))
       .finally(() => setLoading(false))
-  }, [id, isNew])
+  }, [id, isNew, reset])
 
-  const handleSave = async (e) => {
-    e?.preventDefault?.()
+  const onSave = async (formData) => {
     setSaving(true)
     setError(null)
     try {
       const payload = {
-        name: form.name?.trim() || undefined,
-        content: form.content?.trim() || undefined,
+        name: formData.name?.trim() || undefined,
+        content: formData.content?.trim() || undefined,
       }
       if (isNew) {
         const res = await post('/agreements', payload)
@@ -107,7 +104,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
         </button>
       </header>
 
-      <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-hidden">
+      <form onSubmit={handleSubmit(onSave)} className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="space-y-6">
             {error && (
@@ -119,9 +116,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
             <div className="grid grid-cols-1 gap-4">
               <Input
                 label={strings('form.agreement.name')}
-                name="name"
-                value={form.name}
-                onChange={(e) => update({ name: e.target.value })}
+                {...register('name')}
                 placeholder={strings('form.agreement.namePlaceholder')}
               />
             </div>
@@ -129,9 +124,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
             <div className="grid grid-cols-1 gap-4">
               <Textarea
                 label={strings('form.agreement.content')}
-                name="content"
-                value={form.content}
-                onChange={(e) => update({ content: e.target.value })}
+                {...register('content')}
                 placeholder={strings('form.agreement.contentPlaceholder')}
                 rows={16}
                 className="min-h-[300px] font-mono text-sm"

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 
 import { get, put, post } from '../../../../lib/client'
 import { Input } from '../../../../components/inputs'
+import { PanelHeader } from '../../../../components/shared'
 import strings from '../../../../localization'
 
 const MailingPanel = ({ onClose }) => {
@@ -10,15 +12,15 @@ const MailingPanel = ({ onClose }) => {
   const [error, setError] = useState(null)
   const [mailing, setMailing] = useState(null)
 
-  const [form, setForm] = useState({
-    sender: '',
-    email: '',
-    password: '',
-    server: '',
-    port: '',
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      sender: '',
+      email: '',
+      password: '',
+      server: '',
+      port: '',
+    },
   })
-
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
 
   useEffect(() => {
     setError(null)
@@ -28,7 +30,7 @@ const MailingPanel = ({ onClose }) => {
         const first = items[0]
         if (first) {
           setMailing(first)
-          setForm({
+          reset({
             sender: first.sender ?? '',
             email: first.email ?? '',
             password: first.password ?? '',
@@ -39,19 +41,18 @@ const MailingPanel = ({ onClose }) => {
       })
       .catch((err) => setError(err?.message ?? strings('error.failedLoadMailing')))
       .finally(() => setLoading(false))
-  }, [])
+  }, [reset])
 
-  const handleSave = async (e) => {
-    e?.preventDefault?.()
+  const onSave = async (data) => {
     setSaving(true)
     setError(null)
     try {
       const payload = {
-        sender: form.sender,
-        email: form.email,
-        password: form.password || undefined,
-        server: form.server,
-        port: form.port ? parseInt(form.port, 10) : undefined,
+        sender: data.sender,
+        email: data.email,
+        password: data.password || undefined,
+        server: data.server,
+        port: data.port ? parseInt(data.port, 10) : undefined,
       }
       if (mailing?.id) {
         await put(`/mailing/${mailing.id}`, payload)
@@ -70,19 +71,7 @@ const MailingPanel = ({ onClose }) => {
   if (loading) {
     return (
       <div className="flex h-full flex-col">
-        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-            {strings('page.settings.mailingSetup')}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-            aria-label={strings('common.ariaClose')}
-          >
-            <i className="fa-solid fa-xmark text-lg" aria-hidden />
-          </button>
-        </header>
+        <PanelHeader title={strings('page.settings.mailingSetup')} onClose={onClose} />
         <div className="flex flex-1 items-center justify-center p-6">
           <i className="fa-solid fa-spinner fa-spin text-3xl text-slate-400" aria-hidden />
         </div>
@@ -92,21 +81,9 @@ const MailingPanel = ({ onClose }) => {
 
   return (
     <div className="flex h-full flex-col">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4 dark:border-slate-700">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-          {strings('page.settings.mailingSetup')}
-        </h2>
-        <button
-          type="button"
-          onClick={onClose}
-          className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-          aria-label={strings('common.ariaClose')}
-        >
-          <i className="fa-solid fa-xmark text-lg" aria-hidden />
-        </button>
-      </header>
+      <PanelHeader title={strings('page.settings.mailingSetup')} onClose={onClose} />
 
-      <form onSubmit={handleSave} className="flex flex-1 flex-col overflow-hidden">
+      <form onSubmit={handleSubmit(onSave)} className="flex flex-1 flex-col overflow-hidden">
         <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="space-y-6">
             {error && (
@@ -118,9 +95,7 @@ const MailingPanel = ({ onClose }) => {
             <div className="grid grid-cols-1 gap-4">
               <Input
                 label={strings('form.mailing.sender')}
-                name="sender"
-                value={form.sender}
-                onChange={(e) => update({ sender: e.target.value })}
+                {...register('sender')}
                 placeholder={strings('form.mailing.senderPlaceholder')}
                 autoComplete="name"
               />
@@ -129,19 +104,15 @@ const MailingPanel = ({ onClose }) => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 label={strings('form.mailing.email')}
-                name="email"
                 type="email"
-                value={form.email}
-                onChange={(e) => update({ email: e.target.value })}
+                {...register('email')}
                 placeholder={strings('form.mailing.emailPlaceholder')}
                 autoComplete="email"
               />
               <Input
                 label={strings('form.mailing.password')}
-                name="password"
                 type="password"
-                value={form.password}
-                onChange={(e) => update({ password: e.target.value })}
+                {...register('password')}
                 placeholder={strings('form.mailing.passwordPlaceholder')}
                 autoComplete="password"
               />
@@ -150,18 +121,14 @@ const MailingPanel = ({ onClose }) => {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 label={strings('form.mailing.server')}
-                name="server"
-                value={form.server}
-                onChange={(e) => update({ server: e.target.value })}
+                {...register('server')}
                 placeholder={strings('form.mailing.serverPlaceholder')}
                 autoComplete="off"
               />
               <Input
                 label={strings('form.mailing.port')}
-                name="port"
                 type="number"
-                value={form.port}
-                onChange={(e) => update({ port: e.target.value })}
+                {...register('port')}
                 placeholder={strings('form.mailing.portPlaceholder')}
               />
             </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'wouter'
+import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
@@ -261,19 +262,21 @@ const CouponPanel = ({
   deleting,
 }) => {
   const isNew = coupon === null
-  const [form, setForm] = useState(() => getInitialForm(coupon))
+  const defaultValues = getInitialForm(coupon)
+  const { register, handleSubmit, reset } = useForm({ defaultValues })
 
-  const update = (updates) => setForm((prev) => ({ ...prev, ...updates }))
+  useEffect(() => {
+    reset(getInitialForm(coupon))
+  }, [coupon, reset])
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const discountValue = form.discount ? parseFloat(form.discount) : undefined
+  const onFormSubmit = (formData) => {
+    const discountValue = formData.discount ? parseFloat(formData.discount) : undefined
     const payload = {
-      code: form.code || undefined,
-      channel: form.channel || undefined,
-      stock: form.stock ? Number(form.stock) : undefined,
+      code: formData.code?.toUpperCase?.() || undefined,
+      channel: formData.channel || undefined,
+      stock: formData.stock ? Number(formData.stock) : undefined,
       discount: discountValue,
-      status: form.status || 'active',
+      status: formData.status || 'active',
     }
     onSave(coupon, payload)
   }
@@ -297,7 +300,7 @@ const CouponPanel = ({
       </header>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleSubmit(onFormSubmit)}
         className="flex flex-1 flex-col overflow-hidden"
       >
         <div className="flex-1 overflow-y-auto px-6 py-5">
@@ -308,9 +311,7 @@ const CouponPanel = ({
               </h4>
               <Input
                 label={strings('form.coupon.couponCode')}
-                name="code"
-                value={form.code}
-                onChange={(e) => update({ code: e.target.value.toUpperCase() })}
+                {...register('code')}
                 placeholder={strings('form.coupon.codePlaceholder')}
                 className="font-mono"
               />
@@ -322,18 +323,14 @@ const CouponPanel = ({
               </h4>
               <Input
                 label={strings('form.coupon.discount')}
-                name="discount"
+                {...register('discount')}
                 placeholder={strings('form.coupon.discountPlaceholder')}
-                value={form.discount}
-                onChange={(e) => update({ discount: e.target.value })}
               />
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   label={strings('form.coupon.stock')}
-                  name="stock"
                   type="number"
-                  value={form.stock}
-                  onChange={(e) => update({ stock: e.target.value })}
+                  {...register('stock')}
                   placeholder={strings('form.ticket.stockPlaceholder')}
                 />
                 {!isNew && coupon && (
@@ -353,9 +350,7 @@ const CouponPanel = ({
               </h4>
               <Select
                 label={strings('form.channel.channel')}
-                name="channel"
-                value={form.channel}
-                onChange={(e) => update({ channel: e.target.value })}
+                {...register('channel')}
                 placeholder={strings('form.coupon.selectChannel')}
                 options={[
                   { value: '', label: strings('form.coupon.selectChannel') },
@@ -364,9 +359,7 @@ const CouponPanel = ({
               />
               <Select
                 label={strings('common.status')}
-                name="status"
-                value={form.status}
-                onChange={(e) => update({ status: e.target.value })}
+                {...register('status')}
                 options={[
                   { value: 'active', label: strings('form.coupon.statusActive') },
                   { value: 'inactive', label: strings('form.coupon.statusInactive') },
