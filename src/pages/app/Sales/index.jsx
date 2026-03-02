@@ -63,7 +63,7 @@ const Sales = () => {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-semibold text-slate-900">Sales</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{strings('page.sales.title')}</h1>
         <div className="flex flex-wrap items-center justify-end gap-2">
           <button
             type="button"
@@ -78,7 +78,7 @@ const Sales = () => {
             disabled={loading}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            Calculate revenues
+            {strings('page.sales.calculateRevenues')}
           </button>
           <Link
             href="/sales/new"
