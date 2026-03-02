@@ -45,8 +45,7 @@ const Navbar = () => {
       <div className="mx-auto max-w-5xl py-4">
           <h1 className="text-xl font-semibold text-slate-900">HIBilet Panel</h1>
           <nav aria-label="Main navigation" className="relative mt-4">
-            {/* Desktop: tabs with space between */}
-            <div className="hidden md:flex md:justify-between" role="tablist">
+            <div className="hidden md:flex items-center gap-2" role="tablist">
               {navItems.map(({ path, label, icon }) => {
                 const isActive = path === '/' ? location === path : location.startsWith(path)
                 return <NavLink key={path} path={path} label={label} icon={icon} isActive={isActive} />

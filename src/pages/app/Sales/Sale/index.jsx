@@ -67,7 +67,7 @@ const Sale = () => {
         </div>
 
         <nav aria-label="Sale sections" className="mt-4">
-          <div className="flex flex-wrap gap-1" role="tablist">
+          <div className="flex flex-wrap gap-2" role="tablist">
             {tabItems.map(({ path, label, icon }) => (
               <TabLink
                 key={path}
