@@ -3,6 +3,7 @@ import { Switch, Route } from 'wouter'
 import Navbar from '../../components/global/Navbar'
 
 import Dashboard from './Dashboard'
+import Onboarding from './Onboarding'
 import Sales from './Sales'
 import Sale from './Sales/Sale'
 import Transactions from './Transactions'
