@@ -1,3 +1,5 @@
+import strings from '../../localization'
+
 const Pagination = ({ total, limit, page, onPageChange }) => {
   const totalPages = Math.max(1, Math.ceil(total / limit))
   const currentPage = Math.min(Math.max(1, page), totalPages)
@@ -17,9 +19,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 bg-white px-4 py-3 sm:px-6">
       <p className="text-sm text-slate-600">
-        Showing <span className="font-medium">{start}</span> to{' '}
-        <span className="font-medium">{end}</span> of{' '}
-        <span className="font-medium">{total}</span> results
+        {strings('pagination.showing', [String(start), String(end), String(total)])}
       </p>
       {showNav && (
       <nav className="flex items-center gap-1">
@@ -28,7 +28,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
           onClick={() => goTo(1)}
           disabled={!hasPrev}
           className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="First page"
+          aria-label={strings('common.firstPage')}
         >
           ««
         </button>
@@ -37,19 +37,19 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
           onClick={() => goTo(currentPage - 1)}
           disabled={!hasPrev}
           className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Previous page"
+          aria-label={strings('common.previousPage')}
         >
           «
         </button>
         <span className="px-2 py-1.5 text-sm text-slate-700">
-          Page {currentPage} of {totalPages}
+          {strings('pagination.pageOf', [String(currentPage), String(totalPages)])}
         </span>
         <button
           type="button"
           onClick={() => goTo(currentPage + 1)}
           disabled={!hasNext}
           className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Next page"
+          aria-label={strings('common.nextPage')}
         >
           »
         </button>
@@ -58,7 +58,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
           onClick={() => goTo(totalPages)}
           disabled={!hasNext}
           className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Last page"
+          aria-label={strings('common.lastPage')}
         >
           »»
         </button>

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import strings, { formatCurrency } from '../../localization'
 
 const statusStyles = {
   pending: 'bg-amber-100 text-amber-800',
@@ -9,7 +10,6 @@ const statusStyles = {
 }
 
 const TransactionsTable = ({ data = [], bare = false, loading = false, onRowClick }) => {
-  const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY, HH:mm')
 
   const showShimmer = loading || data.length === 0
@@ -33,12 +33,12 @@ const TransactionsTable = ({ data = [], bare = false, loading = false, onRowClic
       <table className="min-w-full divide-y divide-slate-200">
         <thead>
           <tr>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">ID</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Name</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Owner</th>
-            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Subtotal</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Created at</th>
-            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Status</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.id')}</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.name')}</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.owner')}</th>
+            <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.subtotal')}</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.createdAt')}</th>
+            <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.transaction.status')}</th>
           </tr>
         </thead>
         {shimmerRows}
@@ -59,22 +59,22 @@ const TransactionsTable = ({ data = [], bare = false, loading = false, onRowClic
         <thead>
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              ID
+              {strings('table.transaction.id')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Name
+              {strings('table.transaction.name')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Owner
+              {strings('table.transaction.owner')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Subtotal
+              {strings('table.transaction.subtotal')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Created at
+              {strings('table.transaction.createdAt')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Status
+              {strings('table.transaction.status')}
             </th>
           </tr>
         </thead>
@@ -82,7 +82,7 @@ const TransactionsTable = ({ data = [], bare = false, loading = false, onRowClic
           {data.length === 0 ? (
             <tr>
               <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                No transactions yet
+                {strings('table.transaction.noTransactions')}
               </td>
             </tr>
           ) : (

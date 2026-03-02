@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
+import strings from '../../localization'
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: 'fa-gauge-high' },
-  { path: '/accounts', label: 'Accounts', icon: 'fa-users' },
-  { path: '/sales', label: 'Sales', icon: 'fa-cart-shopping' },
-  { path: '/links', label: 'Links', icon: 'fa-link' },
-  { path: '/transactions', label: 'Transactions', icon: 'fa-receipt' },
-  { path: '/reports', label: 'Reports', icon: 'fa-chart-line' },
-  { path: '/settings', label: 'Settings', icon: 'fa-gear' },
+  { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high' },
+  { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users' },
+  { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping' },
+  { path: '/links', labelKey: 'nav.links', icon: 'fa-link' },
+  { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt' },
+  { path: '/reports', labelKey: 'nav.reports', icon: 'fa-chart-line' },
+  { path: '/settings', labelKey: 'nav.settings', icon: 'fa-gear' },
 ]
 
 const Navbar = () => {
@@ -43,12 +44,12 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="mx-auto max-w-5xl py-4">
-          <h1 className="text-xl font-semibold text-slate-900">HIBilet Panel</h1>
+          <h1 className="text-xl font-semibold text-slate-900">{strings('app.name')}</h1>
           <nav aria-label="Main navigation" className="relative mt-4">
             <div className="hidden md:flex items-center gap-2" role="tablist">
-              {navItems.map(({ path, label, icon }) => {
+              {navItems.map(({ path, labelKey, icon }) => {
                 const isActive = path === '/' ? location === path : location.startsWith(path)
-                return <NavLink key={path} path={path} label={label} icon={icon} isActive={isActive} />
+                return <NavLink key={path} path={path} label={strings(labelKey)} icon={icon} isActive={isActive} />
               })}
             </div>
 
@@ -65,7 +66,7 @@ const Navbar = () => {
               >
                 <span className="flex items-center gap-2">
                   <i className={`fa-solid ${activeItem?.icon ?? 'fa-bars'}`} aria-hidden />
-                  {activeItem?.label ?? 'Menu'}
+                  {activeItem ? strings(activeItem.labelKey) : strings('nav.menu')}
                 </span>
                 <i className={`fa-solid fa-chevron-down transition-transform ${menuOpen ? 'rotate-180' : ''}`} aria-hidden />
               </button>
@@ -76,11 +77,11 @@ const Navbar = () => {
                 className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 border-0'}`}
               >
                 <div className="py-2">
-                  {navItems.map(({ path, label, icon }) => {
+                  {navItems.map(({ path, labelKey, icon }) => {
                     const isActive = path === '/' ? location === path : location.startsWith(path)
                     return (
                       <div key={path} className="px-2">
-                        <NavLink path={path} label={label} icon={icon} isActive={isActive} />
+                        <NavLink path={path} label={strings(labelKey)} icon={icon} isActive={isActive} />
                       </div>
                     )
                   })}

@@ -1,5 +1,6 @@
+import strings, { formatCurrency } from '../../localization'
+
 const LinksTable = ({ data = [], loading = false }) => {
-  const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const showShimmer = loading || data.length === 0
 
   if (showShimmer) {
@@ -8,11 +9,11 @@ const LinksTable = ({ data = [], loading = false }) => {
         <table className="min-w-full divide-y divide-slate-200">
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Image</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Title</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Slug</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Reservations</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Revenue</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.link.image')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.link.title')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.link.slug')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.link.reservations')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.link.revenue')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
@@ -37,19 +38,19 @@ const LinksTable = ({ data = [], loading = false }) => {
         <thead>
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Image
+              {strings('table.link.image')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Title
+              {strings('table.link.title')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Slug
+              {strings('table.link.slug')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Reservations
+              {strings('table.link.reservations')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Revenue
+              {strings('table.link.revenue')}
             </th>
           </tr>
         </thead>

@@ -1,6 +1,7 @@
 import { Switch, Route, Link, useLocation, useParams } from 'wouter'
 
 import { SaleProvider, useSale } from '../../../../context'
+import strings from '../../../../localization'
 import SaleBasic from './SaleBasic'
 import SaleTickets from './SaleTickets'
 import SaleChannels from './SaleChannels'
@@ -10,16 +11,16 @@ import SaleReaders from './SaleReaders'
 import SaleCoupons from './SaleCoupons'
 
 const tabItems = [
-  { path: 'basic', label: 'Basic', icon: 'fa-file-lines' },
-  { path: 'tickets', label: 'Tickets', icon: 'fa-ticket' },
-  { path: 'channels', label: 'Channels', icon: 'fa-bullhorn' },
-  { path: 'attendees', label: 'Attendees', icon: 'fa-users' },
-  { path: 'guests', label: 'Guests', icon: 'fa-user-group' },
-  { path: 'readers', label: 'Readers', icon: 'fa-tablet-screen-button' },
-  { path: 'coupons', label: 'Coupons', icon: 'fa-tag' },
+  { path: 'basic', labelKey: 'page.sale.tab.basic', icon: 'fa-file-lines' },
+  { path: 'tickets', labelKey: 'page.sale.tab.tickets', icon: 'fa-ticket' },
+  { path: 'channels', labelKey: 'page.sale.tab.channels', icon: 'fa-bullhorn' },
+  { path: 'attendees', labelKey: 'page.sale.tab.attendees', icon: 'fa-users' },
+  { path: 'guests', labelKey: 'page.sale.tab.guests', icon: 'fa-user-group' },
+  { path: 'readers', labelKey: 'page.sale.tab.readers', icon: 'fa-tablet-screen-button' },
+  { path: 'coupons', labelKey: 'page.sale.tab.coupons', icon: 'fa-tag' },
 ]
 
-const TabLink = ({ path, label, icon, isActive, basePath }) => (
+const TabLink = ({ path, labelKey, icon, isActive, basePath }) => (
   <Link
     href={path === 'basic' ? basePath : `${basePath}/${path}`}
     role="tab"
@@ -35,13 +36,13 @@ const TabLink = ({ path, label, icon, isActive, basePath }) => (
     `}
   >
     <i className={`fa-solid ${icon}`} aria-hidden />
-    <span>{label}</span>
+    <span>{strings(labelKey)}</span>
   </Link>
 )
 
 const SaleHeader = () => {
   const { sale, isNew } = useSale()
-  const title = isNew ? 'New' : (sale?.name ?? 'Sale')
+  const title = isNew ? strings('page.sale.new') : (sale?.name ?? strings('page.sale.title'))
 
   return (
     <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
@@ -68,11 +69,11 @@ const Sale = () => {
 
         <nav aria-label="Sale sections" className="mt-4">
           <div className="flex flex-wrap gap-2" role="tablist">
-            {tabItems.map(({ path, label, icon }) => (
+            {tabItems.map(({ path, labelKey, icon }) => (
               <TabLink
                 key={path}
                 path={path}
-                label={label}
+                labelKey={labelKey}
                 icon={icon}
                 isActive={isTabActive(path)}
                 basePath={basePath}

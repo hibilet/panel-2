@@ -1,4 +1,5 @@
 import { Link } from 'wouter'
+import strings from '../../../localization'
 
 const Reports = () => {
   const reports = [] // placeholder
@@ -9,7 +10,7 @@ const Reports = () => {
         {reports.length === 0 ? (
           <div className="p-8 text-center text-slate-500">
             <i className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300" aria-hidden />
-            <p>No reports yet</p>
+            <p>{strings('page.reports.noReports')}</p>
           </div>
         ) : (
           <ul className="divide-y divide-slate-200">

@@ -1,3 +1,5 @@
+import strings from '../../localization'
+
 /**
  * Generic data table with configurable columns.
  * @param {Object} props
@@ -17,7 +19,7 @@ const DataTable = ({
   getRowKey = (row) => row.id ?? row._id,
   onRowClick,
   loading = false,
-  emptyMessage = 'No data',
+  emptyMessage = strings('common.noData'),
   footer,
   minWidth = 'min-w-[640px]',
   tableRef,

@@ -8,9 +8,7 @@ import SalesChart from '../../../components/charts/SalesChart'
 import TransactionsTable from '../../../components/tables/TransactionsTable'
 import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
 import { StatCard } from '../../../components/shared'
-
-const formatCurrency = (value) =>
-  value != null ? `₺${Number(value).toLocaleString()}` : '₺0'
+import strings, { formatCurrency } from '../../../localization'
 
 const buildChartDataFromApi = (apiData = [], year, month) => {
   const daysInMonth = dayjs().year(year).month(month).daysInMonth()
@@ -96,7 +94,7 @@ const Dashboard = () => {
         setRecentTransactions(transactionsRes.data ?? [])
       })
       .catch((err) => {
-        setError(err?.message ?? 'Failed to load dashboard')
+        setError(err?.message ?? strings('error.failedLoadDashboard'))
       })
   }, [today])
 
@@ -178,22 +176,22 @@ const Dashboard = () => {
         <h2 id="stats-heading" className="sr-only">Quick stats</h2>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatCard
-            label="Today's Sales"
+            label={strings('dashboard.stats.todaySales')}
             value={formatCurrency(todaySales ?? 0)}
             loading={statsLoading}
           />
           <StatCard
-            label="MTD Sales"
+            label={strings('dashboard.stats.mtdSales')}
             value={formatCurrency(mtdSales ?? 0)}
             loading={statsLoading}
           />
           <StatCard
-            label="MTD Products Sold"
+            label={strings('dashboard.stats.mtdProductsSold')}
             value={mtdProductsSold ?? 0}
             loading={statsLoading}
           />
           <StatCard
-            label="Active Sales"
+            label={strings('dashboard.stats.activeSales')}
             value={activeSalesCount ?? 0}
             loading={statsLoading}
           />
@@ -213,7 +211,7 @@ const Dashboard = () => {
       <section aria-labelledby="weekly-events-heading" className="mb-8">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 id="weekly-events-heading" className="text-lg font-medium text-slate-900">
-            Weekly event sale matrix
+            {strings('dashboard.weeklyMatrix')}
           </h2>
           <div className="flex items-center gap-2">
             <button
@@ -221,7 +219,7 @@ const Dashboard = () => {
               onClick={() => setSelectedWeekOffset((o) => Math.min(o + 1, 6))}
               disabled={selectedWeekOffset >= 6}
               className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Previous week"
+              aria-label={strings('common.previousWeek')}
             >
               ‹
             </button>
@@ -233,7 +231,7 @@ const Dashboard = () => {
               onClick={() => setSelectedWeekOffset((o) => Math.max(o - 1, 0))}
               disabled={selectedWeekOffset <= 0}
               className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Next week"
+              aria-label={strings('common.nextWeek')}
             >
               ›
             </button>
@@ -249,13 +247,13 @@ const Dashboard = () => {
       <section aria-labelledby="recent-heading">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="recent-heading" className="text-lg font-medium text-slate-900">
-            Recent activity
+            {strings('dashboard.recentActivity')}
           </h2>
           <Link
             href="/transactions"
             className="text-sm font-medium text-slate-600 hover:text-slate-900"
           >
-            View all →
+            {strings('common.viewAll')}
           </Link>
         </div>
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">

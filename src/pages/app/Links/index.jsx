@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 
 import { get } from '../../../lib/client'
+import strings from '../../../localization'
 import LinksTable from '../../../components/tables/LinksTable'
 
 const Links = () => {
@@ -19,7 +20,7 @@ const Links = () => {
         })))
       })
       .catch((err) => {
-        setError(err?.message ?? 'Failed to load links')
+        setError(err?.message ?? strings('error.failedLoadLinks'))
       })
       .finally(() => {
         setLoading(false)

@@ -5,6 +5,7 @@ import { post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
+import strings from '../../../../localization'
 
 const formatPrice = (value, currency = 'eur') => {
   if (value == null) return '—'
@@ -67,14 +68,14 @@ const SaleTickets = () => {
         closePanel()
       }
     } catch (err) {
-      setError(err?.message ?? 'Failed to save')
+      setError(err?.message ?? strings('error.failedSave'))
     } finally {
       setSaving(null)
     }
   }
 
   const handleDelete = async (productId) => {
-    if (!confirm('Delete this ticket type?')) return
+    if (!confirm(strings('confirm.deleteTicket'))) return
     setDeleting(productId)
     setError(null)
     try {
@@ -82,7 +83,7 @@ const SaleTickets = () => {
       setProducts((prev) => prev.filter((p) => p.id !== productId))
       closePanel()
     } catch (err) {
-      setError(err?.message ?? 'Failed to delete')
+      setError(err?.message ?? strings('error.failedDelete'))
     } finally {
       setDeleting(null)
     }
@@ -126,10 +127,10 @@ const SaleTickets = () => {
       <div className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-medium text-slate-900">Ticket types</h2>
+            <h2 className="text-lg font-medium text-slate-900">{strings('form.ticket.ticketTypes')}</h2>
             <p className="mt-0.5 text-sm text-slate-500">
-              {products.length} ticket type{products.length !== 1 ? 's' : ''}
-              {totals.stock > 0 && <> · {totals.stock} total capacity</>}
+              {products.length === 1 ? strings('form.ticket.ticketTypeCount', [products.length]) : strings('form.ticket.ticketTypeCountPlural', [products.length])}
+              {totals.stock > 0 && <> · {strings('form.ticket.totalCapacity', [totals.stock])}</>}
             </p>
           </div>
           {!isNew && (
@@ -139,7 +140,7 @@ const SaleTickets = () => {
               className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
             >
               <i className="fa-solid fa-plus" aria-hidden />
-              Add ticket type
+              {strings('form.ticket.addTicketType')}
             </button>
           )}
         </div>
@@ -154,14 +155,14 @@ const SaleTickets = () => {
           <EmptyState
             icon="fa-ticket"
             variant="amber"
-            title="Save the sale first"
-            description="Create and save the sale to add ticket types."
+            title={strings('form.ticket.saveFirst')}
+            description={strings('form.ticket.saveFirstDesc')}
           />
         ) : products.length === 0 ? (
           <EmptyState
             icon="fa-ticket"
-            title="No ticket types yet"
-            description="Add your first ticket type to start selling."
+            title={strings('form.ticket.noTicketTypes')}
+            description={strings('form.ticket.noTicketTypesDesc')}
             action={
               <button
                 type="button"
@@ -169,7 +170,7 @@ const SaleTickets = () => {
                 className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
               >
                 <i className="fa-solid fa-plus" aria-hidden />
-                Add ticket type
+                {strings('form.ticket.addTicketType')}
               </button>
             }
           />
@@ -180,22 +181,22 @@ const SaleTickets = () => {
                 <thead>
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Name
+                      {strings('table.ticket.name')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Category
+                      {strings('table.ticket.category')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Price
+                      {strings('table.ticket.price')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Stock
+                      {strings('table.ticket.stock')}
                     </th>
                     <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Reservations
+                      {strings('table.ticket.reservations')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Status
+                      {strings('table.ticket.status')}
                     </th>
                   </tr>
                 </thead>
@@ -215,7 +216,7 @@ const SaleTickets = () => {
                     >
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className="font-medium text-slate-900">
-                          {product.name || 'Untitled'}
+                          {product.name || strings('common.untitled')}
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-sm text-slate-600">
@@ -238,7 +239,7 @@ const SaleTickets = () => {
                               : 'bg-slate-100 text-slate-600'
                           }`}
                         >
-                          {product.status === 'active' ? 'Active' : 'Inactive'}
+                          {product.status === 'active' ? strings('common.active') : strings('common.inactive')}
                         </span>
                       </td>
                     </tr>
@@ -250,12 +251,12 @@ const SaleTickets = () => {
             {totals.stock > 0 && (
               <div className="flex flex-wrap gap-6 rounded-lg border border-slate-200 bg-slate-50 px-5 py-3 text-sm">
                 <span className="font-medium text-slate-700">
-                  {totals.stock} total capacity
+                  {strings('form.ticket.totalCapacityLabel', [totals.stock])}
                 </span>
                 <span className="text-slate-600">
-                  {totals.reserved} reservations
+                  {strings('form.ticket.reservationsLabel', [totals.reserved])}
                 </span>
-                <span className="text-slate-600">{totals.read} read</span>
+                <span className="text-slate-600">{strings('form.ticket.readLabel', [totals.read])}</span>
               </div>
             )}
           </>
@@ -265,7 +266,7 @@ const SaleTickets = () => {
       <SlidePanel
         isOpen={panelOpen}
         onClose={closePanel}
-        title={isAdding ? 'Add ticket type' : 'Edit ticket type'}
+        title={isAdding ? strings('form.ticket.addTicketTypePanel') : strings('form.ticket.editTicketTypePanel')}
       >
         <ProductPanel
           key={isAdding ? 'new' : panelProduct?.id ?? 'edit'}
@@ -317,13 +318,13 @@ const ProductPanel = ({
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
         <h3 className="text-lg font-semibold text-slate-900">
-          {isNew ? 'New ticket type' : product?.name || 'Edit ticket'}
+          {isNew ? strings('form.ticket.newTicketType') : product?.name || strings('form.ticket.editTicket')}
         </h3>
         <button
           type="button"
           onClick={onClose}
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
-          aria-label="Close"
+          aria-label={strings('common.ariaClose')}
         >
           <i className="fa-solid fa-xmark text-lg" aria-hidden />
         </button>
@@ -337,46 +338,46 @@ const ProductPanel = ({
           <div className="space-y-5">
             <div className="space-y-4">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Details
+                {strings('common.details')}
               </h4>
               <Input
-                label="Name"
+                label={strings('common.name')}
                 name="name"
                 value={form.name}
                 onChange={(e) => update({ name: e.target.value })}
-                placeholder="Eg: Early Bird VIP"
+                placeholder={strings('form.ticket.namePlaceholder')}
               />
               <Input
-                label="Category"
+                label={strings('table.ticket.category')}
                 name="category"
                 value={form.category}
                 onChange={(e) => update({ category: e.target.value })}
-                placeholder="Eg: VIP"
+                placeholder={strings('form.ticket.categoryPlaceholder')}
               />
               <Input
-                label="Promo text"
+                label={strings('form.ticket.promoText')}
                 name="promo"
                 value={form.promo}
                 onChange={(e) => update({ promo: e.target.value })}
-                placeholder="Optional promo message"
+                placeholder={strings('form.ticket.promoPlaceholder')}
               />
             </div>
 
             <div className="space-y-4">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Capacity & pricing
+                {strings('form.ticket.capacityPricing')}
               </h4>
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Stock"
+                  label={strings('table.ticket.stock')}
                   name="stock"
                   type="number"
                   value={form.stock}
                   onChange={(e) => update({ stock: e.target.value })}
-                  placeholder="100"
+                  placeholder={strings('form.ticket.stockPlaceholder')}
                 />
                 <Input
-                  label="Tickets to deliver"
+                  label={strings('form.ticket.ticketsToDeliver')}
                   name="productsToDeliver"
                   type="number"
                   value={form.productsToDeliver}
@@ -385,28 +386,28 @@ const ProductPanel = ({
                 />
               </div>
               <Input
-                label="Price"
+                label={strings('table.ticket.price')}
                 name="price"
                 type="number"
                 step="0.01"
                 value={form.price}
                 onChange={(e) => update({ price: e.target.value })}
-                placeholder="Eg: 59.90"
+                placeholder={strings('form.ticket.pricePlaceholder')}
               />
             </div>
 
             <div className="space-y-4">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Status
+                {strings('common.status')}
               </h4>
               <Select
-                label="Visibility"
+                label={strings('form.ticket.visibility')}
                 name="status"
                 value={form.status}
                 onChange={(e) => update({ status: e.target.value })}
                 options={[
-                  { value: 'active', label: 'Active — visible and sellable' },
-                  { value: 'inactive', label: 'Inactive — hidden from buyers' },
+                  { value: 'active', label: strings('form.ticket.visibilityActive') },
+                  { value: 'inactive', label: strings('form.ticket.visibilityInactive') },
                 ]}
               />
             </div>
@@ -417,7 +418,7 @@ const ProductPanel = ({
                 className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
                 <i className="fa-solid fa-armchair" aria-hidden />
-                Select Seats ({seatCount} seats)
+                {strings('form.ticket.selectSeats', [seatCount])}
               </button>
             )}
           </div>
@@ -433,10 +434,10 @@ const ProductPanel = ({
               {saving ? (
                 <>
                   <i className="fa-solid fa-spinner fa-spin" aria-hidden />
-                  Saving…
+                  {strings('common.saving')}
                 </>
               ) : (
-                <>{isNew ? 'Create ticket type' : 'Save changes'}</>
+                <>{isNew ? strings('form.ticket.createTicketType') : strings('form.ticket.saveChanges')}</>
               )}
             </button>
             {isNew ? (
@@ -445,7 +446,7 @@ const ProductPanel = ({
                 onClick={onClose}
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Cancel
+                {strings('common.cancel')}
               </button>
             ) : (
               <button
@@ -453,12 +454,12 @@ const ProductPanel = ({
                 onClick={() => onDelete(product.id)}
                 disabled={deleting || hasReservations}
                 className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
-                title={hasReservations ? 'Cannot delete: has reservations' : 'Delete'}
+                title={hasReservations ? strings('form.ticket.cannotDeleteReservations') : strings('common.delete')}
               >
                 {deleting ? (
                   <i className="fa-solid fa-spinner fa-spin" aria-hidden />
                 ) : (
-                  'Delete'
+                  strings('common.delete')
                 )}
               </button>
             )}

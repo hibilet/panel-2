@@ -3,6 +3,7 @@ import { useParams } from 'wouter'
 
 import { get } from '../../../../lib/client'
 import { useSale } from '../../../../context'
+import strings from '../../../../localization'
 import { PageHeader } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
 import Pagination from '../../../../components/tables/Pagination'
@@ -21,21 +22,21 @@ const getAge = (birthday) => {
 }
 
 const STATUS_LABELS = {
-  success: '✅ Success',
-  read: '✅ Read',
-  reserved: '⏳ Reserved',
-  failed: '❌ Failed',
+  success: `✅ ${strings('status.success')}`,
+  read: `✅ ${strings('status.read')}`,
+  reserved: `⏳ ${strings('status.reserved')}`,
+  failed: `❌ ${strings('status.failed')}`,
 }
 
 const columns = [
-  { key: 'owner', header: 'Owner', headerCell: true, render: (r) => r.owner ?? '—' },
-  { key: 'email', header: 'Email', render: (r) => r.email ?? '—' },
-  { key: 'category', header: 'Category', render: (r) => r.category ?? '—' },
-  { key: 'product', header: 'Product', render: (r) => r.product ?? '—' },
+  { key: 'owner', header: strings('table.transaction.owner'), headerCell: true, render: (r) => r.owner ?? '—' },
+  { key: 'email', header: strings('form.transaction.email'), render: (r) => r.email ?? '—' },
+  { key: 'category', header: strings('table.ticket.category'), render: (r) => r.category ?? '—' },
+  { key: 'product', header: strings('form.attendees.product'), render: (r) => r.product ?? '—' },
   { key: 'age', header: 'Age', render: (r) => getAge(r.birthday), align: 'right' },
   {
     key: 'status',
-    header: 'Status',
+    header: strings('common.status'),
     render: (r) => STATUS_LABELS[r.status] ?? r.status ?? '—',
     align: 'right',
   },
@@ -68,7 +69,7 @@ const SaleAttendees = () => {
         setReservations(r.data ?? [])
         setTotal(r.count ?? 0)
       })
-      .catch((err) => setError(err?.message ?? 'Failed to load attendees'))
+      .catch((err) => setError(err?.message ?? strings('error.failedLoadAttendees')))
       .finally(() => setLoading(false))
   }, [id, skip])
 
@@ -84,12 +85,12 @@ const SaleAttendees = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Attendees - ${sale?.name ?? 'Sale'}</title>
+          <title>${strings('form.attendees.printTitle', [sale?.name ?? strings('page.sale.title')])}</title>
           <script src="https://cdn.tailwindcss.com"></script>
           <style>.print-only{display:table-cell!important}</style>
         </head>
         <body class="p-8">
-          <h1 class="text-2xl font-bold mb-6">Attendees - ${sale?.name ?? 'Sale'}</h1>
+          <h1 class="text-2xl font-bold mb-6">${strings('form.attendees.printTitle', [sale?.name ?? strings('page.sale.title')])}</h1>
           <div class="attendees-print">${printContent}</div>
         </body>
       </html>
@@ -103,7 +104,7 @@ const SaleAttendees = () => {
   }
 
   const handleDownloadExcel = () => {
-    const headers = ['Owner', 'Email', 'Category', 'Product', 'Age', 'Status']
+    const headers = [strings('table.transaction.owner'), strings('form.transaction.email'), strings('table.ticket.category'), strings('form.attendees.product'), 'Age', strings('common.status')]
     const rows = reservations.map((r) => [
       r.owner ?? '',
       r.email ?? '',
@@ -126,20 +127,20 @@ const SaleAttendees = () => {
         onClick={handlePrint}
         disabled={loading || reservations.length === 0}
         className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        aria-label="Print attendees"
+        aria-label={strings('form.attendees.ariaPrint')}
       >
         <i className="fa-solid fa-print" aria-hidden />
-        Print PDF
+        {strings('form.attendees.printPdf')}
       </button>
       <button
         type="button"
         onClick={handleDownloadExcel}
         disabled={loading || reservations.length === 0}
         className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        aria-label="Download Excel"
+        aria-label={strings('form.attendees.ariaDownload')}
       >
         <i className="fa-solid fa-file-excel" aria-hidden />
-        Download Excel
+        {strings('form.attendees.downloadExcel')}
       </button>
     </div>
   )
@@ -155,7 +156,7 @@ const SaleAttendees = () => {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader title="Sale Attendees" actions={actions} />
+      <PageHeader title={strings('form.attendees.title')} actions={actions} />
 
       {error && (
         <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -169,7 +170,7 @@ const SaleAttendees = () => {
           columns={columns}
           getRowKey={(r) => r.id}
           loading={loading}
-          emptyMessage="No attendees yet"
+          emptyMessage={strings('form.attendees.noAttendees')}
           tableRef={printRef}
         />
         <Pagination

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
+import strings, { formatCurrency } from '../../localization'
 
 const SalesTable = ({ data = [], extended = false, onDelete, onRowClick, loading = false }) => {
-  const formatCurrency = (value) => `₺${Number(value).toLocaleString()}`
   const formatDate = (date) => dayjs(date).format('D MMM YYYY')
 
   const baseCols = 6
@@ -15,13 +15,13 @@ const SalesTable = ({ data = [], extended = false, onDelete, onRowClick, loading
         <table className="min-w-full divide-y divide-slate-200">
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Start date</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Name</th>
-              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">Venue</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Views</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Reservations</th>
-              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Revenue</th>
-              {extended && <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">Delete</th>}
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.startDate')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.name')}</th>
+              <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.venue')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.views')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.reservations')}</th>
+              <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.revenue')}</th>
+              {extended && <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">{strings('table.sale.delete')}</th>}
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white">
@@ -48,27 +48,27 @@ const SalesTable = ({ data = [], extended = false, onDelete, onRowClick, loading
         <thead>
           <tr>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Start date
+              {strings('table.sale.startDate')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Name
+              {strings('table.sale.name')}
             </th>
             <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Venue
+              {strings('table.sale.venue')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Views
+              {strings('table.sale.views')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Reservations
+              {strings('table.sale.reservations')}
             </th>
             <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-              Revenue
+              {strings('table.sale.revenue')}
             </th>
             {extended && (
               <>
               <th className="px-4 py-3 text-right text-xs font-medium uppercase tracking-wider text-slate-500">
-                  Delete
+                  {strings('table.sale.delete')}
                 </th>
                 {/* <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                   Created at
@@ -116,10 +116,10 @@ const SalesTable = ({ data = [], extended = false, onDelete, onRowClick, loading
                           type="button"
                           onClick={(e) => { e.stopPropagation(); onDelete(row.id); }}
                           className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 hover:bg-red-200 active:bg-red-300 cursor-pointer transition focus:outline-none focus:ring-2 focus:ring-red-300"
-                          aria-label="Delete"
+                          aria-label={strings('common.ariaDelete')}
                           style={{ pointerEvents: 'auto' }}
                         >
-                          Delete
+                          {strings('common.delete')}
                         </button>
                       ) : (
                         '—'

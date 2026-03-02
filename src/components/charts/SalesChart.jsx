@@ -9,6 +9,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
+import strings, { formatCurrency } from '../../localization'
 
 const buildChartDataFromApi = (apiData = [], year, month) => {
   const daysInMonth = dayjs().year(year).month(month).daysInMonth()
@@ -32,7 +33,7 @@ const buildChartDataFromApi = (apiData = [], year, month) => {
 
 const MONTH_OPTIONS = Array.from({ length: 7 }, (_, i) => ({
   value: i,
-  label: i === 0 ? 'This month' : i === 1 ? '1 month ago' : `${i} months ago`,
+  label: i === 0 ? strings('dashboard.monthThis') : i === 1 ? strings('dashboard.monthAgo') : strings('dashboard.monthsAgo', [i]),
 }))
 
 const useChartColors = () => {
@@ -69,7 +70,6 @@ const SalesChart = ({
   const monthName = chartMonth.format('MMMM')
   const year = chartMonth.year()
 
-  const formatCurrency = (value) => `₺${value.toLocaleString()}`
   const hasData = !loading && data?.length > 0
   const dropdownsDisabled = !hasData
 
@@ -77,7 +77,7 @@ const SalesChart = ({
     <section aria-labelledby="sales-chart-heading" className="mb-8">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 id="sales-chart-heading" className="text-lg font-medium text-slate-900">
-          Sales ({monthName} {year})
+          {strings('dashboard.salesChart', [monthName, year])}
         </h2>
         <div className="flex flex-wrap items-center gap-3">
           <select
@@ -85,7 +85,7 @@ const SalesChart = ({
             onChange={(e) => onMonthOffsetChange?.(Number(e.target.value))}
             disabled={dropdownsDisabled}
             className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Select month"
+            aria-label={strings('common.selectMonth')}
           >
             {MONTH_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -98,9 +98,9 @@ const SalesChart = ({
             onChange={(e) => onSaleChange?.(e.target.value)}
             disabled={dropdownsDisabled}
             className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Filter by sale"
+            aria-label={strings('common.filterBySale')}
           >
-            <option value="all">All sales</option>
+            <option value="all">{strings('common.allSales')}</option>
             {sales.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -116,8 +116,8 @@ const SalesChart = ({
             <div className="min-h-[200px] flex-1 animate-shimmer rounded" />
           </div>
         ) : (
-          <div className="h-64 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="h-64 min-h-[256px] w-full sm:h-80">
+            <ResponsiveContainer width="100%" height="100%" minHeight={256}>
               <LineChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
                 <XAxis
@@ -127,13 +127,13 @@ const SalesChart = ({
                   axisLine={{ stroke: colors.grid }}
                 />
                 <YAxis
-                  tickFormatter={formatCurrency}
+                  tickFormatter={(v) => formatCurrency(v)}
                   tick={{ fontSize: 12, fill: colors.tick }}
                   tickLine={{ stroke: colors.grid }}
                   axisLine={{ stroke: colors.grid }}
                 />
                 <Tooltip
-                  formatter={(value) => [formatCurrency(value), 'Daily sales']}
+                  formatter={(value) => [formatCurrency(value), strings('dashboard.dailySales')]}
                   labelFormatter={(label, payload) =>
                     payload?.[0]?.payload?.label ?? label
                   }

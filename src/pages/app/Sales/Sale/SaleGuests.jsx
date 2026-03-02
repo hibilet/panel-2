@@ -5,6 +5,7 @@ import { get, post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
+import strings from '../../../../localization'
 import Pagination from '../../../../components/tables/Pagination'
 import * as XLSX from 'xlsx'
 
@@ -67,7 +68,7 @@ const SaleGuests = () => {
         setGuests(r.data ?? [])
         setTotal(r.count ?? 0)
       })
-      .catch((err) => setError(err?.message ?? 'Failed to load guests'))
+      .catch((err) => setError(err?.message ?? strings('error.failedLoadGuests')))
       .finally(() => setLoading(false))
   }, [id, skip, isNew])
 
@@ -105,14 +106,14 @@ const SaleGuests = () => {
         closePanel()
       }
     } catch (err) {
-      setError(err?.message ?? 'Failed to save guest')
+      setError(err?.message ?? strings('error.failedSave'))
     } finally {
       setSaving(null)
     }
   }
 
   const handleDelete = async (guestId) => {
-    if (!confirm('Delete this guest?')) return
+    if (!confirm(strings('form.guest.confirmDelete'))) return
     setDeleting(guestId)
     setError(null)
     try {
@@ -121,7 +122,7 @@ const SaleGuests = () => {
       setTotal((t) => Math.max(0, t - 1))
       closePanel()
     } catch (err) {
-      setError(err?.message ?? 'Failed to delete guest')
+      setError(err?.message ?? strings('error.failedDeleteGuest'))
     } finally {
       setDeleting(null)
     }
@@ -143,11 +144,11 @@ const SaleGuests = () => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Guests - ${sale?.name ?? 'Sale'}</title>
+          <title>${strings('form.guest.printTitle', [sale?.name ?? strings('page.sale.title')])}</title>
           <script src="https://cdn.tailwindcss.com"></script>
         </head>
         <body class="p-8">
-          <h1 class="text-2xl font-bold mb-6">Guests - ${sale?.name ?? 'Sale'}</h1>
+          <h1 class="text-2xl font-bold mb-6">${strings('form.guest.printTitle', [sale?.name ?? strings('page.sale.title')])}</h1>
           <div class="guests-print">${printContent}</div>
         </body>
       </html>
@@ -161,7 +162,7 @@ const SaleGuests = () => {
   }
 
   const handleDownloadExcel = () => {
-    const headers = ['Name', 'Email', 'Product', 'Quantity', 'Created']
+    const headers = [strings('form.guest.tableName'), strings('form.guest.tableEmail'), strings('form.guest.tableProduct'), strings('form.guest.tableQuantity'), strings('form.guest.tableCreated')]
     const rows = guests.map((g) => [
       g.name ?? '',
       g.email ?? '',
@@ -192,14 +193,14 @@ const SaleGuests = () => {
       <div className="relative">
         <div className="space-y-4">
           <div>
-            <h2 className="text-lg font-medium text-slate-900">Guests</h2>
-            <p className="mt-0.5 text-sm text-slate-500">Save the sale first to manage guests.</p>
+            <h2 className="text-lg font-medium text-slate-900">{strings('form.guest.title')}</h2>
+            <p className="mt-0.5 text-sm text-slate-500">{strings('form.guest.saveFirstHint')}</p>
           </div>
           <EmptyState
             icon="fa-user-group"
             variant="amber"
-            title="Save the sale first"
-            description="Create and save the sale to manage guests."
+            title={strings('form.guest.saveFirst')}
+            description={strings('form.guest.noGuestsDescAlt')}
           />
         </div>
       </div>
@@ -211,10 +212,10 @@ const SaleGuests = () => {
       <div className="space-y-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-medium text-slate-900">Guests</h2>
+            <h2 className="text-lg font-medium text-slate-900">{strings('form.guest.title')}</h2>
             <p className="mt-0.5 text-sm text-slate-500">
-              {guests.length} guest{guests.length !== 1 ? 's' : ''}
-              {totalQuantity > 0 && <> · {totalQuantity} total tickets</>}
+              {guests.length === 1 ? strings('form.guest.count', [guests.length]) : strings('form.guest.countPlural', [guests.length])}
+              {totalQuantity > 0 && <> · {strings('form.guest.totalTickets', [totalQuantity])}</>}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -224,27 +225,27 @@ const SaleGuests = () => {
               className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
             >
               <i className="fa-solid fa-plus" aria-hidden />
-              Add guest
+              {strings('form.guest.addGuest')}
             </button>
             <button
               type="button"
               onClick={handlePrint}
               disabled={loading || guests.length === 0}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              aria-label="Print guests"
+              aria-label={strings('form.guest.ariaPrint')}
             >
               <i className="fa-solid fa-print" aria-hidden />
-              Print PDF
+              {strings('form.guest.printPdf')}
             </button>
             <button
               type="button"
               onClick={handleDownloadExcel}
               disabled={loading || guests.length === 0}
               className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              aria-label="Download Excel"
+              aria-label={strings('form.guest.ariaDownload')}
             >
               <i className="fa-solid fa-file-excel" aria-hidden />
-              Download Excel
+              {strings('form.guest.downloadExcel')}
             </button>
           </div>
         </div>
@@ -258,8 +259,8 @@ const SaleGuests = () => {
         {guests.length === 0 ? (
           <EmptyState
             icon="fa-user-group"
-            title="No guests yet"
-            description="Add guest entries for comp tickets and VIP access."
+            title={strings('form.guest.noGuests')}
+            description={strings('form.guest.noGuestsDesc')}
             action={
               <button
                 type="button"
@@ -267,7 +268,7 @@ const SaleGuests = () => {
                 className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
               >
                 <i className="fa-solid fa-plus" aria-hidden />
-                Add guest
+                {strings('form.guest.addGuest')}
               </button>
             }
           />
@@ -278,19 +279,19 @@ const SaleGuests = () => {
                 <thead>
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Name
+                      {strings('form.guest.tableName')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Email
+                      {strings('form.guest.tableEmail')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Product
+                      {strings('form.guest.tableProduct')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Quantity
+                      {strings('form.guest.tableQuantity')}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                      Created
+                      {strings('form.guest.tableCreated')}
                     </th>
                   </tr>
                 </thead>
@@ -333,7 +334,7 @@ const SaleGuests = () => {
                   <tr>
                     <td colSpan={3} className="px-4 py-3 text-sm text-slate-500" />
                     <td className="px-4 py-3 text-sm font-medium text-slate-700">
-                      {totalQuantity} Total
+                      {totalQuantity} {strings('form.guest.total')}
                     </td>
                     <td />
                   </tr>
@@ -353,7 +354,7 @@ const SaleGuests = () => {
       <SlidePanel
         isOpen={panelOpen}
         onClose={closePanel}
-        aria-label={isAdding ? 'Add guest' : 'Edit guest'}
+        aria-label={isAdding ? strings('form.guest.addGuest') : strings('form.guest.editGuest')}
       >
         <GuestPanel
           key={isAdding ? 'new' : panelGuest?._id ?? panelGuest?.id ?? 'edit'}
@@ -410,13 +411,13 @@ const GuestPanel = ({
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
         <h3 className="text-lg font-semibold text-slate-900">
-          {isNew ? 'New guest' : guest?.name || 'Edit guest'}
+          {isNew ? strings('form.guest.newGuest') : guest?.name || strings('form.guest.editGuest')}
         </h3>
         <button
           type="button"
           onClick={onClose}
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400"
-          aria-label="Close"
+          aria-label={strings('common.ariaClose')}
         >
           <i className="fa-solid fa-xmark text-lg" aria-hidden />
         </button>
@@ -430,39 +431,39 @@ const GuestPanel = ({
           <div className="space-y-5">
             <div className="space-y-4">
               <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Details
+                {strings('common.details')}
               </h4>
               <Input
-                label="Guest Name"
+                label={strings('form.guest.guestName')}
                 name="name"
                 value={form.name}
                 onChange={(e) => update({ name: e.target.value })}
-                placeholder="Name"
+                placeholder={strings('common.name')}
               />
               <Input
-                label="Guest Email"
+                label={strings('form.guest.guestEmail')}
                 name="email"
                 type="email"
                 value={form.email}
                 onChange={(e) => update({ email: e.target.value })}
-                placeholder="E-Mail"
+                placeholder={strings('form.transaction.email')}
               />
               <Select
-                label="Ticket Type"
+                label={strings('form.guest.ticketType')}
                 name="product"
                 value={form.product}
                 onChange={(e) => update({ product: e.target.value })}
-                placeholder="Please select a ticket type"
+                placeholder={strings('form.guest.selectTicketType')}
                 options={productOptions}
               />
               <Input
-                label="Ticket Quantity"
+                label={strings('form.guest.ticketQuantity')}
                 name="quantity"
                 type="number"
                 min={1}
                 value={form.quantity}
                 onChange={(e) => update({ quantity: e.target.value })}
-                placeholder="Quantity"
+                placeholder={strings('form.guest.tableQuantity')}
               />
             </div>
           </div>
@@ -478,10 +479,10 @@ const GuestPanel = ({
               {saving ? (
                 <>
                   <i className="fa-solid fa-spinner fa-spin" aria-hidden />
-                  Saving…
+                  {strings('common.saving')}
                 </>
               ) : (
-                <>{isNew ? 'Create guest' : 'Save changes'}</>
+                <>{isNew ? strings('form.guest.createGuest') : strings('form.ticket.saveChanges')}</>
               )}
             </button>
             {isNew ? (
@@ -490,7 +491,7 @@ const GuestPanel = ({
                 onClick={onClose}
                 className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
               >
-                Cancel
+                {strings('common.cancel')}
               </button>
             ) : (
               <button
@@ -502,7 +503,7 @@ const GuestPanel = ({
                 {deleting ? (
                   <i className="fa-solid fa-spinner fa-spin" aria-hidden />
                 ) : (
-                  'Delete'
+                  strings('common.delete')
                 )}
               </button>
             )}

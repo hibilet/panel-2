@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'wouter'
 
 import { get, del } from '../../../lib/client'
+import strings from '../../../localization'
 import { useApp } from '../../../context'
 import SalesTable from '../../../components/tables/SalesTable'
 
@@ -35,7 +36,7 @@ const Sales = () => {
       setPastLoading(true)
       get('/sales?past=true&revenue=true')
         .then((res) => setPastSales(mapRows(res.data)))
-        .catch((err) => setPastError(err?.message ?? 'Failed to load past events'))
+        .catch((err) => setPastError(err?.message ?? strings('error.failedLoadPastEvents')))
         .finally(() => setPastLoading(false))
     }
   }
@@ -43,7 +44,7 @@ const Sales = () => {
   const handleCalculateRevenues = () => setRevenueMode(true)
 
   const handleDelete = (id) => {
-    if (!window.confirm('Are you sure you want to delete this sale?')) return
+    if (!window.confirm(strings('confirm.deleteSale'))) return
     del(`/sales/${id}`)
       .then(() => refreshSales({ revenue: revenueMode }))
       .catch(() => {})
@@ -69,7 +70,7 @@ const Sales = () => {
             onClick={() => setShowMore((v) => !v)}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Show More
+            {showMore ? strings('page.sales.showLess') : strings('page.sales.showMore')}
           </button>
           <button
             type="button"
@@ -83,7 +84,7 @@ const Sales = () => {
             href="/sales/new"
             className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
           >
-            Create New Sale
+            {strings('page.sales.createNew')}
           </Link>
         </div>
       </div>
@@ -102,7 +103,7 @@ const Sales = () => {
           onClick={handleViewPastEvents}
           className="self-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
         >
-          {showPastEvents ? 'Hide Past Events' : 'View Past Events'}
+          {showPastEvents ? strings('page.sales.hidePastEvents') : strings('page.sales.viewPastEvents')}
         </button>
         {showPastEvents && (
           <>

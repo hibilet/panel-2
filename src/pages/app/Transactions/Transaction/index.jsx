@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react'
 
 import { get } from '../../../../lib/client'
 import dayjs from 'dayjs'
+import strings, { formatCurrency } from '../../../../localization'
 
 const STATUS_LABELS = {
-  success: 'Success',
-  pending: 'Pending',
-  failed: 'Failed',
-  refunded: 'Refunded',
+  success: strings('status.success'),
+  pending: strings('status.pending'),
+  failed: strings('status.failed'),
+  refunded: strings('status.refunded'),
 }
 
 const STATUS_STYLES = {
@@ -30,7 +31,7 @@ const TransactionPanel = ({ id, onClose }) => {
     setError(null)
     get(`/transactions/${id}`)
       .then((res) => setData(res.data ?? null))
-      .catch((err) => setError(err?.message ?? 'Failed to load transaction'))
+      .catch((err) => setError(err?.message ?? strings('error.failedLoadTransaction')))
       .finally(() => setLoading(false))
   }, [id])
 
@@ -56,13 +57,13 @@ const TransactionPanel = ({ id, onClose }) => {
   }
 
   const handleCancelAll = () => {
-    if (!window.confirm('Are you sure you want to cancel all reservations? This action cannot be undone.')) return
+    if (!window.confirm(strings('confirm.cancelAllReservations'))) return
     // TODO: wire to actual API when available
   }
 
   const handleCancelReservation = (reservation) => (e) => {
     e.stopPropagation()
-    if (!window.confirm(`Cancel reservation "${reservation.name}"?`)) return
+    if (!window.confirm(strings('confirm.cancelReservation', [reservation.name]))) return
     // TODO: wire to actual API when available
   }
 
@@ -71,12 +72,12 @@ const TransactionPanel = ({ id, onClose }) => {
   return (
     <div className="flex h-full flex-col">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
-        <h2 className="text-lg font-semibold text-slate-900">Transaction Details</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{strings('page.transactions.details')}</h2>
         <button
           type="button"
           onClick={onClose}
           className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-          aria-label="Close panel"
+          aria-label={strings('common.ariaClose')}
         >
           <i className="fa-solid fa-xmark text-xl" aria-hidden />
         </button>
@@ -107,7 +108,7 @@ const TransactionPanel = ({ id, onClose }) => {
                   ) : (
                     <i className="fa-solid fa-envelope" aria-hidden />
                   )}
-                  Send Email Again
+                  {strings('form.transaction.sendEmailAgain')}
                 </button>
                 <button
                   type="button"
@@ -116,7 +117,7 @@ const TransactionPanel = ({ id, onClose }) => {
                   className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                 >
                   <i className="fa-solid fa-envelope-circle-check" aria-hidden />
-                  Send To Another Mail
+                  {strings('form.transaction.sendToAnotherMail')}
                 </button>
                 <button
                   type="button"
@@ -125,16 +126,16 @@ const TransactionPanel = ({ id, onClose }) => {
                   className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
                 >
                   <i className="fa-solid fa-ban" aria-hidden />
-                  Cancel All
+                  {strings('form.transaction.cancelAll')}
                 </button>
               </div>
             </section>
 
             <section>
-              <h3 className="mb-3 text-sm font-semibold text-slate-700">Reservations</h3>
+              <h3 className="mb-3 text-sm font-semibold text-slate-700">{strings('form.transaction.reservations')}</h3>
               {reservations.length === 0 ? (
                 <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-                  No reservations
+                  {strings('form.transaction.noReservations')}
                 </p>
               ) : (
                 <div className="grid gap-3">
@@ -159,7 +160,7 @@ const TransactionPanel = ({ id, onClose }) => {
                         </span>
                       </div>
                       <div className="flex justify-between gap-4 text-sm text-slate-600">
-                        <span>{r.price != null ? `CHF ${Number(r.price).toFixed(2)}` : '—'}</span>
+                        <span>{r.price != null ? formatCurrency(r.price, data?.sale?.currency ?? 'eur') : '—'}</span>
                         <span>{r.createdAt ? dayjs(r.createdAt).format('DD MMM YYYY, HH:mm') : '—'}</span>
                       </div>
                       <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
@@ -168,7 +169,7 @@ const TransactionPanel = ({ id, onClose }) => {
                           onClick={handleCancelReservation(r)}
                           className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
                         >
-                          Cancel
+                          {strings('common.cancel')}
                         </button>
                       </div>
                     </div>
@@ -237,20 +238,20 @@ const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) =
       <article className="relative z-10 w-full max-w-md rounded-xl border border-slate-200 bg-white shadow-xl">
         <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h2 id="send-email-dialog-title" className="text-lg font-semibold text-slate-900">
-            Send Email To Another Address
+            {strings('form.transaction.sendToAnotherAddress')}
           </h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Close"
+            aria-label={strings('common.ariaClose')}
           >
             <i className="fa-solid fa-xmark text-lg" aria-hidden />
           </button>
         </header>
         <form id="send-email-form" onSubmit={onSubmit} className="p-4">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-slate-700">E-Mail</span>
+            <span className="mb-1.5 block text-sm font-medium text-slate-700">{strings('form.transaction.email')}</span>
             <input
               type="email"
               name="emailAddress"
@@ -267,7 +268,7 @@ const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) =
             onClick={onClose}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Cancel
+            {strings('common.cancel')}
           </button>
           <button
             type="submit"
@@ -280,7 +281,7 @@ const SendEmailDialog = ({ email, onEmailChange, onClose, onSubmit, sending }) =
             ) : (
               <i className="fa-solid fa-envelope" aria-hidden />
             )}
-            Send Email
+            {strings('form.transaction.sendEmail')}
           </button>
         </footer>
       </article>

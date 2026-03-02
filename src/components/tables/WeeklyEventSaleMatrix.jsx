@@ -1,16 +1,17 @@
 import dayjs from 'dayjs'
+import strings, { formatCurrency } from '../../localization'
 
 // weekday 1 = Mon, 2 = Tue, ..., 6 = Sat, 7 = Sun (dayjs: 0=Sun, 1=Mon, ..., 6=Sat)
 const WEEKDAY_DAYJS = [1, 2, 3, 4, 5, 6, 0]
 
-const formatCurrency = (value) =>
-  value != null ? `₺${Number(value).toLocaleString()}` : '—'
+const formatCurrencyOrDash = (value) =>
+  value != null ? formatCurrency(value) : '—'
 
 const formatCount = (value) =>
   value != null ? Number(value).toLocaleString() : '—'
 
 const WeeklyEventSaleMatrix = ({ data = [], valueFormat = 'currency', loading = false }) => {
-  const formatCell = valueFormat === 'count' ? formatCount : formatCurrency
+  const formatCell = valueFormat === 'count' ? formatCount : formatCurrencyOrDash
 
   const weekdayLabels = WEEKDAY_DAYJS.map((d) => dayjs().day(d).format('ddd'))
   const showShimmer = loading || data.length === 0
@@ -22,7 +23,7 @@ const WeeklyEventSaleMatrix = ({ data = [], valueFormat = 'currency', loading = 
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                Event name
+                {strings('table.weekly.eventName')}
               </th>
               {WEEKDAY_DAYJS.map((d, i) => (
                 <th key={d} className="px-4 py-3 text-center text-xs font-medium uppercase tracking-wider text-slate-500">
@@ -56,7 +57,7 @@ const WeeklyEventSaleMatrix = ({ data = [], valueFormat = 'currency', loading = 
         <thead>
           <tr>
             <th className="sticky left-0 z-10 bg-white px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-              Event name
+              {strings('table.weekly.eventName')}
             </th>
             {WEEKDAY_DAYJS.map((d, i) => (
               <th

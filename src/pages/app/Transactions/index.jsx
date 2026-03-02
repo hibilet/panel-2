@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
+import strings from '../../../localization'
 import Pagination from '../../../components/tables/Pagination'
 import TransactionsTable from '../../../components/tables/TransactionsTable'
 import SlidePanel from '../../../components/shared/SlidePanel'
@@ -31,7 +32,7 @@ const Transactions = () => {
         setError(null)
       })
       .catch((err) => {
-        setError(err?.message ?? 'Failed to load transactions')
+        setError(err?.message ?? strings('error.failedLoadTransactions'))
         setFetchedPage(page)
       })
   }, [page])
@@ -48,7 +49,7 @@ const Transactions = () => {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">Transactions</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">{strings('page.transactions.title')}</h1>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <TransactionsTable
           data={data}
@@ -66,7 +67,7 @@ const Transactions = () => {
       <SlidePanel
         isOpen={!!id}
         onClose={() => setLocation('/transactions')}
-        title="Transaction Details"
+        title={strings('page.transactions.details')}
         aria-label="Transaction details"
       >
         {id && <TransactionPanel id={id} onClose={() => setLocation('/transactions')} />}
