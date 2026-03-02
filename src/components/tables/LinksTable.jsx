@@ -1,6 +1,6 @@
 import strings, { formatCurrency } from '../../localization'
 
-const LinksTable = ({ data = [], loading = false }) => {
+const LinksTable = ({ data = [], loading = false, onRowClick }) => {
   const showShimmer = loading || data.length === 0
 
   if (showShimmer) {
@@ -56,7 +56,11 @@ const LinksTable = ({ data = [], loading = false }) => {
         </thead>
         <tbody className="divide-y divide-slate-200 bg-white">
           {data.map((row) => (
-              <tr key={row.id ?? row.slug} className="hover:bg-slate-50">
+              <tr
+                key={row.id ?? row.slug}
+                className="cursor-pointer hover:bg-slate-50"
+                onClick={() => onRowClick?.(row)}
+              >
                 <td className="whitespace-nowrap px-4 py-3">
                   {row.image ? (
                     <img

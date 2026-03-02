@@ -7,7 +7,6 @@ import Sales from './Sales'
 import Sale from './Sales/Sale'
 import Transactions from './Transactions'
 import Links from './Links'
-import LinkDetail from './Links/Link'
 import Reports from './Reports'
 import Report from './Reports/Report'
 import Accounts from './Accounts'
@@ -27,7 +26,7 @@ const App = () => {
           <Route path="/transactions" component={Transactions} />
           <Route path="/transactions/:id" component={Transactions} />
           <Route path="/links" component={Links} />
-          <Route path="/links/:id" component={LinkDetail} />
+          <Route path="/links/:id" component={Links} />
           <Route path="/reports" component={Reports} />
           <Route path="/reports/:id" component={Report} />
           <Route path="/accounts" component={Accounts} />

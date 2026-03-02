@@ -55,6 +55,7 @@
   "error.failedLoadCoupons": "Kuponlar yüklenemedi",
   "error.failedLoadPastEvents": "Geçmiş etkinlikler yüklenemedi",
   "error.failedLoadTransaction": "İşlem yüklenemedi",
+  "error.failedLoadLink": "Bağlantı yüklenemedi",
 
   "confirm.deleteSale": "Bu satışı silmek istediğinizden emin misiniz?",
   "confirm.deleteChannel": "Bu kanalı silmek istiyor musunuz?",
@@ -128,6 +129,7 @@
   "page.transactions.details": "İşlem Detayları",
 
   "page.links.title": "Bağlantılar",
+  "page.links.details": "Bağlantı Detayları",
 
   "page.reports.title": "Raporlar",
   "page.reports.noReports": "Henüz rapor yok",
@@ -195,6 +197,15 @@
   "form.sale.rules": "Kurallar",
   "form.sale.rulesPlaceholder": "Lütfen kuralları belirtin...",
   "form.sale.save": "💾 Kaydet",
+
+  "form.link.title": "Bağlantı Başlığı",
+  "form.link.slug": "Bağlantı Slug",
+  "form.link.views": "Görüntülenme",
+  "form.link.description": "Bağlantı Açıklaması",
+  "form.link.image": "Bağlantı Görseli",
+  "form.link.sales": "Satışlar",
+  "form.link.startDate": "Başlangıç Tarihi",
+  "form.link.confirmRemoveSale": "Bu satışı bağlantıdan kaldırmak istiyor musunuz?",
 
   "form.ticket.ticketTypes": "Bilet türleri",
   "form.ticket.ticketTypeCount": "$0 bilet türü",

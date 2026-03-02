@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
+import { useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
 import strings from '../../../localization'
 import LinksTable from '../../../components/tables/LinksTable'
+import SlidePanel from '../../../components/shared/SlidePanel'
+import LinkPanel from './Link'
 
 const Links = () => {
+  const [, setLocation] = useLocation()
+  const { id } = useParams()
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -38,8 +43,23 @@ const Links = () => {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <LinksTable data={data} loading={loading} />
+    <div className="mx-auto max-w-5xl space-y-6">
+      <h1 className="text-2xl font-semibold text-slate-900">{strings('page.links.title')}</h1>
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        <LinksTable
+          data={data}
+          loading={loading}
+          onRowClick={(row) => row.id && setLocation(`/links/${row.id}`)}
+        />
+      </div>
+      <SlidePanel
+        isOpen={!!id}
+        onClose={() => setLocation('/links')}
+        title={strings('page.links.details')}
+        aria-label="Link details"
+      >
+        {id && <LinkPanel id={id} onClose={() => setLocation('/links')} />}
+      </SlidePanel>
     </div>
   )
 }

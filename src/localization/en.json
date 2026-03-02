@@ -55,6 +55,7 @@
   "error.failedLoadCoupons": "Failed to load coupons",
   "error.failedLoadPastEvents": "Failed to load past events",
   "error.failedLoadTransaction": "Failed to load transaction",
+  "error.failedLoadLink": "Failed to load link",
   "error.failedDeleteGuest": "Failed to delete guest",
 
   "confirm.deleteSale": "Are you sure you want to delete this sale?",
@@ -129,6 +130,7 @@
   "page.transactions.details": "Transaction Details",
 
   "page.links.title": "Links",
+  "page.links.details": "Link Details",
 
   "page.reports.title": "Reports",
   "page.reports.noReports": "No reports yet",
@@ -196,6 +198,15 @@
   "form.sale.rules": "Rules",
   "form.sale.rulesPlaceholder": "Please provide rules...",
   "form.sale.save": "💾 Save",
+
+  "form.link.title": "Link Title",
+  "form.link.slug": "Link Slug",
+  "form.link.views": "Views",
+  "form.link.description": "Link Description",
+  "form.link.image": "Link Image",
+  "form.link.sales": "Sales",
+  "form.link.startDate": "Start Date",
+  "form.link.confirmRemoveSale": "Remove this sale from the link?",
 
   "form.ticket.ticketTypes": "Ticket types",
   "form.ticket.ticketTypeCount": "$0 ticket type",
