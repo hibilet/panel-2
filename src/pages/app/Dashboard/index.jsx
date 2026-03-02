@@ -134,12 +134,12 @@ const Dashboard = () => {
       if (!cancelled) setChartLoading(true)
     })
 
+    const targetMonth = dayjs(monthStart)
     get(`/dashboards/transactions/between?start=${monthStart}&end=${monthEnd}&${params}`)
       .then((res) => {
         if (cancelled) return
-        const now = dayjs()
         setChartData(
-          buildChartDataFromApi(res.data ?? [], now.year(), now.month())
+          buildChartDataFromApi(res.data ?? [], targetMonth.year(), targetMonth.month())
         )
       })
       .catch(() => {
