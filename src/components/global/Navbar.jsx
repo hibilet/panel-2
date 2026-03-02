@@ -4,7 +4,7 @@ import strings from '../../localization'
 
 const navItems = [
   { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high' },
-  { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users' },
+  // { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users' },
   { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping' },
   { path: '/links', labelKey: 'nav.links', icon: 'fa-link' },
   { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt' },
