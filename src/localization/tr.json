@@ -127,6 +127,12 @@
 
   "page.transactions.title": "İşlemler",
   "page.transactions.details": "İşlem Detayları",
+  "page.transactions.filterTransactions": "İşlemleri Filtrele",
+  "page.transactions.filter": "Filtrele",
+  "page.transactions.transactionId": "İşlem ID",
+  "page.transactions.transactionIdPlaceholder": "Örn: 1234567890",
+  "page.transactions.email": "E-Posta",
+  "page.transactions.emailPlaceholder": "Örn: john@doe.com",
 
   "page.links.title": "Bağlantılar",
   "page.links.details": "Bağlantı Detayları",

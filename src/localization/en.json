@@ -128,6 +128,12 @@
 
   "page.transactions.title": "Transactions",
   "page.transactions.details": "Transaction Details",
+  "page.transactions.filterTransactions": "Filter Transactions",
+  "page.transactions.filter": "Filter",
+  "page.transactions.transactionId": "Transaction ID",
+  "page.transactions.transactionIdPlaceholder": "Eg: 1234567890",
+  "page.transactions.email": "E-Mail",
+  "page.transactions.emailPlaceholder": "Eg: john@doe.com",
 
   "page.links.title": "Links",
   "page.links.details": "Link Details",

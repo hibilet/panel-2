@@ -16,7 +16,7 @@ import {
 import { get, post, put, del } from '../../../../lib/client'
 import { useSale } from '../../../../context'
 import { Input } from '../../../../components/inputs'
-import { EmptyState, SlidePanel } from '../../../../components/shared'
+import { EmptyState, Modal, SlidePanel } from '../../../../components/shared'
 import strings from '../../../../localization'
 
 const CHART_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8']
@@ -105,14 +105,11 @@ const SaleChannels = () => {
 
   useEffect(() => {
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        if (reportChannel) closeReport()
-        else if (panelOpen) closePanel()
-      }
+      if (e.key === 'Escape' && panelOpen) closePanel()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [panelOpen, closePanel, reportChannel, closeReport])
+  }, [panelOpen, closePanel])
 
   const isBaseChannel = (channel) => {
     const name = (channel?.name ?? '').toLowerCase()
@@ -367,45 +364,25 @@ const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
     : []
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="report-dialog-title"
+    <Modal
+      isOpen
+      onClose={onClose}
+      title={strings('form.channel.report', [channel?.name ?? strings('form.channel.channel')])}
+      maxWidth="4xl"
+      bodyRef={printRef}
+      headerActions={
+        <button
+          type="button"
+          onClick={handlePrint}
+          disabled={loading || !data}
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+          aria-label={strings('form.channel.ariaPrintReport')}
+        >
+          <i className="fa-solid fa-print" aria-hidden />
+          {strings('form.channel.print')}
+        </button>
+      }
     >
-      <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
-        aria-hidden
-        onClick={onClose}
-      />
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl">
-        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
-          <h2 id="report-dialog-title" className="text-xl font-semibold text-slate-900">
-            {strings('form.channel.report', [channel?.name ?? strings('form.channel.channel')])}
-          </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handlePrint}
-              disabled={loading || !data}
-              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-              aria-label={strings('form.channel.ariaPrintReport')}
-            >
-              <i className="fa-solid fa-print" aria-hidden />
-              {strings('form.channel.print')}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-              aria-label={strings('common.ariaClose')}
-            >
-              <i className="fa-solid fa-xmark text-lg" aria-hidden />
-            </button>
-          </div>
-        </header>
-
-        <div ref={printRef} className="flex-1 overflow-y-auto p-6">
           {loading ? (
             <div className="flex flex-col gap-6 py-12">
               <div className="h-64 animate-pulse rounded-lg bg-slate-100" />
@@ -563,9 +540,7 @@ const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
               </div>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+    </Modal>
   )
 }
 
