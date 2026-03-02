@@ -4,13 +4,13 @@ import strings from '../../localization'
 import { useApp } from '../../context'
 
 const navItems = [
-  { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high' },
+  { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high', tourId: 'nav-dashboard' },
   // { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users' },
-  { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping' },
-  { path: '/links', labelKey: 'nav.links', icon: 'fa-link' },
-  { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt' },
-  { path: '/reports', labelKey: 'nav.reports', icon: 'fa-chart-line' },
-  { path: '/settings', labelKey: 'nav.settings', icon: 'fa-gear' },
+  { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping', tourId: 'nav-sales' },
+  { path: '/links', labelKey: 'nav.links', icon: 'fa-link', tourId: 'nav-links' },
+  { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt', tourId: 'nav-transactions' },
+  { path: '/reports', labelKey: 'nav.reports', icon: 'fa-chart-line', tourId: 'nav-reports' },
+  { path: '/settings', labelKey: 'nav.settings', icon: 'fa-gear', tourId: 'nav-settings' },
 ]
 
 const Navbar = () => {
@@ -22,12 +22,13 @@ const Navbar = () => {
     path === '/' ? location === path : location.startsWith(path)
   )
 
-  const NavLink = ({ path, label, icon, isActive }) => (
+  const NavLink = ({ path, label, icon, isActive, tourId }) => (
     <Link
       href={path}
       role="tab"
       aria-selected={isActive}
       aria-current={isActive ? 'page' : undefined}
+      data-tour={tourId}
       onClick={() => setMenuOpen(false)}
       className={`
         flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium
@@ -51,9 +52,9 @@ const Navbar = () => {
           </h1>
           <nav aria-label="Main navigation" className="relative mt-4">
             <div className="hidden md:flex items-center gap-2" role="tablist">
-              {navItems.map(({ path, labelKey, icon }) => {
+              {navItems.map(({ path, labelKey, icon, tourId }) => {
                 const isActive = path === '/' ? location === path : location.startsWith(path)
-                return <NavLink key={path} path={path} label={strings(labelKey)} icon={icon} isActive={isActive} />
+                return <NavLink key={path} path={path} label={strings(labelKey)} icon={icon} isActive={isActive} tourId={tourId} />
               })}
             </div>
 
@@ -81,11 +82,11 @@ const Navbar = () => {
                 className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0 border-0'}`}
               >
                 <div className="py-2">
-                  {navItems.map(({ path, labelKey, icon }) => {
+                  {navItems.map(({ path, labelKey, icon, tourId }) => {
                     const isActive = path === '/' ? location === path : location.startsWith(path)
                     return (
                       <div key={path} className="px-2">
-                        <NavLink path={path} label={strings(labelKey)} icon={icon} isActive={isActive} />
+                        <NavLink path={path} label={strings(labelKey)} icon={icon} isActive={isActive} tourId={tourId} />
                       </div>
                     )
                   })}

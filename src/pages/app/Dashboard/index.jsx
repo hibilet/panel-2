@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import dayjs from 'dayjs'
+import { useTour } from '@reactour/tour'
 
 import { Link } from 'wouter'
 import { get } from '../../../lib/client'
@@ -46,6 +47,12 @@ const currentMonthStart = () => dayjs().startOf('month').format('YYYY-MM-DD')
 
 const Dashboard = () => {
   const { sales, loading: appLoading } = useApp()
+  const { setIsOpen, setCurrentStep } = useTour()
+
+  const startTour = () => {
+    setCurrentStep(0)
+    setIsOpen(true)
+  }
   const [todaySales, setTodaySales] = useState(null)
   const [mtdSales, setMtdSales] = useState(null)
   const [mtdProductsSold, setMtdProductsSold] = useState(null)
@@ -201,32 +208,29 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
-      <section aria-labelledby="stats-heading" className="mb-8">
-        <h2 id="stats-heading" className="sr-only">Quick stats</h2>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <StatCard
-            label={strings('dashboard.stats.todaySales')}
-            value={formatCurrency(todaySales ?? 0)}
-            loading={statsLoading}
-          />
-          <StatCard
-            label={strings('dashboard.stats.mtdSales')}
-            value={formatCurrency(mtdSales ?? 0)}
-            loading={statsLoading}
-          />
-          <StatCard
-            label={strings('dashboard.stats.mtdProductsSold')}
-            value={mtdProductsSold ?? 0}
-            loading={statsLoading}
-          />
-          <StatCard
-            label={strings('dashboard.stats.activeSales')}
-            value={activeSalesCount ?? 0}
-            loading={statsLoading}
-          />
-        </div>
-      </section>
+    <div className="mx-auto max-w-5xl relative">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8" data-tour="dashboard-stats">
+        <StatCard
+          label={strings('dashboard.stats.todaySales')}
+          value={formatCurrency(todaySales ?? 0)}
+          loading={statsLoading}
+        />
+        <StatCard
+          label={strings('dashboard.stats.mtdSales')}
+          value={formatCurrency(mtdSales ?? 0)}
+          loading={statsLoading}
+        />
+        <StatCard
+          label={strings('dashboard.stats.mtdProductsSold')}
+          value={mtdProductsSold ?? 0}
+          loading={statsLoading}
+        />
+        <StatCard
+          label={strings('dashboard.stats.activeSales')}
+          value={activeSalesCount ?? 0}
+          loading={statsLoading}
+        />
+      </div>
 
       <SalesChart
         data={chartData}
@@ -239,7 +243,7 @@ const Dashboard = () => {
         onMonthOffsetChange={setSelectedMonthOffset}
       />
 
-      <section aria-labelledby="weekly-events-heading" className="mb-8">
+      <section aria-labelledby="weekly-events-heading" className="mb-8" data-tour="dashboard-weekly-events">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 id="weekly-events-heading" className="text-lg font-medium text-slate-900">
             {strings('dashboard.weeklyMatrix')}
@@ -275,12 +279,13 @@ const Dashboard = () => {
         />
       </section>
 
-      <section aria-labelledby="recent-heading">
+      <section aria-labelledby="recent-heading" data-tour="dashboard-recent-activity">
         <div className="mb-4 flex items-center justify-between">
           <h2 id="recent-heading" className="text-lg font-medium text-slate-900">
             {strings('dashboard.recentActivity')}
           </h2>
           <Link
+            data-tour="dashboard-recent-activity-view-all"
             href="/transactions"
             className="text-sm font-medium text-slate-600 hover:text-slate-900"
           >
@@ -298,6 +303,15 @@ const Dashboard = () => {
           />
         </div>
       </section>
+
+      <button
+        type="button"
+        onClick={startTour}
+        aria-label={strings('tour.start')}
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-lg transition hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+      >
+        <i className="fa-solid fa-question-circle" aria-hidden />
+      </button>
     </div>
   )
 }

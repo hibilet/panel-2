@@ -92,7 +92,7 @@ const SalesChart = ({
   const dropdownsDisabled = !hasData
 
   return (
-    <section aria-labelledby="sales-chart-heading" className="mb-8">
+    <section aria-labelledby="sales-chart-heading" className="mb-8" data-tour="dashboard-sales-chart">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 id="sales-chart-heading" className="text-lg font-medium text-slate-900">
           {strings('dashboard.salesChart', [monthName, year])}
