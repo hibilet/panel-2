@@ -82,8 +82,8 @@ const formatType = (t) => {
 }
 
 export const providersColumns = [
-  { key: 'name', header: strings('table.provider.name'), headerCell: true, render: (r) => r.name ?? '—' },
-  { key: 'bank', header: strings('table.provider.bank'), render: (r) => r.bank ?? '—' },
+  { key: 'id', header: strings('table.provider.id'), headerCell: true, render: (r) => r.id?.slice(-6) ?? '—', className: 'font-mono' },
+  { key: 'name', header: strings('table.provider.name'), render: (r) => r.name ?? '—' },
   { key: 'type', header: strings('table.provider.type'), render: (r) => formatType(r.type) },
   { key: 'createdAt', header: strings('table.provider.createdAt'), render: (r) => formatDateTime(r.createdAt) },
 ]
@@ -99,7 +99,6 @@ const formatPrice = (v, currency = 'eur') =>
 
 export const ticketColumns = [
   { key: 'name', header: strings('table.ticket.name'), headerCell: true, render: (r) => r.name || strings('common.untitled') },
-  { key: 'category', header: strings('table.ticket.category'), render: (r) => r.category ?? '—' },
   { key: 'price', header: strings('table.ticket.price'), align: 'right', render: (r) => formatPrice(r.price) },
   { key: 'stock', header: strings('table.ticket.stock'), align: 'right', render: (r) => r.stock ?? 0 },
   { key: 'reservations', header: strings('table.ticket.reservations'), align: 'right', render: (r) => r.reservations ?? 0 },

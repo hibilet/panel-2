@@ -3,7 +3,8 @@ import { Link, useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
 import strings from '../../../localization'
-import LinksTable from '../../../components/tables/LinksTable'
+import DataTable from '../../../components/tables/DataTable'
+import { linksColumns } from '../../../components/tables/columns'
 import SlidePanel from '../../../components/shared/SlidePanel'
 import LinkPanel from './Link'
 
@@ -54,10 +55,12 @@ const Links = () => {
         </Link>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <LinksTable
+        <DataTable
           data={data}
-          loading={loading}
+          columns={linksColumns}
+          getRowKey={(r) => r.id ?? r.slug}
           onRowClick={(row) => row.id && setLocation(`/links/${row.id}`)}
+          loading={loading}
         />
       </div>
       <SlidePanel

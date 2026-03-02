@@ -4,7 +4,8 @@ import { Link, useLocation, useParams } from 'wouter'
 import { get } from '../../../../lib/client'
 import strings from '../../../../localization'
 import SlidePanel from '../../../../components/shared/SlidePanel'
-import ProvidersTable from '../../../../components/tables/ProvidersTable'
+import DataTable from '../../../../components/tables/DataTable'
+import { providersColumns } from '../../../../components/tables/columns'
 import ProviderPanel from './Provider'
 
 const Providers = () => {
@@ -71,10 +72,14 @@ const Providers = () => {
         </button>
       </div>
 
-      <ProvidersTable
+      <DataTable
         data={data}
+        columns={providersColumns}
+        getRowKey={(r) => r.id}
+        onRowClick={(row) => row.id && setLocation(`/settings/providers/${row.id}`)}
         loading={loading}
-        onRowClick={(row) => setLocation(`/settings/providers/${row.id}`)}
+        dark
+        emptyMessage={strings('table.provider.noProviders')}
       />
 
       <SlidePanel

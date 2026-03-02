@@ -4,7 +4,8 @@ import { Link, useLocation, useParams } from 'wouter'
 import { get } from '../../../../lib/client'
 import strings from '../../../../localization'
 import SlidePanel from '../../../../components/shared/SlidePanel'
-import AgreementsTable from '../../../../components/tables/AgreementsTable'
+import DataTable from '../../../../components/tables/DataTable'
+import { agreementsColumns } from '../../../../components/tables/columns'
 import AgreementPanel from './Agreement'
 
 const Agreements = () => {
@@ -71,10 +72,14 @@ const Agreements = () => {
         </button>
       </div>
 
-      <AgreementsTable
+      <DataTable
         data={data}
+        columns={agreementsColumns}
+        getRowKey={(r) => r.id}
+        onRowClick={(row) => row.id && setLocation(`/settings/agreements/${row.id}`)}
         loading={loading}
-        onRowClick={(row) => setLocation(`/settings/agreements/${row.id}`)}
+        dark
+        emptyMessage={strings('table.agreement.noAgreements')}
       />
 
       <SlidePanel

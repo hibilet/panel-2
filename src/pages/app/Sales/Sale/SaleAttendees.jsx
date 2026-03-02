@@ -31,7 +31,6 @@ const STATUS_LABELS = {
 const columns = [
   { key: 'owner', header: strings('table.transaction.owner'), headerCell: true, render: (r) => r.owner ?? '—' },
   { key: 'email', header: strings('form.transaction.email'), render: (r) => r.email ?? '—' },
-  { key: 'category', header: strings('table.ticket.category'), render: (r) => r.category ?? '—' },
   { key: 'product', header: strings('form.attendees.product'), render: (r) => r.product ?? '—' },
   { key: 'age', header: 'Age', render: (r) => getAge(r.birthday), align: 'right' },
   {
@@ -104,11 +103,10 @@ const SaleAttendees = () => {
   }
 
   const handleDownloadExcel = () => {
-    const headers = [strings('table.transaction.owner'), strings('form.transaction.email'), strings('table.ticket.category'), strings('form.attendees.product'), 'Age', strings('common.status')]
+    const headers = [strings('table.transaction.owner'), strings('form.transaction.email'), strings('form.attendees.product'), 'Age', strings('common.status')]
     const rows = reservations.map((r) => [
       r.owner ?? '',
       r.email ?? '',
-      r.category ?? '',
       r.product ?? '',
       getAge(r.birthday),
       STATUS_LABELS[r.status] ?? r.status ?? '',

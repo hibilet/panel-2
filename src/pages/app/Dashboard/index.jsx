@@ -5,7 +5,8 @@ import { Link } from 'wouter'
 import { get } from '../../../lib/client'
 import { useApp } from '../../../context'
 import SalesChart from '../../../components/charts/SalesChart'
-import TransactionsTable from '../../../components/tables/TransactionsTable'
+import DataTable from '../../../components/tables/DataTable'
+import { transactionsColumns } from '../../../components/tables/columns'
 import WeeklyEventSaleMatrix from '../../../components/tables/WeeklyEventSaleMatrix'
 import { StatCard } from '../../../components/shared'
 import strings, { formatCurrency } from '../../../localization'
@@ -287,10 +288,13 @@ const Dashboard = () => {
           </Link>
         </div>
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <TransactionsTable
+          <DataTable
             data={recentTransactions}
+            columns={transactionsColumns}
+            getRowKey={(r) => r.id}
             bare
             loading={statsLoading}
+            emptyMessage={strings('table.transaction.noTransactions')}
           />
         </div>
       </section>

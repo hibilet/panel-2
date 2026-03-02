@@ -14,7 +14,6 @@ const getInitialForm = (product) => {
   if (product) {
     return {
       name: product.name ?? '',
-      category: product.category ?? '',
       promo: product.promo ?? '',
       stock: String(product.stock ?? ''),
       productsToDeliver: String(product.productsToDeliver ?? ''),
@@ -24,7 +23,6 @@ const getInitialForm = (product) => {
   }
   return {
     name: '',
-    category: '',
     promo: '',
     stock: '',
     productsToDeliver: '',
@@ -231,7 +229,6 @@ const ProductPanel = ({
   const onFormSubmit = (formData) => {
     const payload = {
       name: formData.name || undefined,
-      category: formData.category || undefined,
       promo: formData.promo || undefined,
       stock: formData.stock ? Number(formData.stock) : undefined,
       productsToDeliver: formData.productsToDeliver
@@ -276,11 +273,6 @@ const ProductPanel = ({
                 label={strings('common.name')}
                 {...register('name')}
                 placeholder={strings('form.ticket.namePlaceholder')}
-              />
-              <Input
-                label={strings('table.ticket.category')}
-                {...register('category')}
-                placeholder={strings('form.ticket.categoryPlaceholder')}
               />
               <Input
                 label={strings('form.ticket.promoText')}

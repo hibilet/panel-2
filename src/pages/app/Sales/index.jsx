@@ -4,7 +4,8 @@ import { Link, useLocation } from 'wouter'
 import { get, del } from '../../../lib/client'
 import strings from '../../../localization'
 import { useApp } from '../../../context'
-import SalesTable from '../../../components/tables/SalesTable'
+import DataTable from '../../../components/tables/DataTable'
+import { salesColumns } from '../../../components/tables/columns'
 
 const mapRows = (rows) =>
   (rows ?? []).map((row) => ({
@@ -89,10 +90,10 @@ const Sales = () => {
         </div>
       </div>
 
-      <SalesTable
+      <DataTable
         data={sales}
-        extended={showMore}
-        onDelete={showMore ? handleDelete : undefined}
+        columns={salesColumns(showMore, showMore ? handleDelete : undefined)}
+        getRowKey={(r) => r.id ?? r.name}
         onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
         loading={loading}
       />
@@ -112,9 +113,10 @@ const Sales = () => {
                 {pastError}
               </div>
             ) : (
-              <SalesTable
+              <DataTable
                 data={pastSales}
-                extended={false}
+                columns={salesColumns(false)}
+                getRowKey={(r) => r.id ?? r.name}
                 onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
                 loading={pastLoading}
               />

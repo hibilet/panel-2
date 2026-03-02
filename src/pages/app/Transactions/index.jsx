@@ -4,7 +4,8 @@ import { useLocation, useParams } from 'wouter'
 import { get } from '../../../lib/client'
 import strings from '../../../localization'
 import Pagination from '../../../components/tables/Pagination'
-import TransactionsTable from '../../../components/tables/TransactionsTable'
+import DataTable from '../../../components/tables/DataTable'
+import { transactionsColumns } from '../../../components/tables/columns'
 import { Modal, SlidePanel } from '../../../components/shared'
 import TransactionPanel from './Transaction'
 
@@ -123,11 +124,14 @@ const Transactions = () => {
         </form>
       </Modal>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <TransactionsTable
+        <DataTable
           data={data}
+          columns={transactionsColumns}
+          getRowKey={(r) => r.id}
           bare
           loading={loading}
           onRowClick={(row) => row.id && setLocation(`/transactions/${row.id}`)}
+          emptyMessage={strings('table.transaction.noTransactions')}
         />
         <Pagination
           total={total}
