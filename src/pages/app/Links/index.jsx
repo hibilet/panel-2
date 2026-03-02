@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, useParams } from 'wouter'
+import { Link, useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
 import strings from '../../../localization'
@@ -44,7 +44,15 @@ const Links = () => {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-900">{strings('page.links.title')}</h1>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold text-slate-900">{strings('page.links.title')}</h1>
+        <Link
+          href="/links/new"
+          className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+        >
+          {strings('page.links.createNew')}
+        </Link>
+      </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <LinksTable
           data={data}
@@ -58,7 +66,13 @@ const Links = () => {
         title={strings('page.links.details')}
         aria-label="Link details"
       >
-        {id && <LinkPanel id={id} onClose={() => setLocation('/links')} />}
+        {id && (
+          <LinkPanel
+            id={id}
+            onClose={() => setLocation('/links')}
+            onCreated={(newId) => setLocation(`/links/${newId}`)}
+          />
+        )}
       </SlidePanel>
     </div>
   )

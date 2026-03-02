@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 
-import { get, put } from '../../../../lib/client'
+import { get, post, put } from '../../../../lib/client'
 import { Input, Textarea, AsyncSearchInput } from '../../../../components/inputs'
 import strings from '../../../../localization'
 import dayjs from 'dayjs'
@@ -10,9 +10,10 @@ const sortSalesByStart = (sales) =>
     .filter((s) => !s.deletedAt)
     .sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0))
 
-const LinkPanel = ({ id, onClose }) => {
+const LinkPanel = ({ id, onClose, onCreated }) => {
+  const isNew = id === 'new'
   const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!isNew)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
@@ -27,6 +28,14 @@ const LinkPanel = ({ id, onClose }) => {
   const updateForm = (updates) => setForm((prev) => ({ ...prev, ...updates }))
 
   useEffect(() => {
+    if (isNew) {
+      setLoading(false)
+      setError(null)
+      setData(null)
+      setForm({ title: '', slug: '', description: '', image: '' })
+      setSales([])
+      return
+    }
     setLoading(true)
     setError(null)
     get(`/links/${id}`)
@@ -45,7 +54,7 @@ const LinkPanel = ({ id, onClose }) => {
       })
       .catch((err) => setError(err?.message ?? strings('error.failedLoadLink')))
       .finally(() => setLoading(false))
-  }, [id])
+  }, [id, isNew])
 
   const searchEvents = useCallback(async (q) => {
     const res = await get(`/sales/search?q=${encodeURIComponent(q)}&limit=20`)
@@ -72,12 +81,16 @@ const LinkPanel = ({ id, onClose }) => {
     setSaving(true)
     setError(null)
     try {
-      await put(`/links/${id}`, {
-        ...data,
-        ...form,
-        sales: sales.map((s) => s.id),
-      })
-      setData((prev) => (prev ? { ...prev, ...form, sales } : null))
+      const payload = { ...form, sales: sales.map((s) => s.id) }
+      if (isNew) {
+        const res = await post('/links', payload)
+        const created = res.data ?? null
+        setData(created)
+        if (created?.id) (onCreated ? onCreated(created.id) : onClose?.())
+      } else {
+        await put(`/links/${id}`, { ...data, ...payload })
+        setData((prev) => (prev ? { ...prev, ...form, sales } : null))
+      }
     } catch (err) {
       setError(err?.message ?? strings('error.failedSave'))
     } finally {
@@ -116,15 +129,15 @@ const LinkPanel = ({ id, onClose }) => {
             <div className="h-10 w-48 animate-pulse rounded bg-slate-200" />
             <div className="h-64 animate-pulse rounded-lg bg-slate-100" />
           </div>
-        ) : error && !data ? (
+        ) : error && !data && !isNew ? (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
             {error}
           </div>
-        ) : data ? (
+        ) : (data || isNew) ? (
           <main className="grid grid-cols-1">
             <section className="page-title">
               <h3 className="text-lg font-semibold text-slate-900">
-                {form.title || data.title || strings('common.untitled')} — {strings('page.links.details')}
+                {isNew ? strings('page.links.createNew') : (form.title || data?.title || strings('common.untitled'))} — {strings('page.links.details')}
               </h3>
             </section>
 
@@ -153,19 +166,21 @@ const LinkPanel = ({ id, onClose }) => {
                   />
                 </fieldset>
 
-                <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <label htmlFor="link-views" className="block text-sm font-medium text-slate-700">
-                    <span className="mb-1 block">{strings('form.link.views')}</span>
-                    <input
-                      id="link-views"
-                      type="number"
-                      disabled
-                      value={data.views ?? 0}
-                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 opacity-60"
-                      readOnly
-                    />
-                  </label>
-                </fieldset>
+                {!isNew && (
+                  <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <label htmlFor="link-views" className="block text-sm font-medium text-slate-700">
+                      <span className="mb-1 block">{strings('form.link.views')}</span>
+                      <input
+                        id="link-views"
+                        type="number"
+                        disabled
+                        value={data?.views ?? 0}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 opacity-60"
+                        readOnly
+                      />
+                    </label>
+                  </fieldset>
+                )}
 
                 <fieldset className="grid grid-cols-1">
                   <Textarea
@@ -224,15 +239,14 @@ const LinkPanel = ({ id, onClose }) => {
                   <table className="min-w-full divide-y divide-slate-200">
                     <thead>
                       <tr>
-                        <th scope="col" className="w-10 px-2 py-2 text-left" />
                         <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
                           {strings('table.sale.name')}
                         </th>
                         <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {strings('form.link.startDate')}
+                          {strings('table.sale.venue')}
                         </th>
                         <th scope="col" className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-500">
-                          {strings('table.sale.venue')}
+                          {strings('form.link.startDate')}
                         </th>
                         <th scope="col" className="w-12 px-2 py-2" />
                       </tr>
@@ -240,17 +254,14 @@ const LinkPanel = ({ id, onClose }) => {
                     <tbody className="divide-y divide-slate-200">
                       {sales.map((sale) => (
                         <tr key={sale.id} className="hover:bg-slate-50">
-                          <td className="px-2 py-2 text-slate-400">
-                            <span className="cursor-grab" aria-hidden>☰</span>
-                          </td>
                           <th scope="row" className="px-3 py-2 text-sm font-medium text-slate-900">
                             {sale.name ?? '—'}
                           </th>
                           <td className="px-3 py-2 text-sm text-slate-600">
-                            {formatStartDate(sale.start)}
+                            {getVenueName(sale)}
                           </td>
                           <td className="px-3 py-2 text-sm text-slate-600">
-                            {getVenueName(sale)}
+                            {formatStartDate(sale.start)}
                           </td>
                           <td className="px-2 py-2">
                             <button
@@ -259,7 +270,7 @@ const LinkPanel = ({ id, onClose }) => {
                               className="rounded border border-red-200 px-2 py-1 text-sm text-red-700 hover:bg-red-50"
                               aria-label={strings('common.ariaDelete')}
                             >
-                              🗑️
+                              <i className="fa-solid fa-trash" aria-hidden />
                             </button>
                           </td>
                         </tr>

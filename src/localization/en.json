@@ -131,6 +131,7 @@
 
   "page.links.title": "Links",
   "page.links.details": "Link Details",
+  "page.links.createNew": "Create New Link",
 
   "page.reports.title": "Reports",
   "page.reports.noReports": "No reports yet",
