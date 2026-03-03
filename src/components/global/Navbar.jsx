@@ -4,13 +4,13 @@ import strings from '../../localization'
 import { useApp } from '../../context'
 
 const navItems = [
-  { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high', tourId: 'nav-dashboard' },
-  // { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users' },
-  { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping', tourId: 'nav-sales' },
-  { path: '/links', labelKey: 'nav.links', icon: 'fa-link', tourId: 'nav-links' },
-  { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt', tourId: 'nav-transactions' },
-  { path: '/reports', labelKey: 'nav.reports', icon: 'fa-chart-line', tourId: 'nav-reports' },
-  { path: '/settings', labelKey: 'nav.settings', icon: 'fa-gear', tourId: 'nav-settings' },
+  { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high', tourId: 'nav-dashboard', acl: ["merchant", "admin"] },
+  { path: '/accounts', labelKey: 'nav.accounts', icon: 'fa-users', acl: ["admin"] },
+  { path: '/sales', labelKey: 'nav.sales', icon: 'fa-cart-shopping', tourId: 'nav-sales', acl: ["merchant", "admin"] },
+  { path: '/links', labelKey: 'nav.links', icon: 'fa-link', tourId: 'nav-links', acl: ["merchant", "admin"] },
+  { path: '/transactions', labelKey: 'nav.transactions', icon: 'fa-receipt', tourId: 'nav-transactions', acl: ["merchant", "admin"] },
+  { path: '/reports', labelKey: 'nav.reports', icon: 'fa-chart-line', tourId: 'nav-reports', acl: ["merchant", "admin"] },
+  { path: '/settings', labelKey: 'nav.settings', icon: 'fa-gear', tourId: 'nav-settings', acl: ["merchant", "admin"] },
 ]
 
 const Navbar = () => {
@@ -52,9 +52,9 @@ const Navbar = () => {
           </h1>
           <nav aria-label="Main navigation" className="relative mt-4">
             <div className="hidden md:flex items-center gap-2" role="tablist">
-              {navItems.map(({ path, labelKey, icon, tourId }) => {
+              {navItems.map(({ path, labelKey, icon, tourId, acl }) => {
                 const isActive = path === '/' ? location === path : location.startsWith(path)
-                return <NavLink key={path} path={path} label={strings(labelKey)} icon={icon} isActive={isActive} tourId={tourId} />
+                return acl.includes(account?.type?.split(".")[1]) ? <NavLink key={path} path={path} label={strings(labelKey)} icon={icon} isActive={isActive} tourId={tourId} /> : null
               })}
             </div>
 

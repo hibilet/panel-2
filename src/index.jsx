@@ -4,14 +4,17 @@ import './styles/index.css'
 
 import { TourProvider } from '@reactour/tour'
 import { AppProvider } from './context'
-import App from './pages/app'
 import { dashboardTourSteps } from './components/tours/DashboardTour'
+import { getToken } from './lib/storage'
+
+import App from './pages/app'
+import Auth from './pages/auth'
 
 createRoot(document.body).render(
   <StrictMode>
     <AppProvider>
       <TourProvider steps={dashboardTourSteps}>
-        <App />
+        {getToken() ? <App/> : <Auth/>}
       </TourProvider>
     </AppProvider>
   </StrictMode>,
