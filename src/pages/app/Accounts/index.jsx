@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useLocation } from 'wouter'
+import { useLocation, useParams } from 'wouter'
 
 import { get } from '../../../lib/client'
 import strings from '../../../localization'
 import Pagination from '../../../components/tables/Pagination'
 import DataTable from '../../../components/tables/DataTable'
 import { accountsColumns } from '../../../components/tables/columns'
-import { Modal } from '../../../components/shared'
+import { Modal, SlidePanel } from '../../../components/shared'
+import AccountPanel from './Account'
 
-const LIMIT = 10
+const LIMIT = 25
 
 const Accounts = () => {
   const [, setLocation] = useLocation()
+  const { id } = useParams()
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -81,7 +83,7 @@ const Accounts = () => {
           onClick={() => setFilterDialogOpen(true)}
           className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
         >
-          🔍 {strings('page.accounts.filter')}
+          <i className="fa fa-search mr-2" aria-hidden /> {strings('page.accounts.filter')}
         </button>
       </div>
       <Modal
@@ -95,14 +97,14 @@ const Accounts = () => {
               onClick={closeFilterDialog}
               className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
-              ❌ {strings('common.cancel')}
+              <i className="fa fa-close mr-2" aria-hidden /> {strings('common.cancel')}
             </button>
             <button
               type="submit"
               form="filter-accounts-form"
               className="rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
             >
-              🔍 {strings('page.accounts.filter')}
+              <i className="fa fa-search mr-2" aria-hidden /> {strings('page.accounts.filter')}
             </button>
           </div>
         }
@@ -147,6 +149,14 @@ const Accounts = () => {
           onPageChange={setPage}
         />
       </div>
+      <SlidePanel
+        isOpen={!!id}
+        onClose={() => setLocation('/accounts')}
+        title={strings('page.accounts.details')}
+        aria-label="Account details"
+      >
+        {id && <AccountPanel id={id} onClose={() => setLocation('/accounts')} />}
+      </SlidePanel>
     </div>
   )
 }

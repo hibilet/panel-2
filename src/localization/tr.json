@@ -11,6 +11,7 @@
   "nav.reports": "Raporlar",
   "nav.settings": "Ayarlar",
   "nav.menu": "Menü",
+  "nav.backToAdmin": "Admin'e Dön",
 
   "tour.start": "Rehberli turu başlat",
   "tour.step.dashboard": "Kontrol Paneli — Panelinizin genel görünümü. Bugünkü satışları, aylık istatistikleri, aktif satış sayısını ve son aktiviteleri bir bakışta görün.",
@@ -116,6 +117,7 @@
   "table.account.email": "E-posta",
   "table.account.phone": "Telefon",
   "table.account.type": "Tür",
+  "table.account.createdAt": "Oluşturulma",
   "table.account.noAccounts": "Henüz hesap yok",
   "table.link.image": "Görsel",
   "table.link.title": "Başlık",
@@ -216,6 +218,10 @@
   "page.accounts.typeAll": "Tümü",
   "page.accounts.typeMerchant": "Satıcı",
   "page.accounts.typeUser": "Kullanıcı",
+  "page.accounts.details": "Hesap Detayları",
+
+  "form.account.loginAs": "Bu Hesap Olarak Giriş Yap",
+  "form.account.errorLoginAs": "Bu hesap olarak giriş yapılamadı",
 
   "page.settings.title": "Ayarlar",
   "page.settings.profile": "Profil",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 const ANIM_DURATION = 250
 
@@ -29,16 +30,16 @@ const SlidePanel = ({
     onClose?.()
   }
 
-  return (
+  const content = (
     <>
       <div
-        className="slide-panel-overlay fixed inset-0 z-40 bg-slate-900/20 backdrop-blur-[2px]"
+        className="slide-panel-overlay fixed inset-0 z-[100] bg-slate-900/20"
         data-exiting={isExiting || undefined}
         aria-hidden
         onClick={handleOverlayClick}
       />
       <aside
-        className="slide-panel fixed inset-y-0 right-0 z-50 w-full max-w-lg overflow-y-auto border-l border-slate-200 bg-white shadow-xl"
+        className="slide-panel fixed inset-y-0 right-0 z-[101] w-full max-w-lg overflow-y-auto border-l border-slate-200 bg-white shadow-xl"
         data-exiting={isExiting || undefined}
         aria-label={ariaLabel ?? title}
       >
@@ -46,6 +47,8 @@ const SlidePanel = ({
       </aside>
     </>
   )
+
+  return createPortal(content, document.body)
 }
 
 export default SlidePanel

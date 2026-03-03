@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import strings from '../../localization'
 import { useApp } from '../../context'
+import { getHotSwapToken, setToken, deleteHotSwapToken } from '../../lib/storage'
 
 const navItems = [
   { path: '/', labelKey: 'nav.dashboard', icon: 'fa-gauge-high', tourId: 'nav-dashboard', acl: ["merchant", "admin"] },
@@ -17,6 +18,15 @@ const Navbar = () => {
   const [location] = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
   const { account } = useApp()
+  const hotSwapToken = getHotSwapToken()
+
+  const handleBackToAdmin = () => {
+    const adminToken = getHotSwapToken()
+    if (adminToken) {
+      deleteHotSwapToken()
+      setToken(adminToken)
+    }
+  }
 
   const activeItem = navItems.find(({ path }) =>
     path === '/' ? location === path : location.startsWith(path)
@@ -47,9 +57,21 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
       <div className="mx-auto max-w-5xl py-4">
-          <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
-            {account?.name ? strings('app.welcome', [account.name]) : strings('app.name')}
-          </h1>
+          <div className="flex items-center gap-3">
+            {hotSwapToken && (
+              <button
+                type="button"
+                onClick={handleBackToAdmin}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+              >
+                <i className="fa-solid fa-arrow-left" aria-hidden />
+                {strings('nav.backToAdmin')}
+              </button>
+            )}
+            <h1 className="text-xl font-semibold text-slate-900 dark:text-white">
+              {account?.name ? strings('app.welcome', [account.name]) : strings('app.name')}
+            </h1>
+          </div>
           <nav aria-label="Main navigation" className="relative mt-4">
             <div className="hidden md:flex items-center gap-2" role="tablist">
               {navItems.map(({ path, labelKey, icon, tourId, acl }) => {

@@ -11,6 +11,7 @@
   "nav.reports": "Reports",
   "nav.settings": "Settings",
   "nav.menu": "Menu",
+  "nav.backToAdmin": "Back to Admin",
 
   "tour.start": "Start guided tour",
   "tour.step.dashboard": "Dashboard — Your overview of the panel. View today's sales, monthly stats, active sales count, and recent activity at a glance.",
@@ -117,6 +118,7 @@
   "table.account.email": "Email",
   "table.account.phone": "Phone",
   "table.account.type": "Type",
+  "table.account.createdAt": "Created at",
   "table.account.noAccounts": "No accounts yet",
   "table.link.image": "Image",
   "table.link.title": "Title",
@@ -217,6 +219,10 @@
   "page.accounts.typeAll": "All",
   "page.accounts.typeMerchant": "Merchant",
   "page.accounts.typeUser": "User",
+  "page.accounts.details": "Account Details",
+
+  "form.account.loginAs": "Login As",
+  "form.account.errorLoginAs": "Failed to login as this account",
 
   "page.settings.title": "Settings",
   "page.settings.profile": "Profile",

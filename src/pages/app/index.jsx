@@ -11,7 +11,6 @@ import Links from './Links'
 import Reports from './Reports'
 import Report from './Reports/Report'
 import Accounts from './Accounts'
-import Account from './Accounts/Account'
 import Settings from './Settings'
 import SettingsProviders from './Settings/Providers'
 import SettingsAgreements from './Settings/Agreements'
@@ -33,7 +32,7 @@ const App = () => {
           <Route path="/reports" component={Reports} />
           <Route path="/reports/:id" component={Report} />
           <Route path="/accounts" component={Accounts} />
-          <Route path="/accounts/:id" component={Account} />
+          <Route path="/accounts/:id" component={Accounts} />
           <Route path="/settings" component={Settings} />
           <Route path="/settings/providers" component={SettingsProviders} />
           <Route path="/settings/providers/:id" component={SettingsProviders} />
