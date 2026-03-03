@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { useLocation } from 'wouter'
 
 import { get } from '../../../lib/client'
@@ -20,6 +21,16 @@ const Accounts = () => {
   const [filterEmail, setFilterEmail] = useState('')
   const [filterType, setFilterType] = useState('')
   const [filterDialogOpen, setFilterDialogOpen] = useState(false)
+
+  const { register, handleSubmit, reset } = useForm({
+    defaultValues: { email: '', type: '' },
+  })
+
+  useEffect(() => {
+    if (filterDialogOpen) {
+      reset({ email: filterEmail, type: filterType })
+    }
+  }, [filterDialogOpen, filterEmail, filterType, reset])
 
   const loading = fetchedPage !== page
 
@@ -54,11 +65,9 @@ const Accounts = () => {
 
   const closeFilterDialog = () => setFilterDialogOpen(false)
 
-  const handleFilterSubmit = (e) => {
-    e.preventDefault()
-    const form = e.target
-    setFilterEmail(form.email?.value?.trim() ?? '')
-    setFilterType(form.type?.value?.trim() ?? '')
+  const onFilterSubmit = (data) => {
+    setFilterEmail(data.email?.trim() ?? '')
+    setFilterType(data.type?.trim() ?? '')
     setPage(1)
     closeFilterDialog()
   }
@@ -98,22 +107,20 @@ const Accounts = () => {
           </div>
         }
       >
-        <form id="filter-accounts-form" onSubmit={handleFilterSubmit} className="space-y-4">
+        <form id="filter-accounts-form" onSubmit={handleSubmit(onFilterSubmit)} className="space-y-4">
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">{strings('page.accounts.email')}</span>
             <input
-              name="email"
+              {...register('email')}
               type="text"
               placeholder={strings('page.accounts.emailPlaceholder')}
-              defaultValue={filterEmail}
               className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
             />
           </label>
           <label className="block">
             <span className="mb-1 block text-sm font-medium text-slate-700">{strings('page.accounts.type')}</span>
             <select
-              name="type"
-              defaultValue={filterType}
+              {...register('type')}
               className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
             >
               <option value="">{strings('page.accounts.typeAll')}</option>
