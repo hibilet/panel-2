@@ -1,20 +1,26 @@
 import dayjs from "dayjs";
 import { getLang, setLang } from "../lib/storage";
 
+import de from "./de.json";
 import en from "./en.json";
+import fr from "./fr.json";
+import nl from "./nl.json";
 import tr from "./tr.json";
 
+import "dayjs/locale/de.js";
 import "dayjs/locale/en.js";
+import "dayjs/locale/fr.js";
+import "dayjs/locale/nl.js";
 import "dayjs/locale/tr.js";
 
-const locales = ["en", "tr"];
+const locales = ["de", "en", "fr", "nl", "tr"];
 const DEFAULT_CURRENCY = "eur";
 let locale = getLang() || "en";
 
 locale = locales.includes(locale) ? locale : setLang("en");
 dayjs.locale(locale);
 
-const dictionary = { en, tr };
+const dictionary = { de, en, fr, nl, tr };
 
 const strings = (key, variables) => {
 	if (!key) return "";

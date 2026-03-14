@@ -258,6 +258,9 @@
 	"page.settings.accountDetails": "Account details",
 	"language.en": "English",
 	"language.tr": "Turkish",
+	"language.de": "Deutsch",
+	"language.nl": "Nederlands",
+	"language.fr": "Français",
 
 	"form.sale.info": "ℹ️ Info",
 	"form.sale.eventName": "Event Name",
