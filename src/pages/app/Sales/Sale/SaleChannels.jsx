@@ -48,6 +48,18 @@ const getInitialForm = (channel) => {
 	return { name: "" };
 };
 
+const isBaseChannel = (channel) => {
+	const name = (channel?.name ?? "").toLowerCase();
+	return name === "base-sale" || name === "base sale";
+};
+
+const getChannelDisplayName = (channel) => {
+	if (!channel) return strings("form.channel.channel");
+	return isBaseChannel(channel)
+		? strings("form.channel.baseSaleName")
+		: (channel.name || strings("form.channel.editChannel"));
+};
+
 const SaleChannels = () => {
 	const { id } = useParams();
 	const isNew = id === "new";
@@ -71,18 +83,22 @@ const SaleChannels = () => {
 		setReportData(null);
 	}, []);
 
-	useEffect(() => {
+	const fetchChannels = useCallback(() => {
 		if (isNew) {
 			setChannels([]);
 			setLoading(false);
-			return;
+			return Promise.resolve();
 		}
 		setLoading(true);
-		get(`/sales/${id}/channels`)
+		return get(`/sales/${id}/channels`)
 			.then((r) => setChannels(r.data ?? []))
 			.catch(() => setChannels([]))
 			.finally(() => setLoading(false));
 	}, [id, isNew]);
+
+	useEffect(() => {
+		fetchChannels();
+	}, [fetchChannels]);
 
 	const handleSave = async (channel, payload) => {
 		setSaving(channel?.id ?? "new");
@@ -90,13 +106,11 @@ const SaleChannels = () => {
 		try {
 			if (channel?.id) {
 				await put(`/channels/${channel.id}`, payload);
-				setChannels((prev) =>
-					prev.map((c) => (c.id === channel.id ? { ...c, ...payload } : c)),
-				);
+				await fetchChannels();
 				closePanel();
 			} else {
-				const res = await post(`/sales/${id}/channels`, payload);
-				setChannels((prev) => [...prev, res.data]);
+				await post("/channels", { ...payload, sale: id });
+				await fetchChannels();
 				closePanel();
 			}
 		} catch (err) {
@@ -128,11 +142,6 @@ const SaleChannels = () => {
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
 	}, [panelOpen, closePanel]);
-
-	const isBaseChannel = (channel) => {
-		const name = (channel?.name ?? "").toLowerCase();
-		return name === "base-sale" || name === "base sale";
-	};
 
 	const handleReportsClick = async (channel) => {
 		setReportChannel(channel);
@@ -274,11 +283,11 @@ const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
       <!DOCTYPE html>
       <html>
         <head>
-          <title>${strings("form.channel.report", [channel?.name ?? strings("form.channel.channel")])}</title>
+          <title>${strings("form.channel.report", [getChannelDisplayName(channel)])}</title>
           <script src="https://cdn.tailwindcss.com"></script>
         </head>
         <body class="p-8">
-          <h1 class="text-2xl font-bold mb-6">${strings("form.channel.report", [channel?.name ?? strings("form.channel.channel")])}</h1>
+          <h1 class="text-2xl font-bold mb-6">${strings("form.channel.report", [getChannelDisplayName(channel)])}</h1>
           <div class="channel-report-print">${printContent}</div>
         </body>
       </html>
@@ -313,9 +322,7 @@ const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
 		<Modal
 			isOpen
 			onClose={onClose}
-			title={strings("form.channel.report", [
-				channel?.name ?? strings("form.channel.channel"),
-			])}
+			title={strings("form.channel.report", [getChannelDisplayName(channel)])}
 			maxWidth="4xl"
 			bodyRef={printRef}
 			headerActions={
@@ -568,7 +575,7 @@ const ChannelPanel = ({
 				<h3 className="text-lg font-semibold text-slate-900">
 					{isNew
 						? strings("form.channel.newChannel")
-						: channel?.name || strings("form.channel.editChannel")}
+						: getChannelDisplayName(channel)}
 				</h3>
 				<button
 					type="button"

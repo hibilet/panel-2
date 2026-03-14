@@ -74,23 +74,19 @@ const SaleReaders = () => {
 		try {
 			const readerId = reader?.id ?? reader?._id;
 			if (readerId) {
-				await put(`/accounts/${readerId}`, payload);
-				setReaders((prev) =>
-					prev.map((r) => {
-						const rid = r.id ?? r._id;
-						if (rid !== readerId) return r;
-						return { ...r, ...payload };
-					}),
-				);
-				closePanel();
-			} else {
-				const res = await post("/accounts", {
+				await put(`/accounts/${readerId}`, {
 					...payload,
 					type: "account.reader",
-					sale: id,
 				});
-				const created = res.data ?? payload;
-				setReaders((prev) => [...prev, created]);
+				await fetchReaders();
+				closePanel();
+			} else {
+				await post("/accounts", {
+					...payload,
+					sale: id,
+					type: "account.reader",
+				});
+				await fetchReaders();
 				closePanel();
 			}
 		} catch (err) {
@@ -106,7 +102,7 @@ const SaleReaders = () => {
 		setError(null);
 		try {
 			await del(`/accounts/${readerId}`);
-			setReaders((prev) => prev.filter((r) => (r.id ?? r._id) !== readerId));
+			await fetchReaders();
 			closePanel();
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedDelete"));

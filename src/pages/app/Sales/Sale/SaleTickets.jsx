@@ -69,14 +69,21 @@ const SaleTickets = () => {
 		setError(null);
 		try {
 			if (product?.id) {
-				await put(`/products/${product.id}`, payload);
+				await put(`/products/${product.id}`, {
+					...payload,
+					type: "product.event",
+				});
 				setProducts((prev) =>
 					prev.map((p) => (p.id === product.id ? { ...p, ...payload } : p)),
 				);
 				closePanel();
 			} else {
-				const res = await post(`/sales/${id}/products`, payload);
-				setProducts((prev) => [...prev, res.data]);
+				const res = await post("/products", {
+					...payload,
+					sale: id,
+					type: "product.event",
+				});
+				setProducts((prev) => [...prev, res.data ?? res]);
 				closePanel();
 			}
 		} catch (err) {

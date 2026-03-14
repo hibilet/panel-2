@@ -50,17 +50,17 @@ const SaleCoupons = () => {
 	const panelOpen = panelCoupon !== null;
 	const isAdding = panelCoupon === "new";
 
-	useEffect(() => {
+	const fetchData = useCallback(() => {
 		if (isNew) {
 			setCoupons([]);
 			setChannels([]);
 			setCouponsLoading(false);
 			setChannelsLoading(false);
-			return;
+			return Promise.resolve();
 		}
 		setCouponsLoading(true);
 		setChannelsLoading(true);
-		Promise.all([
+		return Promise.all([
 			get(`/sales/${id}/coupons`).then((r) => r.data ?? []),
 			get(`/sales/${id}/channels`).then((r) => r.data ?? []),
 		])
@@ -77,6 +77,10 @@ const SaleCoupons = () => {
 			});
 	}, [id, isNew]);
 
+	useEffect(() => {
+		fetchData();
+	}, [fetchData]);
+
 	const closePanel = useCallback(() => setPanelCoupon(null), []);
 
 	const handleSave = async (coupon, payload) => {
@@ -85,13 +89,11 @@ const SaleCoupons = () => {
 		try {
 			if (coupon?.id) {
 				await put(`/coupons/${coupon.id}`, payload);
-				setCoupons((prev) =>
-					prev.map((c) => (c.id === coupon.id ? { ...c, ...payload } : c)),
-				);
+				await fetchData();
 				closePanel();
 			} else {
-				const res = await post(`/sales/${id}/coupons`, payload);
-				setCoupons((prev) => [...prev, res.data]);
+				await post("/coupons", { ...payload, sale: id });
+				await fetchData();
 				closePanel();
 			}
 		} catch (err) {

@@ -1,15 +1,14 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "wouter";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, post, put, del } from "../../../../lib/client";
+import { useParams } from "wouter";
+import * as XLSX from "xlsx";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
-import DataTable from "../../../../components/tables/DataTable";
 import { guestColumns } from "../../../../components/tables/columns";
-import strings from "../../../../localization";
+import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
-import * as XLSX from "xlsx";
+import { del, get, post, put } from "../../../../lib/client";
+import strings from "../../../../localization";
 
 const LIMIT = 100;
 
@@ -106,25 +105,28 @@ const SaleGuests = ({ sale }) => {
 
 	const closePanel = useCallback(() => setPanelGuest(null), []);
 
-	const handleSave = async (guest, payload) => {
+	const handleSave = async (guest, formData) => {
 		setSaving(guest?._id ?? guest?.id ?? "new");
 		setError(null);
 		try {
+			const productId = formData.product || (products[0]?.id ?? "");
+			const quantity = formData.quantity ? Number(formData.quantity) : 1;
+			const data = {
+				name: formData.name || undefined,
+				email: formData.email || undefined,
+				sale: id,
+				products: Array.from({ length: quantity }, () => ({
+					product: productId,
+				})),
+			};
 			const guestId = guest?._id ?? guest?.id;
 			if (guestId) {
-				await put(`/guests/${guestId}`, payload);
-				setGuests((prev) =>
-					prev.map((g) => {
-						const gid = g._id ?? g.id;
-						if (gid !== guestId) return g;
-						return { ...g, ...payload };
-					}),
-				);
+				await put(`/giveaways/${guestId}`, data);
+				await fetchGuests();
 				closePanel();
 			} else {
-				const res = await post(`/sales/${id}/guests`, payload);
-				setGuests((prev) => [...prev, res.data ?? payload]);
-				setTotal((t) => t + 1);
+				await post("/giveaways", data);
+				await fetchGuests();
 				closePanel();
 			}
 		} catch (err) {
@@ -139,9 +141,8 @@ const SaleGuests = ({ sale }) => {
 		setDeleting(guestId);
 		setError(null);
 		try {
-			await del(`/guests/${guestId}`);
-			setGuests((prev) => prev.filter((g) => (g._id ?? g.id) !== guestId));
-			setTotal((t) => Math.max(0, t - 1));
+			await del(`/giveaways/${guestId}`);
+			await fetchGuests();
 			closePanel();
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedDeleteGuest"));
@@ -332,12 +333,12 @@ const SaleGuests = ({ sale }) => {
 								}
 							/>
 						</div>
-						<Pagination
+						{/* <Pagination
 							total={total}
 							limit={LIMIT}
 							page={page}
 							onPageChange={setPage}
-						/>
+						/> */}
 					</div>
 				)}
 			</div>
@@ -385,14 +386,12 @@ const GuestPanel = ({
 
 	const onFormSubmit = (formData) => {
 		const productId = formData.product || (products[0]?.id ?? "");
-		const productMatch = products.find((p) => p.id === productId);
-		const payload = {
+		onSave(guest, {
 			name: formData.name || undefined,
 			email: formData.email || undefined,
-			product: productId || productMatch?.name || formData.product,
-			count: formData.quantity ? Number(formData.quantity) : 1,
-		};
-		onSave(guest, payload);
+			product: productId,
+			quantity: formData.quantity ? Number(formData.quantity) : 1,
+		});
 	};
 
 	const productOptions = products.map((p) => ({

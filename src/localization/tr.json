@@ -473,6 +473,7 @@
 	"form.channel.link": "Bağlantı",
 	"form.channel.confirmDelete": "Bu kanalı silmek istiyor musunuz?",
 	"form.channel.default": "Varsayılan",
+	"form.channel.baseSaleName": "Varsayılan Kanal",
 	"form.channel.open": "Aç",
 	"form.channel.newChannel": "Yeni kanal",
 	"form.channel.editChannel": "Kanalı düzenle",

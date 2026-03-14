@@ -474,6 +474,7 @@
 	"form.channel.link": "Link",
 	"form.channel.confirmDelete": "Delete this channel?",
 	"form.channel.default": "Default",
+	"form.channel.baseSaleName": "Default Channel",
 	"form.channel.open": "Open",
 	"form.channel.newChannel": "New channel",
 	"form.channel.editChannel": "Edit channel",

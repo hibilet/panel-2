@@ -315,7 +315,9 @@ export const channelColumns = (getChannelLink, isBaseChannel, CopyButton) => [
 		render: (r) => (
 			<div className="flex items-center gap-2">
 				<span className="font-medium text-slate-900">
-					{r.name || strings("common.untitled")}
+					{isBaseChannel(r)
+						? strings("form.channel.baseSaleName")
+						: (r.name || strings("common.untitled"))}
 				</span>
 				{isBaseChannel(r) && (
 					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
