@@ -1,6 +1,6 @@
-export { default as Input } from './Input'
-export { default as Select } from './Select'
-export { default as Textarea } from './Textarea'
-export { default as Checkbox } from './Checkbox'
-export { default as FormSection } from './FormSection'
-export { default as AsyncSearchInput } from './AsyncSearchInput'
+export { default as Input } from "./Input";
+export { default as Select } from "./Select";
+export { default as Textarea } from "./Textarea";
+export { default as Checkbox } from "./Checkbox";
+export { default as FormSection } from "./FormSection";
+export { default as AsyncSearchInput } from "./AsyncSearchInput";
