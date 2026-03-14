@@ -1,17 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
-
+import { useCallback, useEffect, useMemo, useState } from "react";
+import EventReportCard from "../../../components/EventReportCard";
+import { useApp } from "../../../context";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
-import { useApp } from "../../../context";
 import { toId } from "../../../utils/object";
-import EventReportCard from "../../../components/EventReportCard";
 
 const getVenueName = (sale, venues) => {
 	const v = sale?.venue;
 	if (typeof v === "object" && v?.name) return v.name;
 	const id = toId(v);
-	return venues?.find((x) => x.id === id)?.name ?? (typeof v === "string" ? v : null) ?? "—";
+	return (
+		venues?.find((x) => x.id === id)?.name ??
+		(typeof v === "string" ? v : null) ??
+		"—"
+	);
 };
 
 const Live = () => {
@@ -44,7 +47,9 @@ const Live = () => {
 					const id = sale.id ?? sale._id;
 					const [readersRes, attendeesRes, readRes] = await Promise.all([
 						get(`/accounts/search?sale=${id}&type=account.reader`),
-						get(`/sales/${id}/reservations?status=success,read&limit=10000&skip=0`),
+						get(
+							`/sales/${id}/reservations?status=success,read&limit=10000&skip=0`,
+						),
 						get(`/sales/${id}/reservations?status=read&limit=10000&skip=0`),
 					]);
 					const readers = readersRes?.data ?? [];
@@ -95,9 +100,16 @@ const Live = () => {
 					{strings("page.live.title")}
 				</h1>
 				<div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-12 text-center text-slate-600">
-					<i className="fa-solid fa-tv mb-4 text-4xl text-slate-400" aria-hidden />
-					<p className="text-lg font-medium">{strings("page.live.noEventsToday")}</p>
-					<p className="mt-2 text-sm">{strings("page.live.noEventsTodayDesc")}</p>
+					<i
+						className="fa-solid fa-tv mb-4 text-4xl text-slate-400"
+						aria-hidden
+					/>
+					<p className="text-lg font-medium">
+						{strings("page.live.noEventsToday")}
+					</p>
+					<p className="mt-2 text-sm">
+						{strings("page.live.noEventsTodayDesc")}
+					</p>
 				</div>
 			</div>
 		);

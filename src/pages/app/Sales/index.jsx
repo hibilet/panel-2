@@ -1,11 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
-
-import { get, del } from "../../../lib/client";
-import strings from "../../../localization";
-import { useApp } from "../../../context";
-import DataTable from "../../../components/tables/DataTable";
 import { salesColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
+import { useApp } from "../../../context";
+import { del, get } from "../../../lib/client";
+import strings from "../../../localization";
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({

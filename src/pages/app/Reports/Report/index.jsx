@@ -1,17 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
-
+import EventReportCard from "../../../../components/EventReportCard";
+import { useApp } from "../../../../context";
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
-import { useApp } from "../../../../context";
 import { toId } from "../../../../utils/object";
-import EventReportCard from "../../../../components/EventReportCard";
 
 const getVenueName = (sale, venues) => {
 	const v = sale?.venue;
 	if (typeof v === "object" && v?.name) return v.name;
 	const id = toId(v);
-	return venues?.find((x) => x.id === id)?.name ?? (typeof v === "string" ? v : null) ?? "—";
+	return (
+		venues?.find((x) => x.id === id)?.name ??
+		(typeof v === "string" ? v : null) ??
+		"—"
+	);
 };
 
 const Report = () => {

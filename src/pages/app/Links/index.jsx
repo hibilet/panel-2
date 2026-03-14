@@ -1,13 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
-
+import SlidePanel from "../../../components/shared/SlidePanel";
+import { linksColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
+import { useApp } from "../../../context";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
-import DataTable from "../../../components/tables/DataTable";
-import { linksColumns } from "../../../components/tables/columns";
-import SlidePanel from "../../../components/shared/SlidePanel";
 import LinkPanel from "./Link";
-import { useApp } from "../../../context";
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({

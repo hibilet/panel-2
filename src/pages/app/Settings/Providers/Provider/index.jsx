@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, post, put } from "../../../../../lib/client";
 import { Input, Select } from "../../../../../components/inputs";
+import { get, post, put } from "../../../../../lib/client";
 import strings from "../../../../../localization";
 
 const COUNTRY_OPTIONS = [

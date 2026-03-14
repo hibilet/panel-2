@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, put, post } from "../../../../lib/client";
 import { Input, Select } from "../../../../components/inputs";
+import { get, post, put } from "../../../../lib/client";
+import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings from "../../../../localization";
-import { getToken, setToken, setHotSwapToken } from "../../../../lib/storage";
 
 const STATUS_OPTIONS = [
 	{ value: "active", label: strings("common.active") },

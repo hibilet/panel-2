@@ -1,13 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-
-import { getStoredTheme, setTheme } from "../../../lib/theme";
-import { getLang, setLang, deleteToken } from "../../../lib/storage";
-import strings, { locales } from "../../../localization";
+import SlidePanel from "../../../components/shared/SlidePanel";
 import { useApp } from "../../../context";
+import { deleteToken, getLang, setLang } from "../../../lib/storage";
+import { getStoredTheme, setTheme } from "../../../lib/theme";
+import strings, { locales } from "../../../localization";
 import LoginQRModal from "./LoginQR";
 import MailingPanel from "./Mailing";
-import SlidePanel from "../../../components/shared/SlidePanel";
 
 const LANG_OPTIONS = locales.map((code) => ({
 	value: code,

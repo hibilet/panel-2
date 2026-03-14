@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-
+import { salesColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
-import DataTable from "../../../components/tables/DataTable";
-import { salesColumns } from "../../../components/tables/columns";
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({

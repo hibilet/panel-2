@@ -1,14 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
 import dayjs from "dayjs";
+import { useEffect, useMemo, useState } from "react";
 import {
-	LineChart,
+	CartesianGrid,
+	Legend,
 	Line,
+	LineChart,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	ResponsiveContainer,
-	Legend,
 } from "recharts";
 import strings, { formatCurrency } from "../../localization";
 

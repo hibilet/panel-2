@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, put, post } from "../../../../lib/client";
 import { Input } from "../../../../components/inputs";
 import { PanelHeader } from "../../../../components/shared";
+import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const MailingPanel = ({ onClose }) => {

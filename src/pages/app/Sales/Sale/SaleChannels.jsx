@@ -1,24 +1,23 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams } from "wouter";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
-	PieChart,
-	Pie,
-	Cell,
-	BarChart,
 	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Pie,
+	PieChart,
+	ResponsiveContainer,
+	Tooltip,
 	XAxis,
 	YAxis,
-	CartesianGrid,
-	Tooltip,
-	ResponsiveContainer,
 } from "recharts";
-
-import { get, post, put, del } from "../../../../lib/client";
+import { useParams } from "wouter";
 import { Input } from "../../../../components/inputs";
 import { EmptyState, Modal, SlidePanel } from "../../../../components/shared";
-import DataTable from "../../../../components/tables/DataTable";
 import { channelColumns } from "../../../../components/tables/columns";
+import DataTable from "../../../../components/tables/DataTable";
+import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const CHART_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -57,7 +56,7 @@ const getChannelDisplayName = (channel) => {
 	if (!channel) return strings("form.channel.channel");
 	return isBaseChannel(channel)
 		? strings("form.channel.baseSaleName")
-		: (channel.name || strings("form.channel.editChannel"));
+		: channel.name || strings("form.channel.editChannel");
 };
 
 const SaleChannels = () => {

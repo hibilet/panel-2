@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import dayjs from "dayjs";
 import { useTour } from "@reactour/tour";
+import dayjs from "dayjs";
+import { useEffect, useState } from "react";
 
 import { Link } from "wouter";
-import { get } from "../../../lib/client";
-import { useApp } from "../../../context";
 import SalesChart from "../../../components/charts/SalesChart";
-import DataTable from "../../../components/tables/DataTable";
-import { transactionsColumns } from "../../../components/tables/columns";
-import WeeklyEventSaleMatrix from "../../../components/tables/WeeklyEventSaleMatrix";
 import { StatCard } from "../../../components/shared";
+import { transactionsColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
+import WeeklyEventSaleMatrix from "../../../components/tables/WeeklyEventSaleMatrix";
+import { useApp } from "../../../context";
+import { get } from "../../../lib/client";
 import strings, { formatCurrency } from "../../../localization";
 
 const buildChartDataFromApi = (apiData = [], year, month) => {

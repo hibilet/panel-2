@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-
+import { Modal, SlidePanel } from "../../../components/shared";
+import { transactionsColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
+import Pagination from "../../../components/tables/Pagination";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
-import Pagination from "../../../components/tables/Pagination";
-import DataTable from "../../../components/tables/DataTable";
-import { transactionsColumns } from "../../../components/tables/columns";
-import { Modal, SlidePanel } from "../../../components/shared";
 import TransactionPanel from "./Transaction";
 
 const LIMIT = 25;

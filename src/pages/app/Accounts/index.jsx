@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useParams } from "wouter";
-
+import { Modal, SlidePanel } from "../../../components/shared";
+import { accountsColumns } from "../../../components/tables/columns";
+import DataTable from "../../../components/tables/DataTable";
+import Pagination from "../../../components/tables/Pagination";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
-import Pagination from "../../../components/tables/Pagination";
-import DataTable from "../../../components/tables/DataTable";
-import { accountsColumns } from "../../../components/tables/columns";
-import { Modal, SlidePanel } from "../../../components/shared";
 import AccountPanel from "./Account";
 
 const LIMIT = 25;
