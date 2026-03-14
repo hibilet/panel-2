@@ -16,7 +16,7 @@ const bucketKey = (d) =>
 	Math.floor(dayjs(d).valueOf() / 300000) * 300000;
 
 /**
- * Builds timeline data: 1 hour before event start to 1 hour after (5-min intervals).
+ * Builds timeline data: 1 hour before event start to 2 hours after (5-min intervals).
  * Merges API read-by-interval data into the timeline.
  */
 const buildTimelineData = (eventStart, apiData = []) => {
@@ -26,7 +26,7 @@ const buildTimelineData = (eventStart, apiData = []) => {
 	);
 
 	const result = [];
-	for (let i = 0; i <= 24; i++) {
+	for (let i = 0; i <= 36; i++) {
 		const interval = start.add(i * 5, "minute");
 		const key = bucketKey(interval);
 		const count = byBucket[key] ?? 0;

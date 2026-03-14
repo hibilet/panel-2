@@ -1,13 +1,48 @@
-import { Link } from "wouter";
+import { useEffect, useState } from "react";
+import { useLocation } from "wouter";
+
+import { get } from "../../../lib/client";
 import strings from "../../../localization";
+import DataTable from "../../../components/tables/DataTable";
+import { salesColumns } from "../../../components/tables/columns";
+
+const mapRows = (rows) =>
+	(rows ?? []).map((row) => ({
+		...row,
+		startDate: row.start ?? row.startDate,
+	}));
 
 const Reports = () => {
-	const reports = []; // placeholder
+	const [, setLocation] = useLocation();
+	const [pastSales, setPastSales] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(null);
+
+	useEffect(() => {
+		setLoading(true);
+		setError(null);
+		get("/sales?past=true&revenue=true")
+			.then((res) => setPastSales(mapRows(res.data ?? [])))
+			.catch((err) =>
+				setError(err?.message ?? strings("error.failedLoadPastEvents")),
+			)
+			.finally(() => setLoading(false));
+	}, []);
 
 	return (
-		<div className="mx-auto max-w-5xl">
+		<div className="mx-auto max-w-5xl space-y-6">
+			<h1 className="text-2xl font-semibold text-slate-900">
+				{strings("page.reports.title")}
+			</h1>
+
+			{error && (
+				<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+					{error}
+				</div>
+			)}
+
 			<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-				{reports.length === 0 ? (
+				{pastSales.length === 0 && !loading ? (
 					<div className="p-8 text-center text-slate-500">
 						<i
 							className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300"
@@ -16,22 +51,13 @@ const Reports = () => {
 						<p>{strings("page.reports.noReports")}</p>
 					</div>
 				) : (
-					<ul className="divide-y divide-slate-200">
-						{reports.map((report) => (
-							<li key={report.id}>
-								<Link
-									href={`/reports/${report.id}`}
-									className="flex items-center justify-between p-4 hover:bg-slate-50"
-								>
-									<span>{report.id}</span>
-									<i
-										className="fa-solid fa-chevron-right text-slate-400"
-										aria-hidden
-									/>
-								</Link>
-							</li>
-						))}
-					</ul>
+					<DataTable
+						data={pastSales}
+						columns={salesColumns(false)}
+						getRowKey={(r) => r.id ?? r.name}
+						onRowClick={(row) => row.id && setLocation(`/reports/${row.id}`)}
+						loading={loading}
+					/>
 				)}
 			</div>
 		</div>
