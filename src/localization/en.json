@@ -10,6 +10,7 @@
 	"nav.transactions": "Transactions",
 	"nav.reports": "Reports",
 	"nav.settings": "Settings",
+	"nav.live": "Live Events",
 	"nav.menu": "Menu",
 	"nav.backToAdmin": "Back to Admin",
 
@@ -192,6 +193,13 @@
 	"page.sale.tab.coupons": "Coupons",
 	"page.sale.title": "Sale",
 	"page.sale.new": "New",
+
+	"page.live.title": "Live Events",
+	"page.live.noEventsToday": "No events today",
+	"page.live.noEventsTodayDesc": "The Live tab appears when you have events scheduled for today.",
+	"page.live.readerAccounts": "Reader accounts",
+	"page.live.attendeesRead": "Attendees / Read",
+	"page.live.attendeesReadValue": "$0 / $1",
 
 	"page.transactions.title": "Transactions",
 	"page.transactions.details": "Transaction Details",

@@ -1,14 +1,23 @@
-import { useState } from "react";
+import dayjs from "dayjs";
+import { useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import strings from "../../localization";
 import { useApp } from "../../context";
 import {
+	deleteHotSwapToken,
 	getHotSwapToken,
 	setToken,
-	deleteHotSwapToken,
 } from "../../lib/storage";
+import strings from "../../localization";
 
 const navItems = [
+	{
+		path: "/live",
+		labelKey: "nav.live",
+		icon: "fa-bolt",
+		tourId: "nav-live",
+		acl: ["merchant", "admin"],
+		liveOnly: true,
+	},
 	{
 		path: "/",
 		labelKey: "nav.dashboard",
@@ -62,8 +71,18 @@ const navItems = [
 const Navbar = () => {
 	const [location] = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
-	const { account } = useApp();
+	const { account, sales } = useApp();
 	const hotSwapToken = getHotSwapToken();
+
+	const today = dayjs().format("YYYY-MM-DD");
+	const hasEventsToday = useMemo(
+		() =>
+			(sales ?? []).some((s) => {
+				const d = s.startDate ?? s.start;
+				return d && dayjs(d).format("YYYY-MM-DD") === today;
+			}),
+		[sales, today],
+	);
 
 	const handleBackToAdmin = () => {
 		const adminToken = getHotSwapToken();
@@ -77,7 +96,7 @@ const Navbar = () => {
 		path === "/" ? location === path : location.startsWith(path),
 	);
 
-	const NavLink = ({ path, label, icon, isActive, tourId }) => (
+	const NavLink = ({ path, label, icon, isActive, tourId, hasBeating }) => (
 		<Link
 			href={path}
 			role="tab"
@@ -95,7 +114,10 @@ const Navbar = () => {
 				}
       `}
 		>
-			<i className={`fa-solid ${icon}`} aria-hidden />
+			<i
+				className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
+				aria-hidden
+			/>
 			<span>{label}</span>
 		</Link>
 	);
@@ -122,7 +144,8 @@ const Navbar = () => {
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
 					<div className="hidden md:flex items-center gap-2" role="tablist">
-						{navItems.map(({ path, labelKey, icon, tourId, acl }) => {
+						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly }) => {
+							if (liveOnly && !hasEventsToday) return null;
 							const isActive =
 								path === "/" ? location === path : location.startsWith(path);
 							return acl.includes(account?.type?.split(".")[1]) ? (
@@ -133,6 +156,7 @@ const Navbar = () => {
 									icon={icon}
 									isActive={isActive}
 									tourId={tourId}
+									hasBeating={liveOnly && hasEventsToday}
 								/>
 							) : null;
 						})}
@@ -170,7 +194,8 @@ const Navbar = () => {
 							className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"}`}
 						>
 							<div className="py-2">
-								{navItems.map(({ path, labelKey, icon, tourId }) => {
+								{navItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
+									if (liveOnly && !hasEventsToday) return null;
 									const isActive =
 										path === "/"
 											? location === path
@@ -183,6 +208,7 @@ const Navbar = () => {
 												icon={icon}
 												isActive={isActive}
 												tourId={tourId}
+												hasBeating={liveOnly && hasEventsToday}
 											/>
 										</div>
 									);

@@ -11,6 +11,7 @@
 	"nav.reports": "Raporlar",
 	"nav.settings": "Ayarlar",
 	"nav.menu": "Menü",
+	"nav.live": "Anlık Etkinlikler",
 	"nav.backToAdmin": "Admin'e Dön",
 
 	"tour.start": "Rehberli turu başlat",
@@ -191,6 +192,13 @@
 	"page.sale.tab.coupons": "Kuponlar",
 	"page.sale.title": "Satış",
 	"page.sale.new": "Yeni",
+
+	"page.live.title": "Anlık Etkinlikler",
+	"page.live.noEventsToday": "Bugün etkinlik yok",
+	"page.live.noEventsTodayDesc": "Bugün için planlanmış etkinlikleriniz olduğunda Canlı sekmesi görünür.",
+	"page.live.readerAccounts": "Okuyucu hesapları",
+	"page.live.attendeesRead": "Katılımcılar / Okunan",
+	"page.live.attendeesReadValue": "$0 / $1",
 
 	"page.transactions.title": "İşlemler",
 	"page.transactions.details": "İşlem Detayları",
