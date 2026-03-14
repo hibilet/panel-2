@@ -124,7 +124,7 @@ const Navbar = () => {
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-			<div className="mx-auto max-w-5xl py-4 md:px-6 lg:px-0">
+			<div className="mx-auto max-w-5xl px-4 py-4 md:px-6 lg:px-0">
 				<div className="flex items-center gap-3">
 					{hotSwapToken && (
 						<button
@@ -193,7 +193,7 @@ const Navbar = () => {
 							aria-labelledby="nav-trigger"
 							className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"}`}
 						>
-							<div className="py-2">
+							<div className="px-4 py-4">
 								{navItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
 									if (liveOnly && !hasEventsToday) return null;
 									const isActive =
