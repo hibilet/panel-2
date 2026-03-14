@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "wouter";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, post, put, del } from "../../../../lib/client";
+import { useParams } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
-import DataTable from "../../../../components/tables/DataTable";
 import { readerColumns } from "../../../../components/tables/columns";
+import DataTable from "../../../../components/tables/DataTable";
+import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const QR_API = "https://api.qrserver.com/v1/create-qr-code/";
@@ -410,7 +409,7 @@ const ReaderLinkDialog = ({ reader, onClose }) => {
 	};
 
 	const qrUrl = token
-		? `${QR_API}?size=200x200&data=${encodeURIComponent(token)}`
+		? `${QR_API}?size=600x600&margin=0&data=${encodeURIComponent(token)}`
 		: null;
 
 	return (
@@ -462,7 +461,7 @@ const ReaderLinkDialog = ({ reader, onClose }) => {
 									<img
 										alt={strings("form.reader.qrCodeAlt")}
 										src={qrUrl}
-										className="my-8 w-[35%] min-w-[140px] invert"
+										className="my-8 w-[35%] min-w-[140px] border-0"
 										style={{ imageRendering: "pixelated" }}
 									/>
 								)}
