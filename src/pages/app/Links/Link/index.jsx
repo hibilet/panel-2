@@ -1,16 +1,15 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import dayjs from "dayjs";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, post, put } from "../../../../lib/client";
 import {
+	AsyncSearchInput,
 	Input,
 	Textarea,
-	AsyncSearchInput,
 } from "../../../../components/inputs";
-import DataTable from "../../../../components/tables/DataTable";
 import { linkSalesColumns } from "../../../../components/tables/columns";
+import DataTable from "../../../../components/tables/DataTable";
+import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
-import dayjs from "dayjs";
 
 const sortSalesByStart = (sales) =>
 	[...(sales ?? [])]
@@ -19,12 +18,13 @@ const sortSalesByStart = (sales) =>
 
 const defaultValues = { title: "", slug: "", description: "", image: "" };
 
-const LinkPanel = ({ id, onClose, onCreated }) => {
+const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
 	const [error, setError] = useState(null);
 	const [saving, setSaving] = useState(false);
+	const [archiving, setArchiving] = useState(false);
 	const [sales, setSales] = useState([]);
 	const fileInputRef = useRef(null);
 
@@ -86,20 +86,38 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
 		setSaving(true);
 		setError(null);
 		try {
-			const payload = { ...formData, sales: sales.map((s) => s.id) };
+			const linkData = {
+				...formData,
+				sales: sales.map((s) => s.id),
+			};
 			if (isNew) {
-				const res = await post("/links", payload);
+				const res = await post("/links", linkData);
 				const created = res.data ?? null;
 				setData(created);
 				if (created?.id) onCreated ? onCreated(created.id) : onClose?.();
 			} else {
-				await put(`/links/${id}`, { ...data, ...payload });
+				await put(`/links/${id}`, { ...data, ...linkData });
 				setData((prev) => (prev ? { ...prev, ...formData, sales } : null));
 			}
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const onArchive = async () => {
+		if (isNew || !data?.id) return;
+		if (!window.confirm(strings("form.link.confirmArchive"))) return;
+		setArchiving(true);
+		setError(null);
+		try {
+			await put(`/links/${id}`, { status: "archived" });
+			onClose?.();
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setArchiving(false);
 		}
 	};
 
@@ -275,20 +293,42 @@ const LinkPanel = ({ id, onClose, onCreated }) => {
 
 							<hr className="border-slate-200" />
 
-							<button
-								type="submit"
-								disabled={saving}
-								className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
-							>
-								{saving ? (
-									<>
-										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
-										{strings("common.saving")}
-									</>
-								) : (
-									strings("form.sale.save")
+							<div className="flex items-center gap-2">
+								<button
+									type="submit"
+									disabled={saving}
+									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+								>
+									{saving ? (
+										<>
+											<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+											{strings("common.saving")}
+										</>
+									) : (
+										strings("form.sale.save")
+									)}
+								</button>
+								{!isNew && (
+									<button
+										type="button"
+										onClick={onArchive}
+										disabled={archiving || saving}
+										className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+									>
+										{archiving ? (
+											<>
+												<i
+													className="fa-solid fa-spinner fa-spin"
+													aria-hidden
+												/>
+												{strings("common.saving")}
+											</>
+										) : (
+											strings("common.archive")
+										)}
+									</button>
 								)}
-							</button>
+							</div>
 						</form>
 					</main>
 				) : null}

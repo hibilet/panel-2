@@ -58,6 +58,7 @@
 	"common.inactive": "Pasif",
 	"common.ariaDelete": "Sil",
 	"common.ariaClose": "Paneli kapat",
+	"common.archive": "Arşivle",
 
 	"error.failedLoad": "Yüklenemedi",
 	"error.failedSave": "Kaydedilemedi",
@@ -212,6 +213,8 @@
 	"page.links.title": "Bağlantılar",
 	"page.links.details": "Bağlantı Detayları",
 	"page.links.createNew": "Yeni Bağlantı Oluştur",
+	"page.links.showArchived": "Arşivlenmiş Bağlantıları Göster",
+	"page.links.hideArchived": "Arşivlenmiş Bağlantıları Gizle",
 
 	"page.reports.title": "Raporlar",
 	"page.reports.noReports": "Henüz rapor yok",
@@ -384,6 +387,7 @@
 	"form.link.sales": "Satışlar",
 	"form.link.startDate": "Başlangıç Tarihi",
 	"form.link.confirmRemoveSale": "Bu satışı bağlantıdan kaldırmak istiyor musunuz?",
+	"form.link.confirmArchive": "Bu bağlantıyı arşivlemek istiyor musunuz?",
 
 	"form.ticket.ticketTypes": "Bilet türleri",
 	"form.ticket.ticketTypeCount": "$0 bilet türü",

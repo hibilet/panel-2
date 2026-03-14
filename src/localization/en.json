@@ -58,6 +58,7 @@
 	"common.inactive": "Inactive",
 	"common.ariaDelete": "Delete",
 	"common.ariaClose": "Close panel",
+	"common.archive": "Archive",
 
 	"error.failedLoad": "Failed to load",
 	"error.failedSave": "Failed to save",
@@ -213,6 +214,8 @@
 	"page.links.title": "Links",
 	"page.links.details": "Link Details",
 	"page.links.createNew": "Create New Link",
+	"page.links.showArchived": "Show Archived Links",
+	"page.links.hideArchived": "Hide Archived Links",
 
 	"page.reports.title": "Reports",
 	"page.reports.noReports": "No reports yet",
@@ -385,6 +388,7 @@
 	"form.link.sales": "Sales",
 	"form.link.startDate": "Start Date",
 	"form.link.confirmRemoveSale": "Remove this sale from the link?",
+	"form.link.confirmArchive": "Archive this link?",
 
 	"form.ticket.ticketTypes": "Ticket types",
 	"form.ticket.ticketTypeCount": "$0 ticket type",
