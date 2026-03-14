@@ -1,4 +1,5 @@
 import { getToken } from "./storage";
+import { showToast } from "./toastStore";
 
 const api = import.meta.env.VITE_API_URL;
 
@@ -16,6 +17,17 @@ const handler = async (res) => {
 	}
 };
 
+const withToast = (promise) =>
+	promise
+		.then((data) => {
+			showToast("success", "Success");
+			return data;
+		})
+		.catch((err) => {
+			showToast("error", "An Error Occurred");
+			throw err;
+		});
+
 const get = (endpoint, header = null) =>
 	fetch(api + endpoint, {
 		method: "get",
@@ -23,24 +35,30 @@ const get = (endpoint, header = null) =>
 	}).then(handler);
 
 const post = (endpoint, form = null, header = null) =>
-	fetch(api + endpoint, {
-		method: "post",
-		body: JSON.stringify(form),
-		headers: headerBuilder(header, form),
-	}).then(handler);
+	withToast(
+		fetch(api + endpoint, {
+			method: "post",
+			body: JSON.stringify(form),
+			headers: headerBuilder(header, form),
+		}).then(handler),
+	);
 
 const put = (endpoint, form = null, header = null) =>
-	fetch(api + endpoint, {
-		method: "put",
-		body: JSON.stringify(form),
-		headers: headerBuilder(header, form),
-	}).then(handler);
+	withToast(
+		fetch(api + endpoint, {
+			method: "put",
+			body: JSON.stringify(form),
+			headers: headerBuilder(header, form),
+		}).then(handler),
+	);
 
 const del = (endpoint, form = null, header = null) =>
-	fetch(api + endpoint, {
-		method: "delete",
-		body: JSON.stringify(form),
-		headers: headerBuilder(header, form),
-	}).then(handler);
+	withToast(
+		fetch(api + endpoint, {
+			method: "delete",
+			body: JSON.stringify(form),
+			headers: headerBuilder(header, form),
+		}).then(handler),
+	);
 
 export { api as API_BASE_URL, del, get, post, put };

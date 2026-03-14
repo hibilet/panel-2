@@ -166,3 +166,23 @@
 .animate-heartbeat {
 	animation: heartbeat 1.5s ease-in-out infinite;
 }
+
+/* Toast opacity animation - fade in, hold, fade out over duration */
+@keyframes toast-fade {
+	0% {
+		opacity: 0;
+	}
+	8% {
+		opacity: 1;
+	}
+	92% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+.animate-toast {
+	animation: toast-fade 4s ease-in-out forwards;
+}

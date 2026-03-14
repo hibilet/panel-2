@@ -1,5 +1,8 @@
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { useEffect, useRef, useState } from "react";
+
+dayjs.extend(utc);
 import { useForm } from "react-hook-form";
 import {
 	Checkbox,
@@ -51,9 +54,9 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 		if (!sale || appLoading) return;
 		reset({
 			...sale,
-			start: dayjs(sale?.start).format("YYYY-MM-DDTHH:mm"),
-			end: dayjs(sale?.end).format("YYYY-MM-DDTHH:mm"),
-			stopSaleAt: dayjs(sale?.stopSaleAt).format("YYYY-MM-DDTHH:mm"),
+			start: dayjs.utc(sale?.start).local().format("YYYY-MM-DDTHH:mm"),
+			end: dayjs.utc(sale?.end).local().format("YYYY-MM-DDTHH:mm"),
+			stopSaleAt: dayjs.utc(sale?.stopSaleAt).local().format("YYYY-MM-DDTHH:mm"),
 			venue: toId(sale?.venue),
 			plan: toId(sale?.plan),
 			agreement: toId(sale?.agreement),
