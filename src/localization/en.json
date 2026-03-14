@@ -299,6 +299,12 @@
 	"form.sale.rules": "Rules",
 	"form.sale.rulesPlaceholder": "Please provide rules...",
 	"form.sale.save": "💾 Save",
+	"form.sale.eventDetails": "Event Details",
+	"form.sale.venueDetails": "Venue Details",
+	"form.sale.paymentInformation": "Payment Information",
+	"form.sale.trackingAndAdvertising": "Tracking and Advertising",
+	"form.sale.comboTicketAndLogo": "Combo Ticket and Logo",
+	"form.sale.eventRules": "Event Rules",
 
 	"sale.eventName": "Event Name",
 	"sale.eventNamePlaceholder": "Eg: Chillout Festival 2024",

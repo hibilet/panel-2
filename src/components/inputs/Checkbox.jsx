@@ -1,38 +1,26 @@
 import { forwardRef } from "react";
 
 const Checkbox = forwardRef(
-	(
-		{
-			label,
-			id,
-			name,
-			checked = false,
-			onChange,
-			onBlur,
-			disabled,
-			className = "",
-			error,
-		},
-		ref,
-	) => {
+	({ label, id, name, disabled, className = "", error, ...rest }, ref) => {
 		const inputId = id ?? name;
 		return (
-			<div>
-				<label className="flex cursor-pointer items-center">
+			<div className={`py-2 ${className}`.trim()}>
+				<label
+					className={`flex items-center ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
+					htmlFor={inputId}
+				>
 					<input
 						ref={ref}
 						id={inputId}
 						name={name}
 						type="checkbox"
-						{...(checked !== undefined ? { checked } : {})}
-						onChange={onChange}
-						onBlur={onBlur}
 						disabled={disabled}
-						className={`mr-2 h-4 w-4 rounded border-slate-300 ${className}`.trim()}
+						className="mr-2 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 disabled:cursor-not-allowed"
 						aria-invalid={!!error}
 						aria-describedby={error ? `${inputId}-error` : undefined}
+						{...rest}
 					/>
-					<span className="text-sm text-slate-700">{label}</span>
+					{label && <span className="text-sm text-slate-700">{label}</span>}
 				</label>
 				{error && (
 					<p

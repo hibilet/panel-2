@@ -1,15 +1,15 @@
-import { useState, useEffect, useCallback } from "react";
-import { Switch, Route, Link, useLocation, useParams } from "wouter";
+import { useCallback, useEffect, useState } from "react";
+import { Link, Route, Switch, useLocation, useParams } from "wouter";
 
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
-import SaleBasic from "./SaleBasic";
-import SaleTickets from "./SaleTickets";
-import SaleChannels from "./SaleChannels";
 import SaleAttendees from "./SaleAttendees";
+import SaleBasic from "./SaleBasic";
+import SaleChannels from "./SaleChannels";
+import SaleCoupons from "./SaleCoupons";
 import SaleGuests from "./SaleGuests";
 import SaleReaders from "./SaleReaders";
-import SaleCoupons from "./SaleCoupons";
+import SaleTickets from "./SaleTickets";
 
 const tabItems = [
 	{ path: "basic", labelKey: "page.sale.tab.basic", icon: "fa-file-lines" },
@@ -99,31 +99,28 @@ const Sale = () => {
 					))}
 				</div>
 			</nav>
-
-			<div className="mt-6">
+			<main className="mt-6">
 				<Switch>
 					<Route
-						path="/sales/:id"
-						component={() => <SaleBasic sale={sale} onSave={fetchSale} />}
+						path="/sales/:id/basic"
+						component={(props) => (
+							<SaleBasic {...props} sale={sale} setSale={setSale} />
+						)}
 					/>
 					<Route
-						path="/sales/:id/basic"
-						component={() => <SaleBasic sale={sale} onSave={fetchSale} />}
+						path="/sales/:id"
+						component={(props) => (
+							<SaleBasic {...props} sale={sale} setSale={setSale} />
+						)}
 					/>
 					<Route path="/sales/:id/tickets" component={SaleTickets} />
 					<Route path="/sales/:id/channels" component={SaleChannels} />
-					<Route
-						path="/sales/:id/attendees"
-						component={() => <SaleAttendees sale={sale} />}
-					/>
-					<Route
-						path="/sales/:id/guests"
-						component={() => <SaleGuests sale={sale} />}
-					/>
+					<Route path="/sales/:id/attendees" component={SaleAttendees} />
+					<Route path="/sales/:id/guests" component={SaleGuests} />
 					<Route path="/sales/:id/readers" component={SaleReaders} />
 					<Route path="/sales/:id/coupons" component={SaleCoupons} />
 				</Switch>
-			</div>
+			</main>
 		</div>
 	);
 };

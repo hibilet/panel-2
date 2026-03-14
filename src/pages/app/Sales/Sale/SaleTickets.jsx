@@ -1,12 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
-import { useParams } from "wouter";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import { get, post, put, del } from "../../../../lib/client";
+import { useParams } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
-import DataTable from "../../../../components/tables/DataTable";
 import { ticketColumns } from "../../../../components/tables/columns";
+import DataTable from "../../../../components/tables/DataTable";
+import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const getInitialForm = (product) => {

@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 const baseClass =
-	"mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500";
+	"mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500 disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-500 disabled:cursor-not-allowed disabled:placeholder-slate-300";
 const labelClass = "block text-sm font-medium text-slate-700";
 
 const Input = forwardRef(
@@ -17,6 +17,7 @@ const Input = forwardRef(
 			disabled,
 			className = "",
 			error,
+			required,
 			...rest
 		},
 		ref,
@@ -28,6 +29,7 @@ const Input = forwardRef(
 				id={inputId}
 				name={name}
 				type={type}
+				required={required}
 				{...(value !== undefined && { value })}
 				onChange={onChange}
 				placeholder={placeholder}
