@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { get } from '../../../../lib/client'
 import dayjs from 'dayjs'
 import strings, { formatCurrency } from '../../../../localization'
+import { Link } from 'wouter'
 
 const STATUS_LABELS = {
   success: strings('status.success'),
@@ -121,6 +122,19 @@ const TransactionPanel = ({ id, onClose }) => {
             </section>
 
             <section>
+              <h3 className="mb-3 text-sm font-semibold text-slate-700">{strings('form.transaction.sale')}</h3>
+              <Link className="flex flex-col gap-2 rounded-lg border border-slate-200 bg-white p-4 shadow-sm mb-4" href={`/sales/${data?.sale?.id}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-base font-semibold text-slate-900">
+                    {data?.sale?.name ?? '—'}
+                  </div>
+                  <div className="text-sm text-slate-600">
+                    {data?.sale?.start
+                      ? dayjs(data.sale.start).format('D MMM YYYY, HH:mm')
+                      : '—'}
+                  </div>
+                </div>
+              </Link>
               <h3 className="mb-3 text-sm font-semibold text-slate-700">{strings('form.transaction.reservations')}</h3>
               {reservations.length === 0 ? (
                 <p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">

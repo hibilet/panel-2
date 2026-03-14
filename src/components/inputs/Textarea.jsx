@@ -7,7 +7,7 @@ const Textarea = forwardRef(({
   label,
   id,
   name,
-  value = '',
+  value,
   onChange,
   onBlur,
   placeholder,

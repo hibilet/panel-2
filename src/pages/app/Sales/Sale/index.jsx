@@ -1,6 +1,7 @@
+import { useState, useEffect, useCallback } from 'react'
 import { Switch, Route, Link, useLocation, useParams } from 'wouter'
 
-import { SaleProvider, useSale } from '../../../../context'
+import { get } from '../../../../lib/client'
 import strings from '../../../../localization'
 import SaleBasic from './SaleBasic'
 import SaleTickets from './SaleTickets'
@@ -40,61 +41,69 @@ const TabLink = ({ path, labelKey, icon, isActive, basePath }) => (
   </Link>
 )
 
-const SaleHeader = () => {
-  const { sale, isNew } = useSale()
-  const title = isNew ? strings('page.sale.new') : (sale?.name ?? strings('page.sale.title'))
-
-  return (
-    <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
-  )
-}
-
 const Sale = () => {
   const { id } = useParams()
   const [location] = useLocation()
+  const [sale, setSale] = useState(undefined) // undefined=loading, null=new/error, object=loaded
 
   const basePath = `/sales/${id}`
+  const isNew = id === 'new'
+
+  const fetchSale = useCallback(() => {
+    if (isNew) {
+      setSale(null) // null = new form
+      return
+    }
+    setSale(undefined) // loading
+    get(`/sales/${id}`)
+      .then((r) => setSale(r.data ?? null))
+      .catch(() => setSale(null))
+  }, [id, isNew])
+
+  useEffect(() => {
+    fetchSale()
+  }, [fetchSale])
 
   const isTabActive = (path) => {
     if (path === 'basic') return location === basePath || location === `${basePath}/`
     return location.startsWith(`${basePath}/${path}`)
   }
 
+  const title = isNew ? strings('page.sale.new') : (sale?.name ?? strings('page.sale.title'))
+
   return (
     <div className="mx-auto max-w-5xl">
-      <SaleProvider saleId={id}>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <SaleHeader />
-        </div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+      </div>
 
-        <nav aria-label="Sale sections" className="mt-4">
-          <div className="flex flex-wrap gap-2" role="tablist">
-            {tabItems.map(({ path, labelKey, icon }) => (
-              <TabLink
-                key={path}
-                path={path}
-                labelKey={labelKey}
-                icon={icon}
-                isActive={isTabActive(path)}
-                basePath={basePath}
-              />
-            ))}
-          </div>
-        </nav>
-
-        <div className="mt-6">
-          <Switch>
-            <Route path="/sales/:id" component={SaleBasic} />
-            <Route path="/sales/:id/basic" component={SaleBasic} />
-            <Route path="/sales/:id/tickets" component={SaleTickets} />
-            <Route path="/sales/:id/channels" component={SaleChannels} />
-            <Route path="/sales/:id/attendees" component={SaleAttendees} />
-            <Route path="/sales/:id/guests" component={SaleGuests} />
-            <Route path="/sales/:id/readers" component={SaleReaders} />
-            <Route path="/sales/:id/coupons" component={SaleCoupons} />
-          </Switch>
+      <nav aria-label="Sale sections" className="mt-4">
+        <div className="flex flex-wrap gap-2" role="tablist">
+          {tabItems.map(({ path, labelKey, icon }) => (
+            <TabLink
+              key={path}
+              path={path}
+              labelKey={labelKey}
+              icon={icon}
+              isActive={isTabActive(path)}
+              basePath={basePath}
+            />
+          ))}
         </div>
-      </SaleProvider>
+      </nav>
+
+      <div className="mt-6">
+        <Switch>
+          <Route path="/sales/:id" component={() => <SaleBasic sale={sale} onSave={fetchSale} />} />
+          <Route path="/sales/:id/basic" component={() => <SaleBasic sale={sale} onSave={fetchSale} />} />
+          <Route path="/sales/:id/tickets" component={SaleTickets} />
+          <Route path="/sales/:id/channels" component={SaleChannels} />
+          <Route path="/sales/:id/attendees" component={() => <SaleAttendees sale={sale} />} />
+          <Route path="/sales/:id/guests" component={() => <SaleGuests sale={sale} />} />
+          <Route path="/sales/:id/readers" component={SaleReaders} />
+          <Route path="/sales/:id/coupons" component={SaleCoupons} />
+        </Switch>
+      </div>
     </div>
   )
 }

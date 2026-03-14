@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams } from 'wouter'
 
 import { get } from '../../../../lib/client'
-import { useSale } from '../../../../context'
 import strings from '../../../../localization'
 import { PageHeader } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
@@ -47,10 +46,9 @@ const columns = [
   },
 ]
 
-const SaleAttendees = () => {
+const SaleAttendees = ({ sale }) => {
   const { id } = useParams()
   const printRef = useRef(null)
-  const { sale } = useSale()
 
   const [reservations, setReservations] = useState([])
   const [total, setTotal] = useState(0)

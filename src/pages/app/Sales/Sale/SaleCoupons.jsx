@@ -3,7 +3,6 @@ import { useParams } from 'wouter'
 import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
-import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
 import strings from '../../../../localization'
@@ -35,11 +34,15 @@ const getInitialForm = (coupon) => {
 
 const SaleCoupons = () => {
   const { id } = useParams()
-  const { channels, loading, isNew } = useSale()
+  const isNew = id === 'new'
 
   const [coupons, setCoupons] = useState([])
-  const [couponsLoading, setCouponsLoading] = useState(true)
+  const [channels, setChannels] = useState([])
+  const [couponsLoading, setCouponsLoading] = useState(!isNew)
+  const [channelsLoading, setChannelsLoading] = useState(!isNew)
   const [error, setError] = useState(null)
+
+  const loading = couponsLoading || channelsLoading
   const [panelCoupon, setPanelCoupon] = useState(null)
   const [saving, setSaving] = useState(null)
   const [deleting, setDeleting] = useState(null)
@@ -49,15 +52,27 @@ const SaleCoupons = () => {
 
   useEffect(() => {
     if (isNew) {
-      setCouponsLoading(false)
       setCoupons([])
+      setChannels([])
+      setCouponsLoading(false)
+      setChannelsLoading(false)
       return
     }
     setCouponsLoading(true)
-    get(`/sales/${id}/coupons`)
-      .then((r) => setCoupons(r.data ?? []))
+    setChannelsLoading(true)
+    Promise.all([
+      get(`/sales/${id}/coupons`).then((r) => r.data ?? []),
+      get(`/sales/${id}/channels`).then((r) => r.data ?? []),
+    ])
+      .then(([cps, chs]) => {
+        setCoupons(cps)
+        setChannels(chs)
+      })
       .catch((err) => setError(err?.message ?? strings('error.failedLoadCoupons')))
-      .finally(() => setCouponsLoading(false))
+      .finally(() => {
+        setCouponsLoading(false)
+        setChannelsLoading(false)
+      })
   }, [id, isNew])
 
   const closePanel = useCallback(() => setPanelCoupon(null), [])

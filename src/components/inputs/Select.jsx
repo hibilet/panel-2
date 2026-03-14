@@ -7,7 +7,7 @@ const Select = forwardRef(({
   label,
   id,
   name,
-  value = '',
+  value,
   onChange,
   onBlur,
   options = [],

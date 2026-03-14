@@ -7,6 +7,7 @@ import DataTable from '../../../components/tables/DataTable'
 import { linksColumns } from '../../../components/tables/columns'
 import SlidePanel from '../../../components/shared/SlidePanel'
 import LinkPanel from './Link'
+import { useApp } from '../../../context'
 
 const Links = () => {
   const [, setLocation] = useLocation()
@@ -14,6 +15,7 @@ const Links = () => {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const { account } = useApp();
 
   useEffect(() => {
     setError(null)
@@ -47,12 +49,14 @@ const Links = () => {
     <div className="mx-auto max-w-5xl space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-semibold text-slate-900">{strings('page.links.title')}</h1>
-        <Link
-          href="/links/new"
-          className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
-        >
-          {strings('page.links.createNew')}
-        </Link>
+        {account?.type === "merchant" && (
+          <Link
+            href="/links/new"
+            className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+          >
+            {strings('page.links.createNew')}
+          </Link>
+        )}
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <DataTable

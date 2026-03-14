@@ -2,8 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'wouter'
 import { useForm } from 'react-hook-form'
 
-import { post, put, del } from '../../../../lib/client'
-import { useSale } from '../../../../context'
+import { get, post, put, del } from '../../../../lib/client'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
@@ -33,8 +32,10 @@ const getInitialForm = (product) => {
 
 const SaleTickets = () => {
   const { id } = useParams()
-  const { products, setProducts, loading, isNew } = useSale()
+  const isNew = id === 'new'
 
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(!isNew)
   const [error, setError] = useState(null)
   const [panelProduct, setPanelProduct] = useState(null)
   const [saving, setSaving] = useState(null)
@@ -44,6 +45,19 @@ const SaleTickets = () => {
   const isAdding = panelProduct === 'new'
 
   const closePanel = useCallback(() => setPanelProduct(null), [])
+
+  useEffect(() => {
+    if (isNew) {
+      setProducts([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    get(`/sales/${id}/products`)
+      .then((r) => setProducts((r.data ?? []).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))))
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false))
+  }, [id, isNew])
 
   const handleSave = async (product, payload) => {
     setSaving(product?.id ?? 'new')

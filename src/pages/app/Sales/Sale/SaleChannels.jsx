@@ -15,7 +15,6 @@ import {
 } from 'recharts'
 
 import { get, post, put, del } from '../../../../lib/client'
-import { useSale } from '../../../../context'
 import { Input } from '../../../../components/inputs'
 import { EmptyState, Modal, SlidePanel } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
@@ -50,8 +49,10 @@ const getInitialForm = (channel) => {
 
 const SaleChannels = () => {
   const { id } = useParams()
-  const { channels, setChannels, loading, isNew } = useSale()
+  const isNew = id === 'new'
 
+  const [channels, setChannels] = useState([])
+  const [loading, setLoading] = useState(!isNew)
   const [error, setError] = useState(null)
   const [panelChannel, setPanelChannel] = useState(null)
   const [saving, setSaving] = useState(null)
@@ -68,6 +69,19 @@ const SaleChannels = () => {
     setReportChannel(null)
     setReportData(null)
   }, [])
+
+  useEffect(() => {
+    if (isNew) {
+      setChannels([])
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    get(`/sales/${id}/channels`)
+      .then((r) => setChannels(r.data ?? []))
+      .catch(() => setChannels([]))
+      .finally(() => setLoading(false))
+  }, [id, isNew])
 
   const handleSave = async (channel, payload) => {
     setSaving(channel?.id ?? 'new')

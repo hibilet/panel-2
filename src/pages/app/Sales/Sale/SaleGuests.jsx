@@ -3,7 +3,6 @@ import { useParams } from 'wouter'
 import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
-import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
@@ -44,11 +43,12 @@ const getInitialForm = (guest, products = []) => {
   }
 }
 
-const SaleGuests = () => {
+const SaleGuests = ({ sale }) => {
   const { id } = useParams()
   const printRef = useRef(null)
-  const { sale, products, isNew } = useSale()
+  const isNew = id === 'new'
 
+  const [products, setProducts] = useState([])
   const [guests, setGuests] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -80,8 +80,16 @@ const SaleGuests = () => {
       setLoading(false)
       setGuests([])
       setTotal(0)
+      setProducts([])
       return
     }
+    get(`/sales/${id}/products`)
+      .then((r) => setProducts((r.data ?? []).sort((a, b) => (a.displayOrder ?? 999) - (b.displayOrder ?? 999))))
+      .catch(() => setProducts([]))
+  }, [id, isNew])
+
+  useEffect(() => {
+    if (isNew) return
     fetchGuests()
   }, [fetchGuests, isNew])
 

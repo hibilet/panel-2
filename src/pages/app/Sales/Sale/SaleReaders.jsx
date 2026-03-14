@@ -3,7 +3,6 @@ import { useParams } from 'wouter'
 import { useForm } from 'react-hook-form'
 
 import { get, post, put, del } from '../../../../lib/client'
-import { useSale } from '../../../../context'
 import { Input, Select } from '../../../../components/inputs'
 import { EmptyState, SlidePanel } from '../../../../components/shared'
 import DataTable from '../../../../components/tables/DataTable'
@@ -33,7 +32,7 @@ const getInitialForm = (reader) => {
 
 const SaleReaders = () => {
   const { id } = useParams()
-  const { isNew } = useSale()
+  const isNew = id === 'new'
 
   const [readers, setReaders] = useState([])
   const [loading, setLoading] = useState(true)
