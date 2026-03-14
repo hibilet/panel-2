@@ -16,13 +16,9 @@ export const setTheme = (value) => {
 	applyTheme(value);
 };
 
-export const applyTheme = (value) => {
-	const isDark =
-		value === "dark" ||
-		(value !== "light" &&
-			typeof window !== "undefined" &&
-			window.matchMedia("(prefers-color-scheme: dark)").matches);
-	document.documentElement.classList.toggle("dark", !!isDark);
+export const applyTheme = () => {
+	const isDark = false;
+	document.documentElement.classList.toggle("dark", false);
 	window.dispatchEvent(new CustomEvent("themechange", { detail: { isDark } }));
 	return isDark;
 };
