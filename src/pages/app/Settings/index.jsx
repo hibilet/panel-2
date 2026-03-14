@@ -160,7 +160,9 @@ const Settings = () => {
 					</Link>
 
 					{/* Theme switch card */}
-					<div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+					<div
+						style={{display: "none"}}
+						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
 						<i
 							className={`fa-solid ${darkMode ? "fa-moon" : "fa-sun"} text-xl text-slate-600 dark:text-slate-400`}
 							aria-hidden
