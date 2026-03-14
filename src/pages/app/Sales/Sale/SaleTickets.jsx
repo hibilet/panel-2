@@ -7,6 +7,8 @@ import { ticketColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
+import { toId } from "../../../../utils/object";
+import SaleEventSeating from "./SaleEventSeating";
 
 const getInitialForm = (product) => {
 	if (product) {
@@ -29,7 +31,7 @@ const getInitialForm = (product) => {
 	};
 };
 
-const SaleTickets = () => {
+const SaleTickets = ({ sale, setSale }) => {
 	const { id } = useParams();
 	const isNew = id === "new";
 
@@ -39,6 +41,7 @@ const SaleTickets = () => {
 	const [panelProduct, setPanelProduct] = useState(null);
 	const [saving, setSaving] = useState(null);
 	const [deleting, setDeleting] = useState(null);
+	const [seatingProduct, setSeatingProduct] = useState(null);
 
 	const panelOpen = panelProduct !== null;
 	const isAdding = panelProduct === "new";
@@ -239,22 +242,37 @@ const SaleTickets = () => {
 				<ProductPanel
 					key={isAdding ? "new" : (panelProduct?.id ?? "edit")}
 					product={isAdding ? null : panelProduct}
+					sale={sale}
 					onSave={handleSave}
 					onDelete={handleDelete}
 					onClose={closePanel}
+					onOpenSeating={setSeatingProduct}
 					saving={saving}
 					deleting={deleting}
 				/>
 			</SlidePanel>
+
+			<SaleEventSeating
+				product={seatingProduct}
+				sale={sale}
+				plan={sale?.plan}
+				onClose={() => setSeatingProduct(null)}
+				onSave={(updatedSale) => {
+					setSale?.(updatedSale);
+					setSeatingProduct(null);
+				}}
+			/>
 		</div>
 	);
 };
 
 const ProductPanel = ({
 	product,
+	sale,
 	onSave,
 	onDelete,
 	onClose,
+	onOpenSeating,
 	saving,
 	deleting,
 }) => {
@@ -282,6 +300,7 @@ const ProductPanel = ({
 
 	const hasReservations = (product?.reservations ?? 0) > 0;
 	const seatCount = product?.stock ?? 0;
+	const selectedSeatCount = (sale?.seating?.[product?.id] || []).length;
 
 	return (
 		<div className="flex h-full flex-col">
@@ -370,15 +389,23 @@ const ProductPanel = ({
 							/>
 						</div>
 
-						{product && seatCount > 0 && (
-							<button
-								type="button"
-								className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-							>
-								<i className="fa-solid fa-armchair" aria-hidden />
-								{strings("form.ticket.selectSeats", [seatCount])}
-							</button>
-						)}
+						{product &&
+							seatCount > 0 &&
+							toId(sale?.plan) && (
+								<button
+									type="button"
+									onClick={() => onOpenSeating?.(product)}
+									className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+								>
+									<i
+										className="fa-solid fa-armchair"
+										aria-hidden
+									/>
+									{strings("form.ticket.selectSeats", [
+										selectedSeatCount,
+									])}
+								</button>
+							)}
 					</div>
 				</div>
 

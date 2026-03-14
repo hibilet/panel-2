@@ -113,7 +113,12 @@ const Sale = () => {
 							<SaleBasic {...props} sale={sale} setSale={setSale} />
 						)}
 					/>
-					<Route path="/sales/:id/tickets" component={SaleTickets} />
+					<Route
+						path="/sales/:id/tickets"
+						component={(props) => (
+							<SaleTickets {...props} sale={sale} setSale={setSale} />
+						)}
+					/>
 					<Route path="/sales/:id/channels" component={SaleChannels} />
 					<Route path="/sales/:id/attendees" component={SaleAttendees} />
 					<Route path="/sales/:id/guests" component={SaleGuests} />
