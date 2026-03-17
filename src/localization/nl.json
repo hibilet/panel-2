@@ -141,6 +141,7 @@
 	"table.agreement.noAgreements": "Nog geen overeenkomsten",
 	"table.venue.id": "ID",
 	"table.venue.name": "Naam",
+	"table.venue.owner": "Eigenaar",
 	"table.venue.address": "Adres",
 	"table.venue.category": "Categorie",
 	"table.venue.status": "Status",
@@ -157,6 +158,7 @@
 	"form.venue.category": "Categorie",
 	"form.venue.categoryPlaceholder": "Selecteer categorie",
 	"form.venue.status": "Status",
+	"form.venue.owner": "Eigenaar",
 	"error.failedLoadVenues": "Locaties konden niet worden geladen",
 
 	"form.provider.newTitle": "Nieuwe aanbiederinformatie",

@@ -141,6 +141,7 @@
 	"table.agreement.noAgreements": "Aucun contrat pour le moment",
 	"table.venue.id": "ID",
 	"table.venue.name": "Nom",
+	"table.venue.owner": "Propriétaire",
 	"table.venue.address": "Adresse",
 	"table.venue.category": "Catégorie",
 	"table.venue.status": "Statut",
@@ -157,6 +158,7 @@
 	"form.venue.category": "Catégorie",
 	"form.venue.categoryPlaceholder": "Sélectionner une catégorie",
 	"form.venue.status": "Statut",
+	"form.venue.owner": "Propriétaire",
 	"error.failedLoadVenues": "Impossible de charger les lieux",
 
 	"form.provider.newTitle": "Informations sur un nouveau prestataire",

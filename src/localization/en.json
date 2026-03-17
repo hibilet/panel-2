@@ -141,6 +141,7 @@
 	"table.agreement.noAgreements": "No agreements yet",
 	"table.venue.id": "ID",
 	"table.venue.name": "Name",
+	"table.venue.owner": "Owner",
 	"table.venue.address": "Address",
 	"table.venue.category": "Category",
 	"table.venue.status": "Status",
@@ -159,6 +160,7 @@
 	"form.venue.category": "Category",
 	"form.venue.categoryPlaceholder": "Select category",
 	"form.venue.status": "Status",
+	"form.venue.owner": "Owner",
 
 	"error.failedLoadVenues": "Failed to load venues",
 

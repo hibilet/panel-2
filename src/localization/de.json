@@ -141,6 +141,7 @@
 	"table.agreement.noAgreements": "Noch keine Verträge",
 	"table.venue.id": "ID",
 	"table.venue.name": "Name",
+	"table.venue.owner": "Inhaber",
 	"table.venue.address": "Adresse",
 	"table.venue.category": "Kategorie",
 	"table.venue.status": "Status",
@@ -157,6 +158,7 @@
 	"form.venue.category": "Kategorie",
 	"form.venue.categoryPlaceholder": "Kategorie wählen",
 	"form.venue.status": "Status",
+	"form.venue.owner": "Inhaber",
 	"error.failedLoadVenues": "Spielstätten konnten nicht geladen werden",
 
 	"form.provider.newTitle": "Neue Anbieterinformationen",

@@ -241,17 +241,25 @@ export const providersColumns = [
 ];
 
 export const venuesColumns = [
-	{
-		key: "id",
-		header: strings("table.venue.id"),
-		render: (r) => (r.id ?? r._id)?.slice(-8) ?? "—",
-		className: "font-mono",
-	},
+	// {
+	// 	key: "id",
+	// 	header: strings("table.venue.id"),
+	// 	render: (r) => (r.id ?? r._id)?.slice(-8) ?? "—",
+	// 	className: "font-mono",
+	// },
 	{
 		key: "name",
 		header: strings("table.venue.name"),
 		headerCell: true,
 		render: (r) => r.name ?? "—",
+	},
+	{
+		key: "owner",
+		header: strings("table.venue.owner"),
+		render: (r) =>
+			typeof r.owner === "object" && r.owner?.name
+				? r.owner.name
+				: r.owner ?? "—",
 	},
 	{
 		key: "address",

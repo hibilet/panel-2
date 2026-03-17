@@ -140,6 +140,7 @@
 	"table.agreement.noAgreements": "Henüz sözleşme yok",
 	"table.venue.id": "ID",
 	"table.venue.name": "Ad",
+	"table.venue.owner": "Sahip",
 	"table.venue.address": "Adres",
 	"table.venue.category": "Kategori",
 	"table.venue.status": "Durum",
@@ -156,6 +157,7 @@
 	"form.venue.category": "Kategori",
 	"form.venue.categoryPlaceholder": "Kategori seçin",
 	"form.venue.status": "Durum",
+	"form.venue.owner": "Sahip",
 	"error.failedLoadVenues": "Mekanlar yüklenemedi",
 
 	"form.provider.newTitle": "Yeni Sağlayıcı Bilgileri",

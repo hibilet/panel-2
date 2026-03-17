@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
@@ -130,6 +131,18 @@ const VenuePanel = ({ id, onClose, onSaved }) => {
 							<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
 								{error}
 							</div>
+						)}
+						{!isNew && data?.owner && (
+							<Link to={`/accounts/merchants/${data?.owner?.id}`}>	
+								<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm mb-4">
+									<p className="text-sm font-medium text-slate-500">
+										{strings("form.venue.owner")}
+									</p>
+									<p className="mt-1 text-lg font-medium text-slate-900">
+										{data?.owner?.name}
+									</p>
+								</div>
+							</Link>
 						)}
 						<Input
 							label={strings("form.venue.name")}
