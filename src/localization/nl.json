@@ -122,6 +122,8 @@
 	"table.account.type": "Type",
 	"table.account.createdAt": "Aangemaakt op",
 	"table.account.noAccounts": "Nog geen accounts",
+	"table.account.noMerchants": "Nog geen handelaren",
+	"table.account.noCustomers": "Nog geen klanten",
 	"table.link.image": "Afbeelding",
 	"table.link.title": "Titel",
 	"table.link.slug": "Slug",
@@ -221,6 +223,8 @@
 	"page.reports.noReports": "Nog geen rapporten",
 
 	"page.accounts.title": "Accounts",
+	"page.accounts.tab.merchants": "Handelaren",
+	"page.accounts.tab.customers": "Klanten",
 	"page.accounts.noAccounts": "Nog geen accounts",
 	"page.accounts.filter": "Filter",
 	"page.accounts.filterAccounts": "Accounts filteren",

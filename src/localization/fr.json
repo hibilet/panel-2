@@ -122,6 +122,8 @@
 	"table.account.type": "Type",
 	"table.account.createdAt": "Créé le",
 	"table.account.noAccounts": "Aucun compte pour le moment",
+	"table.account.noMerchants": "Aucun marchand pour le moment",
+	"table.account.noCustomers": "Aucun client pour le moment",
 	"table.link.image": "Image",
 	"table.link.title": "Titre",
 	"table.link.slug": "Slug",
@@ -221,6 +223,8 @@
 	"page.reports.noReports": "Aucun rapport pour le moment",
 
 	"page.accounts.title": "Comptes",
+	"page.accounts.tab.merchants": "Marchands",
+	"page.accounts.tab.customers": "Clients",
 	"page.accounts.noAccounts": "Aucun compte pour le moment",
 	"page.accounts.filter": "Filtrer",
 	"page.accounts.filterAccounts": "Filtrer les comptes",

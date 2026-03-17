@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useLocation, useParams } from "wouter";
+import { Link, useLocation, useParams } from "wouter";
 import { Modal, SlidePanel } from "../../../components/shared";
-import { accountsColumns } from "../../../components/tables/columns";
+import {
+	merchantsColumns,
+	customersColumns,
+} from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
 import { get } from "../../../lib/client";
@@ -11,27 +14,57 @@ import AccountPanel from "./Account";
 
 const LIMIT = 25;
 
+const tabItems = [
+	{ path: "merchants", labelKey: "page.accounts.tab.merchants", icon: "fa-store" },
+	{ path: "customers", labelKey: "page.accounts.tab.customers", icon: "fa-user" },
+];
+
+const TabLink = ({ path, labelKey, icon, isActive }) => (
+	<Link
+		href={`/accounts/${path}`}
+		role="tab"
+		aria-selected={isActive}
+		aria-current={isActive ? "page" : undefined}
+		className={`
+			flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium
+			transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
+			${
+				isActive
+					? "bg-slate-900 text-white"
+					: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+			}
+		`}
+	>
+		<i className={`fa-solid ${icon}`} aria-hidden />
+		<span>{strings(labelKey)}</span>
+	</Link>
+);
+
 const Accounts = () => {
 	const [, setLocation] = useLocation();
 	const { id } = useParams();
+	const [location] = useLocation();
+
+	const activeTab = location.includes("/customers") ? "customers" : "merchants";
+	const accountId = id ?? null;
+
 	const [data, setData] = useState([]);
 	const [total, setTotal] = useState(0);
 	const [page, setPage] = useState(1);
 	const [fetchedPage, setFetchedPage] = useState(null);
 	const [error, setError] = useState(null);
 	const [filterEmail, setFilterEmail] = useState("");
-	const [filterType, setFilterType] = useState("");
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
 
 	const { register, handleSubmit, reset } = useForm({
-		defaultValues: { email: "", type: "" },
+		defaultValues: { email: "" },
 	});
 
 	useEffect(() => {
 		if (filterDialogOpen) {
-			reset({ email: filterEmail, type: filterType });
+			reset({ email: filterEmail });
 		}
-	}, [filterDialogOpen, filterEmail, filterType, reset]);
+	}, [filterDialogOpen, filterEmail, reset]);
 
 	const loading = fetchedPage !== page;
 
@@ -40,9 +73,9 @@ const Accounts = () => {
 		const params = new URLSearchParams({
 			limit: String(LIMIT),
 			skip: String(skip),
+			type: activeTab === "merchants" ? "account.merchant" : "account.customer",
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
-		if (filterType?.trim()) params.set("type", filterType.trim());
 		queueMicrotask(() => setError(null));
 		get(`/accounts/search?${params}`)
 			.then((res) => {
@@ -55,7 +88,7 @@ const Accounts = () => {
 				setError(err?.message ?? strings("error.failedLoadAccounts"));
 				setFetchedPage(page);
 			});
-	}, [page, filterEmail, filterType]);
+	}, [page, filterEmail, activeTab]);
 
 	if (error && data.length === 0) {
 		return (
@@ -69,12 +102,20 @@ const Accounts = () => {
 
 	const closeFilterDialog = () => setFilterDialogOpen(false);
 
-	const onFilterSubmit = (data) => {
-		setFilterEmail(data.email?.trim() ?? "");
-		setFilterType(data.type?.trim() ?? "");
+	const onFilterSubmit = (formData) => {
+		setFilterEmail(formData.email?.trim() ?? "");
 		setPage(1);
 		closeFilterDialog();
 	};
+
+	const isTabActive = (path) => location.startsWith(`/accounts/${path}`);
+	const tabPath = `/accounts/${activeTab}`;
+
+	const columns = activeTab === "merchants" ? merchantsColumns : customersColumns;
+	const emptyMessage =
+		activeTab === "merchants"
+			? strings("table.account.noMerchants")
+			: strings("table.account.noCustomers");
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6">
@@ -91,6 +132,21 @@ const Accounts = () => {
 					{strings("page.accounts.filter")}
 				</button>
 			</div>
+
+			<nav aria-label="Account sections" className="mt-4">
+				<div className="flex flex-wrap gap-2" role="tablist">
+					{tabItems.map(({ path, labelKey, icon }) => (
+						<TabLink
+							key={path}
+							path={path}
+							labelKey={labelKey}
+							icon={icon}
+							isActive={isTabActive(path)}
+						/>
+					))}
+				</div>
+			</nav>
+
 			<Modal
 				isOpen={filterDialogOpen}
 				onClose={closeFilterDialog}
@@ -132,32 +188,20 @@ const Accounts = () => {
 							className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 						/>
 					</label>
-					<label className="block">
-						<span className="mb-1 block text-sm font-medium text-slate-700">
-							{strings("page.accounts.type")}
-						</span>
-						<select
-							{...register("type")}
-							className="block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
-						>
-							<option value="">{strings("page.accounts.typeAll")}</option>
-							<option value="merchant">
-								{strings("page.accounts.typeMerchant")}
-							</option>
-							<option value="user">{strings("page.accounts.typeUser")}</option>
-						</select>
-					</label>
 				</form>
 			</Modal>
+
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
 					data={data}
-					columns={accountsColumns}
+					columns={columns}
 					getRowKey={(r) => r.id}
 					bare
 					loading={loading}
-					onRowClick={(row) => row.id && setLocation(`/accounts/${row.id}`)}
-					emptyMessage={strings("table.account.noAccounts")}
+					onRowClick={(row) =>
+						row.id && setLocation(`/accounts/${activeTab}/${row.id}`)
+					}
+					emptyMessage={emptyMessage}
 				/>
 				<Pagination
 					total={total}
@@ -166,14 +210,18 @@ const Accounts = () => {
 					onPageChange={setPage}
 				/>
 			</div>
+
 			<SlidePanel
-				isOpen={!!id}
-				onClose={() => setLocation("/accounts")}
+				isOpen={!!accountId}
+				onClose={() => setLocation(tabPath)}
 				title={strings("page.accounts.details")}
 				aria-label="Account details"
 			>
-				{id && (
-					<AccountPanel id={id} onClose={() => setLocation("/accounts")} />
+				{accountId && (
+					<AccountPanel
+						id={accountId}
+						onClose={() => setLocation(tabPath)}
+					/>
 				)}
 			</SlidePanel>
 		</div>

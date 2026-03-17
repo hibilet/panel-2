@@ -128,7 +128,7 @@ const formatAccountType = (t) => {
 	return parts[parts.length - 1] ?? t;
 };
 
-export const accountsColumns = [
+const accountBaseColumns = [
 	{
 		key: "id",
 		header: strings("table.account.id"),
@@ -146,18 +146,25 @@ export const accountsColumns = [
 		header: strings("table.account.email"),
 		render: (r) => r.email ?? "—",
 	},
-	// { key: 'phone', header: strings('table.account.phone'), render: (r) => r.phone ?? '—' },
-	{
-		key: "type",
-		header: strings("table.account.type"),
-		render: (r) => formatAccountType(r.type),
-	},
 	{
 		key: "createdAt",
 		header: strings("table.account.createdAt"),
 		render: (r) => formatDateTime(r.createdAt),
 	},
 ];
+
+export const accountsColumns = [
+	...accountBaseColumns.slice(0, 3),
+	{
+		key: "type",
+		header: strings("table.account.type"),
+		render: (r) => formatAccountType(r.type),
+	},
+	...accountBaseColumns.slice(3),
+];
+
+export const merchantsColumns = accountBaseColumns;
+export const customersColumns = accountBaseColumns;
 
 export const linksColumns = [
 	{

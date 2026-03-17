@@ -1,4 +1,5 @@
-import { Route, Switch } from "wouter";
+import { useEffect } from "react";
+import { Route, Switch, useLocation } from "wouter";
 
 import Navbar from "../../components/global/Navbar";
 import Accounts from "./Accounts";
@@ -14,6 +15,14 @@ import Settings from "./Settings";
 import SettingsAgreements from "./Settings/Agreements";
 import SettingsProviders from "./Settings/Providers";
 import Transactions from "./Transactions";
+
+const AccountsRedirect = () => {
+	const [, setLocation] = useLocation();
+	useEffect(() => {
+		setLocation("/accounts/merchants", { replace: true });
+	}, [setLocation]);
+	return null;
+};
 
 const App = () => {
 	return (
@@ -32,8 +41,13 @@ const App = () => {
 					<Route path="/links/:id" component={Links} />
 					<Route path="/reports" component={Reports} />
 					<Route path="/reports/:id" component={Report} />
-					<Route path="/accounts" component={Accounts} />
-					<Route path="/accounts/:id" component={Accounts} />
+					<Route path="/accounts/merchants/:id" component={Accounts} />
+					<Route path="/accounts/customers/:id" component={Accounts} />
+					<Route path="/accounts/merchants" component={Accounts} />
+					<Route path="/accounts/customers" component={Accounts} />
+					<Route path="/accounts">
+						<AccountsRedirect />
+					</Route>
 					<Route path="/settings" component={Settings} />
 					<Route path="/settings/providers" component={SettingsProviders} />
 					<Route path="/settings/providers/:id" component={SettingsProviders} />

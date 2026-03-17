@@ -121,6 +121,8 @@
 	"table.account.type": "Tür",
 	"table.account.createdAt": "Oluşturulma",
 	"table.account.noAccounts": "Henüz hesap yok",
+	"table.account.noMerchants": "Henüz satıcı yok",
+	"table.account.noCustomers": "Henüz müşteri yok",
 	"table.link.image": "Görsel",
 	"table.link.title": "Başlık",
 	"table.link.slug": "Slug",
@@ -220,6 +222,8 @@
 	"page.reports.noReports": "Henüz rapor yok",
 
 	"page.accounts.title": "Hesaplar",
+	"page.accounts.tab.merchants": "Satıcılar",
+	"page.accounts.tab.customers": "Müşteriler",
 	"page.accounts.noAccounts": "Henüz hesap yok",
 	"page.accounts.filter": "Filtrele",
 	"page.accounts.filterAccounts": "Hesapları Filtrele",
