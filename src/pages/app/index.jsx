@@ -15,6 +15,7 @@ import Settings from "./Settings";
 import SettingsAgreements from "./Settings/Agreements";
 import SettingsProviders from "./Settings/Providers";
 import Transactions from "./Transactions";
+import Venues from "./Venues";
 
 const AccountsRedirect = () => {
 	const [, setLocation] = useLocation();
@@ -41,6 +42,8 @@ const App = () => {
 					<Route path="/links/:id" component={Links} />
 					<Route path="/reports" component={Reports} />
 					<Route path="/reports/:id" component={Report} />
+					<Route path="/venues/:id" component={Venues} />
+					<Route path="/venues" component={Venues} />
 					<Route path="/accounts/merchants/:id" component={Accounts} />
 					<Route path="/accounts/customers/:id" component={Accounts} />
 					<Route path="/accounts/merchants" component={Accounts} />

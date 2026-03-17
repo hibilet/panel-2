@@ -32,6 +32,12 @@ const navItems = [
 		acl: ["admin"],
 	},
 	{
+		path: "/venues",
+		labelKey: "nav.venues",
+		icon: "fa-building",
+		acl: ["merchant", "admin"],
+	},
+	{
 		path: "/sales",
 		labelKey: "nav.sales",
 		icon: "fa-cart-shopping",
@@ -143,7 +149,7 @@ const Navbar = () => {
 					</h1>
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
-					<div className="hidden md:flex items-center gap-2" role="tablist">
+					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2" role="tablist">
 						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly }) => {
 							if (liveOnly && !hasEventsToday) return null;
 							const isActive =

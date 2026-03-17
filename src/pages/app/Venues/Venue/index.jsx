@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input, Select } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
-import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings from "../../../../localization";
 
 const STATUS_OPTIONS = [
@@ -10,19 +9,27 @@ const STATUS_OPTIONS = [
 	{ value: "inactive", label: strings("common.inactive") },
 ];
 
+const CATEGORY_OPTIONS = [
+	{ value: "event-hall", label: "Event Hall" },
+	{ value: "club", label: "Club" },
+	{ value: "theater", label: "Theater" },
+	{ value: "arena", label: "Arena" },
+	{ value: "stadium", label: "Stadium" },
+	{ value: "other", label: "Other" },
+];
+
 const defaultValues = {
 	name: "",
-	email: "",
-	phone: "",
+	address: "",
+	category: "",
 	status: "active",
 };
 
-const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
+const VenuePanel = ({ id, onClose, onSaved }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
-	const [loginAsLoading, setLoginAsLoading] = useState(false);
 	const [error, setError] = useState(null);
 
 	const { register, handleSubmit, reset } = useForm({ defaultValues });
@@ -36,21 +43,21 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		}
 		setLoading(true);
 		setError(null);
-		get(`/accounts/${id}`)
+		get(`/venues/${id}`)
 			.then((res) => {
-				const d = res.data ?? null;
+				const d = res.data ?? res;
 				setData(d);
 				if (d) {
 					reset({
 						name: d.name ?? "",
-						email: d.email ?? "",
-						phone: d.phone ?? "",
+						address: d.address ?? "",
+						category: d.category ?? "",
 						status: d.status ?? "active",
 					});
 				}
 			})
 			.catch((err) =>
-				setError(err?.message ?? strings("error.failedLoadAccounts")),
+				setError(err?.message ?? strings("error.failedLoadVenues")),
 			)
 			.finally(() => setLoading(false));
 	}, [id, isNew, reset]);
@@ -61,23 +68,22 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		try {
 			const payload = {
 				name: formData.name?.trim() || undefined,
-				email: formData.email?.trim() || undefined,
-				phone: formData.phone?.trim() || undefined,
+				address: formData.address?.trim() || undefined,
+				category: formData.category?.trim() || undefined,
 				status: formData.status || undefined,
 			};
 			if (isNew) {
-				const res = await post("/accounts", {
-					...payload,
-					type: accountType ?? "account.merchant",
-				});
+				const res = await post("/venues", payload);
 				const created = res.data ?? null;
+				setData(created);
 				const newId = created?.id ?? created?._id;
 				if (newId) onSaved?.(newId);
 			} else {
-				const res = await put(`/accounts/${id}`, payload);
+				const res = await put(`/venues/${id}`, payload);
 				setData((prev) =>
 					prev ? { ...prev, ...(res.data ?? payload) } : (res.data ?? payload),
 				);
+				onSaved?.();
 			}
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
@@ -86,35 +92,13 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		}
 	};
 
-	const handleLoginAs = async () => {
-		if (!data?.type) {
-			setError(strings("form.account.errorLoginAs"));
-			return;
-		}
-		setLoginAsLoading(true);
-		setError(null);
-		try {
-			const res = await post("/auth/token", { id, type: data.type });
-			const token = res?.data?.token ?? res?.token;
-			if (token) {
-				const currentToken = getToken();
-				if (currentToken) setHotSwapToken(currentToken);
-				setToken(token);
-			} else {
-				setError(strings("form.account.errorLoginAs"));
-			}
-		} catch (err) {
-			setError(err?.message ?? strings("form.account.errorLoginAs"));
-		} finally {
-			setLoginAsLoading(false);
-		}
-	};
-
 	return (
 		<div className="flex h-full flex-col">
 			<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
 				<h2 className="text-lg font-semibold text-slate-900">
-					{strings("page.accounts.details")}
+					{isNew
+						? strings("form.venue.newTitle")
+						: strings("page.venues.details")}
 				</h2>
 				<button
 					type="button"
@@ -132,13 +116,13 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						<div className="h-10 w-48 animate-pulse rounded bg-slate-200" />
 						<div className="h-64 animate-pulse rounded-lg bg-slate-100" />
 					</div>
-				) : !isNew && error && !data ? (
+				) : error && !data ? (
 					<div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
 						{error}
 					</div>
 				) : (
 					<form
-						id="account-form"
+						id="venue-form"
 						onSubmit={handleSubmit(onSave)}
 						className="space-y-4"
 					>
@@ -148,23 +132,23 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							</div>
 						)}
 						<Input
-							label={strings("common.name")}
+							label={strings("form.venue.name")}
 							{...register("name")}
-							placeholder={strings("page.settings.yourName")}
+							placeholder={strings("form.venue.namePlaceholder")}
 						/>
 						<Input
-							label={strings("page.accounts.email")}
-							type="email"
-							{...register("email")}
-							placeholder={strings("page.settings.emailPlaceholder")}
-						/>
-						<Input
-							label={strings("page.settings.phone")}
-							{...register("phone")}
-							placeholder="+90 555 555 5555"
+							label={strings("form.venue.address")}
+							{...register("address")}
+							placeholder={strings("form.venue.addressPlaceholder")}
 						/>
 						<Select
-							label={strings("common.status")}
+							label={strings("form.venue.category")}
+							{...register("category")}
+							options={CATEGORY_OPTIONS}
+							placeholder={strings("form.venue.categoryPlaceholder")}
+						/>
+						<Select
+							label={strings("form.venue.status")}
 							{...register("status")}
 							options={STATUS_OPTIONS}
 						/>
@@ -174,24 +158,9 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 
 			{!loading && (data || isNew) && (
 				<footer className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
-					{!isNew && (
-						<button
-							type="button"
-							onClick={handleLoginAs}
-							disabled={loginAsLoading}
-							className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-						>
-							{loginAsLoading ? (
-								<i className="fa-solid fa-spinner fa-spin" aria-hidden />
-							) : (
-								<i className="fa-solid fa-right-to-bracket" aria-hidden />
-							)}
-							{strings("form.account.loginAs")}
-						</button>
-					)}
 					<button
 						type="submit"
-						form="account-form"
+						form="venue-form"
 						disabled={saving}
 						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
 					>
@@ -208,4 +177,4 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	);
 };
 
-export default AccountPanel;
+export default VenuePanel;

@@ -1,6 +1,7 @@
 export {
 	accountsColumns,
 	agreementsColumns,
+	venuesColumns,
 	channelColumns,
 	guestColumns,
 	linkSalesColumns,

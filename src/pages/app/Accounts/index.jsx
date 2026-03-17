@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useParams } from "wouter";
 import { Modal, SlidePanel } from "../../../components/shared";
@@ -68,7 +68,7 @@ const Accounts = () => {
 
 	const loading = fetchedPage !== page;
 
-	useEffect(() => {
+	const fetchAccounts = useCallback(() => {
 		const skip = (page - 1) * LIMIT;
 		const params = new URLSearchParams({
 			limit: String(LIMIT),
@@ -89,6 +89,10 @@ const Accounts = () => {
 				setFetchedPage(page);
 			});
 	}, [page, filterEmail, activeTab]);
+
+	useEffect(() => {
+		fetchAccounts();
+	}, [fetchAccounts]);
 
 	if (error && data.length === 0) {
 		return (
@@ -123,14 +127,26 @@ const Accounts = () => {
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.accounts.title")}
 				</h1>
-				<button
-					type="button"
-					onClick={() => setFilterDialogOpen(true)}
-					className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-				>
-					<i className="fa fa-search mr-2" aria-hidden />{" "}
-					{strings("page.accounts.filter")}
-				</button>
+				<div className="flex items-center gap-2">
+					{activeTab === "merchants" && (
+						<button
+							type="button"
+							onClick={() => setLocation(`/accounts/merchants/new`)}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+						>
+							<i className="fa-solid fa-plus" aria-hidden />
+							{strings("page.accounts.createAccount")}
+						</button>
+					)}
+					<button
+						type="button"
+						onClick={() => setFilterDialogOpen(true)}
+						className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+					>
+						<i className="fa fa-search mr-2" aria-hidden />{" "}
+						{strings("page.accounts.filter")}
+					</button>
+				</div>
 			</div>
 
 			<nav aria-label="Account sections" className="mt-4">
@@ -214,13 +230,28 @@ const Accounts = () => {
 			<SlidePanel
 				isOpen={!!accountId}
 				onClose={() => setLocation(tabPath)}
-				title={strings("page.accounts.details")}
-				aria-label="Account details"
+				title={
+					accountId === "new"
+						? strings("page.accounts.createAccount")
+						: strings("page.accounts.details")
+				}
+				aria-label={
+					accountId === "new"
+						? strings("page.accounts.createAccount")
+						: "Account details"
+				}
 			>
 				{accountId && (
 					<AccountPanel
 						id={accountId}
+						accountType={
+							activeTab === "merchants" ? "account.merchant" : "account.customer"
+						}
 						onClose={() => setLocation(tabPath)}
+						onSaved={(newId) => {
+							fetchAccounts();
+							if (newId) setLocation(`/accounts/${activeTab}/${newId}`);
+						}}
 					/>
 				)}
 			</SlidePanel>

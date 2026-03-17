@@ -240,6 +240,56 @@ export const providersColumns = [
 	},
 ];
 
+export const venuesColumns = [
+	{
+		key: "id",
+		header: strings("table.venue.id"),
+		render: (r) => (r.id ?? r._id)?.slice(-8) ?? "—",
+		className: "font-mono",
+	},
+	{
+		key: "name",
+		header: strings("table.venue.name"),
+		headerCell: true,
+		render: (r) => r.name ?? "—",
+	},
+	{
+		key: "address",
+		header: strings("table.venue.address"),
+		render: (r) => r.address ?? "—",
+	},
+	{
+		key: "category",
+		header: strings("table.venue.category"),
+		render: (r) =>
+			r.category
+				? String(r.category).replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+				: "—",
+	},
+	{
+		key: "status",
+		header: strings("table.venue.status"),
+		render: (r) => (
+			<span
+				className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+					r.status === "active"
+						? "bg-emerald-100 text-emerald-700"
+						: "bg-slate-100 text-slate-600"
+				}`}
+			>
+				{r.status === "active"
+					? strings("common.active")
+					: strings("common.inactive")}
+			</span>
+		),
+	},
+	{
+		key: "createdAt",
+		header: strings("table.venue.createdAt"),
+		render: (r) => formatDateTime(r.createdAt),
+	},
+];
+
 export const agreementsColumns = [
 	{
 		key: "name",
