@@ -184,6 +184,10 @@ const Links = () => {
 						onClose={() => setLocation("/links")}
 						onSaved={fetchLinks}
 						onArchived={handleArchived}
+						onDeleted={() => {
+							fetchLinks();
+							if (showArchived) fetchArchivedLinks();
+						}}
 					/>
 				)}
 			</SlidePanel>

@@ -92,6 +92,7 @@
 	"confirm.deleteTicket": "Bu bilet türünü silmek istiyor musunuz?",
 	"confirm.deleteReader": "Bu okuyucuyu silmek istiyor musunuz?",
 	"confirm.deleteCoupon": "Bu kuponu silmek istiyor musunuz?",
+	"confirm.deleteLink": "Bu linki silmek istiyor musunuz?",
 	"confirm.cancelAllReservations": "Tüm rezervasyonları iptal etmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
 	"confirm.cancelReservation": "\"$0\" rezervasyonunu iptal et?",
 

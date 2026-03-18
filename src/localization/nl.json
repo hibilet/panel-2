@@ -93,6 +93,7 @@
 	"confirm.deleteTicket": "Dit tickettype verwijderen?",
 	"confirm.deleteReader": "Deze scanner verwijderen?",
 	"confirm.deleteCoupon": "Deze kortingscode verwijderen?",
+	"confirm.deleteLink": "Dit link verwijderen?",
 	"confirm.cancelAllReservations": "Weet u zeker dat u alle reserveringen wilt annuleren? Deze actie kan niet ongedaan worden gemaakt.",
 	"confirm.cancelReservation": "Reservering \"$0\" annuleren?",
 

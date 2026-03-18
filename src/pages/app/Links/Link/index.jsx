@@ -9,7 +9,7 @@ import {
 import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import { getLinkUrl } from "../../../../lib/appUrl";
-import { get, post, put } from "../../../../lib/client";
+import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const CopyButton = ({ text, stopPropagation }) => {
@@ -54,13 +54,14 @@ const sortSalesByStart = (sales) =>
 
 const defaultValues = { title: "", slug: "", description: "", image: "" };
 
-const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
+const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
 	const [error, setError] = useState(null);
 	const [saving, setSaving] = useState(false);
 	const [archiving, setArchiving] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 	const [sales, setSales] = useState([]);
 	const fileInputRef = useRef(null);
 
@@ -179,6 +180,22 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setArchiving(false);
+		}
+	};
+
+	const onDelete = async () => {
+		if (isNew || !data?.id) return;
+		if (!window.confirm(strings("confirm.deleteLink"))) return;
+		setDeleting(true);
+		setError(null);
+		try {
+			await del(`/links/${id}`);
+			onDeleted?.();
+			onClose?.();
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedDelete"));
+		} finally {
+			setDeleting(false);
 		}
 	};
 
@@ -393,26 +410,46 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
 									)}
 								</button>
 								{!isNew && (
-									<button
-										type="button"
-										onClick={isArchived ? onUnarchive : onArchive}
-										disabled={archiving || saving}
-										className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
-									>
-										{archiving ? (
-											<>
-												<i
-													className="fa-solid fa-spinner fa-spin"
-													aria-hidden
-												/>
-												{strings("common.saving")}
-											</>
-										) : isArchived ? (
-											strings("common.unarchive")
-										) : (
-											strings("common.archive")
-										)}
-									</button>
+									<>
+										<button
+											type="button"
+											onClick={isArchived ? onUnarchive : onArchive}
+											disabled={archiving || deleting || saving}
+											className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+										>
+											{archiving ? (
+												<>
+													<i
+														className="fa-solid fa-spinner fa-spin"
+														aria-hidden
+													/>
+													{strings("common.saving")}
+												</>
+											) : isArchived ? (
+												strings("common.unarchive")
+											) : (
+												strings("common.archive")
+											)}
+										</button>
+										<button
+											type="button"
+											onClick={onDelete}
+											disabled={archiving || deleting || saving}
+											className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 disabled:opacity-50"
+										>
+											{deleting ? (
+												<>
+													<i
+														className="fa-solid fa-spinner fa-spin"
+														aria-hidden
+													/>
+													{strings("common.saving")}
+												</>
+											) : (
+												strings("common.delete")
+											)}
+										</button>
+									</>
 								)}
 							</div>
 						</form>

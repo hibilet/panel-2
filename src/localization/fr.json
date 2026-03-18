@@ -93,6 +93,7 @@
 	"confirm.deleteTicket": "Supprimer ce type de billet ?",
 	"confirm.deleteReader": "Supprimer ce lecteur ?",
 	"confirm.deleteCoupon": "Supprimer ce coupon ?",
+	"confirm.deleteLink": "Supprimer ce lien ?",
 	"confirm.cancelAllReservations": "Êtes-vous sûr de vouloir annuler toutes les réservations ? Cette action est irréversible.",
 	"confirm.cancelReservation": "Annuler la réservation \"$0\" ?",
 

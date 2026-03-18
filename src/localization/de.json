@@ -93,6 +93,7 @@
 	"confirm.deleteTicket": "Diesen Tickettyp löschen?",
 	"confirm.deleteReader": "Diesen Leser löschen?",
 	"confirm.deleteCoupon": "Diesen Gutschein löschen?",
+	"confirm.deleteLink": "Diesen Link löschen?",
 	"confirm.cancelAllReservations": "Sind Sie sicher, dass Sie alle Reservierungen stornieren möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"confirm.cancelReservation": "Reservierung \"$0\" stornieren?",
 

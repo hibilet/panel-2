@@ -93,6 +93,7 @@
 	"confirm.deleteTicket": "Delete this ticket type?",
 	"confirm.deleteReader": "Delete this reader?",
 	"confirm.deleteCoupon": "Delete this coupon?",
+	"confirm.deleteLink": "Delete this link?",
 	"confirm.cancelAllReservations": "Are you sure you want to cancel all reservations? This action cannot be undone.",
 	"confirm.cancelReservation": "Cancel reservation \"$0\"?",
 
