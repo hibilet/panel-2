@@ -273,6 +273,8 @@
 
 	"form.account.loginAs": "Inloggen als",
 	"form.account.errorLoginAs": "Inloggen als dit account mislukt",
+	"form.account.setInactive": "Deactiveren",
+	"form.account.confirmSetInactive": "Weet u zeker dat u dit account wilt deactiveren?",
 	"form.account.commission": "Commissie",
 	"form.account.commissionAmount": "Commissiebedrag",
 	"form.account.commissionVat": "BTW-vermenigvuldiger",

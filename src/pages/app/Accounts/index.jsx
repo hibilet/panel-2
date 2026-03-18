@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useParams } from "wouter";
 import { Modal, SlidePanel } from "../../../components/shared";
 import {
-	merchantsColumns,
 	customersColumns,
+	merchantsColumns,
 } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
@@ -15,8 +15,16 @@ import AccountPanel from "./Account";
 const LIMIT = 25;
 
 const tabItems = [
-	{ path: "merchants", labelKey: "page.accounts.tab.merchants", icon: "fa-store" },
-	{ path: "customers", labelKey: "page.accounts.tab.customers", icon: "fa-user" },
+	{
+		path: "merchants",
+		labelKey: "page.accounts.tab.merchants",
+		icon: "fa-store",
+	},
+	{
+		path: "customers",
+		labelKey: "page.accounts.tab.customers",
+		icon: "fa-user",
+	},
 ];
 
 const TabLink = ({ path, labelKey, icon, isActive }) => (
@@ -77,7 +85,7 @@ const Accounts = () => {
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
 		queueMicrotask(() => setError(null));
-		get(`/accounts/search?${params}`)
+		get(`/accounts/search?${params}&status=active`)
 			.then((res) => {
 				setData(res.data ?? []);
 				setTotal(res.total ?? res.count ?? 0);
@@ -115,7 +123,8 @@ const Accounts = () => {
 	const isTabActive = (path) => location.startsWith(`/accounts/${path}`);
 	const tabPath = `/accounts/${activeTab}`;
 
-	const columns = activeTab === "merchants" ? merchantsColumns : customersColumns;
+	const columns =
+		activeTab === "merchants" ? merchantsColumns : customersColumns;
 	const emptyMessage =
 		activeTab === "merchants"
 			? strings("table.account.noMerchants")
@@ -215,6 +224,7 @@ const Accounts = () => {
 					bare
 					loading={loading}
 					onRowClick={(row) =>
+						row.type !== "account.customer" &&
 						row.id && setLocation(`/accounts/${activeTab}/${row.id}`)
 					}
 					emptyMessage={emptyMessage}
@@ -245,12 +255,18 @@ const Accounts = () => {
 					<AccountPanel
 						id={accountId}
 						accountType={
-							activeTab === "merchants" ? "account.merchant" : "account.customer"
+							activeTab === "merchants"
+								? "account.merchant"
+								: "account.customer"
 						}
 						onClose={() => setLocation(tabPath)}
 						onSaved={(newId) => {
 							fetchAccounts();
-							if (newId) setLocation(`/accounts/${activeTab}/${newId}`);
+							if (newId) {
+								setLocation(`/accounts/${activeTab}/${newId}`);
+							} else {
+								setLocation(tabPath);
+							}
 						}}
 					/>
 				)}

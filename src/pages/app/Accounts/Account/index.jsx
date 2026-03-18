@@ -35,9 +35,10 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [loginAsLoading, setLoginAsLoading] = useState(false);
+	const [setInactiveLoading, setSetInactiveLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const { register, handleSubmit, reset, control, watch } = useForm({
+	const { register, handleSubmit, reset, control, watch, getValues } = useForm({
 		defaultValues,
 	});
 	const commissionType = watch("commissionType");
@@ -103,11 +104,31 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				setData((prev) =>
 					prev ? { ...prev, ...(res.data ?? payload) } : (res.data ?? payload),
 				);
+				onSaved?.();
 			}
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const handleSetInactive = async () => {
+		if (isNew || !id) return;
+		if (!window.confirm(strings("form.account.confirmSetInactive"))) return;
+		setSetInactiveLoading(true);
+		setError(null);
+		try {
+			const res = await put(`/accounts/${id}`, { status: "inactive" });
+			setData((prev) =>
+				prev ? { ...prev, ...(res.data ?? { status: "inactive" }) } : null,
+			);
+			reset({ ...getValues(), status: "inactive" });
+			onSaved?.();
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setSetInactiveLoading(false);
 		}
 	};
 
@@ -286,19 +307,36 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 			{!loading && (data || isNew) && (
 				<footer className="flex shrink-0 items-center justify-end gap-2 border-t border-slate-200 px-6 py-4">
 					{!isNew && (
-						<button
-							type="button"
-							onClick={handleLoginAs}
-							disabled={loginAsLoading}
-							className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-						>
-							{loginAsLoading ? (
-								<i className="fa-solid fa-spinner fa-spin" aria-hidden />
-							) : (
-								<i className="fa-solid fa-right-to-bracket" aria-hidden />
+						<>
+							{data?.status === "active" && (
+								<button
+									type="button"
+									onClick={handleSetInactive}
+									disabled={setInactiveLoading}
+									className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+								>
+									{setInactiveLoading ? (
+										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+									) : (
+										<i className="fa-solid fa-trash-can" aria-hidden />
+									)}
+									{strings("form.account.setInactive")}
+								</button>
 							)}
-							{strings("form.account.loginAs")}
-						</button>
+							<button
+								type="button"
+								onClick={handleLoginAs}
+								disabled={loginAsLoading}
+								className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							>
+								{loginAsLoading ? (
+									<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+								) : (
+									<i className="fa-solid fa-right-to-bracket" aria-hidden />
+								)}
+								{strings("form.account.loginAs")}
+							</button>
+						</>
 					)}
 					<button
 						type="submit"

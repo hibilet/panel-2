@@ -129,12 +129,12 @@ const formatAccountType = (t) => {
 };
 
 const accountBaseColumns = [
-	{
-		key: "id",
-		header: strings("table.account.id"),
-		render: (r) => r.id?.slice(-8) ?? "—",
-		className: "font-mono",
-	},
+	// {
+	// 	key: "id",
+	// 	header: strings("table.account.id"),
+	// 	render: (r) => r.id?.slice(-8) ?? "—",
+	// 	className: "font-mono",
+	// },
 	{
 		key: "name",
 		header: strings("table.account.name"),

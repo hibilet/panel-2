@@ -273,6 +273,8 @@
 
 	"form.account.loginAs": "Anmelden als",
 	"form.account.errorLoginAs": "Anmeldung als dieses Konto fehlgeschlagen",
+	"form.account.setInactive": "Deaktivieren",
+	"form.account.confirmSetInactive": "Möchten Sie dieses Konto wirklich deaktivieren?",
 	"form.account.commission": "Provision",
 	"form.account.commissionAmount": "Provisionsbetrag",
 	"form.account.commissionVat": "MwSt.-Multiplikator",

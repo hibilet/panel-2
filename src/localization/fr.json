@@ -273,6 +273,8 @@
 
 	"form.account.loginAs": "Se connecter en tant que",
 	"form.account.errorLoginAs": "Impossible de se connecter avec ce compte",
+	"form.account.setInactive": "Désactiver",
+	"form.account.confirmSetInactive": "Êtes-vous sûr de vouloir désactiver ce compte ?",
 	"form.account.commission": "Commission",
 	"form.account.commissionAmount": "Montant de la commission",
 	"form.account.commissionVat": "Multiplicateur TVA",
