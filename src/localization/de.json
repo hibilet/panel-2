@@ -66,6 +66,7 @@
 	"common.ariaDelete": "Löschen",
 	"common.ariaClose": "Panel schließen",
 	"common.archive": "Archivieren",
+	"common.unarchive": "Wiederherstellen",
 	"common.vat": "MwSt.",
 	"common.total": "Gesamt",
 
@@ -136,6 +137,8 @@
 	"table.account.noAccounts": "Noch keine Konten",
 	"table.account.noMerchants": "Noch keine Händler",
 	"table.account.noCustomers": "Noch keine Kunden",
+	"table.account.commission": "Provision",
+	"table.account.commissionVat": "MwSt.",
 	"table.link.image": "Bild",
 	"table.link.title": "Titel",
 	"table.link.slug": "Slug",
@@ -439,6 +442,7 @@
 	"form.link.startDate": "Startdatum",
 	"form.link.confirmRemoveSale": "Diesen Verkauf aus dem Link entfernen?",
 	"form.link.confirmArchive": "Diesen Link archivieren?",
+	"form.link.confirmUnarchive": "Diesen Link wiederherstellen?",
 
 	"form.ticket.ticketTypes": "Ticketarten",
 	"form.ticket.ticketTypeCount": "$0 Ticketart",

@@ -66,6 +66,7 @@
 	"common.ariaDelete": "Verwijderen",	
 	"common.ariaClose": "Paneel sluiten",
 	"common.archive": "Archiveren",
+	"common.unarchive": "Uit archief halen",
 	"common.vat": "BTW",
 	"common.total": "Totaal",
 
@@ -136,6 +137,8 @@
 	"table.account.noAccounts": "Nog geen accounts",
 	"table.account.noMerchants": "Nog geen handelaren",
 	"table.account.noCustomers": "Nog geen klanten",
+	"table.account.commission": "Commissie",
+	"table.account.commissionVat": "BTW",
 	"table.link.image": "Afbeelding",
 	"table.link.title": "Titel",
 	"table.link.slug": "Slug",
@@ -439,6 +442,7 @@
 	"form.link.startDate": "Startdatum",
 	"form.link.confirmRemoveSale": "Deze verkoop uit de link verwijderen?",
 	"form.link.confirmArchive": "Deze link archiveren?",
+	"form.link.confirmUnarchive": "Deze link herstellen?",
 
 	"form.ticket.ticketTypes": "Tickettypes",
 	"form.ticket.ticketTypeCount": "$0 tickettype",

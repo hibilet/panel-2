@@ -146,7 +146,7 @@ const Links = () => {
 					<LinkPanel
 						id={id}
 						onClose={() => setLocation("/links")}
-						onCreated={(newId) => setLocation(`/links/${newId}`)}
+						onSaved={fetchLinks}
 						onArchived={handleArchived}
 					/>
 				)}

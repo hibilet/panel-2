@@ -66,6 +66,7 @@
 	"common.ariaDelete": "Delete",
 	"common.ariaClose": "Close panel",
 	"common.archive": "Archive",
+	"common.unarchive": "Unarchive",
 	"common.vat": "VAT",
 	"common.total": "Total",
 
@@ -136,6 +137,8 @@
 	"table.account.noAccounts": "No accounts yet",
 	"table.account.noMerchants": "No merchants yet",
 	"table.account.noCustomers": "No customers yet",
+	"table.account.commission": "Commission",
+	"table.account.commissionVat": "VAT",
 	"table.link.image": "Image",
 	"table.link.title": "Title",
 	"table.link.slug": "Slug",
@@ -442,6 +445,7 @@
 	"form.link.startDate": "Start Date",
 	"form.link.confirmRemoveSale": "Remove this sale from the link?",
 	"form.link.confirmArchive": "Archive this link?",
+	"form.link.confirmUnarchive": "Restore this link to active?",
 
 	"form.ticket.ticketTypes": "Ticket types",
 	"form.ticket.ticketTypeCount": "$0 ticket type",

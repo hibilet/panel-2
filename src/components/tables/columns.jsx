@@ -146,11 +146,6 @@ const accountBaseColumns = [
 		header: strings("table.account.email"),
 		render: (r) => r.email ?? "—",
 	},
-	{
-		key: "createdAt",
-		header: strings("table.account.createdAt"),
-		render: (r) => formatDateTime(r.createdAt),
-	},
 ];
 
 export const accountsColumns = [
@@ -163,8 +158,46 @@ export const accountsColumns = [
 	...accountBaseColumns.slice(3),
 ];
 
-export const merchantsColumns = accountBaseColumns;
-export const customersColumns = accountBaseColumns;
+export const merchantsColumns = [
+	...accountBaseColumns,
+		{
+			key: "commission",
+			header: strings("table.account.commission"),
+			align: "right",
+			render: (r) => {
+				if (!r.commission || !("amount" in r.commission)) return "—";
+				if (r.commission.type === "percentage") {
+					// Show as percentage (e.g. "0.50%")
+					return `${(Number(r.commission.amount) * 100).toFixed(2)}%`;
+				}
+				// Show as EUR fixed value (e.g. "€ 1.00")
+				return `€ ${Number(r.commission.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+			},
+		},
+		{
+			key: "commissionVat",
+			header: strings("table.account.commissionVat"),
+			align: "right",
+			render: (r) => {
+				if (!r.commission || r.commission.vat == null) return "—";
+				return `${((Number(r.commission.vat) - 1) * 100).toFixed(2).replace(/\.00$/, "")}%`;
+			},
+		},
+		{
+			key: "createdAt",
+			header: strings("table.account.createdAt"),
+			render: (r) => formatDateTime(r.createdAt),
+		},
+];
+
+export const customersColumns = [
+	...accountBaseColumns,
+	{
+		key: "createdAt",
+		header: strings("table.account.createdAt"),
+		render: (r) => formatDateTime(r.createdAt),
+	},
+];
 
 export const linksColumns = [
 	{

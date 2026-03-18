@@ -18,7 +18,7 @@ const sortSalesByStart = (sales) =>
 
 const defaultValues = { title: "", slug: "", description: "", image: "" };
 
-const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
+const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -94,10 +94,15 @@ const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 				const res = await post("/links", linkData);
 				const created = res.data ?? null;
 				setData(created);
-				if (created?.id) onCreated ? onCreated(created.id) : onClose?.();
+				if (created?.id) {
+					onSaved?.();
+					onClose?.();
+				}
 			} else {
 				await put(`/links/${id}`, { ...data, ...linkData });
 				setData((prev) => (prev ? { ...prev, ...formData, sales } : null));
+				onSaved?.();
+				onClose?.();
 			}
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
@@ -106,6 +111,8 @@ const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 		}
 	};
 
+	const isArchived = data?.status === "archived";
+
 	const onArchive = async () => {
 		if (isNew || !data?.id) return;
 		if (!window.confirm(strings("form.link.confirmArchive"))) return;
@@ -113,6 +120,24 @@ const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 		setError(null);
 		try {
 			await put(`/links/${id}`, { status: "archived" });
+			onArchived?.();
+			onClose?.();
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setArchiving(false);
+		}
+	};
+
+	const onUnarchive = async () => {
+		if (isNew || !data?.id) return;
+		if (!window.confirm(strings("form.link.confirmUnarchive"))) return;
+		setArchiving(true);
+		setError(null);
+		try {
+			await put(`/links/${id}`, { status: "active" });
+			setData((prev) => (prev ? { ...prev, status: "active" } : null));
+			onArchived?.();
 			onClose?.();
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
@@ -311,7 +336,7 @@ const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 								{!isNew && (
 									<button
 										type="button"
-										onClick={onArchive}
+										onClick={isArchived ? onUnarchive : onArchive}
 										disabled={archiving || saving}
 										className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
 									>
@@ -323,6 +348,8 @@ const LinkPanel = ({ id, onClose, onCreated, onArchived }) => {
 												/>
 												{strings("common.saving")}
 											</>
+										) : isArchived ? (
+											strings("common.unarchive")
 										) : (
 											strings("common.archive")
 										)}

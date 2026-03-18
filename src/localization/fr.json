@@ -66,6 +66,7 @@
 	"common.ariaDelete": "Supprimer",
 	"common.ariaClose": "Fermer le panneau",	
 	"common.archive": "Archiver",
+	"common.unarchive": "Désarchiver",
 	"common.vat": "TVA",
 	"common.total": "Total",
 
@@ -104,7 +105,7 @@
 	"dashboard.stats.vsLastMonth": "il y a 1 mois",
 	"dashboard.weeklyMatrix": "Matrice hebdomadaire des ventes d’événements",
 	"dashboard.recentActivity": "Activité récente",
-	"dashboard.salesChart": "Ventes ($0 $1)",
+	"dashboard.salesChart": "Ventes ($0 $1)",		
 	"dashboard.quickStats": "Statistiques rapides",
 	"dashboard.monthThis": "Ce mois-ci",
 	"dashboard.monthAgo": "Il y a 1 mois",
@@ -136,6 +137,8 @@
 	"table.account.noAccounts": "Aucun compte pour le moment",
 	"table.account.noMerchants": "Aucun marchand pour le moment",
 	"table.account.noCustomers": "Aucun client pour le moment",
+	"table.account.commission": "Commission",
+	"table.account.commissionVat": "TVA",
 	"table.link.image": "Image",
 	"table.link.title": "Titre",
 	"table.link.slug": "Slug",
@@ -439,6 +442,7 @@
 	"form.link.startDate": "Date de début",
 	"form.link.confirmRemoveSale": "Retirer cette vente du lien ?",
 	"form.link.confirmArchive": "Archiver ce lien ?",
+	"form.link.confirmUnarchive": "Restaurer ce lien ?",
 
 	"form.ticket.ticketTypes": "Types de billets",
 	"form.ticket.ticketTypeCount": "$0 type de billet",

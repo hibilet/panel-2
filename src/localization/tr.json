@@ -66,6 +66,7 @@
 	"common.ariaDelete": "Sil",
 	"common.ariaClose": "Paneli kapat",
 	"common.archive": "Arşivle",
+	"common.unarchive": "Arşivden Çıkar",
 	"common.vat": "KDV",
 	"common.total": "Toplam",
 
@@ -135,6 +136,8 @@
 	"table.account.noAccounts": "Henüz hesap yok",
 	"table.account.noMerchants": "Henüz satıcı yok",
 	"table.account.noCustomers": "Henüz müşteri yok",
+	"table.account.commission": "Komisyon",
+	"table.account.commissionVat": "KDV",
 	"table.link.image": "Görsel",
 	"table.link.title": "Başlık",
 	"table.link.slug": "Slug",
@@ -438,6 +441,7 @@
 	"form.link.startDate": "Başlangıç Tarihi",
 	"form.link.confirmRemoveSale": "Bu satışı bağlantıdan kaldırmak istiyor musunuz?",
 	"form.link.confirmArchive": "Bu bağlantıyı arşivlemek istiyor musunuz?",
+	"form.link.confirmUnarchive": "Bu bağlantıyı aktif hale getirmek istiyor musunuz?",
 
 	"form.ticket.ticketTypes": "Bilet türleri",
 	"form.ticket.ticketTypeCount": "$0 bilet türü",
