@@ -3,7 +3,7 @@ import "./styles/index.css";
 import profiles from "./configs.json";
 
 const host = typeof window !== "undefined" ? window.location.hostname : "";
-const profile = profiles.profiles[host] ?? profiles.profiles["hibilet.com"];
+const profile = profiles.profiles[host] ?? profiles.profiles["panel.hibilet.com"];
 if (typeof document !== "undefined") {
 	document.title = profile.title;
 	const link = document.querySelector('link[rel="icon"]');
