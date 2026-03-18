@@ -273,7 +273,7 @@ export const providersColumns = [
 	},
 ];
 
-export const venuesColumns = [
+export const venuesColumns  = [
 	// {
 	// 	key: "id",
 	// 	header: strings("table.venue.id"),
@@ -330,6 +330,33 @@ export const venuesColumns = [
 		render: (r) => formatDateTime(r.createdAt),
 	},
 ];
+
+export const venuesMerchantColumns = [
+	{
+		key: "name",
+		header: strings("table.venue.name"),
+		headerCell: true,
+		render: (r) => r.name ?? "—",
+	},
+	{
+		key: "address",
+		header: strings("table.venue.address"),
+		render: (r) => r.address ?? "—",
+	},
+	{
+		key: "category",
+		header: strings("table.venue.category"),
+		render: (r) =>
+			r.category
+				? String(r.category).replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+				: "—",
+	},
+	{
+		key: "createdAt",
+		header: strings("table.venue.createdAt"),
+		render: (r) => formatDateTime(r.createdAt),
+	},
+]
 
 export const agreementsColumns = [
 	{

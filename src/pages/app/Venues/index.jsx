@@ -1,9 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { SlidePanel } from "../../../components/shared";
-import { venuesColumns } from "../../../components/tables/columns";
+import {
+	venuesColumns,
+	venuesMerchantColumns,
+} from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
+import { useApp } from "../../../context/AppContext";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import VenuePanel from "./Venue";
@@ -12,6 +16,7 @@ const LIMIT = 25;
 
 const Venues = () => {
 	const [, setLocation] = useLocation();
+	const { account } = useApp();
 	const { id } = useParams();
 
 	const venueId = id ?? null;
@@ -78,7 +83,11 @@ const Venues = () => {
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
 					data={paginatedData}
-					columns={venuesColumns}
+					columns={
+						account?.type === "account.merchant"
+							? venuesMerchantColumns
+							: venuesColumns
+					}
 					getRowKey={(r) => r.id ?? r._id}
 					bare
 					loading={loading}
@@ -105,9 +114,7 @@ const Venues = () => {
 						: strings("page.venues.details")
 				}
 				aria-label={
-					venueId === "new"
-						? strings("form.venue.newTitle")
-						: "Venue details"
+					venueId === "new" ? strings("form.venue.newTitle") : "Venue details"
 				}
 			>
 				{venueId && (
