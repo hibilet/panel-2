@@ -81,6 +81,16 @@ export const AppProvider = ({ children }) => {
 		}
 	}, []);
 
+	const refreshAccount = useCallback(async () => {
+		try {
+			const r = await get("/accounts/me");
+			setAccount(r?.data ?? null);
+			return r?.data ?? null;
+		} catch {
+			return null;
+		}
+	}, []);
+
 	const value = {
 		account,
 		sales,
@@ -91,6 +101,7 @@ export const AppProvider = ({ children }) => {
 		loading,
 		error,
 		refreshSales,
+		refreshAccount,
 	};
 
 	return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

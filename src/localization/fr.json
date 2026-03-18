@@ -28,6 +28,12 @@
 	"tour.step.dashboardRecentActivity": "Activité récente — Affichez votre activité récente. Sélectionnez une transaction pour voir les informations.",
 	"tour.step.dashboardRecentActivityViewAll": "Tout afficher — Affichez toute votre activité récente.",
 
+	"completionSteps.title": "Complétez votre configuration",
+	"completionSteps.description": "Veuillez compléter les étapes suivantes avant d'utiliser le panneau.",
+	"completionSteps.agreements": "Contrats",
+	"completionSteps.providers": "Prestataires",
+	"completionSteps.mailings": "Envoi de mails",
+
 	"common.save": "Enregistrer",
 	"common.cancel": "Annuler",
 	"common.delete": "Supprimer",
@@ -194,6 +200,7 @@
 	"form.agreement.content": "Contenu du contrat",
 	"form.agreement.contentPlaceholder": "Ex : Contrat de vente à distance...",
 	"table.weekly.eventName": "Nom de l'événement",
+	"table.weekly.noEvents": "Aucun événement sur cette période",
 	"table.ticket.name": "Nom",
 	"table.ticket.category": "Catégorie",
 	"table.ticket.price": "Prix",

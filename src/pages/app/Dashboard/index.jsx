@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Link } from "wouter";
 import SalesChart from "../../../components/charts/SalesChart";
+import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
 import { StatCard } from "../../../components/shared";
 import { transactionsColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -230,8 +231,10 @@ const Dashboard = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl relative">
+			<CompletionStepsWizard />
+
 			<div
-				className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8"
+				className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8 mt-8"
 				data-tour="dashboard-stats"
 			>
 				<StatCard

@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
 import strings, { formatCurrency } from "../../localization";
+import EmptyState from "../shared/EmptyState";
 
 // weekday 1 = Mon, 2 = Tue, ..., 6 = Sat, 7 = Sun (dayjs: 0=Sun, 1=Mon, ..., 6=Sat)
 const WEEKDAY_DAYJS = [1, 2, 3, 4, 5, 6, 0];
@@ -19,9 +20,8 @@ const WeeklyEventSaleMatrix = ({
 		valueFormat === "count" ? formatCount : formatCurrencyOrDash;
 
 	const weekdayLabels = WEEKDAY_DAYJS.map((d) => dayjs().day(d).format("ddd"));
-	const showShimmer = loading || data.length === 0;
 
-	if (showShimmer) {
+	if (loading) {
 		return (
 			<div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
 				<table className="min-w-full divide-y divide-slate-200">
@@ -55,7 +55,16 @@ const WeeklyEventSaleMatrix = ({
 						))}
 					</tbody>
 				</table>
-			</div>
+		</div>
+	);
+	}
+
+	if (data.length === 0) {
+		return (
+			<EmptyState
+				icon="fa-calendar-xmark"
+				title={strings("table.weekly.noEvents")}
+			/>
 		);
 	}
 

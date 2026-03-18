@@ -28,6 +28,12 @@
 	"tour.step.dashboardRecentActivity": "Son aktiviteler — Son aktiviteleri görüntüleyin. Bir işlem seçerek verileri görüntüleyin.",
 	"tour.step.dashboardRecentActivityViewAll": "Tümünü gör — Tüm son aktiviteleri görüntüleyin.",
 
+	"completionSteps.title": "Kurulumu tamamlayın",
+	"completionSteps.description": "Paneli kullanmadan önce lütfen aşağıdaki adımları tamamlayın.",
+	"completionSteps.agreements": "Sözleşmeler",
+	"completionSteps.providers": "Sağlayıcılar",
+	"completionSteps.mailings": "Posta ayarları",
+
 	"common.save": "Kaydet",
 	"common.cancel": "İptal",
 	"common.delete": "Sil",
@@ -193,6 +199,7 @@
 	"form.agreement.content": "Sözleşme İçeriği",
 	"form.agreement.contentPlaceholder": "Örn: Uzaktan Satış Sözleşmesi...",
 	"table.weekly.eventName": "Etkinlik adı",
+	"table.weekly.noEvents": "Bu dönemde etkinlik yok",
 	"table.ticket.name": "Ad",
 	"table.ticket.category": "Kategori",
 	"table.ticket.price": "Fiyat",

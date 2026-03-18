@@ -28,6 +28,12 @@
 	"tour.step.dashboardRecentActivity": "Letzte Aktivität — Sehen Sie Ihre letzten Aktivitäten. Wählen Sie eine Transaktion, um die Details zu sehen.",
 	"tour.step.dashboardRecentActivityViewAll": "Alle anzeigen — Sehen Sie alle Ihre letzten Aktivitäten.",
 
+	"completionSteps.title": "Setup abschließen",
+	"completionSteps.description": "Bitte schließen Sie die folgenden Schritte ab, bevor Sie das Panel nutzen.",
+	"completionSteps.agreements": "Verträge",
+	"completionSteps.providers": "Anbieter",
+	"completionSteps.mailings": "E-Mail-Einstellungen",
+
 	"common.save": "Speichern",
 	"common.cancel": "Abbrechen",
 	"common.delete": "Löschen",
@@ -194,6 +200,7 @@
 	"form.agreement.content": "Vertragstext",
 	"form.agreement.contentPlaceholder": "Z.B.: Fernabsatzvertrag...",
 	"table.weekly.eventName": "Veranstaltungsname",
+	"table.weekly.noEvents": "Keine Veranstaltungen in diesem Zeitraum",
 	"table.ticket.name": "Name",
 	"table.ticket.category": "Kategorie",
 	"table.ticket.price": "Preis",

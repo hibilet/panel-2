@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Link, useLocation, useParams } from "wouter";
 
+import { useApp } from "../../../../context";
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
 import SlidePanel from "../../../../components/shared/SlidePanel";
@@ -11,6 +12,7 @@ import ProviderPanel from "./Provider";
 const Providers = () => {
 	const [, setLocation] = useLocation();
 	const { id } = useParams();
+	const { refreshAccount } = useApp();
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -111,6 +113,7 @@ const Providers = () => {
 						onClose={() => setLocation("/settings/providers")}
 						onSaved={(newId) => {
 							fetchProviders(true);
+							refreshAccount?.();
 							if (newId) setLocation(`/settings/providers/${newId}`);
 						}}
 					/>

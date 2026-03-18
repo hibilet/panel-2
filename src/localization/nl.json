@@ -28,6 +28,12 @@
 	"tour.step.dashboardRecentActivity": "Recente activiteit — Bekijk uw recente acties. Selecteer een transactie om de gegevens te zien.",
 	"tour.step.dashboardRecentActivityViewAll": "Alles bekijken — Bekijk al uw recente activiteiten.",
 
+	"completionSteps.title": "Voltooi uw configuratie",
+	"completionSteps.description": "Voltooi de volgende stappen voordat u het paneel gebruikt.",
+	"completionSteps.agreements": "Overeenkomsten",
+	"completionSteps.providers": "Aanbieders",
+	"completionSteps.mailings": "Mailinstellingen",
+
 	"common.save": "Opslaan",
 	"common.cancel": "Annuleren",
 	"common.delete": "Verwijderen",
@@ -194,6 +200,7 @@
 	"form.agreement.content": "Overeenkomstinhoud",
 	"form.agreement.contentPlaceholder": "Bijv: Koop op afstand...",
 	"table.weekly.eventName": "Evenementsnaam",
+	"table.weekly.noEvents": "Geen evenementen in deze periode",
 	"table.ticket.name": "Naam",
 	"table.ticket.category": "Categorie",
 	"table.ticket.price": "Prijs",

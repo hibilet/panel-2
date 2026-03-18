@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import SlidePanel from "../../../components/shared/SlidePanel";
+import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
 import { useApp } from "../../../context";
 import { deleteToken, getLang, setLang } from "../../../lib/storage";
 import { getStoredTheme, setTheme } from "../../../lib/theme";
 import strings, { locales } from "../../../localization";
 import LoginQRModal from "./LoginQR";
-import MailingPanel from "./Mailing";
 
 const LANG_OPTIONS = locales.map((code) => ({
 	value: code,
@@ -19,7 +18,6 @@ const Settings = () => {
 	const [lang, setLangState] = useState(getLang() || "en");
 	const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 	const [loginQrOpen, setLoginQrOpen] = useState(false);
-	const [mailingPanelOpen, setMailingPanelOpen] = useState(false);
 	const langDropdownRef = useRef(null);
 
 	useEffect(() => {
@@ -66,6 +64,8 @@ const Settings = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-8">
+			<CompletionStepsWizard />
+
 			{/* Account details */}
 			<h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
 				<i className="fa-solid fa-user" aria-hidden />
@@ -119,9 +119,8 @@ const Settings = () => {
 					{strings("page.settings.preferences")}
 				</h2>
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					<button
-						type="button"
-						onClick={() => setMailingPanelOpen(true)}
+					<Link
+						href="/settings/mailing"
 						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:border-slate-600"
 					>
 						<i
@@ -131,7 +130,7 @@ const Settings = () => {
 						<span className="font-medium text-slate-900 dark:text-white">
 							{strings("page.settings.mailingSetup")}
 						</span>
-					</button>
+					</Link>
 
 					<Link
 						href="/settings/providers"
@@ -262,15 +261,6 @@ const Settings = () => {
 					</button>
 				</div>
 			</section>
-
-			<SlidePanel
-				isOpen={mailingPanelOpen}
-				onClose={() => setMailingPanelOpen(false)}
-				title={strings("page.settings.mailingSetup")}
-				aria-label={strings("page.settings.mailingSetup")}
-			>
-				<MailingPanel onClose={() => setMailingPanelOpen(false)} />
-			</SlidePanel>
 
 			<LoginQRModal
 				isOpen={loginQrOpen}

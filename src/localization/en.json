@@ -28,6 +28,12 @@
 	"tour.step.dashboardRecentActivity": "Recent activity — View your recent activity. Select a transaction to see the data.",
 	"tour.step.dashboardRecentActivityViewAll": "View all — View all your recent activity.",
 
+	"completionSteps.title": "Complete your setup",
+	"completionSteps.description": "Please complete the following steps before using the panel.",
+	"completionSteps.agreements": "Agreements",
+	"completionSteps.providers": "Providers",
+	"completionSteps.mailings": "Mailings",
+
 	"common.save": "Save",
 	"common.cancel": "Cancel",
 	"common.delete": "Delete",
@@ -197,6 +203,7 @@
 	"form.agreement.content": "Agreement Content",
 	"form.agreement.contentPlaceholder": "Eg: Distant Sales Agreement...",
 	"table.weekly.eventName": "Event name",
+	"table.weekly.noEvents": "No events in this period",
 	"table.ticket.name": "Name",
 	"table.ticket.category": "Category",
 	"table.ticket.price": "Price",

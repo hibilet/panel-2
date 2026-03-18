@@ -80,7 +80,17 @@ const Navbar = () => {
 	const { account, sales } = useApp();
 	const hotSwapToken = getHotSwapToken();
 
+	const isMerchant = account?.type === "account.merchant";
+	const isSetupComplete =
+		!isMerchant ||
+		(account?.providers !== false &&
+			account?.agreements !== false &&
+			account?.mailings !== false);
+
 	const today = dayjs().format("YYYY-MM-DD");
+	const isNavItemEnabled = (path) =>
+		isSetupComplete || path === "/" || path === "/settings";
+
 	const hasEventsToday = useMemo(
 		() =>
 			(sales ?? []).some((s) => {
@@ -102,31 +112,62 @@ const Navbar = () => {
 		path === "/" ? location === path : location.startsWith(path),
 	);
 
-	const NavLink = ({ path, label, icon, isActive, tourId, hasBeating }) => (
-		<Link
-			href={path}
-			role="tab"
-			aria-selected={isActive}
-			aria-current={isActive ? "page" : undefined}
-			data-tour={tourId}
-			onClick={() => setMenuOpen(false)}
-			className={`
+	const NavLink = ({
+		path,
+		label,
+		icon,
+		isActive,
+		tourId,
+		hasBeating,
+		disabled,
+	}) => {
+		const baseClass = `
         flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium
         transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
         ${
-					isActive
-						? "bg-slate-900 text-white"
-						: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+					disabled
+						? "cursor-not-allowed opacity-50 text-slate-400"
+						: isActive
+							? "bg-slate-900 text-white"
+							: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
 				}
-      `}
-		>
-			<i
-				className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
-				aria-hidden
-			/>
-			<span>{label}</span>
-		</Link>
-	);
+      `;
+		if (disabled) {
+			return (
+				<span
+					role="tab"
+					aria-disabled="true"
+					aria-selected={isActive}
+					tabIndex={-1}
+					data-tour={tourId}
+					className={baseClass}
+				>
+					<i
+						className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
+						aria-hidden
+					/>
+					<span>{label}</span>
+				</span>
+			);
+		}
+		return (
+			<Link
+				href={path}
+				role="tab"
+				aria-selected={isActive}
+				aria-current={isActive ? "page" : undefined}
+				data-tour={tourId}
+				onClick={() => setMenuOpen(false)}
+				className={baseClass}
+			>
+				<i
+					className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
+					aria-hidden
+				/>
+				<span>{label}</span>
+			</Link>
+		);
+	};
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -154,6 +195,7 @@ const Navbar = () => {
 							if (liveOnly && !hasEventsToday) return null;
 							const isActive =
 								path === "/" ? location === path : location.startsWith(path);
+							const disabled = !isNavItemEnabled(path);
 							return acl.includes(account?.type?.split(".")[1]) ? (
 								<NavLink
 									key={path}
@@ -163,6 +205,7 @@ const Navbar = () => {
 									isActive={isActive}
 									tourId={tourId}
 									hasBeating={liveOnly && hasEventsToday}
+									disabled={disabled}
 								/>
 							) : null;
 						})}
@@ -200,12 +243,14 @@ const Navbar = () => {
 							className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"}`}
 						>
 							<div className="px-4 py-4">
-								{navItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
+								{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly }) => {
 									if (liveOnly && !hasEventsToday) return null;
+									if (!acl.includes(account?.type?.split(".")[1])) return null;
 									const isActive =
 										path === "/"
 											? location === path
 											: location.startsWith(path);
+									const disabled = !isNavItemEnabled(path);
 									return (
 										<div key={path} className="px-2">
 											<NavLink
@@ -215,6 +260,7 @@ const Navbar = () => {
 												isActive={isActive}
 												tourId={tourId}
 												hasBeating={liveOnly && hasEventsToday}
+												disabled={disabled}
 											/>
 										</div>
 									);
