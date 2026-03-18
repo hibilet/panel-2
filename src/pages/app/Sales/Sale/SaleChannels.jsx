@@ -17,6 +17,7 @@ import { Input } from "../../../../components/inputs";
 import { EmptyState, Modal, SlidePanel } from "../../../../components/shared";
 import { channelColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
+import { getChannelLink } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -26,16 +27,6 @@ const RESERVATION_LABELS = {
 	success: `✅ ${strings("status.success")}`,
 	pending: `⏳ ${strings("status.pending")}`,
 	cancelled: `⛔ ${strings("status.cancelled")}`,
-};
-
-const API_BASE = import.meta.env.VITE_API_URL || "";
-const APP_BASE =
-	import.meta.env.VITE_APP_URL || API_BASE.replace(/api[^.]*/, "app");
-
-const getChannelLink = (channelId) => {
-	if (!channelId || !APP_BASE) return null;
-	const base = APP_BASE.replace(/\/$/, "");
-	return `${base}/${channelId}`;
 };
 
 const getInitialForm = (channel) => {

@@ -8,8 +8,44 @@ import {
 } from "../../../../components/inputs";
 import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
+import { getLinkUrl } from "../../../../lib/appUrl";
 import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
+
+const CopyButton = ({ text, stopPropagation }) => {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async (e) => {
+		if (stopPropagation) e.stopPropagation();
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// ignore
+		}
+	};
+
+	return (
+		<button
+			type="button"
+			onClick={handleCopy}
+			className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+			aria-label={
+				copied
+					? strings("form.channel.copied")
+					: strings("form.channel.copyLink")
+			}
+			title={strings("form.channel.copyLink")}
+		>
+			{copied ? (
+				<i className="fa-solid fa-check text-emerald-600" aria-hidden />
+			) : (
+				<i className="fa-solid fa-copy" aria-hidden />
+			)}
+		</button>
+	);
+};
 
 const sortSalesByStart = (sales) =>
 	[...(sales ?? [])]
@@ -239,6 +275,25 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
 									</fieldset>
 								)}
 
+								{(formValues.slug || data?.slug) && (
+									<div className="space-y-4">
+										<h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+											{strings("form.channel.channelLink")}
+										</h4>
+										<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
+											<a
+												href={getLinkUrl(formValues.slug || data?.slug)}
+												target="_blank"
+												rel="noreferrer"
+												className="min-w-0 flex-1 truncate text-sm text-slate-600 underline hover:text-slate-900"
+											>
+												{getLinkUrl(formValues.slug || data?.slug)}
+											</a>
+											<CopyButton text={getLinkUrl(formValues.slug || data?.slug)} />
+										</div>
+									</div>
+								)}
+
 								<fieldset className="grid grid-cols-1">
 									<Textarea
 										label={strings("form.link.description")}
@@ -248,11 +303,15 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived }) => {
 								</fieldset>
 
 								<fieldset className="grid grid-cols-1">
-									<label className="block text-sm font-medium text-slate-700">
+									<label
+										htmlFor="link-image"
+										className="block text-sm font-medium text-slate-700"
+									>
 										{strings("form.link.image")}
 									</label>
 									<div className="mt-1 flex items-center gap-2">
 										<input
+											id="link-image"
 											type="text"
 											placeholder={strings("form.sale.uploadImagePlaceholder")}
 											{...register("image")}

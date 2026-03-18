@@ -199,7 +199,7 @@ export const customersColumns = [
 	},
 ];
 
-export const linksColumns = [
+export const linksColumns = (getLinkUrl, CopyButton) => [
 	{
 		key: "image",
 		header: strings("table.link.image"),
@@ -234,11 +234,34 @@ export const linksColumns = [
 		align: "right",
 		render: (r) => r.reservations?.toLocaleString() ?? "—",
 	},
+	// {
+	// 	key: "revenue",
+	// 	header: strings("table.link.revenue"),
+	// 	align: "right",
+	// 	render: (r) => (r.revenue != null ? formatCurrency(r.revenue) : "—"),
+	// },
 	{
-		key: "revenue",
-		header: strings("table.link.revenue"),
-		align: "right",
-		render: (r) => (r.revenue != null ? formatCurrency(r.revenue) : "—"),
+		key: "link",
+		header: strings("form.channel.link"),
+		render: (r) => {
+			const link = getLinkUrl?.(r.slug);
+			return link ? (
+				<span className="flex items-center gap-2">
+					<a
+						href={link}
+						target="_blank"
+						rel="noreferrer"
+						onClick={(e) => e.stopPropagation()}
+						className="text-sm text-slate-600 underline hover:text-slate-900"
+					>
+						{strings("form.channel.open")}
+					</a>
+					{CopyButton && <CopyButton text={link} stopPropagation />}
+				</span>
+			) : (
+				"—"
+			);
+		},
 	},
 ];
 

@@ -4,9 +4,45 @@ import SlidePanel from "../../../components/shared/SlidePanel";
 import { linksColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
+import { getLinkUrl } from "../../../lib/appUrl";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import LinkPanel from "./Link";
+
+const CopyButton = ({ text, stopPropagation }) => {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async (e) => {
+		if (stopPropagation) e.stopPropagation();
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// ignore
+		}
+	};
+
+	return (
+		<button
+			type="button"
+			onClick={handleCopy}
+			className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+			aria-label={
+				copied
+					? strings("form.channel.copied")
+					: strings("form.channel.copyLink")
+			}
+			title={strings("form.channel.copyLink")}
+		>
+			{copied ? (
+				<i className="fa-solid fa-check text-emerald-600" aria-hidden />
+			) : (
+				<i className="fa-solid fa-copy" aria-hidden />
+			)}
+		</button>
+	);
+};
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({
@@ -97,7 +133,7 @@ const Links = () => {
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
 					data={data}
-					columns={linksColumns}
+					columns={linksColumns(getLinkUrl, CopyButton)}
 					getRowKey={(r) => r.id ?? r.slug}
 					onRowClick={(row) => row.id && setLocation(`/links/${row.id}`)}
 					loading={loading}
@@ -124,7 +160,7 @@ const Links = () => {
 							<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 								<DataTable
 									data={archivedLinks}
-									columns={linksColumns}
+									columns={linksColumns(getLinkUrl, CopyButton)}
 									getRowKey={(r) => r.id ?? r.slug}
 									onRowClick={(row) =>
 										row.id && setLocation(`/links/${row.id}`)
