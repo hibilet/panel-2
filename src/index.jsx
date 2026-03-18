@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./styles/index.css";
+import "./lib/firebase";
 import profiles from "./configs.json";
 
 const host = typeof window !== "undefined" ? window.location.hostname : "";
