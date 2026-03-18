@@ -1,7 +1,8 @@
 import { useEffect } from "react";
-import { Route, Switch, useLocation } from "wouter";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 
 import Navbar from "../../components/global/Navbar";
+import { useApp } from "../../context";
 import Accounts from "./Accounts";
 import Dashboard from "./Dashboard";
 import Links from "./Links";
@@ -18,15 +19,16 @@ import SettingsProviders from "./Settings/Providers";
 import Transactions from "./Transactions";
 import Venues from "./Venues";
 
-const AccountsRedirect = () => {
-	const [, setLocation] = useLocation();
-	useEffect(() => {
-		setLocation("/accounts/merchants", { replace: true });
-	}, [setLocation]);
-	return null;
+const NotFound = () => {
+	return (
+		<div className="mx-auto max-w-5xl">
+			<h1 className="text-2xl font-semibold text-slate-900">404 Not Found</h1>
+		</div>
+	);
 };
 
 const App = () => {
+	const { account } = useApp();
 	return (
 		<>
 			<Navbar />
@@ -45,13 +47,15 @@ const App = () => {
 					<Route path="/reports/:id" component={Report} />
 					<Route path="/venues/:id" component={Venues} />
 					<Route path="/venues" component={Venues} />
-					<Route path="/accounts/merchants/:id" component={Accounts} />
-					<Route path="/accounts/customers/:id" component={Accounts} />
-					<Route path="/accounts/merchants" component={Accounts} />
-					<Route path="/accounts/customers" component={Accounts} />
-					<Route path="/accounts">
-						<AccountsRedirect />
-					</Route>
+					{account?.type === "account.admin" && (
+						<>
+							<Route path="/accounts/merchants/:id" component={Accounts} />
+							<Route path="/accounts/customers/:id" component={Accounts} />
+							<Route path="/accounts/merchants" component={Accounts} />
+							<Route path="/accounts/customers" component={Accounts} />
+							<Redirect to="/accounts/merchants" />
+						</>
+					)}
 					<Route path="/settings" component={Settings} />
 					<Route path="/settings/providers" component={SettingsProviders} />
 					<Route path="/settings/providers/:id" component={SettingsProviders} />
@@ -61,6 +65,9 @@ const App = () => {
 						path="/settings/agreements/:id"
 						component={SettingsAgreements}
 					/>
+					<Route path="*">
+						<NotFound />
+					</Route>
 				</Switch>
 			</main>
 		</>
