@@ -8,7 +8,7 @@ const Splash = () => {
 	const search = useSearch();
 	const params = new URLSearchParams(search);
 	const isAdmin = params.get("type") === "admin";
-	const authType = isAdmin ? "admin" : "account.merchant";
+	const authType = isAdmin ? "admin" : "merchant";
 
 	const [step, setStep] = useState("email");
 	const [email, setEmail] = useState("");
