@@ -1,5 +1,14 @@
 import { createRoot } from "react-dom/client";
 import "./styles/index.css";
+import profiles from "./configs.json";
+
+const host = typeof window !== "undefined" ? window.location.hostname : "";
+const profile = profiles.profiles[host] ?? profiles.profiles["hibilet.com"];
+if (typeof document !== "undefined") {
+	document.title = profile.title;
+	const link = document.querySelector('link[rel="icon"]');
+	if (link) link.href = `/${profile.favicon}`;
+}
 
 import { TourProvider } from "@reactour/tour";
 import dayjs from "dayjs";

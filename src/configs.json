@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "hibilet.com": {
+      "title": "HIBilet Panel",
+      "favicon": "hibilet-favicon.svg"
+    },
+    "tixcore.de": {
+      "title": "Tixcore Panel",
+      "favicon": "tixcore-favicon.svg"
+    }
+  }
+}
