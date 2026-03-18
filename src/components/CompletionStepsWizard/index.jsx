@@ -23,6 +23,14 @@ const STEPS = [
 	},
 ];
 
+export const shouldShowCompletionWizard = (account) => {
+	if (!account || account.type !== "account.merchant") return false;
+	return STEPS.some(
+		(step) =>
+			account[step.key] === false || account[step.key] === undefined,
+	);
+};
+
 const CompletionStepsWizard = () => {
 	const { account } = useApp();
 

@@ -3,7 +3,9 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 import { Link } from "wouter";
-import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
+import CompletionStepsWizard, {
+	shouldShowCompletionWizard,
+} from "../../../components/CompletionStepsWizard";
 import SalesChart from "../../../components/charts/SalesChart";
 import { StatCard } from "../../../components/shared";
 import { transactionsColumns } from "../../../components/tables/columns";
@@ -293,12 +295,14 @@ const Dashboard = () => {
 		);
 	}
 
+	const showWizard = shouldShowCompletionWizard(account);
+
 	return (
 		<div className="mx-auto max-w-5xl relative">
 			<CompletionStepsWizard />
 
 			<div
-				className="grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8 mt-8"
+				className={`grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8 ${showWizard ? "mt-8" : ""}`}
 				data-tour="dashboard-stats"
 			>
 				<StatCard
