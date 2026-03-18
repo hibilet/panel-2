@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Input, Select } from "../../../../components/inputs";
+import { Controller, useForm } from "react-hook-form";
+import { FormSection, Input, Select } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings from "../../../../localization";
@@ -10,14 +10,26 @@ const STATUS_OPTIONS = [
 	{ value: "inactive", label: strings("common.inactive") },
 ];
 
+const COMMISSION_TYPE_OPTIONS = [
+	{
+		value: "percentage",
+		label: strings("form.account.commissionTypePercentage"),
+	},
+	{ value: "fixed", label: strings("form.account.commissionTypeFixed") },
+];
+
 const defaultValues = {
 	name: "",
 	email: "",
 	phone: "",
 	status: "active",
+	commissionAmount: 1.0, // stored as decimal (0.4 = 40%)
+	commissionVat: 1.19, // stored as multiplier (1.19 = 19%)
+	commissionType: "fixed",
 };
 
 const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
+	const isMerchant = accountType === "account.merchant";
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -25,7 +37,10 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [loginAsLoading, setLoginAsLoading] = useState(false);
 	const [error, setError] = useState(null);
 
-	const { register, handleSubmit, reset } = useForm({ defaultValues });
+	const { register, handleSubmit, reset, control, watch } = useForm({
+		defaultValues,
+	});
+	const commissionType = watch("commissionType");
 
 	useEffect(() => {
 		if (isNew) {
@@ -41,11 +56,15 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				const d = res.data ?? null;
 				setData(d);
 				if (d) {
+					const commission = d.commission ?? {};
 					reset({
 						name: d.name ?? "",
 						email: d.email ?? "",
 						phone: d.phone ?? "",
 						status: d.status ?? "active",
+						commissionAmount: commission.amount ?? 0.4,
+						commissionVat: commission.vat ?? 1.19,
+						commissionType: commission.type ?? "percentage",
 					});
 				}
 			})
@@ -65,11 +84,17 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				phone: formData.phone?.trim() || undefined,
 				status: formData.status || undefined,
 			};
+			if (isMerchant) {
+				payload.commission = {
+					...(data?.commission ?? {}),
+					amount: Number(formData.commissionAmount) || 0.4,
+					vat: Number(formData.commissionVat) || 1.19,
+					type: formData.commissionType || "percentage",
+				};
+			}
+			payload.type = accountType ?? data?.type ?? "account.merchant";
 			if (isNew) {
-				const res = await post("/accounts", {
-					...payload,
-					type: accountType ?? "account.merchant",
-				});
+				const res = await post("/accounts", payload);
 				const created = res.data ?? null;
 				const newId = created?.id ?? created?._id;
 				if (newId) onSaved?.(newId);
@@ -168,6 +193,92 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							{...register("status")}
 							options={STATUS_OPTIONS}
 						/>
+						{isMerchant && (
+							<FormSection title={strings("form.account.commission")}>
+								<Select
+									label={strings("form.account.commissionType")}
+									{...register("commissionType")}
+									options={COMMISSION_TYPE_OPTIONS}
+								/>
+								{commissionType === "percentage" ? (
+									<Controller
+										control={control}
+										name="commissionAmount"
+										render={({ field }) => (
+											<Input
+												label={strings("form.account.commissionAmount")}
+												type="number"
+												step="0.01"
+												min="0"
+												max="100"
+												placeholder="40"
+												endAdornment="%"
+												value={
+													field.value != null &&
+													field.value !== "" &&
+													!Number.isNaN(Number(field.value))
+														? String(
+																Math.round(Number(field.value) * 10000) / 100,
+															)
+														: ""
+												}
+												onChange={(e) => {
+													const v = e.target.value;
+													const num = v === "" ? 0 : Number(v) / 100;
+													field.onChange(num);
+												}}
+												onBlur={field.onBlur}
+												name={field.name}
+												ref={field.ref}
+											/>
+										)}
+									/>
+								) : (
+									<Input
+										label={strings("form.account.commissionAmount")}
+										type="number"
+										step="0.01"
+										min="0"
+										{...register("commissionAmount", { valueAsNumber: true })}
+										placeholder="10.50"
+										endAdornment="€"
+									/>
+								)}
+								<Controller
+									control={control}
+									name="commissionVat"
+									render={({ field }) => (
+										<Input
+											label={strings("form.account.commissionVat")}
+											type="number"
+											step="0.01"
+											min="0"
+											max="100"
+											placeholder="19"
+											endAdornment="%"
+											value={
+												field.value != null &&
+												field.value !== "" &&
+												!Number.isNaN(Number(field.value))
+													? String(
+															Math.round((Number(field.value) - 1) * 10000) /
+																100,
+														)
+													: ""
+											}
+											onChange={(e) => {
+												const v = e.target.value;
+												const num = v === "" ? 1 : 1 + Number(v) / 100;
+												field.onChange(num);
+											}}
+											onBlur={field.onBlur}
+											name={field.name}
+											ref={field.ref}
+										/>
+									)}
+								/>
+							</FormSection>
+						)}
 					</form>
 				)}
 			</div>

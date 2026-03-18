@@ -271,6 +271,12 @@
 
 	"form.account.loginAs": "Login As",
 	"form.account.errorLoginAs": "Failed to login as this account",
+	"form.account.commission": "Commission",
+	"form.account.commissionAmount": "Commission amount",
+	"form.account.commissionVat": "VAT multiplier",
+	"form.account.commissionType": "Commission type",
+	"form.account.commissionTypePercentage": "Percentage",
+	"form.account.commissionTypeFixed": "Fixed",
 
 	"page.settings.title": "Settings",
 	"page.settings.profile": "Profile",

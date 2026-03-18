@@ -268,6 +268,12 @@
 
 	"form.account.loginAs": "Se connecter en tant que",
 	"form.account.errorLoginAs": "Impossible de se connecter avec ce compte",
+	"form.account.commission": "Commission",
+	"form.account.commissionAmount": "Montant de la commission",
+	"form.account.commissionVat": "Multiplicateur TVA",
+	"form.account.commissionType": "Type de commission",
+	"form.account.commissionTypePercentage": "Pourcentage",
+	"form.account.commissionTypeFixed": "Fixe",
 
 	"page.settings.title": "Paramètres",
 	"page.settings.profile": "Profil",

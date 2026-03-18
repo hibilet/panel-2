@@ -267,6 +267,12 @@
 
 	"form.account.loginAs": "Bu Hesap Olarak Giriş Yap",
 	"form.account.errorLoginAs": "Bu hesap olarak giriş yapılamadı",
+	"form.account.commission": "Komisyon",
+	"form.account.commissionAmount": "Komisyon tutarı",
+	"form.account.commissionVat": "KDV çarpanı",
+	"form.account.commissionType": "Komisyon tipi",
+	"form.account.commissionTypePercentage": "Yüzde",
+	"form.account.commissionTypeFixed": "Sabit",
 
 	"page.settings.title": "Ayarlar",
 	"page.settings.profile": "Profil",
