@@ -624,6 +624,8 @@
 	"form.reader.namePlaceholder": "Bijv: Jan Jansen",
 	"form.reader.emailPlaceholder": "Bijv: jan@voorbeeld.com",
 
+	"common.pleaseSelect": "Selecteer",
+
 	"form.coupon.title": "Kortingscodes",
 	"form.coupon.addCoupon": "Kortingscode toevoegen",
 	"form.coupon.saveFirst": "Sla de verkoop eerst op",

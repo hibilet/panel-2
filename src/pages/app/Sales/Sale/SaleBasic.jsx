@@ -3,7 +3,9 @@ import utc from "dayjs/plugin/utc";
 import { useEffect, useRef, useState } from "react";
 
 dayjs.extend(utc);
+
 import { useForm } from "react-hook-form";
+import { useLocation } from "wouter";
 import {
 	Checkbox,
 	Input,
@@ -13,10 +15,18 @@ import {
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
-import { toId } from "../../../../utils/object";
+import { saleBasicFaker } from "../../../../utils/fakers";
+import { compact, toId } from "../../../../utils/object";
 
 const SaleBasic = ({ sale, setSale, params: { id } }) => {
-	const { venues, agreements, providers, loading: appLoading } = useApp();
+	const [, setLocation] = useLocation();
+	const {
+		venues,
+		agreements,
+		providers,
+		loading: appLoading,
+		refreshSales,
+	} = useApp();
 	const [plans, setPlans] = useState(null);
 	const fileInputRef = useRef(null);
 
@@ -40,23 +50,45 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			.catch(() => setPlans([]));
 	}, [venue]);
 
+	const buildPayload = (fd) => {
+		const tracking = compact({
+			ga: fd.tracking?.ga,
+			meta: fd.tracking?.meta,
+			tiktok: fd.tracking?.tiktok,
+		});
+		return compact({
+			...fd,
+			start: fd.start ? dayjs(fd.start).format("YYYY-MM-DD HH:mm") : undefined,
+			end: fd.end ? dayjs(fd.end).format("YYYY-MM-DD HH:mm") : undefined,
+			stopSaleAt: fd.stopSaleAt
+				? dayjs(fd.stopSaleAt).format("YYYY-MM-DD HH:mm")
+				: undefined,
+			...(Object.keys(tracking).length > 0 && { tracking }),
+		});
+	};
+
 	const CreateSale = async (data) => {
-		const res = await post(`/sales`, data);
+		const payload = buildPayload(data);
+		const res = await post(`/sales`, payload);
 		setSale(res.data);
+		await refreshSales();
+		if (res.data?.id) setLocation(`/sales/${res.data.id}`);
 	};
 
 	const UpdateSale = async (data) => {
-		const res = await put(`/sales/${sale?.id}`, data);
+		const payload = buildPayload(data);
+		const res = await put(`/sales/${sale?.id}`, payload);
 		setSale(res.data);
+		await refreshSales();
 	};
 
 	useEffect(() => {
 		if (!sale || appLoading) return;
 		reset({
 			...sale,
-			start: dayjs.utc(sale?.start).local().format("YYYY-MM-DDTHH:mm"),
-			end: dayjs.utc(sale?.end).local().format("YYYY-MM-DDTHH:mm"),
-			stopSaleAt: dayjs.utc(sale?.stopSaleAt).local().format("YYYY-MM-DDTHH:mm"),
+			start: dayjs(sale?.start).format("YYYY-MM-DD HH:mm"),
+			end: dayjs(sale?.end).format("YYYY-MM-DD HH:mm"),
+			stopSaleAt: dayjs(sale?.stopSaleAt).format("YYYY-MM-DD HH:mm"),
 			venue: toId(sale?.venue),
 			plan: toId(sale?.plan),
 			agreement: toId(sale?.agreement),
@@ -78,14 +110,27 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 				<h2 className="text-lg font-medium text-slate-900">
 					{strings("form.sale.eventDetails")}
 				</h2>
-				<button
-					type="button"
-					className="inline-flex items-center gap-2 justify-start rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
-					onClick={handleSubmit(id === "new" ? CreateSale : UpdateSale)}
-				>
-					<i className="fa-solid fa-save" aria-hidden="true" />
-					Save
-				</button>
+				<div className="flex items-center gap-2">
+					<button
+						type="button"
+						className="inline-flex items-center gap-2 justify-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+						onClick={() => {
+							const faked = saleBasicFaker({ venues });
+							reset(faked);
+						}}
+					>
+						<i className="fa-solid fa-wand-magic-sparkles" aria-hidden="true" />
+						Fill form
+					</button>
+					<button
+						type="button"
+						className="inline-flex items-center gap-2 justify-start rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+						onClick={handleSubmit(id === "new" ? CreateSale : UpdateSale)}
+					>
+						<i className="fa-solid fa-save" aria-hidden="true" />
+						Save
+					</button>
+				</div>
 			</div>
 			{/* Basic Information */}
 			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -278,6 +323,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 						{...register("ticketAdornmentPosition")}
 						placeholder={strings("sale.selectPosition")}
 						options={[
+							{ value: "", label: strings("common.pleaseSelect") },
 							{ value: "top", label: strings("sale.position.top") },
 							{ value: "bottom", label: strings("sale.position.bottom") },
 							{ value: "left", label: strings("sale.position.left") },
@@ -289,6 +335,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 						{...register("ticketAdornmentSize")}
 						placeholder={strings("sale.selectSize")}
 						options={[
+							{ value: "", label: strings("common.pleaseSelect") },
 							{ value: "small", label: strings("sale.size.small") },
 							{ value: "medium", label: strings("sale.size.medium") },
 							{ value: "large", label: strings("sale.size.large") },

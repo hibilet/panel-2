@@ -627,6 +627,8 @@
 	"form.reader.namePlaceholder": "Eg: John Doe",
 	"form.reader.emailPlaceholder": "Eg: john@doe.com",
 
+	"common.pleaseSelect": "Please select",
+
 	"form.coupon.title": "Coupons",
 	"form.coupon.addCoupon": "Add coupon",
 	"form.coupon.saveFirst": "Save the sale first",

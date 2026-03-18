@@ -624,6 +624,8 @@
 	"form.reader.namePlaceholder": "Ex : Jean Dupont",
 	"form.reader.emailPlaceholder": "Ex : jean@dupont.com",
 
+	"common.pleaseSelect": "Veuillez sélectionner",
+
 	"form.coupon.title": "Coupons",
 	"form.coupon.addCoupon": "Ajouter un coupon",
 	"form.coupon.saveFirst": "Enregistrez d'abord la vente",

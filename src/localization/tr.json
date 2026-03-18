@@ -623,6 +623,8 @@
 	"form.reader.namePlaceholder": "Örn: Ahmet Yılmaz",
 	"form.reader.emailPlaceholder": "Örn: ahmet@ornek.com",
 
+	"common.pleaseSelect": "Lütfen seçin",
+
 	"form.coupon.title": "Kuponlar",
 	"form.coupon.addCoupon": "Kupon ekle",
 	"form.coupon.saveFirst": "Önce satışı kaydedin",

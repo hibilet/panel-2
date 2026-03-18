@@ -624,6 +624,8 @@
 	"form.reader.namePlaceholder": "Z.B.: Max Mustermann",
 	"form.reader.emailPlaceholder": "Z.B.: max@mustermann.de",
 
+	"common.pleaseSelect": "Bitte auswählen",
+
 	"form.coupon.title": "Gutscheine",
 	"form.coupon.addCoupon": "Gutschein hinzufügen",
 	"form.coupon.saveFirst": "Speichern Sie zuerst den Verkauf",
