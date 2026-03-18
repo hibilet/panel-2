@@ -66,6 +66,8 @@
 	"common.ariaDelete": "Delete",
 	"common.ariaClose": "Close panel",
 	"common.archive": "Archive",
+	"common.vat": "VAT",
+	"common.total": "Total",
 
 	"error.failedLoad": "Failed to load",
 	"error.failedSave": "Failed to save",
@@ -97,6 +99,9 @@
 	"dashboard.stats.mtdSales": "MTD Sales",
 	"dashboard.stats.mtdProductsSold": "MTD Products Sold",
 	"dashboard.stats.activeSales": "Active Sales",
+	"dashboard.stats.amountDue": "Amount Due",
+	"dashboard.stats.vsYesterday": "1d ago",
+	"dashboard.stats.vsLastMonth": "1m ago",
 	"dashboard.weeklyMatrix": "Weekly event sale matrix",
 	"dashboard.recentActivity": "Recent activity",
 	"dashboard.salesChart": "Sales ($0 $1)",

@@ -3,8 +3,8 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 
 import { Link } from "wouter";
-import SalesChart from "../../../components/charts/SalesChart";
 import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
+import SalesChart from "../../../components/charts/SalesChart";
 import { StatCard } from "../../../components/shared";
 import { transactionsColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -49,7 +49,7 @@ const buildWeeklyMatrixFromSalesReport = (apiData = []) => {
 const currentMonthStart = () => dayjs().startOf("month").format("YYYY-MM-DD");
 
 const Dashboard = () => {
-	const { sales, loading: appLoading } = useApp();
+	const { account, sales, loading: appLoading } = useApp();
 	const { setIsOpen, setCurrentStep } = useTour();
 
 	const startTour = () => {
@@ -57,12 +57,24 @@ const Dashboard = () => {
 		setIsOpen(true);
 	};
 	const [todaySales, setTodaySales] = useState(null);
+	const [yesterdaySales, setYesterdaySales] = useState(null);
 	const [mtdSales, setMtdSales] = useState(null);
 	const [mtdProductsSold, setMtdProductsSold] = useState(null);
+	const [lastMonthSales, setLastMonthSales] = useState(null);
+	const [lastMonthProductsSold, setLastMonthProductsSold] = useState(null);
 	const [chartData, setChartData] = useState(null);
 	const [currentMonthChartData, setCurrentMonthChartData] = useState(null);
 
-	const activeSalesCount = sales.filter((s) => s.status === "active").length;
+	const commission = account?.commission ?? {
+		amount: 0,
+		vat: 1.19,
+		type: "fixed",
+	};
+	const amountDue =
+		(mtdProductsSold ?? 0) *
+		((commission.type === "fixed" ? 0 : 1) + (commission.amount ?? 0));
+	const subtotal = amountDue * (commission.vat ?? 1.19);
+	const vatPercent = Math.round(((commission.vat ?? 1.19) - 1) * 100);
 	const [chartLoading, setChartLoading] = useState(true);
 	const [selectedSale, setSelectedSale] = useState("all");
 	const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
@@ -90,25 +102,43 @@ const Dashboard = () => {
 			test: "true",
 		});
 		const mtdStart = currentMonthStart();
+		const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
+		const lastMonthStart = dayjs().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
+		const lastMonthEnd = dayjs().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
 
 		Promise.all([
 			get(
 				`/dashboards/transactions/between?start=${today}&end=${today}&sale=all&${params}`,
 			),
 			get(
+				`/dashboards/transactions/between?start=${yesterday}&end=${yesterday}&sale=all&${params}`,
+			),
+			get(
 				`/dashboards/transactions/between?start=${mtdStart}&end=${today}&sale=all&${params}`,
+			),
+			get(
+				`/dashboards/transactions/between?start=${lastMonthStart}&end=${lastMonthEnd}&sale=all&${params}`,
 			),
 			get("/transactions/search?limit=5&skip=0&status=success"),
 		])
-			.then(([todayRes, mtdRes, transactionsRes]) => {
+			.then(([todayRes, yesterdayRes, mtdRes, lastMonthRes, transactionsRes]) => {
 				const todayData = todayRes.data?.[0];
 				setTodaySales(todayData?.total ?? 0);
+
+				const yesterdayData = yesterdayRes.data?.[0];
+				setYesterdaySales(yesterdayData?.total ?? 0);
 
 				const mtdData = mtdRes.data ?? [];
 				const mtdTotal = mtdData.reduce((sum, d) => sum + (d.total ?? 0), 0);
 				const mtdCount = mtdData.reduce((sum, d) => sum + (d.count ?? 0), 0);
 				setMtdSales(mtdTotal);
 				setMtdProductsSold(mtdCount);
+
+				const lastMonthData = lastMonthRes.data ?? [];
+				const lastTotal = lastMonthData.reduce((sum, d) => sum + (d.total ?? 0), 0);
+				const lastCount = lastMonthData.reduce((sum, d) => sum + (d.count ?? 0), 0);
+				setLastMonthSales(lastTotal);
+				setLastMonthProductsSold(lastCount);
 
 				setRecentTransactions(transactionsRes.data ?? []);
 			})
@@ -219,6 +249,40 @@ const Dashboard = () => {
 		(todaySales === null && mtdSales === null && mtdProductsSold === null) ||
 		appLoading;
 
+	const buildComparison = (current, previous, formatValue, label) => {
+		if (current == null || previous == null) return null;
+		const diff = current - previous;
+		const percent =
+			previous === 0
+				? (current > 0 ? 100 : 0)
+				: ((current - previous) / previous) * 100;
+		return {
+			diff,
+			percent,
+			formattedDiff: formatValue(diff),
+			label,
+		};
+	};
+
+	const todayVsYesterday = buildComparison(
+		todaySales ?? 0,
+		yesterdaySales ?? 0,
+		(d) => formatCurrency(d),
+		strings("dashboard.stats.vsYesterday"),
+	);
+	const mtdVsLastMonth = buildComparison(
+		mtdSales ?? 0,
+		lastMonthSales ?? 0,
+		(d) => formatCurrency(d),
+		strings("dashboard.stats.vsLastMonth"),
+	);
+	const mtdProductsVsLastMonth = buildComparison(
+		mtdProductsSold ?? 0,
+		lastMonthProductsSold ?? 0,
+		(d) => String(d),
+		strings("dashboard.stats.vsLastMonth"),
+	);
+
 	if (error && todaySales === null) {
 		return (
 			<div className="mx-auto max-w-5xl">
@@ -241,22 +305,42 @@ const Dashboard = () => {
 					label={strings("dashboard.stats.todaySales")}
 					value={formatCurrency(todaySales ?? 0)}
 					loading={statsLoading}
+					comparison={todayVsYesterday}
 				/>
 				<StatCard
 					label={strings("dashboard.stats.mtdSales")}
 					value={formatCurrency(mtdSales ?? 0)}
 					loading={statsLoading}
+					comparison={mtdVsLastMonth}
 				/>
 				<StatCard
 					label={strings("dashboard.stats.mtdProductsSold")}
 					value={mtdProductsSold ?? 0}
 					loading={statsLoading}
+					comparison={mtdProductsVsLastMonth}
 				/>
-				<StatCard
-					label={strings("dashboard.stats.activeSales")}
-					value={activeSalesCount ?? 0}
-					loading={statsLoading}
-				/>
+				{statsLoading ? (
+					<StatCard
+						label={strings("dashboard.stats.amountDue")}
+						value=""
+						loading
+					/>
+				) : (
+					<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+						<p className="text-sm text-slate-500">
+							{strings("dashboard.stats.amountDue")}
+						</p>
+						<p className="mt-1 text-2xl font-bold text-slate-900">
+							{formatCurrency(amountDue)} 
+							<span className="text-sm text-slate-500 ml-1">
+								+ {vatPercent}% {strings("common.vat")}
+							</span>
+						</p>
+						<p className="mt-1 text-xs font-bold text-slate-500">
+							{formatCurrency(subtotal)} {strings("common.total")}
+						</p>
+					</div>
+				)}
 			</div>
 
 			<SalesChart

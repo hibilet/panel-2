@@ -66,6 +66,8 @@
 	"common.ariaDelete": "Sil",
 	"common.ariaClose": "Paneli kapat",
 	"common.archive": "Arşivle",
+	"common.vat": "KDV",
+	"common.total": "Toplam",
 
 	"error.failedLoad": "Yüklenemedi",
 	"error.failedSave": "Kaydedilemedi",
@@ -96,6 +98,9 @@
 	"dashboard.stats.mtdSales": "Aylık Satışlar",
 	"dashboard.stats.mtdProductsSold": "Aylık Satılan Ürün",
 	"dashboard.stats.activeSales": "Aktif Satışlar",
+	"dashboard.stats.amountDue": "Ödenecek Tutar",
+	"dashboard.stats.vsYesterday": "1g önce",
+	"dashboard.stats.vsLastMonth": "1 ay önce",
 	"dashboard.weeklyMatrix": "Haftalık etkinlik satış matrisi",
 	"dashboard.recentActivity": "Son aktiviteler",
 	"dashboard.salesChart": "Satışlar ($0 $1)",

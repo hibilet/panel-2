@@ -66,6 +66,8 @@
 	"common.ariaDelete": "Löschen",
 	"common.ariaClose": "Panel schließen",
 	"common.archive": "Archivieren",
+	"common.vat": "MwSt.",
+	"common.total": "Gesamt",
 
 	"error.failedLoad": "Laden fehlgeschlagen",
 	"error.failedSave": "Speichern fehlgeschlagen",
@@ -97,6 +99,9 @@
 	"dashboard.stats.mtdSales": "MTD Verkäufe",
 	"dashboard.stats.mtdProductsSold": "MTD Produkte verkauft",
 	"dashboard.stats.activeSales": "Aktive Verkäufe",
+	"dashboard.stats.amountDue": "Fälliger Betrag",
+	"dashboard.stats.vsYesterday": "1d vorher",
+	"dashboard.stats.vsLastMonth": "1m vorher",
 	"dashboard.weeklyMatrix": "Wöchentliche Event-Verkaufs-Matrix",
 	"dashboard.recentActivity": "Letzte Aktivität",
 	"dashboard.salesChart": "Verkäufe ($0 $1)",
