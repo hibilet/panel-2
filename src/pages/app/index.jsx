@@ -53,7 +53,9 @@ const App = () => {
 							<Route path="/accounts/customers/:id" component={Accounts} />
 							<Route path="/accounts/merchants" component={Accounts} />
 							<Route path="/accounts/customers" component={Accounts} />
-							<Redirect to="/accounts/merchants" />
+							<Route path="/accounts">
+								<Redirect to="/accounts/merchants" />
+							</Route>
 						</>
 					)}
 					<Route path="/settings" component={Settings} />
