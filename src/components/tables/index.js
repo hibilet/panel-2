@@ -1,8 +1,8 @@
 export {
 	accountsColumns,
 	agreementsColumns,
-	venuesColumns,
 	channelColumns,
+	customersColumns,
 	guestColumns,
 	linkSalesColumns,
 	linksColumns,
@@ -12,7 +12,7 @@ export {
 	salesColumns,
 	ticketColumns,
 	transactionsColumns,
-	customersColumns,
+	venuesColumns,
 } from "./columns";
 export { default as DataTable } from "./DataTable";
 export { default as Pagination } from "./Pagination";

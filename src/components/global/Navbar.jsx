@@ -63,7 +63,7 @@ const navItems = [
 		labelKey: "nav.reports",
 		icon: "fa-chart-line",
 		tourId: "nav-reports",
-		acl: ["admin"],
+		acl: [],
 	},
 	{
 		path: "/settings",
