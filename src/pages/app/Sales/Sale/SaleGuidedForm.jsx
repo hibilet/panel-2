@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Modal } from "../../../../components/shared";
 import { Textarea } from "../../../../components/inputs";
+import { Modal } from "../../../../components/shared";
 import { useApp } from "../../../../context";
 import { chatCompletion } from "../../../../lib/openrouter";
 import strings from "../../../../localization";
@@ -29,7 +29,8 @@ const SaleGuidedForm = ({ onClose }) => {
 		setError(null);
 		setGeneratedJson(null);
 		try {
-			const userPrompt = description.trim() || "Create a sale for me with default values.";
+			const userPrompt =
+				description.trim() || "Create a sale for me with default values.";
 			const content = await chatCompletion({
 				systemPrompt: masterPrompt,
 				userPrompt,
@@ -90,7 +91,10 @@ const SaleGuidedForm = ({ onClose }) => {
 				/>
 				{generating && (
 					<div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-						<i className="fa-solid fa-spinner fa-spin text-slate-500" aria-hidden />
+						<i
+							className="fa-solid fa-spinner fa-spin text-slate-500"
+							aria-hidden
+						/>
 						<span className="text-sm text-slate-600">
 							{strings("page.sale.guided.generating")}
 						</span>

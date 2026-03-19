@@ -6,7 +6,11 @@
     },
     "panel.tixcore.de": {
       "title": "Tixcore Panel",
-      "favicon": "tixcore-favicon.svg"
-    }
+      "favicon": "tixcore-favicon.png"
+    },
+    "dashboard.tixcore.de": {
+      "title": "Tixcore Panel",
+      "favicon": "tixcore-favicon.png"
+    },
   }
 }
