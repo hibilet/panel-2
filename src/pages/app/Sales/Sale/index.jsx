@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, Route, Switch, useLocation, useParams } from "wouter";
+import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
@@ -8,6 +8,7 @@ import SaleBasic from "./SaleBasic";
 import SaleChannels from "./SaleChannels";
 import SaleCoupons from "./SaleCoupons";
 import SaleGuests from "./SaleGuests";
+import SaleGuidedForm from "./SaleGuidedForm";
 import SaleReaders from "./SaleReaders";
 import SaleTickets from "./SaleTickets";
 
@@ -68,11 +69,17 @@ const TabLink = ({ path, labelKey, icon, isActive, basePath, disabled }) => {
 
 const Sale = () => {
 	const { id } = useParams();
-	const [location] = useLocation();
+	const [location, setLocation] = useLocation();
+	const search = useSearch();
 	const [sale, setSale] = useState(undefined); // undefined=loading, null=new/error, object=loaded
 
 	const basePath = `/sales/${id}`;
 	const isNew = id === "new";
+	const isGuided = new URLSearchParams(search || "").get("guided") === "true";
+
+	const handleCloseGuided = () => {
+		setLocation("/sales/new", true);
+	};
 
 	const fetchSale = useCallback(() => {
 		if (isNew) {
@@ -101,6 +108,9 @@ const Sale = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl">
+			{isNew && isGuided && (
+				<SaleGuidedForm onClose={handleCloseGuided} />
+			)}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
 			</div>
