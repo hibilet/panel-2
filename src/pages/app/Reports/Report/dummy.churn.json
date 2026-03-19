@@ -1,0 +1,4003 @@
+[
+  {
+    "_id": "Beren.cakir@web.de",
+    "owner": {
+      "name": "Beren Cakir",
+      "email": "Beren.cakir@web.de",
+      "_id": {
+        "$oid": "69a5928447ca0b9517a5419e"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772458537135"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772458629579"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 92.444,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "139.6",
+    "avgFailedSessionTime": "92.444",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "David.mymail02@gmail.com",
+    "owner": {
+      "name": "David Iverson",
+      "email": "David.mymail02@gmail.com",
+      "_id": {
+        "$oid": "69a48d0447ca0b9517a35037"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772391580202"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772391685363"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 105.161,
+        "hasReturned": true,
+        "timeToReturnSeconds": 4189.283
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772395193257"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772395207284"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 14.027,
+        "hasReturned": true,
+        "timeToReturnSeconds": 667.362
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a49c51463ae23c375e648d"
+        },
+        "sale": {
+          "$oid": "69a3149b463ae23c375e1367"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772395601507"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772395874646"
+          }
+        },
+        "basketTotal": 34.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Stuttgart"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "34.9",
+    "totalFailedBaskets": "2",
+    "totalFailedRevenue": "139.6",
+    "avgFailedSessionTime": "59.594",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "Hello345@icloud.com",
+    "owner": {
+      "name": " Hello",
+      "email": "Hello345@icloud.com",
+      "_id": {
+        "$oid": "69a738c347ca0b9517a785de"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772566661118"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772566724778"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 63.66,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "63.66",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "Luca.Duarte@t-online.de",
+    "owner": {
+      "name": "Luca",
+      "email": "Luca.Duarte@t-online.de",
+      "_id": {
+        "$oid": "69a8a8f747ca0b9517a92ba5"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772660687874"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772660984596"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 296.722,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "296.722",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "Ozanaskan@icloud.com",
+    "owner": {
+      "name": "Byssn",
+      "email": "Ozanaskan@icloud.com",
+      "_id": {
+        "$oid": "69a4abe347ca0b9517a36991"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772399547124"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772399587911"
+          }
+        },
+        "sale": "Bojan - Frankfurt",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 40.787,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772829584216"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772829586691"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 2.475,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "2",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "21.631",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "Timikim68256@gmail.com",
+    "owner": {
+      "name": "Tim müller",
+      "email": "Timikim68256@gmail.com",
+      "_id": {
+        "$oid": "69a5f1aa47ca0b9517a5b8ef"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772482912452"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772482987007"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 74.555,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "74.555",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "Ziberi.lavdrim@icloud.com",
+    "owner": {
+      "name": "Lavdrim ",
+      "email": "Ziberi.lavdrim@icloud.com",
+      "_id": {
+        "$oid": "69a4823b47ca0b9517a341f5"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772388846818"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772388946803"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 99.985,
+        "hasReturned": true,
+        "timeToReturnSeconds": 704.174
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a484bc463ae23c375e488e"
+        },
+        "sale": {
+          "$oid": "69a185cf463ae23c375e0643"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772389564005"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772389650977"
+          }
+        },
+        "basketTotal": 174.5,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Dortmund"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "174.5",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "279.2",
+    "avgFailedSessionTime": "99.985",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "aleksandramajkic@outlook.de",
+    "owner": {
+      "name": "Aleksandra Majkic",
+      "email": "aleksandramajkic@outlook.de",
+      "_id": {
+        "$oid": "69a5b6fc47ca0b9517a55f98"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772467911425"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772468038743"
+          }
+        },
+        "sale": "Bojan - Frankfurt",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 127.318,
+        "hasReturned": true,
+        "timeToReturnSeconds": 340.474
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a5b74abee57e600d4a6dd6"
+        },
+        "sale": {
+          "$oid": "69a31536463ae23c375e13ea"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772468042736"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772468379217"
+          }
+        },
+        "basketTotal": 69.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Frankfurt"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "69.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "127.318",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "aleynademirel8161@hotmail.com",
+    "owner": {
+      "name": "Aleyna Demirel",
+      "email": "aleynademirel8161@hotmail.com",
+      "_id": {
+        "$oid": "69ab2b6b47ca0b9517abd0ae"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772825358608"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772825576778"
+          }
+        },
+        "sale": "Lvbel C5 - Zürich",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 218.17,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772907641048"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772907650728"
+          }
+        },
+        "sale": "Lvbel C5 - Zürich",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 9.68,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69ab2bff06bd3c79ca29bd4f"
+        },
+        "sale": {
+          "$oid": "695edcae01876c939567ac66"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772825599753"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772826269589"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Lvbel C5 - München"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "59.9",
+    "totalFailedBaskets": "2",
+    "totalFailedRevenue": "179.7",
+    "avgFailedSessionTime": "113.925",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "alp@savrum.com",
+    "owner": {
+      "name": "Bregalad Odonis",
+      "email": "alp@savrum.com",
+      "_id": {
+        "$oid": "67bdc8cc4eb1435da88a3393"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772357523622"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772357526800"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 3.178,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772387533103"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772387537082"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 3.979,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772560425152"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772560432410"
+          }
+        },
+        "sale": "Inna - Köln",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 7.258,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "67eff044d8c4e404d2027796"
+        },
+        "sale": {
+          "$oid": "67eeb5fde168c4b963a191a6"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1743777860485"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1743795629489"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "1"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Test Ticket",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Gokhan Turkmen - Zürich [PAST]"
+      },
+      {
+        "_id": {
+          "$oid": "67f8d046aaf30c378c31477f"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1744359494529"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1744359521586"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "10"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Parkett Test",
+              "price": {
+                "$numberInt": "10"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "67f8dae9aaf30c378c3149a8"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1744362217341"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1744362350951"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "20"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Parkett Test",
+              "price": {
+                "$numberInt": "10"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Parkett Test",
+              "price": {
+                "$numberInt": "10"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "67f8fb7741880cea2932cf98"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1744370551187"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1744370582561"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "10"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Parkett Test",
+              "price": {
+                "$numberInt": "10"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68022803884d68eaacd88b77"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1744971779045"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1744971814320"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "50"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68052502e5beaa754cdc61c9"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745167618718"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745167669955"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "50"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68053648209ace3a4887b6db"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745172040584"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745172180820"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "100"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68054858a65cfab846652291"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745176664610"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745176690962"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "150"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68057a70a65cfab8466522cd"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745189488385"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745189519931"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "100"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68057b80224cf949b03bdb0f"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745189760762"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745189785392"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "100"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "68057d18224cf949b03bdd32"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745190168138"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745190197932"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "100"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "6807c1fd224cf949b03c29c7"
+        },
+        "sale": {
+          "$oid": "67f8d023aaf30c378c31472e"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1745338877912"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1745338902704"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "100"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ],
+          [
+            {
+              "name": "Coupon Test",
+              "price": {
+                "$numberInt": "50"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Berlin Test Sale"
+      },
+      {
+        "_id": {
+          "$oid": "6814ef1051e22eb26766b32b"
+        },
+        "sale": {
+          "$oid": "6814d71451e22eb26766b046"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1746202384267"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1746202429713"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "2"
+        },
+        "reservations": [
+          [
+            {
+              "name": "VR Maestro Experience",
+              "price": {
+                "$numberInt": "2"
+              }
+            }
+          ]
+        ],
+        "sale_name": "EmpowerHer Charity Concert [PAST]"
+      },
+      {
+        "_id": {
+          "$oid": "6814f0d6a866310740213604"
+        },
+        "sale": {
+          "$oid": "6814d71451e22eb26766b046"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1746202838496"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1746202876080"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "2"
+        },
+        "reservations": [
+          [
+            {
+              "name": "VR Maestro Experience",
+              "price": {
+                "$numberInt": "2"
+              }
+            }
+          ]
+        ],
+        "sale_name": "EmpowerHer Charity Concert [PAST]"
+      },
+      {
+        "_id": {
+          "$oid": "689a15c746f4f7642791eff2"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1754928583624"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1754928718334"
+          }
+        },
+        "basketTotal": 119.8,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ],
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "689a1dca46f4f7642791f0c3"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1754930634595"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1754930703231"
+          }
+        },
+        "basketTotal": 129.9,
+        "reservations": [
+          [
+            {
+              "name": "VIP",
+              "price": 129.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "69171580ab1d7f2aa56ec2dd"
+        },
+        "sale": {
+          "$oid": "691714afab1d7f2aa56ec213"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1763120512779"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1763120534190"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "1"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Test",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Stripe Test"
+      },
+      {
+        "_id": {
+          "$oid": "69171844bfa4a91910c5214d"
+        },
+        "sale": {
+          "$oid": "691714afab1d7f2aa56ec213"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1763121220369"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1763121258191"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "4"
+        },
+        "reservations": [
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Stripe Test"
+      },
+      {
+        "_id": {
+          "$oid": "691745476f943fefe17940dd"
+        },
+        "sale": {
+          "$oid": "691714afab1d7f2aa56ec213"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1763132743959"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1763132779019"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "4"
+        },
+        "reservations": [
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Stripe Test"
+      },
+      {
+        "_id": {
+          "$oid": "69175f596f943fefe17944f1"
+        },
+        "sale": {
+          "$oid": "691714afab1d7f2aa56ec213"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1763139417165"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1763139448431"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "4"
+        },
+        "reservations": [
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ],
+          [
+            {
+              "name": "4 Freunde",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Stripe Test"
+      },
+      {
+        "_id": {
+          "$oid": "695f9b65c95b00ff60fb3fe7"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1767873381087"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1767873401440"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "695f9d2cc95b00ff60fb4050"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1767873836272"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1767873863086"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "695f9ee913ed1ede2e058cd6"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1767874281301"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1767874300005"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "695fa63613ed1ede2e058f91"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1767876150934"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1767876219971"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      },
+      {
+        "_id": {
+          "$oid": "6967ef53b1061ffa5864af1a"
+        },
+        "sale": {
+          "$oid": "689a14e038ec1f7b22b2c5ae"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1768419155927"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1768419210746"
+          }
+        },
+        "basketTotal": 119.8,
+        "reservations": [
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ],
+          [
+            {
+              "name": "Regular Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Demo Reguläre Veranstaltung"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "25",
+    "totalSpendingsEver": "1417.1",
+    "totalFailedBaskets": "3",
+    "totalFailedRevenue": "129.7",
+    "avgFailedSessionTime": "4.805",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "apollo.145@icloud.com",
+    "owner": {
+      "name": "Heinrich Remme",
+      "email": "apollo.145@icloud.com",
+      "_id": {
+        "$oid": "69a4bf5747ca0b9517a37a62"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772404520657"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772404567725"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 47.068,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "47.068",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "berishagylsa@gmail.com",
+    "owner": {
+      "name": "Giylshah Berisha ",
+      "email": "berishagylsa@gmail.com",
+      "_id": {
+        "$oid": "69a6fb6147ca0b9517a73080"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772550952358"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772551010379"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 58.021,
+        "hasReturned": true,
+        "timeToReturnSeconds": 923949.274
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69b513cee531d15072b414fb"
+        },
+        "sale": {
+          "$oid": "69a3149b463ae23c375e1367"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1773474766565"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1773474959653"
+          }
+        },
+        "basketTotal": 34.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Stuttgart"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "34.9",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "58.021",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "berra312009@gmail.com",
+    "owner": {
+      "name": "Berra",
+      "email": "berra312009@gmail.com",
+      "_id": {
+        "$oid": "68b530b1ac81659e2c6b45f7"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772804946409"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772804967429"
+          }
+        },
+        "sale": "Gökhan Türkmen - Rotterdam",
+        "reservations": [
+          {
+            "name": "Regular Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Regular Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 21.02,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772805787926"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772805824071"
+          }
+        },
+        "sale": "Gökhan Türkmen - Rotterdam",
+        "reservations": [
+          {
+            "name": "Regular Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Regular Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 36.145,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "2",
+    "totalFailedRevenue": "239.6",
+    "avgFailedSessionTime": "28.5825",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "cevat.anov@icloud.com",
+    "owner": {
+      "name": "Cevat anov",
+      "email": "cevat.anov@icloud.com",
+      "_id": {
+        "$oid": "69ac49f347ca0b9517ad1923"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772898754015"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772898804602"
+          }
+        },
+        "sale": "Lvbel C5 - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 50.587,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "119.8",
+    "avgFailedSessionTime": "50.587",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "corovic.eldin@icloud.com",
+    "owner": {
+      "name": "Eldin Corovic",
+      "email": "corovic.eldin@icloud.com",
+      "_id": {
+        "$oid": "69a478a247ca0b9517a33ac3"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772386418581"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772386467456"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 48.875,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "48.875",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "cwthoglu@gmail.com",
+    "owner": {
+      "name": "Baris Hacirüstemoglu",
+      "email": "cwthoglu@gmail.com",
+      "_id": {
+        "$oid": "69a9873947ca0b9517aa1736"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772717790726"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772717881979"
+          }
+        },
+        "sale": "Inna - Bandolera Events",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 37.7
+          }
+        ],
+        "sessionTimeSeconds": 91.253,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "37.7",
+    "avgFailedSessionTime": "91.253",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "david2662klein@gmail.com",
+    "owner": {
+      "name": "David Klein",
+      "email": "david2662klein@gmail.com",
+      "_id": {
+        "$oid": "69a4914347ca0b9517a35338"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772392743743"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772392772441"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 28.698,
+        "hasReturned": true,
+        "timeToReturnSeconds": 43102.856
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a53980463ae23c375e7aad"
+        },
+        "sale": {
+          "$oid": "69a185cf463ae23c375e0643"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772435840531"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772435875297"
+          }
+        },
+        "basketTotal": 69.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Dortmund"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "69.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "28.698",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "emirhanalsancak@icloud.com",
+    "owner": {
+      "name": "Emirhan Alsancak",
+      "email": "emirhanalsancak@icloud.com",
+      "_id": {
+        "$oid": "69a49d5747ca0b9517a35cf1"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772395757688"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772395864279"
+          }
+        },
+        "sale": "Bojan - Hannover",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 106.591,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "106.591",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "emirv@outlook.de",
+    "owner": {
+      "name": "Emir var ",
+      "email": "emirv@outlook.de",
+      "_id": {
+        "$oid": "69a6b8f047ca0b9517a6f62d"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772533960199"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772534000867"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 40.668,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "40.668",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "eneskaynarca68@outlook.com",
+    "owner": {
+      "name": "Enes Kaynarca",
+      "email": "eneskaynarca68@outlook.com",
+      "_id": {
+        "$oid": "69a73ed147ca0b9517a79997"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772568193724"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772568274503"
+          }
+        },
+        "sale": "Gökhan Türkmen - München",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 80.779,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "119.8",
+    "avgFailedSessionTime": "80.779",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "erdogan.azra41@gmail.com",
+    "owner": {
+      "name": "Azra",
+      "email": "erdogan.azra41@gmail.com",
+      "_id": {
+        "$oid": "69ac3aeb47ca0b9517ad0c03"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772894767825"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772894956340"
+          }
+        },
+        "sale": "Gökhan Türkmen - Wien",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 188.515,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "359.4",
+    "avgFailedSessionTime": "188.515",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "f.blaue2109@gmail.com",
+    "owner": {
+      "name": "Franziska ",
+      "email": "f.blaue2109@gmail.com",
+      "_id": {
+        "$oid": "69a52c3f47ca0b9517a402a2"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772432390719"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772432448506"
+          }
+        },
+        "sale": "Bojan - Hannover",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 57.787,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "57.787",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "fabian.zirpel@outlook.de",
+    "owner": {
+      "name": "Fabian Zirpel",
+      "email": "fabian.zirpel@outlook.de",
+      "_id": {
+        "$oid": "69aa055347ca0b9517aad0e5"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772750049942"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772750245687"
+          }
+        },
+        "sale": "Rich The Kid - Köln",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 54.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 54.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 54.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 54.9
+          }
+        ],
+        "sessionTimeSeconds": 195.745,
+        "hasReturned": true,
+        "timeToReturnSeconds": 213.172
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69aa05aa06bd3c79ca29b3dd"
+        },
+        "sale": {
+          "$oid": "6977636f681d5ee49acc7332"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772750250320"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772750458859"
+          }
+        },
+        "basketTotal": 109.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 54.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 54.9
+            }
+          ]
+        ],
+        "sale_name": "Rich The Kid - Köln"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "109.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "219.6",
+    "avgFailedSessionTime": "195.745",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "fawadahmadzai06@gmail.com",
+    "owner": {
+      "name": "Fawad Ahmadzai",
+      "email": "fawadahmadzai06@gmail.com",
+      "_id": {
+        "$oid": "69a482d347ca0b9517a34257"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772389040231"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772389075731"
+          }
+        },
+        "sale": "Bojan - Hannover",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 35.5,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "35.5",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "giancarlo.pennino04@gmail.com",
+    "owner": {
+      "name": "Giancarlo Pennino",
+      "email": "giancarlo.pennino04@gmail.com",
+      "_id": {
+        "$oid": "69a8a4ca47ca0b9517a9267a"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772659798590"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772659915723"
+          }
+        },
+        "sale": "Lvbel C5 - Frankfurt",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 117.133,
+        "hasReturned": true,
+        "timeToReturnSeconds": 365.936
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a8a5d606bd3c79ca29a6fb"
+        },
+        "sale": {
+          "$oid": "695ed84101876c939567aab5"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772660182189"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772660281659"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Lvbel C5 - Frankfurt"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "59.9",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "59.9",
+    "avgFailedSessionTime": "117.133",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "hazzalpoyraz@icloud.com",
+    "owner": {
+      "name": "Hazal Poyraz",
+      "email": "hazzalpoyraz@icloud.com",
+      "_id": {
+        "$oid": "69a49fa447ca0b9517a35f89"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772396393276"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772396452935"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 59.659,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "59.659",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "ibrahmtuna@gmail.com",
+    "owner": {
+      "name": "Ibrahim Tuna",
+      "email": "ibrahmtuna@gmail.com",
+      "_id": {
+        "$oid": "69a9e17b47ca0b9517aa9513"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772740890183"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772740988702"
+          }
+        },
+        "sale": "Inna - Bandolera Events",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 37.7
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 37.7
+          }
+        ],
+        "sessionTimeSeconds": 98.519,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "75.4",
+    "avgFailedSessionTime": "98.519",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "info@echoconcerts.de",
+    "owner": {
+      "name": "Standard",
+      "email": "info@echoconcerts.de",
+      "_id": {
+        "$oid": "68936de9ee088e7f1f951b91"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772387629429"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772387753557"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 124.128,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "695fddb913ed1ede2e0593b3"
+        },
+        "sale": {
+          "$oid": "695ee30b01876c939567aed1"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1767890361156"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1767890387540"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "1"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Test",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Gökhan Türkmen - Rotterdam"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "1",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "124.128",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "ionutciocotoi15@gmail.com",
+    "owner": {
+      "name": "Ionut ciocotoi",
+      "email": "ionutciocotoi15@gmail.com",
+      "_id": {
+        "$oid": "69a4732747ca0b9517a3367c"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772384973255"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772385063579"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 90.324,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "90.324",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "janinabichler@googlemail.com",
+    "owner": {
+      "name": "Janina Bichler",
+      "email": "janinabichler@googlemail.com",
+      "_id": {
+        "$oid": "69a484cc47ca0b9517a343cc"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772389515698"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772389580837"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 65.139,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "65.139",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "joelbijo1@gmail.com",
+    "owner": {
+      "name": "Jbwaht",
+      "email": "joelbijo1@gmail.com",
+      "_id": {
+        "$oid": "69a824fc47ca0b9517a8a93f"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772627167721"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772627197579"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 29.858,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "29.858",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "jonas.scharwitzky@web.de",
+    "owner": {
+      "name": "Jonas Scharwitzky ",
+      "email": "jonas.scharwitzky@web.de",
+      "_id": {
+        "$oid": "69a4725c47ca0b9517a33562"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772384775584"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772384861609"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 86.025,
+        "hasReturned": true,
+        "timeToReturnSeconds": 2266.11
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a47a9a463ae23c375e3910"
+        },
+        "sale": {
+          "$oid": "69a185cf463ae23c375e0643"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772386970583"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772387127719"
+          }
+        },
+        "basketTotal": 69.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Dortmund"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "69.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "86.025",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "junistructure20@gmail.com",
+    "owner": {
+      "name": "Alpha Ousmane Barry ",
+      "email": "junistructure20@gmail.com",
+      "_id": {
+        "$oid": "69ac74e447ca0b9517ad3f20"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772909718372"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772909865305"
+          }
+        },
+        "sale": "Shaggy - Düsseldorf",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 146.933,
+        "hasReturned": true,
+        "timeToReturnSeconds": 54.414
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69ac752a06bd3c79ca29c7fc"
+        },
+        "sale": {
+          "$oid": "696cd46bff80be3e77c3e72b"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772909866575"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772909919719"
+          }
+        },
+        "basketTotal": 59.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 59.9
+            }
+          ]
+        ],
+        "sale_name": "Shaggy - Düsseldorf"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "59.9",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "119.8",
+    "avgFailedSessionTime": "146.933",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "justin.taylor07@icloud.com",
+    "owner": {
+      "name": "Justin Halberstadt ",
+      "email": "justin.taylor07@icloud.com",
+      "_id": {
+        "$oid": "69a499e247ca0b9517a35a12"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772394952096"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772395010140"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 58.044,
+        "hasReturned": true,
+        "timeToReturnSeconds": 30.413
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a49a04463ae23c375e6318"
+        },
+        "sale": {
+          "$oid": "69a3149b463ae23c375e1367"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772395012323"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772395040553"
+          }
+        },
+        "basketTotal": 34.9,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Stuttgart"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "34.9",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "58.044",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "kadir.yilmaz90@gmx.net",
+    "owner": {
+      "name": "Kadir Yilmaz",
+      "email": "kadir.yilmaz90@gmx.net",
+      "_id": {
+        "$oid": "69a5850047ca0b9517a531c4"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772455110421"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772455169756"
+          }
+        },
+        "sale": "Bojan - Stuttgart",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 59.335,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "59.335",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "kandemiralper2005@gmail.com",
+    "owner": {
+      "name": "Alper Kandemir",
+      "email": "kandemiralper2005@gmail.com",
+      "_id": {
+        "$oid": "69a6111b47ca0b9517a5eb93"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772490999284"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772491036552"
+          }
+        },
+        "sale": "Lvbel C5 - Köln",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 37.268,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "59.9",
+    "avgFailedSessionTime": "37.268",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "karimelkurdi9@icloud.com",
+    "owner": {
+      "name": "Karim El-Kurdi",
+      "email": "karimelkurdi9@icloud.com",
+      "_id": {
+        "$oid": "69a487c347ca0b9517a34605"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772390222476"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772390340062"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 117.586,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "117.586",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "kevinklik28@gmail.com",
+    "owner": {
+      "name": "Kevin klik",
+      "email": "kevinklik28@gmail.com",
+      "_id": {
+        "$oid": "69a4728c47ca0b9517a335f3"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772386240668"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772386252310"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 11.642,
+        "hasReturned": true,
+        "timeToReturnSeconds": -1143.58
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772387213165"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772387217518"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 4.353,
+        "hasReturned": true,
+        "timeToReturnSeconds": -2108.788
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a4724e463ae23c375e28b7"
+        },
+        "sale": {
+          "$oid": "69a31602463ae23c375e146d"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772384846451"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772385108730"
+          }
+        },
+        "basketTotal": 69.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Berlin"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "69.8",
+    "totalFailedBaskets": "2",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "7.9975",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "kuebra-06@hotmail.com",
+    "owner": {
+      "name": "Kübra Günana",
+      "email": "kuebra-06@hotmail.com",
+      "_id": {
+        "$oid": "699b0d9be559e02a0a585280"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772814234065"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772814255845"
+          }
+        },
+        "sale": "Gökhan Türkmen - Wien",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 21.78,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "359.4",
+    "avgFailedSessionTime": "21.78",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "laura_dlugosz@icloud.com",
+    "owner": {
+      "name": "Laura Dlugosz",
+      "email": "laura_dlugosz@icloud.com",
+      "_id": {
+        "$oid": "69a472dc47ca0b9517a3362c"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772384948907"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772385123294"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 174.387,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "139.6",
+    "avgFailedSessionTime": "174.387",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "lucaleipold10@gmail.com",
+    "owner": {
+      "name": "Luca Leipold",
+      "email": "lucaleipold10@gmail.com",
+      "_id": {
+        "$oid": "69a8034247ca0b9517a88f90"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772618515763"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772618563634"
+          }
+        },
+        "sale": "Bojan - Frankfurt",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 47.871,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "47.871",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "maikepawlaczyk@gmail.com",
+    "owner": {
+      "name": "Maike Garenfeld",
+      "email": "maikepawlaczyk@gmail.com",
+      "_id": {
+        "$oid": "69a4754947ca0b9517a33847"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772385535143"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772385610447"
+          }
+        },
+        "sale": "Bojan - Köln",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 75.304,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "75.304",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "manuel.frontzek@icloud.com",
+    "owner": {
+      "name": "Manuel Frontzek ",
+      "email": "manuel.frontzek@icloud.com",
+      "_id": {
+        "$oid": "69a48a7d47ca0b9517a34bf9"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772390879104"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772391062056"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 182.952,
+        "hasReturned": true,
+        "timeToReturnSeconds": 793.854
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69a48d8e463ae23c375e4f7b"
+        },
+        "sale": {
+          "$oid": "69a185cf463ae23c375e0643"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772391822358"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772391855910"
+          }
+        },
+        "basketTotal": 69.8,
+        "reservations": [
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ],
+          [
+            {
+              "name": "Reguläres Ticket",
+              "price": 34.9
+            }
+          ]
+        ],
+        "sale_name": "Bojan - Dortmund"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "69.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "182.952",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "marmy0516@gmail.com",
+    "owner": {
+      "name": "Marina Schröder ",
+      "email": "marmy0516@gmail.com",
+      "_id": {
+        "$oid": "69a472e947ca0b9517a3363d"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772384928092"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772385002079"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 73.987,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "73.987",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "maryam.mohammed@gmx.de",
+    "owner": {
+      "name": "maryam",
+      "email": "maryam.mohammed@gmx.de",
+      "_id": {
+        "$oid": "68207809e942d15cfbcb4753"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772396557866"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772396599417"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 41.551,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "6820a0f66e94cb90c9c2235d"
+        },
+        "sale": {
+          "$oid": "67abf64e356a503a23687d77"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1746968822276"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1746968959551"
+          }
+        },
+        "basketTotal": 139.8,
+        "reservations": [
+          [
+            {
+              "name": "Azalea Festival Ticket",
+              "price": 69.9
+            }
+          ],
+          [
+            {
+              "name": "Azalea Festival Ticket",
+              "price": 69.9
+            }
+          ]
+        ],
+        "sale_name": "Azalea Music Festival 2025 [PAST]"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "139.8",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "41.551",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "mauriceberse1904@gmail.com",
+    "owner": {
+      "name": "Maurice Berse",
+      "email": "mauriceberse1904@gmail.com",
+      "_id": {
+        "$oid": "69a4957f47ca0b9517a3567e"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772393743063"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772393855184"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 112.121,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "34.9",
+    "avgFailedSessionTime": "112.121",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "mubaraksalih@icloud.com",
+    "owner": {
+      "name": "Mubarak",
+      "email": "mubaraksalih@icloud.com",
+      "_id": {
+        "$oid": "69a9f40247ca0b9517aac0fa"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772745682766"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772745731418"
+          }
+        },
+        "sale": "Shaggy - Düsseldorf",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 48.652,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "119.8",
+    "avgFailedSessionTime": "48.652",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "musti015@hotmail.com",
+    "owner": {
+      "name": "Mustafa Ekinci",
+      "email": "musti015@hotmail.com",
+      "_id": {
+        "$oid": "69a9934147ca0b9517aa24e2"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772720923151"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772720962375"
+          }
+        },
+        "sale": "Gökhan Türkmen - Wien",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 59.9
+          }
+        ],
+        "sessionTimeSeconds": 39.224,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "119.8",
+    "avgFailedSessionTime": "39.224",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "neilhammes13@gmail.com",
+    "owner": {
+      "name": "Neil Hammes",
+      "email": "neilhammes13@gmail.com",
+      "_id": {
+        "$oid": "69a4a6cb47ca0b9517a365b2"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772398262605"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772398283914"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          },
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 21.309,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [],
+    "isPaidCustomer": "false",
+    "totalSuccessfulBasketsEver": "0",
+    "totalSpendingsEver": "0",
+    "totalFailedBaskets": "1",
+    "totalFailedRevenue": "69.8",
+    "avgFailedSessionTime": "21.309",
+    "churnedSalesCount": "1"
+  },
+  {
+    "_id": "ozan@echoconcerts.de",
+    "owner": {
+      "name": "Ozan Askan",
+      "email": "ozan@echoconcerts.de",
+      "_id": {
+        "$oid": "69807e901e75c3bbd67952f8"
+      }
+    },
+    "failedBaskets": [
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772357544350"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772357549771"
+          }
+        },
+        "sale": "Bojan - Dortmund",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 5.421,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772357595980"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772357602789"
+          }
+        },
+        "sale": "Bojan - Frankfurt",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 6.809,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      },
+      {
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1772357665053"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1772357690632"
+          }
+        },
+        "sale": "Bojan - Berlin",
+        "reservations": [
+          {
+            "name": "Reguläres Ticket",
+            "price": 34.9
+          }
+        ],
+        "sessionTimeSeconds": 25.579,
+        "hasReturned": false,
+        "timeToReturnSeconds": null
+      }
+    ],
+    "allSuccessfulBasketsEver": [
+      {
+        "_id": {
+          "$oid": "69ba90272af8e268d4dc479b"
+        },
+        "sale": {
+          "$oid": "69ba8a1b2af8e268d4dc40b3"
+        },
+        "createdAt": {
+          "$date": {
+            "$numberLong": "1773834279562"
+          }
+        },
+        "updatedAt": {
+          "$date": {
+            "$numberLong": "1773834356101"
+          }
+        },
+        "basketTotal": {
+          "$numberInt": "1"
+        },
+        "reservations": [
+          [
+            {
+              "name": "Test1",
+              "price": {
+                "$numberInt": "1"
+              }
+            }
+          ]
+        ],
+        "sale_name": "Semicenk - Live"
+      }
+    ],
+    "isPaidCustomer": "true",
+    "totalSuccessfulBasketsEver": "1",
+    "totalSpendingsEver": "1",
+    "totalFailedBaskets": "3",
+    "totalFailedRevenue": "104.7",
+    "avgFailedSessionTime": "12.603",
+    "churnedSalesCount": "1"
+  }
+]

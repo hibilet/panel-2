@@ -63,7 +63,7 @@ const navItems = [
 		labelKey: "nav.reports",
 		icon: "fa-chart-line",
 		tourId: "nav-reports",
-		acl: ["merchant", "admin"],
+		acl: ["admin"],
 	},
 	{
 		path: "/settings",
@@ -188,6 +188,14 @@ const Navbar = () => {
 							? strings("app.welcome", [account.name])
 							: strings("app.name")}
 					</h1>
+					{account?.realm?.name && (
+						<span
+							className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+							title={account.realm.name}
+						>
+							{account.realm.name}
+						</span>
+					)}
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
 					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2" role="tablist">

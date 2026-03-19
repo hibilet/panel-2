@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { get } from "../../../lib/client";
@@ -40,6 +40,23 @@ const Reports = () => {
 				</div>
 			)}
 
+			<section>
+				<h2 className="mb-3 text-sm font-medium text-slate-700">
+					{strings("page.reports.routineReports")}
+				</h2>
+				<div className="flex flex-wrap gap-3">
+					<Link
+						href="/reports/weekly?type=churn"
+						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
+					>
+						<i className="fa-solid fa-chart-line text-slate-500" aria-hidden />
+						<span className="font-medium text-slate-900">
+							{strings("page.reports.weeklyChurn")}
+						</span>
+					</Link>
+				</div>
+			</section>
+
 			<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 				{pastSales.length === 0 && !loading ? (
 					<div className="p-8 text-center text-slate-500">
@@ -54,7 +71,7 @@ const Reports = () => {
 						data={pastSales}
 						columns={salesColumns(false)}
 						getRowKey={(r) => r.id ?? r.name}
-						onRowClick={(row) => row.id && setLocation(`/reports/${row.id}`)}
+						onRowClick={(row) => row.id && setLocation(`/reports/${row.id}?type=event`)}
 						loading={loading}
 					/>
 				)}
