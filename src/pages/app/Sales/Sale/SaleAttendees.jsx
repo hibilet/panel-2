@@ -104,7 +104,7 @@ const RowDetail = ({ row, questions }) => {
 	);
 
 	return (
-		<div className="space-y-1.5 pl-10">
+		<div className="space-y-1.5 pl-12">
 			<dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-slate-600">
 				{answers
 					.filter((a) => {
