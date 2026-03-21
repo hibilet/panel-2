@@ -41,8 +41,8 @@ const App = () => {
 					<Route path="/sales/:id/:tab" component={Sale} />
 					<Route path="/transactions" component={Transactions} />
 					<Route path="/transactions/:id" component={Transactions} />
-					<Route path="/links" component={Links} />
 					<Route path="/links/:id" component={Links} />
+					<Route path="/links" component={Links} />
 					<Route path="/reports" component={Reports} />
 					<Route path="/reports/:id" component={Report} />
 					<Route path="/venues/:id" component={Venues} />

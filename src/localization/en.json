@@ -512,8 +512,9 @@
 	"form.ticket.ticketsToDeliver": "Tickets to deliver",
 	"form.ticket.pricePlaceholder": "Eg: 59.90",
 	"form.ticket.visibility": "Visibility",
-	"form.ticket.visibilityActive": "Active — visible and sellable",
-	"form.ticket.visibilityInactive": "Inactive — hidden from buyers",
+	"form.ticket.visibilityActive": "Active",
+	"form.ticket.visibilityInactive": "Inactive",
+	"form.ticket.visibilityComingSoon": "Coming soon",
 	"form.ticket.selectSeats": "Select Seats ($0 selected)",
 	"form.ticket.selectSeatsModalTitle": "Select seats — $0",
 	"form.ticket.seatsSelected": "$0 seats selected",
@@ -697,5 +698,7 @@
 	"form.coupon.used": "Used",
 	"form.coupon.stockLabel": "Stock:",
 	"form.coupon.usedLabel": "Used:",
+	"form.coupon.expirationDate": "Expiration date & time",
+	"form.coupon.expiresLabel": "Expires:",
 	"form.coupon.cannotDeleteUsed": "Cannot delete: coupon has been used"
 }

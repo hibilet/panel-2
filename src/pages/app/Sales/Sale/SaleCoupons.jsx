@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "wouter";
@@ -12,6 +13,16 @@ const formatDiscount = (value) => {
 	return value.toLocaleString();
 };
 
+const toDateTimeLocalValue = (value) =>
+	value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : "";
+
+const formatExpirationList = (value) =>
+	value ? dayjs(value).format("D MMM YYYY, HH:mm") : "—";
+
+/** API may return camelCase or snake_case */
+const getCouponExpiration = (coupon) =>
+	coupon?.expirationDate ?? coupon?.expiration_date ?? null;
+
 const getInitialForm = (coupon) => {
 	if (coupon) {
 		return {
@@ -20,6 +31,7 @@ const getInitialForm = (coupon) => {
 			stock: String(coupon.stock ?? ""),
 			discount: String(coupon.discount ?? ""),
 			status: coupon.status ?? "active",
+			expirationDate: toDateTimeLocalValue(getCouponExpiration(coupon)),
 		};
 	}
 	return {
@@ -28,6 +40,7 @@ const getInitialForm = (coupon) => {
 		stock: "",
 		discount: "",
 		status: "active",
+		expirationDate: "",
 	};
 };
 
@@ -233,7 +246,7 @@ const SaleCoupons = () => {
 												{getChannelName(coupon.channel)}
 											</p>
 										</div>
-										<div className="flex shrink-0 items-center gap-6 text-sm">
+										<div className="flex max-w-full shrink-0 flex-wrap items-center gap-x-6 gap-y-1 text-sm">
 											<span className="font-medium text-slate-700">
 												{formatDiscount(coupon.discount)}
 											</span>
@@ -242,6 +255,12 @@ const SaleCoupons = () => {
 											</span>
 											<span className="text-slate-500">
 												{strings("form.coupon.usedLabel")} {coupon.used ?? 0}
+											</span>
+											<span className="tabular-nums text-slate-500">
+												{strings("form.coupon.expiresLabel")}{" "}
+												<span className="text-slate-700">
+													{formatExpirationList(getCouponExpiration(coupon))}
+												</span>
 											</span>
 											<i
 												className="fa-solid fa-chevron-right text-slate-300"
@@ -301,12 +320,14 @@ const CouponPanel = ({
 		const discountValue = formData.discount
 			? parseFloat(formData.discount)
 			: undefined;
+		const exp = formData.expirationDate?.trim();
 		const payload = {
 			code: formData.code?.toUpperCase?.() || undefined,
 			channel: formData.channel || undefined,
 			stock: formData.stock ? Number(formData.stock) : undefined,
 			discount: discountValue,
 			status: formData.status || "active",
+			expirationDate: exp ? dayjs(exp).format("YYYY-MM-DD HH:mm") : null,
 		};
 		onSave(coupon, payload);
 	};
@@ -374,6 +395,11 @@ const CouponPanel = ({
 									</div>
 								)}
 							</div>
+							<Input
+								label={strings("form.coupon.expirationDate")}
+								type="datetime-local"
+								{...register("expirationDate")}
+							/>
 						</div>
 
 						<div className="space-y-4">

@@ -509,8 +509,9 @@
 	"form.ticket.ticketsToDeliver": "Zu übergebende Tickets",
 	"form.ticket.pricePlaceholder": "Z.B.: 59,90",
 	"form.ticket.visibility": "Sichtbarkeit",
-	"form.ticket.visibilityActive": "Aktiv — sichtbar und verkäuflich",
-	"form.ticket.visibilityInactive": "Inaktiv — für Käufer verborgen",
+	"form.ticket.visibilityActive": "Aktiv",
+	"form.ticket.visibilityInactive": "Inaktiv",
+	"form.ticket.visibilityComingSoon": "Bald im Verkauf",
 	"form.ticket.selectSeats": "Plätze auswählen ($0 ausgewählt)",
 	"form.ticket.selectSeatsModalTitle": "Plätze auswählen — $0",
 	"form.ticket.seatsSelected": "$0 Plätze ausgewählt",
@@ -694,5 +695,7 @@
 	"form.coupon.used": "Benutzt",
 	"form.coupon.stockLabel": "Bestand:",
 	"form.coupon.usedLabel": "Verwendet:",
+	"form.coupon.expirationDate": "Ablaufdatum und Uhrzeit",
+	"form.coupon.expiresLabel": "Läuft ab:",
 	"form.coupon.cannotDeleteUsed": "Kann nicht gelöscht werden: Gutschein wurde verwendet"
 }

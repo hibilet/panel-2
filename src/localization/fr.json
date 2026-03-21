@@ -509,8 +509,9 @@
 	"form.ticket.ticketsToDeliver": "Billets à remettre",
 	"form.ticket.pricePlaceholder": "Ex : 59.90",
 	"form.ticket.visibility": "Visibilité",
-	"form.ticket.visibilityActive": "Actif — Visible et vendable",
-	"form.ticket.visibilityInactive": "Inactif — Caché des acheteurs",
+	"form.ticket.visibilityActive": "Actif",
+	"form.ticket.visibilityInactive": "Inactif",
+	"form.ticket.visibilityComingSoon": "Bientôt disponible",
 	"form.ticket.selectSeats": "Sélectionner les places ($0 sélectionnées)",
 	"form.ticket.selectSeatsModalTitle": "Sélectionner les places — $0",
 	"form.ticket.seatsSelected": "$0 places sélectionnées",
@@ -694,5 +695,7 @@
 	"form.coupon.used": "Utilisé",
 	"form.coupon.stockLabel": "Stock :",
 	"form.coupon.usedLabel": "Utilisé :",
+	"form.coupon.expirationDate": "Date et heure d'expiration",
+	"form.coupon.expiresLabel": "Expire :",
 	"form.coupon.cannotDeleteUsed": "Suppression impossible : coupon déjà utilisé"
 }

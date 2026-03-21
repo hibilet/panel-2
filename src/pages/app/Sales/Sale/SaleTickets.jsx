@@ -385,6 +385,10 @@ const ProductPanel = ({
 										value: "inactive",
 										label: strings("form.ticket.visibilityInactive"),
 									},
+									{
+										value: "coming-soon",
+										label: strings("form.ticket.visibilityComingSoon"),
+									},
 								]}
 							/>
 						</div>

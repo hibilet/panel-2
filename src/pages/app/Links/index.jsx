@@ -134,8 +134,11 @@ const Links = () => {
 				<DataTable
 					data={data}
 					columns={linksColumns(getLinkUrl, CopyButton)}
-					getRowKey={(r) => r.id ?? r.slug}
-					onRowClick={(row) => row.id && setLocation(`/links/${row.id}`)}
+					getRowKey={(r) => r._id ?? r.slug}
+					onRowClick={(row) => {
+						const id = row._id ?? row.slug;
+						id && setLocation(`/links/${id}`);
+					}}
 					loading={loading}
 				/>
 			</div>
@@ -151,8 +154,7 @@ const Links = () => {
 						: strings("page.links.showArchived")}
 				</button>
 				{showArchived && (
-					<>
-						{archivedError ? (
+					archivedError ? (
 							<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
 								{archivedError}
 							</div>
@@ -162,14 +164,14 @@ const Links = () => {
 									data={archivedLinks}
 									columns={linksColumns(getLinkUrl, CopyButton)}
 									getRowKey={(r) => r.id ?? r.slug}
-									onRowClick={(row) =>
-										row.id && setLocation(`/links/${row.id}`)
-									}
+									onRowClick={(row) => {
+										const id = row.id ?? row.slug;
+										id && setLocation(`/links/${id}`);
+									}}
 									loading={archivedLoading}
 								/>
 							</div>
-						)}
-					</>
+						)
 				)}
 			</div>
 			<SlidePanel

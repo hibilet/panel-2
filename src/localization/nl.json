@@ -509,8 +509,9 @@
 	"form.ticket.ticketsToDeliver": "Te leveren tickets",
 	"form.ticket.pricePlaceholder": "Bijv: 59,90",
 	"form.ticket.visibility": "Zichtbaarheid",
-	"form.ticket.visibilityActive": "Actief — zichtbaar en te koop",
-	"form.ticket.visibilityInactive": "Inactief — verborgen voor kopers",
+	"form.ticket.visibilityActive": "Actief",
+	"form.ticket.visibilityInactive": "Inactief",
+	"form.ticket.visibilityComingSoon": "Binnenkort beschikbaar",
 	"form.ticket.selectSeats": "Stoelen selecteren ($0 geselecteerd)",
 	"form.ticket.selectSeatsModalTitle": "Stoelen selecteren — $0",
 	"form.ticket.seatsSelected": "$0 stoelen geselecteerd",
@@ -694,5 +695,7 @@
 	"form.coupon.used": "Gebruikt",
 	"form.coupon.stockLabel": "Voorraad:",
 	"form.coupon.usedLabel": "Gebruikt:",
+	"form.coupon.expirationDate": "Vervaldatum en tijd",
+	"form.coupon.expiresLabel": "Verloopt:",
 	"form.coupon.cannotDeleteUsed": "Kan niet verwijderen: kortingscode is gebruikt"
 }

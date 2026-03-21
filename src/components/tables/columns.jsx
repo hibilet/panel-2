@@ -444,11 +444,15 @@ export const ticketColumns = [
 				className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
 					r.status === "active"
 						? "bg-emerald-100 text-emerald-700"
+						: r.status === "coming-soon"
+						? "bg-yellow-100 text-yellow-700"
 						: "bg-slate-100 text-slate-600"
 				}`}
 			>
 				{r.status === "active"
 					? strings("common.active")
+					: r.status === "coming-soon"
+					? strings("form.ticket.visibilityComingSoon")
 					: strings("common.inactive")}
 			</span>
 		),

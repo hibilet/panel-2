@@ -508,8 +508,9 @@
 	"form.ticket.ticketsToDeliver": "Teslim edilecek bilet",
 	"form.ticket.pricePlaceholder": "Örn: 59.90",
 	"form.ticket.visibility": "Görünürlük",
-	"form.ticket.visibilityActive": "Aktif — görünür ve satılabilir",
-	"form.ticket.visibilityInactive": "Pasif — alıcılardan gizli",
+	"form.ticket.visibilityActive": "Aktif",
+	"form.ticket.visibilityInactive": "Pasif",
+	"form.ticket.visibilityComingSoon": "Yakında Satışa Çıkacak",
 	"form.ticket.selectSeats": "Koltuk Seç ($0 seçildi)",
 	"form.ticket.selectSeatsModalTitle": "Koltuk seç — $0",
 	"form.ticket.seatsSelected": "$0 koltuk seçildi",
@@ -693,6 +694,8 @@
 	"form.coupon.used": "Kullanılan",
 	"form.coupon.stockLabel": "Stok:",
 	"form.coupon.usedLabel": "Kullanılan:",
+	"form.coupon.expirationDate": "Son kullanma tarihi ve saati",
+	"form.coupon.expiresLabel": "Son kullanma:",
 	"form.coupon.cannotDeleteUsed": "Silinemez: kupon kullanılmış",
 
 	"error.failedDeleteGuest": "Misafir silinemedi"
