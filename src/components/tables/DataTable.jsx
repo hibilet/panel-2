@@ -1,3 +1,4 @@
+import { useState } from "react";
 import strings from "../../localization";
 
 const TH_CLASS =
@@ -31,12 +32,20 @@ const DARK_TBODY = "dark:bg-slate-800";
  * @param {string} props.minWidth - e.g. 'min-w-[640px]'
  * @param {Object} props.tableRef - ref for print area
  * @param {number} props.shimmerRows - Rows to show when loading
+ * @param {Function} props.renderRowDetail - (row) => ReactNode for expandable row detail
+ * @param {Set|Array} props.expandedRowKeys - controlled: which row keys are expanded
+ * @param {Function} props.onExpandedChange - (Set) => void when expansion changes
+ * @param {boolean} props.expandAllForPrint - when true, all rows with details are expanded (e.g. for print)
  */
 const DataTable = ({
 	data = [],
 	columns = [],
 	getRowKey = (row) => row.id ?? row._id,
 	onRowClick,
+	renderRowDetail,
+	expandedRowKeys,
+	onExpandedChange,
+	expandAllForPrint = false,
 	loading = false,
 	bare = false,
 	dark = false,
@@ -47,8 +56,36 @@ const DataTable = ({
 	shimmerRows = 5,
 	className = "",
 }) => {
+	const [internalExpanded, setInternalExpanded] = useState(new Set());
+	const isControlled = expandedRowKeys !== undefined;
+	const expandedSet = expandAllForPrint
+		? new Set(
+				data
+					.filter((row) => renderRowDetail(row))
+					.map((row) => getRowKey(row))
+			)
+		: isControlled
+			? new Set(Array.isArray(expandedRowKeys) ? expandedRowKeys : [])
+			: internalExpanded;
+
+	const setExpanded = (next) => {
+		if (isControlled) {
+			onExpandedChange?.(next);
+		} else {
+			setInternalExpanded(next);
+		}
+	};
+
+	const toggleRow = (rowKey, hasDetail) => {
+		if (!hasDetail) return;
+		const next = new Set(expandedSet);
+		if (next.has(rowKey)) next.delete(rowKey);
+		else next.add(rowKey);
+		setExpanded(next);
+	};
+
 	const showLoading = loading && data.length === 0;
-	const darkCls = dark ? " dark" : "";
+	const hasExpandable = !!renderRowDetail;
 
 	if (showLoading) {
 		const wrapperClass = bare
@@ -100,6 +137,12 @@ const DataTable = ({
 		>
 			<thead className={`bg-slate-50 ${dark ? DARK_THEAD : ""}`}>
 				<tr>
+					{hasExpandable && (
+						<th
+							className={`${TH_CLASS} ${TH_CLASS_LEFT} w-10 ${dark ? DARK_TH : ""} print:hidden`}
+							aria-hidden
+						/>
+					)}
 					{columns.map((col) => (
 						<th
 							key={col.key}
@@ -116,53 +159,92 @@ const DataTable = ({
 				{data.length === 0 ? (
 					<tr>
 						<td
-							colSpan={columns.length}
+							colSpan={columns.length + (hasExpandable ? 1 : 0)}
 							className="px-4 py-8 text-center text-slate-500 dark:text-slate-400"
 						>
 							{emptyMessage}
 						</td>
 					</tr>
 				) : (
-					data.map((row) => (
-						<tr
-							key={getRowKey(row)}
-							role={onRowClick ? "button" : undefined}
-							tabIndex={onRowClick ? 0 : undefined}
-							onClick={onRowClick ? () => onRowClick(row) : undefined}
-							onKeyDown={
-								onRowClick
-									? (e) => {
-											if (e.key === "Enter" || e.key === " ") {
-												e.preventDefault();
-												onRowClick(row);
-											}
+					data.flatMap((row) => {
+						const rowKey = getRowKey(row);
+						const isExpanded = hasExpandable && expandedSet.has(rowKey);
+						const hasDetail = renderRowDetail(row);
+						return [
+							<tr
+								key={rowKey}
+								role={hasExpandable || onRowClick ? "button" : undefined}
+								tabIndex={hasExpandable || onRowClick ? 0 : undefined}
+								onClick={() => {
+									if (hasExpandable && hasDetail) {
+										toggleRow(rowKey, true);
+									} else if (onRowClick) {
+										onRowClick(row);
+									}
+								}}
+								onKeyDown={(e) => {
+									if (e.key === "Enter" || e.key === " ") {
+										e.preventDefault();
+										if (hasExpandable && hasDetail) {
+											toggleRow(rowKey, true);
+										} else if (onRowClick) {
+											onRowClick(row);
 										}
-									: undefined
-							}
-							className={`${onRowClick ? ROW_CLASS : ROW_CLASS_STATIC} ${dark ? DARK_ROW : ""}`}
-						>
-							{columns.map((col) => {
-								const content = col.render
-									? col.render(row)
-									: (row[col.key] ?? "—");
-								const isTh = col.headerCell;
-								const Tag = isTh ? "th" : "td";
-								return (
-									<Tag
-										key={col.key}
-										scope={isTh ? "row" : undefined}
-										className={`whitespace-nowrap ${TD_CLASS} ${
-											col.align === "right" ? "text-right" : "text-left"
-										} ${isTh ? `${TD_CLASS_MEDIUM} ${dark ? "dark:text-white" : ""}` : TD_CLASS_MUTED} ${
-											dark ? DARK_TD : ""
-										} ${col.printOnly ? "print-only hidden" : ""} ${col.className ?? ""}`}
+									}
+								}}
+								className={`${hasExpandable || onRowClick ? ROW_CLASS : ROW_CLASS_STATIC} ${dark ? DARK_ROW : ""}`}
+							>
+								{hasExpandable && (
+									<td
+										className={`${TD_CLASS} print:hidden ${
+											hasDetail ? "text-slate-400" : "text-slate-200"
+										}`}
 									>
-										{content}
-									</Tag>
-								);
-							})}
-						</tr>
-					))
+										{hasDetail ? (
+											<i
+												className={`fa-solid fa-chevron-down transition-transform ${
+													isExpanded ? "" : "-rotate-90"
+												}`}
+												aria-hidden
+											/>
+										) : (
+											<span className="w-4" />
+										)}
+									</td>
+								)}
+								{columns.map((col) => {
+									const content = col.render
+										? col.render(row)
+										: (row[col.key] ?? "—");
+									const isTh = col.headerCell;
+									const Tag = isTh ? "th" : "td";
+									return (
+										<Tag
+											key={col.key}
+											scope={isTh ? "row" : undefined}
+											className={`whitespace-nowrap ${TD_CLASS} ${
+												col.align === "right" ? "text-right" : "text-left"
+											} ${isTh ? `${TD_CLASS_MEDIUM} ${dark ? "dark:text-white" : ""}` : TD_CLASS_MUTED} ${
+												dark ? DARK_TD : ""
+											} ${col.printOnly ? "print-only hidden" : ""} ${col.className ?? ""}`}
+										>
+											{content}
+										</Tag>
+									);
+								})}
+							</tr>,
+							isExpanded && hasDetail && (
+								<tr key={`${rowKey}-detail`}>
+									<td
+										colSpan={columns.length + 1}
+										className="bg-slate-50 px-4 py-3 text-sm dark:bg-slate-800/50"
+									>
+										{renderRowDetail(row)}
+									</td>
+								</tr>
+							),
+						].filter(Boolean);
+					})
 				)}
 			</tbody>
 			{footer && (

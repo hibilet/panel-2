@@ -157,7 +157,12 @@ const Sale = () => {
 							<SaleQuestions {...props} sale={sale} setSale={setSale} />
 						)}
 					/>
-					<Route path="/sales/:id/attendees" component={SaleAttendees} />
+					<Route
+						path="/sales/:id/attendees"
+						component={(props) => (
+							<SaleAttendees {...props} sale={sale} />
+						)}
+					/>
 					<Route path="/sales/:id/guests" component={SaleGuests} />
 					<Route path="/sales/:id/readers" component={SaleReaders} />
 					<Route path="/sales/:id/coupons" component={SaleCoupons} />
