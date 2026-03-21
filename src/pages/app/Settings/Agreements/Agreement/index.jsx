@@ -46,6 +46,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 			const payload = {
 				name: formData.name?.trim() || undefined,
 				content: formData.content?.trim() || undefined,
+				type: "sales"
 			};
 			if (isNew) {
 				const res = await post("/agreements", payload);

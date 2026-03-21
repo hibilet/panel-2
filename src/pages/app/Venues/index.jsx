@@ -121,9 +121,9 @@ const Venues = () => {
 					<VenuePanel
 						id={venueId}
 						onClose={() => setLocation("/venues")}
-						onSaved={(newId) => {
+						onSaved={() => {
 							fetchVenues(true);
-							if (newId) setLocation(`/venues/${newId}`);
+							setLocation("/venues");
 						}}
 					/>
 				)}

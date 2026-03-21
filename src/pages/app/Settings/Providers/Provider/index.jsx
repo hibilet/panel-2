@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input, Select } from "../../../../../components/inputs";
-import { get, post, put } from "../../../../../lib/client";
+import { del, get, post, put } from "../../../../../lib/client";
 import strings from "../../../../../localization";
 
 const COUNTRY_OPTIONS = [
@@ -32,11 +32,12 @@ const defaultValues = {
 	webhookSecret: "",
 };
 
-const ProviderPanel = ({ id, onClose, onSaved }) => {
+const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
+	const [deleting, setDeleting] = useState(false);
 	const [error, setError] = useState(null);
 
 	const { register, handleSubmit, reset, watch } = useForm({ defaultValues });
@@ -101,6 +102,22 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setSaving(false);
+		}
+	};
+
+	const onDelete = async () => {
+		if (isNew || !data?.id) return;
+		if (!window.confirm(strings("confirm.deleteProvider"))) return;
+		setDeleting(true);
+		setError(null);
+		try {
+			await del(`/providers/${id}`);
+			onDeleted?.();
+			onClose?.();
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedDelete"));
+		} finally {
+			setDeleting(false);
 		}
 	};
 
@@ -170,12 +187,15 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
 							/>
 						</div>
 
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						<div className="grid grid-cols-1 gap-4">
 							<Input
 								label={strings("form.provider.bank")}
 								{...register("bank")}
 								placeholder={strings("form.provider.bankPlaceholder")}
 							/>
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
 							<Select
 								label={strings("form.provider.country")}
 								{...register("country")}
@@ -238,10 +258,33 @@ const ProviderPanel = ({ id, onClose, onSaved }) => {
 					</div>
 				</div>
 
-				<footer className="shrink-0 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
+				<footer className="flex shrink-0 items-center justify-between gap-4 border-t border-slate-200 px-6 py-4 dark:border-slate-700">
+					<div>
+						{!isNew && (
+							<button
+								type="button"
+								onClick={onDelete}
+								disabled={saving || deleting}
+								className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2 font-medium text-red-700 hover:bg-red-50 disabled:opacity-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-950/30"
+								aria-label={strings("common.ariaDelete")}
+							>
+								{deleting ? (
+									<>
+										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+										{strings("common.saving")}
+									</>
+								) : (
+									<>
+										<i className="fa-solid fa-trash" aria-hidden />
+										{strings("common.delete")}
+									</>
+								)}
+							</button>
+						)}
+					</div>
 					<button
 						type="submit"
-						disabled={saving}
+						disabled={saving || deleting}
 						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
 					>
 						{saving ? (

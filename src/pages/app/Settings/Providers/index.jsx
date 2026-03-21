@@ -111,10 +111,15 @@ const Providers = () => {
 					<ProviderPanel
 						id={id}
 						onClose={() => setLocation("/settings/providers")}
-						onSaved={(newId) => {
+						onSaved={() => {
 							fetchProviders(true);
 							refreshAccount?.();
-							if (newId) setLocation(`/settings/providers/${newId}`);
+							setLocation("/settings/providers");
+						}}
+						onDeleted={() => {
+							fetchProviders(true);
+							refreshAccount?.();
+							setLocation("/settings/providers");
 						}}
 					/>
 				)}

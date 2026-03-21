@@ -1,12 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
-
+import SlidePanel from "../../../../components/shared/SlidePanel";
+import { agreementsColumns } from "../../../../components/tables/columns";
+import DataTable from "../../../../components/tables/DataTable";
 import { useApp } from "../../../../context";
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
-import SlidePanel from "../../../../components/shared/SlidePanel";
-import DataTable from "../../../../components/tables/DataTable";
-import { agreementsColumns } from "../../../../components/tables/columns";
 import AgreementPanel from "./Agreement";
 
 const Agreements = () => {
@@ -111,10 +110,10 @@ const Agreements = () => {
 					<AgreementPanel
 						id={id}
 						onClose={() => setLocation("/settings/agreements")}
-						onSaved={(newId) => {
+						onSaved={() => {
 							fetchAgreements(true);
 							refreshAccount?.();
-							if (newId) setLocation(`/settings/agreements/${newId}`);
+							setLocation("/settings/agreements");
 						}}
 					/>
 				)}

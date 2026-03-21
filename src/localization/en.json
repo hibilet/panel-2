@@ -94,6 +94,7 @@
 	"confirm.deleteReader": "Delete this reader?",
 	"confirm.deleteCoupon": "Delete this coupon?",
 	"confirm.deleteLink": "Delete this link?",
+	"confirm.deleteProvider": "Delete this provider?",
 	"confirm.cancelAllReservations": "Are you sure you want to cancel all reservations? This action cannot be undone.",
 	"confirm.cancelReservation": "Cancel reservation \"$0\"?",
 
