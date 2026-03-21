@@ -502,6 +502,7 @@
 	"form.ticket.editTicket": "Bileti düzenle",
 	"form.ticket.namePlaceholder": "Örn: Early Bird VIP",
 	"form.ticket.categoryPlaceholder": "Örn: VIP",
+	"form.ticket.availability": "Kullanılabilirlik",
 	"form.ticket.promoText": "Promosyon metni",
 	"form.ticket.promoPlaceholder": "İsteğe bağlı promosyon mesajı",
 	"form.ticket.capacityPricing": "Kapasite ve fiyatlandırma",

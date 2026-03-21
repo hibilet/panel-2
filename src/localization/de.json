@@ -503,6 +503,7 @@
 	"form.ticket.editTicket": "Ticket bearbeiten",
 	"form.ticket.namePlaceholder": "Z.B.: Early Bird VIP",
 	"form.ticket.categoryPlaceholder": "Z.B.: VIP",
+	"form.ticket.availability": "Verfügbarkeit",
 	"form.ticket.promoText": "Promo-Text",
 	"form.ticket.promoPlaceholder": "Optionales Promo-Angebot",
 	"form.ticket.capacityPricing": "Kapazität & Preisgestaltung",

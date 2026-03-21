@@ -503,6 +503,7 @@
 	"form.ticket.editTicket": "Ticket bewerken",
 	"form.ticket.namePlaceholder": "Bijv: Early Bird VIP",
 	"form.ticket.categoryPlaceholder": "Bijv: VIP",
+	"form.ticket.availability": "Beschikbaarheid",
 	"form.ticket.promoText": "Promotietekst",
 	"form.ticket.promoPlaceholder": "Optioneel promotiebericht",
 	"form.ticket.capacityPricing": "Capaciteit & prijs",

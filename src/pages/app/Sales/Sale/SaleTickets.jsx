@@ -1,14 +1,19 @@
+import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
+
 import { ticketColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 import { toId } from "../../../../utils/object";
 import SaleEventSeating from "./SaleEventSeating";
+
+const toDateTimeLocalValue = (value) =>
+	value ? dayjs(value).format("YYYY-MM-DDTHH:mm") : "";
 
 const getInitialForm = (product) => {
 	if (product) {
@@ -19,6 +24,8 @@ const getInitialForm = (product) => {
 			productsToDeliver: String(product.productsToDeliver ?? ""),
 			price: String(product.price ?? ""),
 			status: product.status ?? "active",
+			startAt: toDateTimeLocalValue(product.startAt ?? product.start_at),
+			endAt: toDateTimeLocalValue(product.endAt ?? product.end_at),
 		};
 	}
 	return {
@@ -28,6 +35,8 @@ const getInitialForm = (product) => {
 		productsToDeliver: "",
 		price: "",
 		status: "active",
+		startAt: "",
+		endAt: "",
 	};
 };
 
@@ -294,6 +303,12 @@ const ProductPanel = ({
 				: undefined,
 			price: formData.price ? Number(formData.price) : undefined,
 			status: formData.status || "active",
+			startAt: formData.startAt
+				? dayjs(formData.startAt).format("YYYY-MM-DD HH:mm")
+				: undefined,
+			endAt: formData.endAt
+				? dayjs(formData.endAt).format("YYYY-MM-DD HH:mm")
+				: undefined,
 		};
 		onSave(product, payload);
 	};
@@ -340,6 +355,24 @@ const ProductPanel = ({
 								{...register("promo")}
 								placeholder={strings("form.ticket.promoPlaceholder")}
 							/>
+						</div>
+
+						<div className="space-y-4">
+							<h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+								{strings("form.ticket.availability")}
+							</h4>
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<Input
+									label={strings("form.sale.startDateTime")}
+									type="datetime-local"
+									{...register("startAt")}
+								/>
+								<Input
+									label={strings("form.sale.endDateTime")}
+									type="datetime-local"
+									{...register("endAt")}
+								/>
+							</div>
 						</div>
 
 						<div className="space-y-4">
