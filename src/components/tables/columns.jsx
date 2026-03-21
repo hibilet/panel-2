@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { Link } from "wouter";
 import strings, { formatCurrency } from "../../localization";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
@@ -256,7 +257,7 @@ export const linksColumns = (getLinkUrl, CopyButton) => [
 					>
 						{strings("form.channel.open")}
 					</a>
-					{CopyButton && <CopyButton text={link} stopPropagation />}
+					{/* {CopyButton && <CopyButton text={link} stopPropagation />} */}
 				</span>
 			) : (
 				"—"
@@ -516,7 +517,88 @@ export const channelColumns = (getChannelLink, isBaseChannel, CopyButton) => [
 					>
 						{strings("form.channel.open")}
 					</a>
-					<CopyButton text={link} stopPropagation />
+					{/* <CopyButton text={link} stopPropagation /> */}
+				</span>
+			) : (
+				"—"
+			);
+		},
+	},
+];
+
+const getAge = (birthday) => {
+	if (!birthday) return "—";
+	const birth = new Date(birthday);
+	const today = new Date();
+	let age = today.getFullYear() - birth.getFullYear();
+	const m = today.getMonth() - birth.getMonth();
+	if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+	return age;
+};
+
+const ATTENDEE_STATUS_LABELS = {
+	success: `✅ ${strings("status.success")}`,
+	read: `✅ ${strings("status.read")}`,
+	reserved: `⏳ ${strings("status.reserved")}`,
+	failed: `❌ ${strings("status.failed")}`,
+};
+
+export const attendeeColumns = (CopyButton) => [
+	{
+		key: "owner",
+		header: strings("table.transaction.owner"),
+		headerCell: true,
+		render: (r) => r.owner ?? "—",
+	},
+	{
+		key: "email",
+		header: strings("form.transaction.email"),
+		render: (r) => r.email ?? "—",
+	},
+	{
+		key: "product",
+		header: strings("form.attendees.product"),
+		render: (r) => r.product ?? "—",
+	},
+	{
+		key: "tickets",
+		header: strings("page.sale.tab.tickets"),
+		render: (r) => r.tickets ?? "—",
+		align: "right",
+	},
+	{
+		key: "gender",
+		header: "Gender",
+		render: (r) =>
+			r.gender
+				? String(r.gender).charAt(0).toUpperCase() + String(r.gender).slice(1)
+				: "—",
+	},
+	{
+		key: "age",
+		header: "Age",
+		render: (r) => r.age ?? getAge(r.birthday) ?? "—",
+		align: "right",
+	},
+	{
+		key: "status",
+		header: strings("common.status"),
+		render: (r) => ATTENDEE_STATUS_LABELS[r.status] ?? r.status ?? "—",
+		align: "right",
+	},
+	{
+		key: "link",
+		header: strings("form.channel.link"),
+		render: (r) => {
+			return r.transaction ? (
+				<span className="flex items-center gap-2">
+					<Link
+						href={`/transactions/${r.transaction}`}
+						className="text-sm text-slate-600 underline hover:text-slate-900"
+					>
+						{strings("form.channel.open")}
+					</Link>
+					{/* <CopyButton text={`/transactions/${r.transaction}`} stopPropagation /> */}
 				</span>
 			) : (
 				"—"

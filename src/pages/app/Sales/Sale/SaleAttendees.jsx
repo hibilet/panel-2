@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "wouter";
 import * as XLSX from "xlsx";
 import { PageHeader } from "../../../../components/shared";
+import { attendeeColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
 import { get } from "../../../../lib/client";
@@ -26,35 +27,43 @@ const STATUS_LABELS = {
 	failed: `❌ ${strings("status.failed")}`,
 };
 
+const CopyButton = ({ text, stopPropagation }) => {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async (e) => {
+		if (stopPropagation) e.stopPropagation();
+		try {
+			await navigator.clipboard.writeText(text);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		} catch {
+			// ignore
+		}
+	};
+
+	return (
+		<button
+			type="button"
+			onClick={handleCopy}
+			className="rounded p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+			aria-label={
+				copied
+					? strings("form.channel.copied")
+					: strings("form.channel.copyLink")
+			}
+			title={strings("form.channel.copyLink")}
+		>
+			{copied ? (
+				<i className="fa-solid fa-check text-emerald-600" aria-hidden />
+			) : (
+				<i className="fa-solid fa-copy" aria-hidden />
+			)}
+		</button>
+	);
+};
+
 const columns = [
-	{
-		key: "owner",
-		header: strings("table.transaction.owner"),
-		headerCell: true,
-		render: (r) => r.owner ?? "—",
-	},
-	{
-		key: "email",
-		header: strings("form.transaction.email"),
-		render: (r) => r.email ?? "—",
-	},
-	{
-		key: "product",
-		header: strings("form.attendees.product"),
-		render: (r) => r.product ?? "—",
-	},
-	{
-		key: "age",
-		header: "Age",
-		render: (r) => getAge(r.birthday),
-		align: "right",
-	},
-	{
-		key: "status",
-		header: strings("common.status"),
-		render: (r) => STATUS_LABELS[r.status] ?? r.status ?? "—",
-		align: "right",
-	},
+	...attendeeColumns(CopyButton),
 	{
 		key: "print",
 		header: "✓",
@@ -126,15 +135,23 @@ const SaleAttendees = ({ sale }) => {
 			strings("table.transaction.owner"),
 			strings("form.transaction.email"),
 			strings("form.attendees.product"),
+			strings("page.sale.tab.tickets"),
+			"Gender",
 			"Age",
 			strings("common.status"),
+			strings("page.transactions.transactionId"),
 		];
 		const rows = reservations.map((r) => [
 			r.owner ?? "",
 			r.email ?? "",
 			r.product ?? "",
-			getAge(r.birthday),
+			r.tickets ?? "",
+			r.gender
+				? String(r.gender).charAt(0).toUpperCase() + String(r.gender).slice(1)
+				: "",
+			r.age ?? getAge(r.birthday) ?? "",
 			STATUS_LABELS[r.status] ?? r.status ?? "",
+			r.transaction ? String(r.transaction).slice(-6) : "",
 		]);
 		const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
 		const wb = XLSX.utils.book_new();
