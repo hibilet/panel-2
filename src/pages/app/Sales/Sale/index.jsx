@@ -9,6 +9,7 @@ import SaleChannels from "./SaleChannels";
 import SaleCoupons from "./SaleCoupons";
 import SaleGuests from "./SaleGuests";
 import SaleGuidedForm from "./SaleGuidedForm";
+import SaleQuestions from "./SaleQuestions";
 import SaleReaders from "./SaleReaders";
 import SaleTickets from "./SaleTickets";
 
@@ -16,6 +17,7 @@ const tabItems = [
 	{ path: "basic", labelKey: "page.sale.tab.basic", icon: "fa-file-lines" },
 	{ path: "tickets", labelKey: "page.sale.tab.tickets", icon: "fa-ticket" },
 	{ path: "channels", labelKey: "page.sale.tab.channels", icon: "fa-bullhorn" },
+	{ path: "questions", labelKey: "page.sale.tab.questions", icon: "fa-question-circle" },
 	{ path: "attendees", labelKey: "page.sale.tab.attendees", icon: "fa-users" },
 	{ path: "guests", labelKey: "page.sale.tab.guests", icon: "fa-user-group" },
 	{
@@ -108,9 +110,7 @@ const Sale = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl">
-			{isNew && isGuided && (
-				<SaleGuidedForm onClose={handleCloseGuided} />
-			)}
+			{isNew && isGuided && <SaleGuidedForm onClose={handleCloseGuided} />}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
 			</div>
@@ -151,6 +151,12 @@ const Sale = () => {
 						)}
 					/>
 					<Route path="/sales/:id/channels" component={SaleChannels} />
+					<Route
+						path="/sales/:id/questions"
+						component={(props) => (
+							<SaleQuestions {...props} sale={sale} setSale={setSale} />
+						)}
+					/>
 					<Route path="/sales/:id/attendees" component={SaleAttendees} />
 					<Route path="/sales/:id/guests" component={SaleGuests} />
 					<Route path="/sales/:id/readers" component={SaleReaders} />
