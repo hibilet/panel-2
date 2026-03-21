@@ -691,6 +691,7 @@
 	"form.reader.emailPlaceholder": "Örn: ahmet@ornek.com",
 
 	"common.pleaseSelect": "Lütfen seçin",
+	"common.editTemplate": "Şablonu düzenle",
 
 	"form.coupon.title": "Kuponlar",
 	"form.coupon.addCoupon": "Kupon ekle",

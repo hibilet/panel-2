@@ -695,6 +695,7 @@
 	"form.reader.emailPlaceholder": "Eg: john@doe.com",
 
 	"common.pleaseSelect": "Please select",
+	"common.editTemplate": "Edit template",
 
 	"form.coupon.title": "Coupons",
 	"form.coupon.addCoupon": "Add coupon",

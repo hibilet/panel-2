@@ -692,6 +692,7 @@
 	"form.reader.emailPlaceholder": "Ex : jean@dupont.com",
 
 	"common.pleaseSelect": "Veuillez sélectionner",
+	"common.editTemplate": "Modifier la template",
 
 	"form.coupon.title": "Coupons",
 	"form.coupon.addCoupon": "Ajouter un coupon",

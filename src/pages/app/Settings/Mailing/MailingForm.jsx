@@ -133,7 +133,7 @@ const MailingForm = ({ onSaved }) => {
 				/>
 			</div>
 
-			<div className="pt-4">
+			<div className="pt-4 flex gap-2">
 				<button
 					type="submit"
 					disabled={saving}
@@ -150,6 +150,14 @@ const MailingForm = ({ onSaved }) => {
 							{strings("common.save")}
 						</>
 					)}
+				</button>
+				<button
+					type="submit"
+					disabled={saving}
+					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+				>
+					<i className="fa-solid fa-envelope" aria-hidden />
+					{strings("common.editTemplate")}
 				</button>
 			</div>
 		</form>

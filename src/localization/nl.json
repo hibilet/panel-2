@@ -692,6 +692,7 @@
 	"form.reader.emailPlaceholder": "Bijv: jan@voorbeeld.com",
 
 	"common.pleaseSelect": "Selecteer",
+	"common.editTemplate": "Template bewerken",
 
 	"form.coupon.title": "Kortingscodes",
 	"form.coupon.addCoupon": "Kortingscode toevoegen",

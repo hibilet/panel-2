@@ -692,6 +692,7 @@
 	"form.reader.emailPlaceholder": "Z.B.: max@mustermann.de",
 
 	"common.pleaseSelect": "Bitte auswählen",
+	"common.editTemplate": "Vorlage bearbeiten",
 
 	"form.coupon.title": "Gutscheine",
 	"form.coupon.addCoupon": "Gutschein hinzufügen",
