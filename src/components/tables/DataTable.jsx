@@ -61,7 +61,7 @@ const DataTable = ({
 	const expandedSet = expandAllForPrint
 		? new Set(
 				data
-					.filter((row) => renderRowDetail(row))
+					.filter((row) => renderRowDetail?.(row))
 					.map((row) => getRowKey(row))
 			)
 		: isControlled
@@ -169,7 +169,7 @@ const DataTable = ({
 					data.flatMap((row) => {
 						const rowKey = getRowKey(row);
 						const isExpanded = hasExpandable && expandedSet.has(rowKey);
-						const hasDetail = renderRowDetail(row);
+						const hasDetail = hasExpandable && renderRowDetail?.(row);
 						return [
 							<tr
 								key={rowKey}
@@ -239,7 +239,7 @@ const DataTable = ({
 										colSpan={columns.length + 1}
 										className="bg-slate-50 px-4 py-3 text-sm dark:bg-slate-800/50"
 									>
-										{renderRowDetail(row)}
+										{renderRowDetail?.(row)}
 									</td>
 								</tr>
 							),
