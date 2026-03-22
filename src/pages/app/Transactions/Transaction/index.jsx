@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "wouter";
-import { get } from "../../../../lib/client";
+import { get, post } from "../../../../lib/client";
 import strings, { formatCurrency } from "../../../../localization";
 
 const STATUS_LABELS = {
@@ -39,8 +39,8 @@ const TransactionPanel = ({ id, onClose }) => {
 
 	const handleSendEmailAgain = () => {
 		setSending(true);
-		// TODO: wire to actual API when available
-		setTimeout(() => setSending(false), 800);
+		post(`/transactions/${id}/resend-email`, {})
+			.finally(() => setSending(false));
 	};
 
 	const handleSendToAnotherEmail = () => {
@@ -238,6 +238,7 @@ const TransactionPanel = ({ id, onClose }) => {
 
 			{emailDialogOpen && (
 				<SendEmailDialog
+					transactionId={id}
 					initialEmail={data?.owner?.email ?? ""}
 					onClose={() => setEmailDialogOpen(false)}
 					setSending={setSending}
@@ -247,7 +248,7 @@ const TransactionPanel = ({ id, onClose }) => {
 	);
 };
 
-const SendEmailDialog = ({ initialEmail, onClose, setSending }) => {
+const SendEmailDialog = ({ transactionId, initialEmail, onClose, setSending }) => {
 	const [sending, setSendingLocal] = useState(false);
 	const { register, handleSubmit, reset } = useForm({
 		defaultValues: { emailAddress: initialEmail ?? "" },
@@ -265,15 +266,18 @@ const SendEmailDialog = ({ initialEmail, onClose, setSending }) => {
 		return () => window.removeEventListener("keydown", onKeyDown);
 	}, [onClose]);
 
-	const onSubmit = () => {
+	const onSubmit = ({ emailAddress }) => {
+		if (!transactionId || !emailAddress?.trim()) return;
 		setSendingLocal(true);
 		setSending?.(true);
-		// TODO: wire to actual API when available
-		setTimeout(() => {
-			setSendingLocal(false);
-			setSending?.(false);
-			onClose();
-		}, 800);
+		post(`/transactions/${transactionId}/resend-email-alternate`, {
+			emailAddress: emailAddress.trim(),
+		})
+			.then(() => onClose())
+			.finally(() => {
+				setSendingLocal(false);
+				setSending?.(false);
+			});
 	};
 
 	return (
