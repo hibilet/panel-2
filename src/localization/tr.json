@@ -343,6 +343,7 @@
 	"page.settings.lightTheme": "Açık tema",
 	"page.settings.saveChanges": "Değişiklikleri kaydet",
 	"page.settings.mailingSetup": "Posta Kurulumu",
+	"page.settings.mailTemplate": "E-posta Şablonu",
 	"page.settings.saleProviders": "Satış Sağlayıcıları",
 	"page.settings.createNewProvider": "Yeni Sağlayıcı Oluştur",
 	"page.settings.createNewAgreement": "Yeni Sözleşme Oluştur",
@@ -475,6 +476,11 @@
 	"form.mailing.serverPlaceholder": "Örn: smtp.gmail.com",
 	"form.mailing.port": "Port",
 	"form.mailing.portPlaceholder": "Örn: 587",
+	"form.mailing.templateRawHtml": "Ham HTML",
+	"form.mailing.templateEjs": "EJS Şablonu",
+	"form.mailing.templatePreview": "Önizleme",
+	"form.mailing.templateRenderError": "Önizleme hatası",
+	"form.mailing.templatePreviewError": "Önizleme için EJS sözdizimini düzeltin",
 	"error.failedLoadMailing": "Posta ayarları yüklenemedi",
 
 	"form.link.title": "Bağlantı Başlığı",
@@ -564,6 +570,7 @@
 	"back.settings": "Ayarlara Dön",
 	"back.providers": "Satış Sağlayıcılarına Dön",
 	"back.agreements": "Satış Sözleşmelerine Dön",
+	"back.mailing": "Posta Ayarlarına Dön",
 
 	"detail.id": "ID",
 	"detail.url": "URL",

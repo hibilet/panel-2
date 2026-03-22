@@ -344,6 +344,7 @@
 	"page.settings.lightTheme": "Thème clair",
 	"page.settings.saveChanges": "Enregistrer les modifications",
 	"page.settings.mailingSetup": "Configuration du courrier",
+	"page.settings.mailTemplate": "Modèle d'e-mail",
 	"page.settings.saleProviders": "Prestataires de vente",
 	"page.settings.createNewProvider": "Créer un nouveau prestataire",
 	"page.settings.createNewAgreement": "Créer un nouveau contrat",
@@ -476,6 +477,11 @@
 	"form.mailing.serverPlaceholder": "Ex : smtp.gmail.com",
 	"form.mailing.port": "Port",
 	"form.mailing.portPlaceholder": "Ex : 587",
+	"form.mailing.templateRawHtml": "HTML brut",
+	"form.mailing.templateEjs": "Modèle EJS",
+	"form.mailing.templatePreview": "Aperçu",
+	"form.mailing.templateRenderError": "Erreur d'aperçu",
+	"form.mailing.templatePreviewError": "Corriger la syntaxe EJS pour voir l'aperçu",
 	"error.failedLoadMailing": "Impossible de charger les paramètres de messagerie",
 
 	"form.link.title": "Titre du lien",
@@ -565,6 +571,7 @@
 	"back.settings": "Retour aux paramètres",
 	"back.providers": "Retour aux prestataires de vente",
 	"back.agreements": "Retour aux contrats de vente",
+	"back.mailing": "Retour à la configuration du courrier",
 
 	"detail.id": "ID",
 	"detail.url": "URL",

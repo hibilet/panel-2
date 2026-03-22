@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket-Bestätigung</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 15px; line-height: 1.5; color: #0f172a; background: #f8fafc; margin: 0; padding: 32px 20px;">
+
+  <div style="max-width: 480px; margin: 0 auto; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+
+    <div style="border-bottom: 1px solid #e2e8f0; background: #f8fafc; padding: 24px;">
+      <h1 style="font-size: 18px; font-weight: 600; color: #0f172a; margin: 0;"><%= sale.name %></h1>
+      <p style="margin: 8px 0 0; font-size: 14px; color: #64748b;"><%= dayjs(sale.start).format('DD MMM YYYY, HH:mm') %> Uhr · <%= venue.name %><% if (venue.city) { %>, <%= venue.city %><% } %></p>
+    </div>
+
+    <div style="padding: 28px 24px;">
+      <p style="margin: 0; color: #0f172a;">Hallo <%= basket.owner.name %>,</p>
+      <p style="margin: 6px 0 24px; color: #475569;">Ihre Buchung wurde bestätigt.</p>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; border-bottom: none; overflow: hidden;">
+        <table cellpadding="0" cellspacing="0" width="100%" style="border-collapse: collapse;">
+          <% reservations.forEach(function(reservation) { %>
+          <% if (!reservation.parentReservation) { %>
+          <tr>
+            <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; vertical-align: top;">
+              <div style="font-weight: 500; color: #0f172a;"><%= reservation.product.name %></div>
+              <% if (reservation.seat && reservation.seat.name) { %>
+              <div style="margin-top: 6px;"><span style="display: inline-block; padding: 4px 10px; background: #0f172a; color: #fff; font-size: 12px; font-weight: 500; border-radius: 6px;"><%= reservation.seat.name %></span></div>
+              <% } %>
+            </td>
+            <td style="padding: 16px 20px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 500; color: #475569;">€<%= reservation.coupon ? (reservation.coupon.discount < 1 ? (reservation.product.price - (reservation.product.price * reservation.coupon.discount)).toFixed(2) : (reservation.product.price - reservation.coupon.discount).toFixed(2)) : reservation.product.price.toFixed(2) %></td>
+          </tr>
+          <% } %>
+          <% }); %>
+        </table>
+        <div style="padding: 16px 20px; font-weight: 600; color: #0f172a;">Gesamt €<%= reservations.filter(function(res) { return !res.parentReservation; }).reduce(function(acc, res) { return acc + (res.coupon ? (res.coupon.discount < 1 ? (res.product.price - (res.product.price * res.coupon.discount)) : (res.product.price - res.coupon.discount)) : res.product.price); }, 0).toFixed(2) %></div>
+        <div style="padding: 0 20px 16px; font-size: 12px; color: #94a3b8;">Transaktions-ID: <%= transaction._id %></div>
+      </div>
+
+      <a href="<%= 'https://app.tixcore.de/?reference=' + base64 %>" style="display: block; text-align: center; padding: 14px 24px; background: #0f172a; color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; border-radius: 8px; margin-top: 24px;">Tickets anzeigen</a>
+
+      <ul style="font-size: 13px; color: #64748b; line-height: 1.7; margin: 28px 0 0; padding-left: 20px;">
+        <li style="margin-bottom: 6px;">Einlass mind. 1 Std. vor Veranstaltungsbeginn</li>
+        <li style="margin-bottom: 6px;">Gültigen Ausweis mitführen</li>
+        <li style="margin-bottom: 6px;">Veranstaltungsregeln beachten</li>
+        <li>Diese E-Mail dient als Ticketbestätigung</li>
+      </ul>
+    </div>
+
+    <div style="border-top: 1px solid #e2e8f0; padding: 20px 24px; font-size: 12px; color: #94a3b8; text-align: center; background: #f8fafc;">
+      <p style="margin: 0;">Fragen? <a href="mailto:<%= billing.email %>" style="color: #64748b;"><%= billing.email %></a></p>
+      <p style="margin: 8px 0 0;">© <%= new Date().getFullYear() %> <%= billing.corporate.name %></p>
+    </div>
+
+  </div>
+
+</body>
+</html>

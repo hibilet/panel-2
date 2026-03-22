@@ -344,6 +344,7 @@
 	"page.settings.lightTheme": "Helles Design",
 	"page.settings.saveChanges": "Änderungen speichern",
 	"page.settings.mailingSetup": "Mailing-Einstellungen",
+	"page.settings.mailTemplate": "E-Mail-Vorlage",
 	"page.settings.saleProviders": "Verkaufsanbieter",
 	"page.settings.createNewProvider": "Neuen Anbieter erstellen",
 	"page.settings.createNewAgreement": "Neuen Vertrag erstellen",
@@ -476,6 +477,11 @@
 	"form.mailing.serverPlaceholder": "Z.B.: smtp.gmail.com",
 	"form.mailing.port": "Port",
 	"form.mailing.portPlaceholder": "Z.B.: 587",
+	"form.mailing.templateRawHtml": "Rohes HTML",
+	"form.mailing.templateEjs": "EJS-Vorlage",
+	"form.mailing.templatePreview": "Vorschau",
+	"form.mailing.templateRenderError": "Vorschau-Fehler",
+	"form.mailing.templatePreviewError": "EJS-Syntax beheben für Vorschau",
 	"error.failedLoadMailing": "Mail-Einstellungen konnten nicht geladen werden",
 
 	"form.link.title": "Link-Titel",
@@ -565,6 +571,7 @@
 	"back.settings": "Zurück zu Einstellungen",
 	"back.providers": "Zurück zu Verkaufsanbietern",
 	"back.agreements": "Zurück zu Verkaufsverträgen",
+	"back.mailing": "Zurück zu Mailing",
 
 	"detail.id": "ID",
 	"detail.url": "URL",

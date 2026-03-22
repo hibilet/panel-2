@@ -344,6 +344,7 @@
 	"page.settings.lightTheme": "Licht thema",
 	"page.settings.saveChanges": "Wijzigingen opslaan",
 	"page.settings.mailingSetup": "Mailinstellingen",
+	"page.settings.mailTemplate": "E-mailtemplate",
 	"page.settings.saleProviders": "Verkoopaanbieders",
 	"page.settings.createNewProvider": "Nieuwe aanbieder aanmaken",
 	"page.settings.createNewAgreement": "Nieuwe overeenkomst aanmaken",
@@ -476,6 +477,11 @@
 	"form.mailing.serverPlaceholder": "Bijv: smtp.gmail.com",
 	"form.mailing.port": "Poort",
 	"form.mailing.portPlaceholder": "Bijv: 587",
+	"form.mailing.templateRawHtml": "Ruwe HTML",
+	"form.mailing.templateEjs": "EJS-sjabloon",
+	"form.mailing.templatePreview": "Voorbeeld",
+	"form.mailing.templateRenderError": "Voorbeeldfout",
+	"form.mailing.templatePreviewError": "Repareer EJS-syntax voor voorbeeld",
 	"error.failedLoadMailing": "Mailinstellingen laden mislukt",
 
 	"form.link.title": "Linktitel",
@@ -565,6 +571,7 @@
 	"back.settings": "Terug naar instellingen",
 	"back.providers": "Terug naar verkoopaanbieders",
 	"back.agreements": "Terug naar verkoopovereenkomsten",
+	"back.mailing": "Terug naar mailing",
 
 	"detail.id": "ID",
 	"detail.url": "URL",

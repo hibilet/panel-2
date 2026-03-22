@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Link } from "wouter";
 import { Input } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
@@ -10,11 +11,7 @@ const MailingForm = ({ onSaved }) => {
 	const [error, setError] = useState(null);
 	const [mailing, setMailing] = useState(null);
 
-	const {
-		register,
-		handleSubmit,
-		reset,
-	} = useForm({
+	const { register, handleSubmit, reset } = useForm({
 		defaultValues: {
 			sender: "",
 			email: "",
@@ -151,14 +148,16 @@ const MailingForm = ({ onSaved }) => {
 						</>
 					)}
 				</button>
-				<button
-					type="submit"
-					disabled={saving}
-					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
-				>
-					<i className="fa-solid fa-envelope" aria-hidden />
-					{strings("common.editTemplate")}
-				</button>
+				<Link href="/settings/mailing/template">
+					<button
+						type="button"
+						disabled={saving}
+						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+					>
+						<i className="fa-solid fa-envelope" aria-hidden />
+						{strings("common.editTemplate")}
+					</button>
+				</Link>
 			</div>
 		</form>
 	);

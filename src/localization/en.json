@@ -347,6 +347,7 @@
 	"page.settings.lightTheme": "Light theme",
 	"page.settings.saveChanges": "Save changes",
 	"page.settings.mailingSetup": "Mailing Setup",
+	"page.settings.mailTemplate": "Mail Template",
 	"page.settings.saleProviders": "Sale Providers",
 	"page.settings.createNewProvider": "Create New Provider",
 	"page.settings.createNewAgreement": "Create New Agreement",
@@ -479,6 +480,11 @@
 	"form.mailing.serverPlaceholder": "Eg: smtp.gmail.com",
 	"form.mailing.port": "Port",
 	"form.mailing.portPlaceholder": "Eg: 587",
+	"form.mailing.templateRawHtml": "Raw HTML",
+	"form.mailing.templateEjs": "EJS Template",
+	"form.mailing.templatePreview": "Preview",
+	"form.mailing.templateRenderError": "Preview error",
+	"form.mailing.templatePreviewError": "Fix EJS syntax to see preview",
 	"error.failedLoadMailing": "Failed to load mailing settings",
 
 	"form.link.title": "Link Title",
@@ -568,6 +574,7 @@
 	"back.settings": "Back to Settings",
 	"back.providers": "Back to Sale Providers",
 	"back.agreements": "Back to Sales Agreements",
+	"back.mailing": "Back to Mailing",
 
 	"detail.id": "ID",
 	"detail.url": "URL",
