@@ -86,9 +86,10 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				status: formData.status || undefined,
 			};
 			if (isMerchant) {
+				const commissionAmount = Number(formData.commissionAmount);
 				payload.commission = {
 					...(data?.commission ?? {}),
-					amount: Number(formData.commissionAmount) || 0.4,
+					amount: !Number.isNaN(commissionAmount) ? commissionAmount : 0.4,
 					vat: Number(formData.commissionVat) || 1.19,
 					type: formData.commissionType || "percentage",
 				};
