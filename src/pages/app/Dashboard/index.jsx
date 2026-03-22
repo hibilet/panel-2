@@ -105,8 +105,15 @@ const Dashboard = () => {
 		});
 		const mtdStart = currentMonthStart();
 		const yesterday = dayjs().subtract(1, "day").format("YYYY-MM-DD");
-		const lastMonthStart = dayjs().subtract(1, "month").startOf("month").format("YYYY-MM-DD");
-		const lastMonthEnd = dayjs().subtract(1, "month").endOf("month").format("YYYY-MM-DD");
+		const lastMonth = dayjs().subtract(1, "month");
+		const lastMonthStart = lastMonth.startOf("month").format("YYYY-MM-DD");
+		// Same-period comparison: compare MTD (e.g. Mar 1–22) to same days last month (e.g. Feb 1–22)
+		const lastMonthDaysInMonth = lastMonth.daysInMonth();
+		const currentDayOfMonth = dayjs().date();
+		const lastMonthSameDay = Math.min(currentDayOfMonth, lastMonthDaysInMonth);
+		const lastMonthEnd = lastMonth
+			.date(lastMonthSameDay)
+			.format("YYYY-MM-DD");
 
 		Promise.all([
 			get(

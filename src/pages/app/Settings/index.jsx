@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
 import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
 import { useApp } from "../../../context";
+import { put } from "../../../lib/client";
+import { uploadImage } from "../../../lib/imgbb";
 import { deleteToken, getLang, setLang } from "../../../lib/storage";
 import { getStoredTheme, setTheme } from "../../../lib/theme";
 import strings, { locales } from "../../../localization";
@@ -13,12 +15,14 @@ const LANG_OPTIONS = locales.map((code) => ({
 }));
 
 const Settings = () => {
-	const { account } = useApp();
+	const { account, refreshAccount } = useApp();
 	const [darkMode, setDarkMode] = useState(false);
 	const [lang, setLangState] = useState(getLang() || "en");
 	const [langDropdownOpen, setLangDropdownOpen] = useState(false);
 	const [loginQrOpen, setLoginQrOpen] = useState(false);
+	const [logoUploading, setLogoUploading] = useState(false);
 	const langDropdownRef = useRef(null);
+	const logoInputRef = useRef(null);
 
 	useEffect(() => {
 		const stored = getStoredTheme();
@@ -60,6 +64,34 @@ const Settings = () => {
 
 	const handleLogout = () => {
 		deleteToken();
+	};
+
+	const handleLogoUpload = async (e) => {
+		const file = e.target.files?.[0];
+		if (!file || !file.type.startsWith("image/")) return;
+		setLogoUploading(true);
+		try {
+			const url = await uploadImage(file);
+			await put("/accounts/me", { logo: url });
+			await refreshAccount?.();
+		} catch {
+			// Error is shown via withToast in put
+		} finally {
+			setLogoUploading(false);
+			if (logoInputRef.current) logoInputRef.current.value = "";
+		}
+	};
+
+	const handleLogoRemove = async () => {
+		setLogoUploading(true);
+		try {
+			await put("/accounts/me", { logo: "" });
+			await refreshAccount?.();
+		} catch {
+			// Error is shown via withToast in put
+		} finally {
+			setLogoUploading(false);
+		}
 	};
 
 	return (
@@ -109,6 +141,66 @@ const Settings = () => {
 							</dd>
 						</div>
 					</dl>
+
+					{/* Account logo upload — only for merchants */}
+					{account.type === "account.merchant" && (
+					<div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
+						<p className="mb-2 text-sm text-slate-500 dark:text-slate-400">
+							{strings("page.settings.clickImageToUploadLogo")}
+						</p>
+						<div className="flex flex-col gap-2">
+							<input
+								ref={logoInputRef}
+								type="file"
+								accept="image/*"
+								className="hidden"
+								onChange={handleLogoUpload}
+							/>
+							<button
+								type="button"
+								onClick={() => logoInputRef.current?.click()}
+								disabled={logoUploading}
+								className="relative block w-full overflow-hidden rounded-xl border border-slate-200 bg-[#111827] outline-none transition-opacity hover:opacity-90 focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:opacity-50 dark:border-slate-600"
+							>
+								<div className="aspect-[6/1] max-h-32 w-full p-4">
+									{account.logo ? (
+										<img
+											src={account.logo}
+											alt=""
+											className="h-full w-full object-contain"
+										/>
+									) : (
+										<div className="flex h-full w-full items-center justify-center">
+											<i
+												className="fa-solid fa-image text-4xl text-slate-400"
+												aria-hidden
+											/>
+										</div>
+									)}
+								</div>
+								{logoUploading && (
+									<div className="absolute inset-0 flex items-center justify-center bg-slate-900/40">
+										<i
+											className="fa-solid fa-spinner fa-spin text-2xl text-white"
+											aria-hidden
+										/>
+									</div>
+								)}
+							</button>
+							{account.logo && (
+								<button
+									type="button"
+									onClick={handleLogoRemove}
+									disabled={logoUploading}
+									className="inline-flex w-fit items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 disabled:opacity-50 dark:text-red-400 dark:hover:text-red-300"
+								>
+									<i className="fa-solid fa-trash-can" aria-hidden />
+									{strings("page.settings.removeLogo")}
+								</button>
+							)}
+						</div>
+					</div>
+					)}
 				</section>
 			)}
 

@@ -158,7 +158,7 @@ const Accounts = () => {
 				</div>
 			</div>
 
-			<nav aria-label="Account sections" className="mt-4">
+			{/* <nav aria-label="Account sections" className="mt-4">
 				<div className="flex flex-wrap gap-2" role="tablist">
 					{tabItems.map(({ path, labelKey, icon }) => (
 						<TabLink
@@ -170,7 +170,7 @@ const Accounts = () => {
 						/>
 					))}
 				</div>
-			</nav>
+			</nav> */}
 
 			<Modal
 				isOpen={filterDialogOpen}
