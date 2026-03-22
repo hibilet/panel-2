@@ -92,13 +92,13 @@ const Sales = () => {
 					>
 						{strings("page.sales.createNew")}
 					</Link>
-					<Link
+					{/* <Link
 						href="/sales/new?guided=true"
 						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
 					>
 						<i className="fa-solid fa-sparkles" aria-hidden />
 						{strings("page.sales.createWithAI")}
-					</Link>
+					</Link> */}
 				</div>
 			</div>
 

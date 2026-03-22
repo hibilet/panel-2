@@ -111,7 +111,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 					{strings("form.sale.eventDetails")}
 				</h2>
 				<div className="flex items-center gap-2">
-					<button
+					{/* <button
 						type="button"
 						className="inline-flex items-center gap-2 justify-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
 						onClick={() => {
@@ -121,7 +121,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 					>
 						<i className="fa-solid fa-wand-magic-sparkles" aria-hidden="true" />
 						Fill form
-					</button>
+					</button> */}
 					<button
 						type="button"
 						className="inline-flex items-center gap-2 justify-start rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
