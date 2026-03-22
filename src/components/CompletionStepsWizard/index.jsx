@@ -21,6 +21,12 @@ const STEPS = [
 		labelKey: "completionSteps.mailings",
 		icon: "fa-envelope",
 	},
+	{
+		key: "billings",
+		href: "/settings/billing",
+		labelKey: "completionSteps.billing",
+		icon: "fa-file-invoice",
+	},
 ];
 
 export const shouldShowCompletionWizard = (account) => {

@@ -225,6 +225,19 @@ const Settings = () => {
 					</Link>
 
 					<Link
+						href="/settings/billing"
+						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:border-slate-600"
+					>
+						<i
+							className="fa-solid fa-file-invoice text-xl text-slate-600 dark:text-slate-400"
+							aria-hidden
+						/>
+						<span className="font-medium text-slate-900 dark:text-white">
+							{strings("page.settings.billingSetup")}
+						</span>
+					</Link>
+
+					<Link
 						href="/settings/providers"
 						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:border-slate-600"
 					>

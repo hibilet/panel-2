@@ -14,6 +14,7 @@ import Sales from "./Sales";
 import Sale from "./Sales/Sale";
 import Settings from "./Settings";
 import SettingsAgreements from "./Settings/Agreements";
+import SettingsBilling from "./Settings/Billing";
 import SettingsMailing from "./Settings/Mailing";
 import SettingsMailTemplate from "./Settings/Mailing/MailTemplate";
 import SettingsProviders from "./Settings/Providers";
@@ -63,6 +64,7 @@ const App = () => {
 					<Route path="/settings/providers" component={SettingsProviders} />
 					<Route path="/settings/providers/:id" component={SettingsProviders} />
 					<Route path="/settings/mailing" component={SettingsMailing} />
+					<Route path="/settings/billing" component={SettingsBilling} />
 					<Route path="/settings/mailing/template" component={SettingsMailTemplate} />
 					<Route path="/settings/agreements" component={SettingsAgreements} />
 					<Route
