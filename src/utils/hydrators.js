@@ -60,24 +60,112 @@ const hydrateObjectProgramme = (data) => {
 	return { venues, sales, links };
 };
 
+const tryHydrateNested = (value) => {
+	if (!Array.isArray(value) || value.length === 0 || !Array.isArray(value[0])) {
+		return null;
+	}
+	try {
+		return hydrateNestedProgramme(value);
+	} catch {
+		return null;
+	}
+};
+
 /**
  * Normalizes AI or fixture payloads into { venues, sales, links }.
  * Links get `sales` filled later with created sale IDs when running the queue.
+ *
+ * Handles:
+ * - Nested array: [[[venues],[sales],[linkTitle,linkDesc]]] (fixtures / parsed)
+ * - Plain { venues, sales, links }
+ * - /ai/sales envelope: { data: { parsed: [...], message: "[...]" , data: { context } } }
  */
 const normalizeSaleProgramme = (raw) => {
 	if (raw == null) return { venues: [], sales: [], links: [] };
-	const data = raw?.data ?? raw;
+
+	const nestedFrom = tryHydrateNested(raw);
 	if (
-		data !== null &&
-		typeof data === "object" &&
-		!Array.isArray(data) &&
-		(data.venues || data.sales || data.links)
+		nestedFrom &&
+		(nestedFrom.venues.length ||
+			nestedFrom.sales.length ||
+			nestedFrom.links.length)
 	) {
-		return hydrateObjectProgramme(data);
+		return nestedFrom;
 	}
-	if (Array.isArray(data) && data[0] && Array.isArray(data[0])) {
-		return hydrateNestedProgramme(data);
+
+	const layer = raw?.data ?? raw;
+
+	if (layer?.parsed != null) {
+		const fromParsed = tryHydrateNested(layer.parsed);
+		if (
+			fromParsed &&
+			(fromParsed.venues.length ||
+				fromParsed.sales.length ||
+				fromParsed.links.length)
+		) {
+			return fromParsed;
+		}
 	}
+
+	if (typeof layer?.message === "string") {
+		const trimmed = layer.message.trim();
+		if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+			try {
+				const decoded = JSON.parse(trimmed);
+				const fromMsg = tryHydrateNested(decoded);
+				if (
+					fromMsg &&
+					(fromMsg.venues.length ||
+						fromMsg.sales.length ||
+						fromMsg.links.length)
+				) {
+					return fromMsg;
+				}
+			} catch {
+				// ignore
+			}
+		}
+	}
+
+	/* Some APIs nest context under data.data; programme is still on layer.parsed above */
+	const inner = layer?.data;
+	if (inner?.parsed != null) {
+		const fromInner = tryHydrateNested(inner.parsed);
+		if (
+			fromInner &&
+			(fromInner.venues.length ||
+				fromInner.sales.length ||
+				fromInner.links.length)
+		) {
+			return fromInner;
+		}
+	}
+
+	if (
+		layer !== null &&
+		typeof layer === "object" &&
+		!Array.isArray(layer) &&
+		(layer.venues || layer.sales || layer.links)
+	) {
+		/* Skip API "context" blobs: venues are only { id, name }, no programme sales */
+		const v = layer.venues;
+		const looksLikeContextOnly =
+			Array.isArray(v) &&
+			v.length > 0 &&
+			v.every(
+				(x) =>
+					x &&
+					typeof x === "object" &&
+					"id" in x &&
+					!("address" in x) &&
+					!("type" in x),
+			) &&
+			!layer.sales?.length;
+		if (!looksLikeContextOnly) {
+			return hydrateObjectProgramme(layer);
+		}
+	}
+
 	return { venues: [], sales: [], links: [] };
 };
 

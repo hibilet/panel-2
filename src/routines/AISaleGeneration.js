@@ -99,12 +99,17 @@ export async function runSaleProgrammeImport(rawData, options) {
 	const linkCount = links.length;
 	const vTotal = venues.length;
 	const saleCount = sales.length;
+	/** Multi-event “tour” links only; one event → open the sale directly */
+	const skipLinks = saleCount <= 1;
 
 	const cp = cloneImportCheckpoint(resume);
 
 	if (!resume) {
+		const linkPart = skipLinks
+			? "no link (single event)"
+			: `${linkCount} link(s)`;
 		onLog?.(
-			`Starting import: ${vTotal} venue(s), ${saleCount} event(s), ${linkCount} link(s).`,
+			`Starting import: ${vTotal} venue(s), ${saleCount} event(s), ${linkPart}.`,
 			"info",
 		);
 	} else {
@@ -172,7 +177,9 @@ export async function runSaleProgrammeImport(rawData, options) {
 				rules: "~",
 				venue: venueId,
 				agreement: sale.agreement,
-				provider: sale.provider,
+				...(sale.provider != null && sale.provider !== ""
+					? { provider: sale.provider }
+					: {}),
 				currency: "eur",
 				category: "tour",
 				type: "sale.event",
@@ -278,7 +285,9 @@ export async function runSaleProgrammeImport(rawData, options) {
 			rules: "~",
 			venue: venueId,
 			agreement: sale.agreement,
-			provider: sale.provider,
+			...(sale.provider != null && sale.provider !== ""
+				? { provider: sale.provider }
+				: {}),
 			currency: "eur",
 			category: "tour",
 			type: "sale.event",
@@ -353,49 +362,51 @@ export async function runSaleProgrammeImport(rawData, options) {
 		await sleep(requestGapMs);
 	}
 
-	const saleIdsForLinks =
-		createdSaleIds.length > 0
-			? createdSaleIds
-			: links.flatMap((l) => l.sales ?? []);
+	if (!skipLinks) {
+		const saleIdsForLinks =
+			createdSaleIds.length > 0
+				? createdSaleIds
+				: links.flatMap((l) => l.sales ?? []);
 
-	for (let li = cp.linksCompleted; li < links.length; li++) {
-		const link = links[li];
-		const linkSaleIds =
-			Array.isArray(link.sales) &&
-			link.sales.length > 0 &&
-			link.sales.every((x) => isLikelyObjectId(String(x)))
-				? link.sales
-				: saleIdsForLinks;
+		for (let li = cp.linksCompleted; li < links.length; li++) {
+			const link = links[li];
+			const linkSaleIds =
+				Array.isArray(link.sales) &&
+				link.sales.length > 0 &&
+				link.sales.every((x) => isLikelyObjectId(String(x)))
+					? link.sales
+					: saleIdsForLinks;
 
-		let msgId;
-		if (cp.pendingLinkMessageId != null && li === cp.linksCompleted) {
-			msgId = cp.pendingLinkMessageId;
-		} else {
-			msgId = linkStart?.(link.name) ?? null;
-			cp.pendingLinkMessageId = msgId;
+			let msgId;
+			if (cp.pendingLinkMessageId != null && li === cp.linksCompleted) {
+				msgId = cp.pendingLinkMessageId;
+			} else {
+				msgId = linkStart?.(link.name) ?? null;
+				cp.pendingLinkMessageId = msgId;
+				emitCheckpoint(onCheckpoint, cp);
+			}
+
+			const linkRes = await postSilent("/links", {
+				title: link.name,
+				image: `https://placeholdit.com/1000x1000/dddddd/999999?text=${encodeURIComponent(link.name)}`,
+				slug: `${slugify(link.name)}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+				description: link.url || undefined,
+				sales: linkSaleIds,
+			});
+			const linkRow = linkRes.data ?? linkRes;
+			const linkId = linkRow?.id ?? linkRow?._id;
+			if (!linkId) {
+				emitCheckpoint(onCheckpoint, cp);
+				throw new Error(`Link created but no id for "${link.name}"`);
+			}
+			cp.linksCompleted = li + 1;
+			cp.pendingLinkMessageId = null;
+			if (msgId) {
+				linkDone?.(msgId, { id: linkId, name: link.name });
+			}
 			emitCheckpoint(onCheckpoint, cp);
+			await sleep(requestGapMs);
 		}
-
-		const linkRes = await postSilent("/links", {
-			title: link.name,
-			image: `https://placeholdit.com/1000x1000/dddddd/999999?text=${encodeURIComponent(link.name)}`,
-			slug: `${slugify(link.name)}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-			description: link.url || undefined,
-			sales: linkSaleIds,
-		});
-		const linkRow = linkRes.data ?? linkRes;
-		const linkId = linkRow?.id ?? linkRow?._id;
-		if (!linkId) {
-			emitCheckpoint(onCheckpoint, cp);
-			throw new Error(`Link created but no id for "${link.name}"`);
-		}
-		cp.linksCompleted = li + 1;
-		cp.pendingLinkMessageId = null;
-		if (msgId) {
-			linkDone?.(msgId, { id: linkId, name: link.name });
-		}
-		emitCheckpoint(onCheckpoint, cp);
-		await sleep(requestGapMs);
 	}
 
 	onLog?.("Import finished successfully.", "info");

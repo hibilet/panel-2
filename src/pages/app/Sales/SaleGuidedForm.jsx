@@ -141,9 +141,7 @@ const ChatBubble = ({ message, busy, onRetryImport }) => {
 
 const SaleGuidedForm = ({ onClose }) => {
 	const { refreshSales } = useApp();
-	const [description, setDescription] = useState(
-		`Create event programme for 'Inna - City Name 2026' in march 15 Columbia Berlin, 17 Rotterdam, 19 Das Bett, 21 Mitsubishi Halle, and 22 Tivoli Vredenburg between 19.00 - 21.00. for every event we will have Early bird tickets at 59.90 eur, vip tickets at 149.90 eur and limited tickets at 74.90 eur. total event capacity is 1000, limited tickets stocks are 100. We will have campaigns in instagram.`,
-	);
+	const [description, setDescription] = useState();
 	const [generating, setGenerating] = useState(false);
 	const [importing, setImporting] = useState(false);
 	const [messages, setMessages] = useState([]);
@@ -373,8 +371,12 @@ const SaleGuidedForm = ({ onClose }) => {
 					"AI returned an empty programme. Try adjusting the brief.",
 				);
 			}
+			const linkSummary =
+				normalized.sales.length <= 1
+					? "no tour link (single event)"
+					: `${normalized.links.length} link(s)`;
 			pushTextMessage(
-				`Programme ready: ${normalized.venues.length} venue(s), ${normalized.sales.length} event(s), ${normalized.links.length} link(s). Starting import…`,
+				`Programme ready: ${normalized.venues.length} venue(s), ${normalized.sales.length} event(s), ${linkSummary}. Starting import…`,
 			);
 			await runImport(response, null);
 		} catch (err) {
