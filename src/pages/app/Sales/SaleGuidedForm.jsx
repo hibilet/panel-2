@@ -4,18 +4,28 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { Textarea } from "../../../components/inputs";
 import { CircularProgress, Modal } from "../../../components/shared";
 import { useApp } from "../../../context";
-import { post } from "../../../lib/client";
+import { postSilent } from "../../../lib/client";
 import strings from "../../../localization";
 import {
 	cloneImportCheckpoint,
 	runSaleProgrammeImport,
 } from "../../../routines/AISaleGeneration";
 import { normalizeSaleProgramme } from "../../../utils/hydrators";
+import {
+	isSpreadsheetFilename,
+	prepareSpreadsheetAttachment,
+} from "../../../utils/spreadsheetToCsv";
 import exampleResponse from "./Sale/sale.guided.response.json";
 
 dayjs.extend(utc);
 
 const nextId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+
+function formatFileSize(bytes) {
+	if (bytes < 1024) return `${bytes} B`;
+	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const ChatBubble = ({ message, busy, onRetryImport }) => {
 	const isUser = message.role === "user";
@@ -146,7 +156,11 @@ const SaleGuidedForm = ({ onClose }) => {
 	const [importing, setImporting] = useState(false);
 	const [messages, setMessages] = useState([]);
 	const [scrollVers, setScrollVers] = useState(0);
+	const [attachments, setAttachments] = useState([]);
+	const [dragActive, setDragActive] = useState(false);
+	const [fileIngestBusy, setFileIngestBusy] = useState(false);
 	const logEndRef = useRef(null);
+	const fileInputRef = useRef(null);
 	const importCheckpointRef = useRef(cloneImportCheckpoint(null));
 	const lastImportRawRef = useRef(null);
 
@@ -232,6 +246,91 @@ const SaleGuidedForm = ({ onClose }) => {
 		lastImportRawRef.current = null;
 		bumpScroll();
 	};
+
+	const removeAttachment = useCallback((id) => {
+		setAttachments((prev) => prev.filter((a) => a.id !== id));
+	}, []);
+
+	const ingestFileList = useCallback(
+		async (fileList) => {
+			const arr = Array.from(fileList ?? []).filter((f) =>
+				isSpreadsheetFilename(f.name),
+			);
+			if (!arr.length) {
+				pushTextMessage(
+					"No CSV or Excel files found. Use .csv, .tsv, .xlsx, or .xls.",
+					"error",
+				);
+				return;
+			}
+			setFileIngestBusy(true);
+			try {
+				for (const file of arr) {
+					try {
+						const { name, contents, size, mimeType, dataBase64 } =
+							await prepareSpreadsheetAttachment(file);
+						if (!contents.trim()) {
+							pushTextMessage(`"${name}" has no data — skipped.`, "error");
+							continue;
+						}
+						setAttachments((prev) => [
+							...prev,
+							{
+								id: nextId(),
+								name,
+								size,
+								mimeType,
+								dataBase64,
+								contents,
+							},
+						]);
+					} catch (err) {
+						const m = err?.message ?? "Could not read file";
+						pushTextMessage(`${file.name}: ${m}`, "error");
+					}
+				}
+			} finally {
+				setFileIngestBusy(false);
+			}
+		},
+		[pushTextMessage],
+	);
+
+	const onDragEnter = useCallback(
+		(e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			if (inputLocked) return;
+			if (e.dataTransfer?.types?.includes?.("Files")) setDragActive(true);
+		},
+		[inputLocked],
+	);
+
+	const onDragLeave = useCallback((e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const next = e.relatedTarget;
+		if (next instanceof Node && e.currentTarget.contains(next)) return;
+		setDragActive(false);
+	}, []);
+
+	const onDragOver = useCallback((e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+	}, []);
+
+	const onDrop = useCallback(
+		async (e) => {
+			e.preventDefault();
+			e.stopPropagation();
+			setDragActive(false);
+			if (inputLocked) return;
+			const list = e.dataTransfer?.files;
+			if (list?.length) await ingestFileList(list);
+		},
+		[inputLocked, ingestFileList],
+	);
 
 	const runImport = useCallback(
 		async (data, resume = null) => {
@@ -353,14 +452,43 @@ const SaleGuidedForm = ({ onClose }) => {
 
 	const handleGenerate = async () => {
 		const brief = description.trim();
+		/** Raw bytes as base64 + shapes many LLM gateways expect (see inlineData / fileData). */
+		const filesPayload = attachments.map((a) => {
+			const fileData = { mimeType: a.mimeType, data: a.dataBase64 };
+			return {
+				name: a.name,
+				mimeType: a.mimeType,
+				contents: a.contents,
+				fileData,
+				inlineData: fileData,
+			};
+		});
+		if (!brief && filesPayload.length === 0) {
+			pushTextMessage(
+				"Add a message or attach at least one CSV or Excel file.",
+				"error",
+			);
+			return;
+		}
 		setGenerating(true);
 		resetSession();
 		try {
 			if (brief) {
 				pushTextMessage(brief, "info", "user");
 			}
+			if (filesPayload.length) {
+				pushTextMessage(
+					`Attached file${filesPayload.length === 1 ? "" : "s"} (${filesPayload.length}): ${attachments.map((a) => a.name).join(", ")}`,
+					"info",
+					"user",
+				);
+			}
 			pushTextMessage("Generating programme from your brief…");
-			const response = await post("/ai/sales", { message: brief });
+			const body = {
+				message: brief,
+				...(filesPayload.length ? { files: filesPayload } : {}),
+			};
+			const response = await postSilent("/ai/sales", body);
 			const normalized = normalizeSaleProgramme(response);
 			if (
 				!normalized.venues.length &&
@@ -387,6 +515,8 @@ const SaleGuidedForm = ({ onClose }) => {
 			setGenerating(false);
 		}
 	};
+
+	const canGenerate = Boolean(description?.trim()) || attachments.length > 0;
 
 	const handleLoadSample = () => {
 		resetSession();
@@ -417,7 +547,7 @@ const SaleGuidedForm = ({ onClose }) => {
 					</button>
 					<button
 						type="button"
-						disabled={busy}
+						disabled={busy || !canGenerate}
 						onClick={handleGenerate}
 						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
 					>
@@ -438,11 +568,29 @@ const SaleGuidedForm = ({ onClose }) => {
 				</div>
 			}
 		>
-			<div className="flex min-h-0 flex-1 flex-col gap-3">
+			<section
+				aria-label="Spreadsheet drop zone"
+				className="relative flex min-h-0 flex-1 flex-col gap-3"
+				onDragEnter={onDragEnter}
+				onDragLeave={onDragLeave}
+				onDragOver={onDragOver}
+				onDrop={onDrop}
+			>
+				{dragActive && !inputLocked ? (
+					<div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-slate-900/[0.06] ring-2 ring-inset ring-slate-900/25">
+						<p className="rounded-lg bg-white/95 px-4 py-2 text-sm font-medium text-slate-800 shadow-md">
+							Drop CSV or Excel files here
+						</p>
+					</div>
+				) : null}
 				<div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-100/90 shadow-inner min-h-[min(68vh,52rem)]">
 					<div className="shrink-0 border-b border-slate-200/80 bg-white/95 px-4 py-2.5">
 						<p className="text-xs font-medium uppercase tracking-wide text-slate-500">
 							Assistant chat
+						</p>
+						<p className="mt-0.5 text-[11px] text-slate-400">
+							Drag and drop spreadsheets here or use Attach below — files are
+							converted to CSV for the model.
 						</p>
 					</div>
 
@@ -486,7 +634,75 @@ const SaleGuidedForm = ({ onClose }) => {
 						</div>
 					</div>
 
+					{attachments.length > 0 ? (
+						<div className="shrink-0 border-t border-slate-200 bg-white px-4 py-2.5">
+							<p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-slate-500">
+								Attached (sent with Generate)
+							</p>
+							<div className="flex flex-wrap gap-2">
+								{attachments.map((a) => (
+									<div
+										key={a.id}
+										className="relative max-w-[min(100%,280px)] rounded-lg border border-slate-200 bg-slate-50 py-2 pl-7 pr-3 pt-5 shadow-sm"
+									>
+										<button
+											type="button"
+											disabled={inputLocked}
+											onClick={() => removeAttachment(a.id)}
+											className="absolute left-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-md text-slate-500 hover:bg-slate-200 hover:text-slate-800 disabled:pointer-events-none disabled:opacity-40"
+											aria-label={`Remove ${a.name}`}
+										>
+											<i
+												className="fa-solid fa-xmark text-[10px]"
+												aria-hidden
+											/>
+										</button>
+										<p
+											className="truncate text-xs font-medium text-slate-900"
+											title={a.name}
+										>
+											{a.name}
+										</p>
+										<p className="text-[10px] tabular-nums text-slate-500">
+											{formatFileSize(a.size)} · CSV
+										</p>
+									</div>
+								))}
+							</div>
+						</div>
+					) : null}
+
 					<div className="shrink-0 border-t border-slate-200 bg-white p-4">
+						<input
+							ref={fileInputRef}
+							type="file"
+							multiple
+							accept=".csv,.tsv,.xlsx,.xls,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv"
+							className="sr-only"
+							onChange={(e) => {
+								const list = e.target.files;
+								if (list?.length) void ingestFileList(list);
+								e.target.value = "";
+							}}
+						/>
+						<div className="mb-2 flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								disabled={inputLocked || fileIngestBusy}
+								onClick={() => fileInputRef.current?.click()}
+								className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							>
+								{fileIngestBusy ? (
+									<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+								) : (
+									<i className="fa-solid fa-paperclip" aria-hidden />
+								)}
+								Attach CSV / Excel
+							</button>
+							{fileIngestBusy ? (
+								<span className="text-xs text-slate-500">Reading files…</span>
+							) : null}
+						</div>
 						<Textarea
 							label="Message"
 							value={description}
@@ -503,7 +719,7 @@ const SaleGuidedForm = ({ onClose }) => {
 						) : null}
 					</div>
 				</div>
-			</div>
+			</section>
 		</Modal>
 	);
 };
