@@ -43,6 +43,14 @@ const post = (endpoint, form = null, header = null) =>
 		}).then(handler),
 	);
 
+/** POST without success/error toasts (e.g. batch guided flows). */
+const postSilent = (endpoint, form = null, header = null) =>
+	fetch(api + endpoint, {
+		method: "post",
+		body: JSON.stringify(form),
+		headers: headerBuilder(header, form),
+	}).then(handler);
+
 const put = (endpoint, form = null, header = null) =>
 	withToast(
 		fetch(api + endpoint, {
@@ -61,4 +69,4 @@ const del = (endpoint, form = null, header = null) =>
 		}).then(handler),
 	);
 
-export { api as API_BASE_URL, del, get, post, put };
+export { api as API_BASE_URL, del, get, post, postSilent, put };
