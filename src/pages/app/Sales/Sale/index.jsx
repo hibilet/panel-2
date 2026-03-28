@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
+import { Link, Route, Switch, useLocation, useParams } from "wouter";
 
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
@@ -8,7 +8,6 @@ import SaleBasic from "./SaleBasic";
 import SaleChannels from "./SaleChannels";
 import SaleCoupons from "./SaleCoupons";
 import SaleGuests from "./SaleGuests";
-import SaleGuidedForm from "./SaleGuidedForm";
 import SaleQuestions from "./SaleQuestions";
 import SaleReaders from "./SaleReaders";
 import SaleTickets from "./SaleTickets";
@@ -17,7 +16,11 @@ const tabItems = [
 	{ path: "basic", labelKey: "page.sale.tab.basic", icon: "fa-file-lines" },
 	{ path: "tickets", labelKey: "page.sale.tab.tickets", icon: "fa-ticket" },
 	{ path: "channels", labelKey: "page.sale.tab.channels", icon: "fa-bullhorn" },
-	{ path: "questions", labelKey: "page.sale.tab.questions", icon: "fa-question-circle" },
+	{
+		path: "questions",
+		labelKey: "page.sale.tab.questions",
+		icon: "fa-question-circle",
+	},
 	{ path: "attendees", labelKey: "page.sale.tab.attendees", icon: "fa-users" },
 	{ path: "guests", labelKey: "page.sale.tab.guests", icon: "fa-user-group" },
 	{
@@ -71,17 +74,11 @@ const TabLink = ({ path, labelKey, icon, isActive, basePath, disabled }) => {
 
 const Sale = () => {
 	const { id } = useParams();
-	const [location, setLocation] = useLocation();
-	const search = useSearch();
+	const [location] = useLocation();
 	const [sale, setSale] = useState(undefined); // undefined=loading, null=new/error, object=loaded
 
 	const basePath = `/sales/${id}`;
 	const isNew = id === "new";
-	const isGuided = new URLSearchParams(search || "").get("guided") === "true";
-
-	const handleCloseGuided = () => {
-		setLocation("/sales/new", true);
-	};
 
 	const fetchSale = useCallback(() => {
 		if (isNew) {
@@ -110,7 +107,6 @@ const Sale = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl">
-			{isNew && isGuided && <SaleGuidedForm onClose={handleCloseGuided} />}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
 			</div>
@@ -159,9 +155,7 @@ const Sale = () => {
 					/>
 					<Route
 						path="/sales/:id/attendees"
-						component={(props) => (
-							<SaleAttendees {...props} sale={sale} />
-						)}
+						component={(props) => <SaleAttendees {...props} sale={sale} />}
 					/>
 					<Route path="/sales/:id/guests" component={SaleGuests} />
 					<Route path="/sales/:id/readers" component={SaleReaders} />

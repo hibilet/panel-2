@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
 import { del, get } from "../../../lib/client";
 import strings from "../../../localization";
+import SaleGuidedForm from "./SaleGuidedForm";
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({
@@ -14,7 +15,11 @@ const mapRows = (rows) =>
 
 const Sales = () => {
 	const [, setLocation] = useLocation();
+	const search = useSearch();
+	const guidedOpen = new URLSearchParams(search ?? "").get("guided") === "true";
 	const { sales, loading, error: appError, refreshSales } = useApp();
+
+	const closeGuided = () => setLocation("/sales");
 
 	const [pastSales, setPastSales] = useState([]);
 	const [pastLoading, setPastLoading] = useState(false);
@@ -64,6 +69,7 @@ const Sales = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-8">
+			{guidedOpen ? <SaleGuidedForm onClose={closeGuided} /> : null}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.sales.title")}
@@ -93,7 +99,7 @@ const Sales = () => {
 						{strings("page.sales.createNew")}
 					</Link>
 					<Link
-						href="/sales/new?guided=true"
+						href="/sales?guided=true"
 						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
 					>
 						<i className="fa-solid fa-sparkles" aria-hidden />

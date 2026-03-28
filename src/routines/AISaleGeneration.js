@@ -15,90 +15,262 @@ export const SALE_IMPORT_REQUEST_GAP_MS = 500;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/** Snapshot for resume after a failed POST. */
+export function cloneImportCheckpoint(source) {
+	if (!source) {
+		return {
+			createdVenueIds: [],
+			createdSaleIds: [],
+			completedFullSales: 0,
+			midSale: null,
+			linksCompleted: 0,
+			pendingVenueMessageId: null,
+			pendingEventMessageId: null,
+			pendingLinkMessageId: null,
+		};
+	}
+	return {
+		createdVenueIds: [...(source.createdVenueIds ?? [])],
+		createdSaleIds: [...(source.createdSaleIds ?? [])],
+		completedFullSales: source.completedFullSales ?? 0,
+		midSale: source.midSale
+			? {
+					saleIndex: source.midSale.saleIndex,
+					phase: source.midSale.phase,
+					eventMessageId: source.midSale.eventMessageId,
+					saleId: source.midSale.saleId ?? null,
+					ticketsPosted: source.midSale.ticketsPosted ?? 0,
+				}
+			: null,
+		linksCompleted: source.linksCompleted ?? 0,
+		pendingVenueMessageId: source.pendingVenueMessageId ?? null,
+		pendingEventMessageId: source.pendingEventMessageId ?? null,
+		pendingLinkMessageId: source.pendingLinkMessageId ?? null,
+	};
+}
+
+function emitCheckpoint(onCheckpoint, cp) {
+	onCheckpoint?.(cloneImportCheckpoint(cp));
+}
+
 /**
- * Creates venues, sales, ticket products, and links from a normalized or raw AI payload.
- *
- * @param {unknown} rawData - API response or fixture (nested array or { venues, sales, links }).
+ * @typedef {object} SaleImportUiHooks
+ * @property {(name: string) => string | undefined | void} [venueStart]
+ * @property {(msgId: string, payload: { id: string, name: string }) => void} [venueDone]
+ * @property {(name: string, max: number) => string | undefined | void} [eventStart]
+ * @property {(msgId: string, payload: { value: number, max: number, sublabel: string }) => void} [eventProgress]
+ * @property {(msgId: string, payload: { id: string, name: string, max: number }) => void} [eventDone]
+ * @property {(name: string) => string | undefined | void} [linkStart]
+ * @property {(msgId: string, payload: { id: string, name: string }) => void} [linkDone]
+ * @property {(text: string, kind?: 'info'|'error') => void} [onLog]
+ */
+
+/**
+ * @param {unknown} rawData
  * @param {object} options
  * @param {number} [options.requestGapMs]
  * @param {() => Promise<void>} [options.refreshSales]
- * @param {(phase: string) => void} options.onPhase - 'venues' | 'events' | 'links' | 'done' | 'error'
- * @param {(meta: { venuesTotal: number, salesTotal: number, linksTotal: number, grandTotal: number, ticketPosts: number, saleCount: number }) => void} options.onInitProgress
- * @param {() => void} options.onVenueStep - after each venue POST
- * @param {() => void} options.onSaleStep - after each sale POST
- * @param {() => void} options.onTicketStep - after each product POST
- * @param {() => void} options.onLinkStep - after each link POST
- * @param {(text: string, kind?: 'info'|'error') => void} options.onLog
+ * @param {SaleImportUiHooks} [options.ui]
+ * @param {ReturnType<typeof cloneImportCheckpoint>} [options.resume]
+ * @param {(cp: ReturnType<typeof cloneImportCheckpoint>) => void} [options.onCheckpoint]
  */
 export async function runSaleProgrammeImport(rawData, options) {
 	const {
 		requestGapMs = SALE_IMPORT_REQUEST_GAP_MS,
 		refreshSales,
-		onPhase,
-		onInitProgress,
-		onVenueStep,
-		onSaleStep,
-		onTicketStep,
-		onLinkStep,
-		onLog,
+		ui = {},
+		resume,
+		onCheckpoint,
 	} = options;
+	const {
+		venueStart,
+		venueDone,
+		eventStart,
+		eventProgress,
+		eventDone,
+		linkStart,
+		linkDone,
+		onLog,
+	} = ui;
 
 	const normalized = normalizeSaleProgramme(rawData);
 	const { venues, sales, links } = normalized;
 
-	const ticketPosts = sales.reduce(
-		(acc, s) => acc + (s.tickets?.length ?? 0),
-		0,
-	);
 	const linkCount = links.length;
 	const vTotal = venues.length;
 	const saleCount = sales.length;
-	const grandTotal = vTotal + saleCount + ticketPosts + linkCount;
 
-	onInitProgress({
-		venuesTotal: vTotal,
-		salesTotal: saleCount,
-		linksTotal: linkCount,
-		grandTotal,
-		ticketPosts,
-		saleCount,
-	});
+	const cp = cloneImportCheckpoint(resume);
 
-	const createdVenueIds = [];
-	const createdSaleIds = [];
+	if (!resume) {
+		onLog?.(
+			`Starting import: ${vTotal} venue(s), ${saleCount} event(s), ${linkCount} link(s).`,
+			"info",
+		);
+	} else {
+		onLog?.("Resuming import from last checkpoint…", "info");
+	}
 
-	onPhase("venues");
-	onLog(
-		`Starting import: ${vTotal} venue(s), ${saleCount} event(s), ${linkCount} link(s), ${ticketPosts} ticket type(s).`,
-		"info",
-	);
+	const createdVenueIds = cp.createdVenueIds;
+	const createdSaleIds = cp.createdSaleIds;
 
-	for (let i = 0; i < venues.length; i++) {
+	// —— Venues ——
+	for (let i = createdVenueIds.length; i < venues.length; i++) {
 		const v = venues[i];
-		onLog(`Creating venue "${v.name}"…`, "info");
-		const payload = {
+		let msgId;
+		if (cp.pendingVenueMessageId != null && i === createdVenueIds.length) {
+			msgId = cp.pendingVenueMessageId;
+		} else {
+			msgId = venueStart?.(v.name) ?? null;
+			cp.pendingVenueMessageId = msgId;
+			emitCheckpoint(onCheckpoint, cp);
+		}
+
+		const res = await postSilent("/venues", {
 			name: v.name,
 			address: v.address || undefined,
 			category: venueTypeToCategory(v.type),
 			status: "active",
-		};
-		const res = await postSilent("/venues", payload);
+		});
 		const created = res.data ?? res;
 		const vid = created?.id ?? created?._id;
 		if (!vid) {
+			emitCheckpoint(onCheckpoint, cp);
 			throw new Error(`Venue created but no id returned for "${v.name}"`);
 		}
 		createdVenueIds.push(vid);
-		onVenueStep();
-		onLog(`Venue ready: ${v.name} (${vid}).`, "info");
+		cp.pendingVenueMessageId = null;
+		if (msgId) {
+			venueDone?.(msgId, { id: vid, name: v.name });
+		}
+		emitCheckpoint(onCheckpoint, cp);
 		await sleep(requestGapMs);
 	}
 
-	onPhase("events");
-	for (const sale of sales) {
+	// —— Mid-sale resume (tickets only, or finish sale POST) ——
+	if (cp.midSale) {
+		const ms = cp.midSale;
+		const sale = sales[ms.saleIndex];
+		const tickets = sale.tickets ?? [];
+		const max = 1 + tickets.length;
+		const msgId = ms.eventMessageId ?? cp.pendingEventMessageId;
+
+		if (ms.phase === "sale") {
+			const venueId = resolveVenueId(sale.venue, createdVenueIds);
+			if (msgId) {
+				eventProgress?.(msgId, {
+					value: 0,
+					max,
+					sublabel: "Creating event…",
+				});
+			}
+			const saleRes = await postSilent("/sales", {
+				name: sale.name,
+				start: dayjs(sale.start).format("YYYY-MM-DD HH:mm"),
+				end: dayjs(sale.end).format("YYYY-MM-DD HH:mm"),
+				stopSaleAt: dayjs(sale.end).format("YYYY-MM-DD HH:mm"),
+				rules: "~",
+				venue: venueId,
+				agreement: sale.agreement,
+				provider: sale.provider,
+				currency: "eur",
+				category: "tour",
+				type: "sale.event",
+			});
+			const saleRow = saleRes.data ?? saleRes;
+			const saleId = saleRow?.id ?? saleRow?._id;
+			if (!saleId) {
+				emitCheckpoint(onCheckpoint, cp);
+				throw new Error(`Sale created but no id for "${sale.name}"`);
+			}
+			ms.phase = "tickets";
+			ms.saleId = saleId;
+			ms.ticketsPosted = 0;
+			cp.pendingEventMessageId = msgId;
+			emitCheckpoint(onCheckpoint, cp);
+			if (msgId) {
+				const tc = tickets.length;
+				eventProgress?.(msgId, {
+					value: 1,
+					max,
+					sublabel: tc > 0 ? `Adding tickets (1/${tc})…` : "Finishing…",
+				});
+			}
+			await sleep(requestGapMs);
+		}
+
+		if (ms.phase === "tickets" && ms.saleId) {
+			const saleId = ms.saleId;
+			for (let ti = ms.ticketsPosted; ti < tickets.length; ti++) {
+				const t = tickets[ti];
+				const [tName, price, stock] = t;
+				if (msgId) {
+					eventProgress?.(msgId, {
+						value: 1 + ti,
+						max,
+						sublabel: `Adding tickets (${ti + 1}/${tickets.length})…`,
+					});
+				}
+				await postSilent("/products", {
+					sale: saleId,
+					type: "product.event",
+					name: tName,
+					price: Number(price),
+					stock: Number(stock),
+					status: "active",
+				});
+				ms.ticketsPosted = ti + 1;
+				emitCheckpoint(onCheckpoint, cp);
+				if (msgId) {
+					const n = tickets.length;
+					const doneValue = 2 + ti;
+					eventProgress?.(msgId, {
+						value: doneValue,
+						max,
+						sublabel: ti + 1 < n ? `Adding tickets (${ti + 2}/${n})…` : "Done",
+					});
+				}
+				await sleep(requestGapMs);
+			}
+			if (msgId) {
+				eventProgress?.(msgId, { value: max, max, sublabel: "Done" });
+				eventDone?.(msgId, { id: saleId, name: sale.name, max });
+			}
+			createdSaleIds.push(saleId);
+			cp.completedFullSales = ms.saleIndex + 1;
+			cp.midSale = null;
+			cp.pendingEventMessageId = null;
+			emitCheckpoint(onCheckpoint, cp);
+			await sleep(requestGapMs);
+		}
+	}
+
+	// —— Sales (remaining) ——
+	for (let s = cp.completedFullSales; s < sales.length; s++) {
+		const sale = sales[s];
 		const venueId = resolveVenueId(sale.venue, createdVenueIds);
-		onLog(`Creating event "${sale.name}"…`, "info");
-		const salePayload = {
+		const tickets = sale.tickets ?? [];
+		const max = 1 + tickets.length;
+		const msgId = eventStart?.(sale.name, max) ?? null;
+		cp.pendingEventMessageId = msgId;
+		cp.midSale = {
+			saleIndex: s,
+			phase: "sale",
+			eventMessageId: msgId,
+			saleId: null,
+			ticketsPosted: 0,
+		};
+		emitCheckpoint(onCheckpoint, cp);
+
+		if (msgId) {
+			eventProgress?.(msgId, {
+				value: 0,
+				max,
+				sublabel: "Creating event…",
+			});
+		}
+
+		const saleRes = await postSilent("/sales", {
 			name: sale.name,
 			start: dayjs(sale.start).format("YYYY-MM-DD HH:mm"),
 			end: dayjs(sale.end).format("YYYY-MM-DD HH:mm"),
@@ -110,22 +282,43 @@ export async function runSaleProgrammeImport(rawData, options) {
 			currency: "eur",
 			category: "tour",
 			type: "sale.event",
-		};
-		const saleRes = await postSilent("/sales", salePayload);
+		});
 		const saleRow = saleRes.data ?? saleRes;
 		const saleId = saleRow?.id ?? saleRow?._id;
 		if (!saleId) {
+			emitCheckpoint(onCheckpoint, cp);
 			throw new Error(`Sale created but no id for "${sale.name}"`);
 		}
-		createdSaleIds.push(saleId);
-		onSaleStep();
-		onLog(`Event live: ${sale.name}.`, "info");
+
+		cp.midSale = {
+			saleIndex: s,
+			phase: "tickets",
+			eventMessageId: msgId,
+			saleId,
+			ticketsPosted: 0,
+		};
+		emitCheckpoint(onCheckpoint, cp);
+
+		if (msgId) {
+			const tc = tickets.length;
+			eventProgress?.(msgId, {
+				value: 1,
+				max,
+				sublabel: tc > 0 ? `Adding tickets (1/${tc})…` : "Finishing…",
+			});
+		}
 		await sleep(requestGapMs);
 
-		const tickets = sale.tickets ?? [];
-		for (const t of tickets) {
+		for (let ti = 0; ti < tickets.length; ti++) {
+			const t = tickets[ti];
 			const [tName, price, stock] = t;
-			onLog(`Adding ticket "${tName}" to ${sale.name}…`, "info");
+			if (msgId) {
+				eventProgress?.(msgId, {
+					value: 1 + ti,
+					max,
+					sublabel: `Adding tickets (${ti + 1}/${tickets.length})…`,
+				});
+			}
 			await postSilent("/products", {
 				sale: saleId,
 				type: "product.event",
@@ -134,20 +327,39 @@ export async function runSaleProgrammeImport(rawData, options) {
 				stock: Number(stock),
 				status: "active",
 			});
-			onTicketStep();
-			onLog(`Ticket "${tName}" added.`, "info");
+			if (msgId) {
+				const n = tickets.length;
+				const doneValue = 2 + ti;
+				eventProgress?.(msgId, {
+					value: doneValue,
+					max,
+					sublabel: ti + 1 < n ? `Adding tickets (${ti + 2}/${n})…` : "Done",
+				});
+			}
+			cp.midSale.ticketsPosted = ti + 1;
+			emitCheckpoint(onCheckpoint, cp);
 			await sleep(requestGapMs);
 		}
+
+		if (msgId) {
+			eventProgress?.(msgId, { value: max, max, sublabel: "Done" });
+			eventDone?.(msgId, { id: saleId, name: sale.name, max });
+		}
+		createdSaleIds.push(saleId);
+		cp.completedFullSales = s + 1;
+		cp.midSale = null;
+		cp.pendingEventMessageId = null;
+		emitCheckpoint(onCheckpoint, cp);
+		await sleep(requestGapMs);
 	}
 
-	onPhase("links");
 	const saleIdsForLinks =
 		createdSaleIds.length > 0
 			? createdSaleIds
 			: links.flatMap((l) => l.sales ?? []);
 
-	for (let i = 0; i < links.length; i++) {
-		const link = links[i];
+	for (let li = cp.linksCompleted; li < links.length; li++) {
+		const link = links[li];
 		const linkSaleIds =
 			Array.isArray(link.sales) &&
 			link.sales.length > 0 &&
@@ -155,23 +367,37 @@ export async function runSaleProgrammeImport(rawData, options) {
 				? link.sales
 				: saleIdsForLinks;
 
-		onLog(
-			`Creating link "${link.name}" with ${linkSaleIds.length} event(s)…`,
-			"info",
-		);
-		await postSilent("/links", {
+		let msgId;
+		if (cp.pendingLinkMessageId != null && li === cp.linksCompleted) {
+			msgId = cp.pendingLinkMessageId;
+		} else {
+			msgId = linkStart?.(link.name) ?? null;
+			cp.pendingLinkMessageId = msgId;
+			emitCheckpoint(onCheckpoint, cp);
+		}
+
+		const linkRes = await postSilent("/links", {
 			title: link.name,
-			image: `https://placeholdit.com/1000x1000/dddddd/999999?text=${link.name}`,
-			slug: slugify(link.name),
+			image: `https://placeholdit.com/1000x1000/dddddd/999999?text=${encodeURIComponent(link.name)}`,
+			slug: `${slugify(link.name)}-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
 			description: link.url || undefined,
 			sales: linkSaleIds,
 		});
-		onLinkStep();
-		onLog(`Link "${link.name}" saved.`, "info");
+		const linkRow = linkRes.data ?? linkRes;
+		const linkId = linkRow?.id ?? linkRow?._id;
+		if (!linkId) {
+			emitCheckpoint(onCheckpoint, cp);
+			throw new Error(`Link created but no id for "${link.name}"`);
+		}
+		cp.linksCompleted = li + 1;
+		cp.pendingLinkMessageId = null;
+		if (msgId) {
+			linkDone?.(msgId, { id: linkId, name: link.name });
+		}
+		emitCheckpoint(onCheckpoint, cp);
 		await sleep(requestGapMs);
 	}
 
-	onPhase("done");
-	onLog("Import finished successfully.", "info");
+	onLog?.("Import finished successfully.", "info");
 	await refreshSales?.();
 }

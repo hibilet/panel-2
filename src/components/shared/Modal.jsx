@@ -21,6 +21,12 @@ const Modal = ({
 	footer,
 	bodyRef,
 	maxWidth = "md",
+	/** Tailwind classes for panel min-height (default ~80vh) */
+	panelMinHeight = "min-h-[80vh]",
+	/** Tailwind classes for panel max-height (default ~90vh) */
+	panelMaxHeight = "max-h-[90vh]",
+	/** Replace default body region classes when you need e.g. flex column + internal scroll */
+	bodyClassName,
 	"aria-label": ariaLabel,
 	"aria-labelledby": ariaLabelledBy,
 }) => {
@@ -52,7 +58,7 @@ const Modal = ({
 				onClick={onClose}
 			/>
 			<div
-				className={`relative z-10 flex max-h-[90vh] w-full ${MAX_WIDTH_CLASS[maxWidth] ?? MAX_WIDTH_CLASS.md} flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl animate-slide-up`}
+				className={`relative z-10 flex w-full ${panelMinHeight} ${panelMaxHeight} ${MAX_WIDTH_CLASS[maxWidth] ?? MAX_WIDTH_CLASS.md} flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl animate-slide-up`}
 			>
 				{(title || headerActions) && (
 					<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
@@ -74,7 +80,10 @@ const Modal = ({
 						</div>
 					</header>
 				)}
-				<div ref={bodyRef} className="flex-1 overflow-y-auto p-6">
+				<div
+					ref={bodyRef}
+					className={bodyClassName ?? "flex-1 overflow-y-auto p-6"}
+				>
 					{children}
 				</div>
 				{footer && (
