@@ -5,6 +5,7 @@ import Navbar from "../../components/global/Navbar";
 import { useApp } from "../../context";
 import Accounts from "./Accounts";
 import Dashboard from "./Dashboard";
+import Invoices from "./Invoices";
 import Links from "./Links";
 import Live from "./Live";
 import Onboarding from "./Onboarding";
@@ -18,6 +19,8 @@ import SettingsBilling from "./Settings/Billing";
 import SettingsMailing from "./Settings/Mailing";
 import SettingsMailTemplate from "./Settings/Mailing/MailTemplate";
 import SettingsProviders from "./Settings/Providers";
+import SettingsSubscription from "./Settings/Subscription";
+import Tiers from "./Tiers";
 import Transactions from "./Transactions";
 import Venues from "./Venues";
 
@@ -58,8 +61,12 @@ const App = () => {
 							<Route path="/accounts">
 								<Redirect to="/accounts/merchants" />
 							</Route>
+							<Route path="/tiers/:id" component={Tiers} />
+							<Route path="/tiers" component={Tiers} />
 						</>
 					)}
+					<Route path="/invoices/:id" component={Invoices} />
+					<Route path="/invoices" component={Invoices} />
 					<Route path="/settings" component={Settings} />
 					<Route path="/settings/providers" component={SettingsProviders} />
 					<Route path="/settings/providers/:id" component={SettingsProviders} />
@@ -71,6 +78,7 @@ const App = () => {
 						path="/settings/agreements/:id"
 						component={SettingsAgreements}
 					/>
+					<Route path="/settings/subscription" component={SettingsSubscription} />
 					<Route path="*">
 						<NotFound />
 					</Route>

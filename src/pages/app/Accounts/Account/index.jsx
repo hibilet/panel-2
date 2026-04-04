@@ -1,9 +1,10 @@
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormSection, Input, Select } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
-import strings from "../../../../localization";
+import strings, { formatCurrency } from "../../../../localization";
 
 const STATUS_OPTIONS = [
 	{ value: "active", label: strings("common.active") },
@@ -37,11 +38,21 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [loginAsLoading, setLoginAsLoading] = useState(false);
 	const [setInactiveLoading, setSetInactiveLoading] = useState(false);
 	const [error, setError] = useState(null);
+	const [tiers, setTiers] = useState([]);
+	const [assigningTier, setAssigningTier] = useState(false);
 
 	const { register, handleSubmit, reset, control, watch, getValues } = useForm({
 		defaultValues,
 	});
 	const commissionType = watch("commissionType");
+
+	useEffect(() => {
+		if (isMerchant && !isNew) {
+			get("/tiers")
+				.then((res) => setTiers(res.data ?? []))
+				.catch(() => {});
+		}
+	}, [isMerchant, isNew]);
 
 	useEffect(() => {
 		if (isNew) {
@@ -133,6 +144,21 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		}
 	};
 
+	const handleAssignTier = async (tierUuid) => {
+		if (!tierUuid || !id) return;
+		setAssigningTier(true);
+		setError(null);
+		try {
+			await post(`/accounts/${id}/subscription`, { tierUuid });
+			const res = await get(`/accounts/${id}`);
+			setData(res.data ?? data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setAssigningTier(false);
+		}
+	};
+
 	const handleLoginAs = async () => {
 		if (!data?.type) {
 			setError(strings("form.account.errorLoginAs"));
@@ -215,6 +241,56 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							{...register("status")}
 							options={STATUS_OPTIONS}
 						/>
+						{isMerchant && !isNew && data?.subscription && (
+							<FormSection title={strings("page.subscription.title")}>
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm space-y-1.5">
+									{data.subscription.tier ? (
+										<>
+											<div className="flex justify-between">
+												<span className="text-slate-500">
+													{strings("page.subscription.currentTier")}
+												</span>
+												<span className="font-medium text-slate-900">
+													{tiers.find((t) => t.id === data.subscription.tier || t.uuid === data.subscription.tierUuid)?.name ?? data.subscription.tierUuid ?? "—"}
+												</span>
+											</div>
+											{data.subscription.startedAt && (
+												<div className="flex justify-between">
+													<span className="text-slate-500">
+														{strings("page.subscription.startedAt", [""])}
+													</span>
+													<span className="text-slate-700">
+														{dayjs(data.subscription.startedAt).format("D MMM YYYY")}
+													</span>
+												</div>
+											)}
+											{data.subscription.nextTierUuid && (
+												<p className="text-xs text-amber-600">
+													{strings("page.subscription.upgradeQueued")}
+												</p>
+											)}
+										</>
+									) : (
+										<p className="text-slate-500">
+											{strings("page.subscription.noTier")}
+										</p>
+									)}
+								</div>
+								{tiers.length > 0 && (
+									<Select
+										label={strings("page.tiers.details")}
+										value=""
+										onChange={(e) => handleAssignTier(e.target.value)}
+										disabled={assigningTier}
+										placeholder={strings("common.pleaseSelect")}
+										options={tiers.filter((t) => t.status === "active").map((t) => ({
+											value: t.uuid ?? t.id,
+											label: `${t.name} (${formatCurrency(t.baseFee ?? 0)}/mo)`,
+										}))}
+									/>
+								)}
+							</FormSection>
+						)}
 						{isMerchant && (
 							<FormSection title={strings("form.account.commission")}>
 								<Select

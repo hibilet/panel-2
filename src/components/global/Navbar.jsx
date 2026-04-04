@@ -66,6 +66,18 @@ const navItems = [
 		acl: [],
 	},
 	{
+		path: "/tiers",
+		labelKey: "nav.tiers",
+		icon: "fa-layer-group",
+		acl: ["admin"],
+	},
+	{
+		path: "/invoices",
+		labelKey: "nav.invoices",
+		icon: "fa-file-invoice-dollar",
+		acl: ["merchant", "admin"],
+	},
+	{
 		path: "/settings",
 		labelKey: "nav.settings",
 		icon: "fa-gear",
