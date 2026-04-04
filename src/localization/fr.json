@@ -198,6 +198,7 @@
 	"form.provider.apiSecretPlaceholder": "aL9XjwvNRGZxDzxR...",
 	"form.provider.webhookSecret": "Clé webhook Stripe",
 	"form.provider.webhookSecretPlaceholder": "aL9XjwvNRGZxDzxR...",
+	"form.provider.isDefault": "Par défaut",
 	"form.provider.countryTR": "Turquie",
 	"form.provider.countryDE": "Allemagne",
 	"form.provider.countryNL": "Pays-Bas",

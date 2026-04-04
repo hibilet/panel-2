@@ -1,21 +1,24 @@
-const IMGBB_API = "https://api.imgbb.com/1/upload";
-const API_KEY = import.meta.env.VITE_IMGBB_API_KEY;
+import { getToken } from "./storage";
+
+const api = import.meta.env.VITE_API_URL;
 
 export const uploadImage = async (file) => {
-	if (!API_KEY) {
-		throw new Error("VITE_IMGBB_API_KEY is not configured");
-	}
 	const form = new FormData();
-	form.append("key", API_KEY);
-	form.append("image", file);
+	form.append("file", file);
 
-	const res = await fetch(IMGBB_API, {
+	const res = await fetch(`${api}/media`, {
 		method: "POST",
+		headers: {
+			...(getToken() ? { authorization: getToken() } : null),
+		},
 		body: form,
 	});
-	const json = await res.json();
-	if (!json.success) {
-		throw new Error(json?.error?.message ?? "Image upload failed");
+
+	if (!res.ok) {
+		const err = await res.json().catch(() => ({}));
+		throw new Error(err?.message ?? "Image upload failed");
 	}
-	return json.data.url;
+
+	const json = await res.json();
+	return json.data.display_url;
 };

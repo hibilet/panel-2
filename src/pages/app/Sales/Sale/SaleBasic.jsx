@@ -14,6 +14,7 @@ import {
 } from "../../../../components/inputs";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
+import { uploadImage } from "../../../../lib/imgbb";
 import strings from "../../../../localization";
 import { saleBasicFaker } from "../../../../utils/fakers";
 import { compact, toId } from "../../../../utils/object";
@@ -29,6 +30,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 	} = useApp();
 	const [plans, setPlans] = useState(null);
 	const fileInputRef = useRef(null);
+	const [imageUploading, setImageUploading] = useState(false);
 
 	const {
 		register,
@@ -303,17 +305,28 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 							type="file"
 							accept="image/*"
 							className="hidden"
-							onChange={(e) => {
+							onChange={async (e) => {
 								const f = e.target.files?.[0];
-								if (f) setValue("ticketAdornment", f.name);
+								if (!f) return;
+								setImageUploading(true);
+								try {
+									const url = await uploadImage(f);
+									setValue("ticketAdornment", url);
+								} catch {
+									// Error shown via toast
+								} finally {
+									setImageUploading(false);
+									e.target.value = "";
+								}
 							}}
 						/>
 						<button
 							type="button"
 							onClick={() => fileInputRef.current?.click()}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							disabled={imageUploading}
+							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
 						>
-							{strings("sale.uploadImage")}
+							{imageUploading ? strings("common.saving") : strings("sale.uploadImage")}
 						</button>
 					</div>
 				</label>

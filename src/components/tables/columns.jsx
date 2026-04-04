@@ -283,7 +283,16 @@ export const providersColumns = [
 	{
 		key: "name",
 		header: strings("table.provider.name"),
-		render: (r) => r.name ?? "—",
+		render: (r) => (
+			<div className="flex items-center gap-2">
+				<span>{r.name ?? "—"}</span>
+				{r.isDefault && (
+					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+						{strings("form.provider.isDefault")}
+					</span>
+				)}
+			</div>
+		),
 	},
 	{
 		key: "type",

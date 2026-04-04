@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Input, Select } from "../../../../../components/inputs";
+import { Checkbox, Input, Select } from "../../../../../components/inputs";
 import { del, get, post, put } from "../../../../../lib/client";
 import strings from "../../../../../localization";
 
@@ -30,6 +30,7 @@ const defaultValues = {
 	apiKey: "",
 	apiSecret: "",
 	webhookSecret: "",
+	isDefault: false,
 };
 
 const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
@@ -67,6 +68,7 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						apiKey: d.apiKey ?? "",
 						apiSecret: d.apiSecret ?? "",
 						webhookSecret: d.webhookSecret ?? "",
+						isDefault: d.isDefault ?? false,
 					});
 				}
 			})
@@ -87,6 +89,7 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				apiKey: formData.apiKey?.trim() || undefined,
 				apiSecret: formData.apiSecret?.trim() || undefined,
 				webhookSecret: formData.webhookSecret?.trim() || undefined,
+				isDefault: formData.isDefault ?? false,
 			};
 			if (isNew) {
 				const res = await post("/providers", payload);
@@ -255,6 +258,14 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								</div>
 							</>
 						)}
+
+						<hr className="border-slate-200 dark:border-slate-700" />
+						<div className="grid grid-cols-1 gap-4">
+							<Checkbox
+								label={strings("form.provider.isDefault")}
+								{...register("isDefault")}
+							/>
+						</div>
 					</div>
 				</div>
 

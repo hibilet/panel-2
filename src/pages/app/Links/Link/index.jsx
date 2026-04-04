@@ -8,8 +8,9 @@ import {
 } from "../../../../components/inputs";
 import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
-import { getLinkUrl } from "../../../../lib/appUrl";
+import { getWidgetLinkUrl } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
+import { uploadImage } from "../../../../lib/imgbb";
 import strings from "../../../../localization";
 
 const CopyButton = ({ text, stopPropagation }) => {
@@ -62,6 +63,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 	const [saving, setSaving] = useState(false);
 	const [archiving, setArchiving] = useState(false);
 	const [deleting, setDeleting] = useState(false);
+	const [imageUploading, setImageUploading] = useState(false);
 	const [sales, setSales] = useState([]);
 	const fileInputRef = useRef(null);
 
@@ -199,11 +201,18 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 		}
 	};
 
-	const handleImageUpload = (e) => {
+	const handleImageUpload = async (e) => {
 		const f = e.target.files?.[0];
-		if (f) {
-			// TODO: upload to storage and get URL
-			setValue("image", f.name);
+		if (!f) return;
+		setImageUploading(true);
+		try {
+			const url = await uploadImage(f);
+			setValue("image", url);
+		} catch {
+			// Error shown via toast
+		} finally {
+			setImageUploading(false);
+			e.target.value = "";
 		}
 	};
 
@@ -299,14 +308,14 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 										</h4>
 										<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
 											<a
-												href={getLinkUrl(formValues.slug || data?.slug)}
+												href={getWidgetLinkUrl(formValues.slug || data?.slug)}
 												target="_blank"
 												rel="noreferrer"
 												className="min-w-0 flex-1 truncate text-sm text-slate-600 underline hover:text-slate-900"
 											>
-												{getLinkUrl(formValues.slug || data?.slug)}
+												{getWidgetLinkUrl(formValues.slug || data?.slug)}
 											</a>
-											<CopyButton text={getLinkUrl(formValues.slug || data?.slug)} />
+											<CopyButton text={getWidgetLinkUrl(formValues.slug || data?.slug)} />
 										</div>
 									</div>
 								)}
@@ -344,9 +353,10 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 										<button
 											type="button"
 											onClick={() => fileInputRef.current?.click()}
-											className="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+											disabled={imageUploading}
+											className="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
 										>
-											{strings("form.sale.uploadImage")}
+											{imageUploading ? strings("common.saving") : strings("form.sale.uploadImage")}
 										</button>
 										{formValues.image && (
 											<img

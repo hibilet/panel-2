@@ -27,3 +27,15 @@ export const getLinkUrl = (slug) => {
 	const base = getAppBase().replace(/\/$/, "");
 	return base ? `${base}/${slug}` : null;
 };
+
+export const getWidgetLinkUrl = (slug) => {
+	if (!slug) return null;
+	const base = import.meta.env.VITE_WIDGET_APP_URL?.replace(/\/$/, "");
+	return base ? `${base}/${slug}` : null;
+};
+
+export const getWidgetChannelLink = (channelId) => {
+	if (!channelId) return null;
+	const base = import.meta.env.VITE_WIDGET_APP_URL?.replace(/\/$/, "");
+	return base ? `${base}/${channelId}` : null;
+};

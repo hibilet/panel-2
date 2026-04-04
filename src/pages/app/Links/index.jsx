@@ -4,7 +4,7 @@ import SlidePanel from "../../../components/shared/SlidePanel";
 import { linksColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
-import { getLinkUrl } from "../../../lib/appUrl";
+import { getWidgetLinkUrl } from "../../../lib/appUrl";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import LinkPanel from "./Link";
@@ -121,7 +121,7 @@ const Links = () => {
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.links.title")}
 				</h1>
-				{account?.type === "merchant" && (
+				{account?.type === "account.merchant" && (
 					<Link
 						href="/links/new"
 						className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
@@ -133,7 +133,7 @@ const Links = () => {
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
 					data={data}
-					columns={linksColumns(getLinkUrl, CopyButton)}
+					columns={linksColumns(getWidgetLinkUrl, CopyButton)}
 					getRowKey={(r) => r._id ?? r.slug}
 					onRowClick={(row) => {
 						const id = row._id ?? row.slug;
@@ -162,7 +162,7 @@ const Links = () => {
 							<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 								<DataTable
 									data={archivedLinks}
-									columns={linksColumns(getLinkUrl, CopyButton)}
+									columns={linksColumns(getWidgetLinkUrl, CopyButton)}
 									getRowKey={(r) => r.id ?? r.slug}
 									onRowClick={(row) => {
 										const id = row.id ?? row.slug;

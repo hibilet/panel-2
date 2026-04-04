@@ -197,6 +197,7 @@
 	"form.provider.apiSecretPlaceholder": "aL9XjwvNRGZxDzxR...",
 	"form.provider.webhookSecret": "Stripe Webhook Secret",
 	"form.provider.webhookSecretPlaceholder": "aL9XjwvNRGZxDzxR...",
+	"form.provider.isDefault": "Varsayılan",
 	"form.provider.countryTR": "Türkiye",
 	"form.provider.countryDE": "Almanya",
 	"form.provider.countryNL": "Hollanda",

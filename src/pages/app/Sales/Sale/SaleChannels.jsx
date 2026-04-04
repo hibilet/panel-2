@@ -17,7 +17,7 @@ import { Input } from "../../../../components/inputs";
 import { EmptyState, Modal, SlidePanel } from "../../../../components/shared";
 import { channelColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
-import { getChannelLink } from "../../../../lib/appUrl";
+import { getWidgetChannelLink } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -222,7 +222,7 @@ const SaleChannels = () => {
 				) : (
 					<DataTable
 						data={channels}
-						columns={channelColumns(getChannelLink, isBaseChannel, CopyButton)}
+						columns={channelColumns(getWidgetChannelLink, isBaseChannel, CopyButton)}
 						getRowKey={(r) => r.id}
 						onRowClick={setPanelChannel}
 					/>
@@ -557,7 +557,7 @@ const ChannelPanel = ({
 		onSave(channel, payload);
 	};
 
-	const link = !isNew && channel ? getChannelLink(channel.id) : null;
+	const link = !isNew && channel ? getWidgetChannelLink(channel.id) : null;
 
 	return (
 		<div className="flex h-full flex-col">
