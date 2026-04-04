@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams, useLocation } from "wouter";
-import { Input } from "../../../components/inputs";
+import { AsyncSearchInput, Input } from "../../../components/inputs";
 import { Modal, SlidePanel } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
@@ -37,9 +37,10 @@ const Invoices = () => {
 	const [generateOpen, setGenerateOpen] = useState(false);
 	const [generating, setGenerating] = useState(false);
 	const [filterEmail, setFilterEmail] = useState("");
+	const [selectedMerchant, setSelectedMerchant] = useState(null);
 
 	const { register, handleSubmit: handleGenerateSubmit, reset: resetGenerate } = useForm({
-		defaultValues: { merchantId: "", start: "", end: "" },
+		defaultValues: { start: "", end: "" },
 	});
 
 	const loading = fetchedPage !== page;
@@ -73,16 +74,22 @@ const Invoices = () => {
 		}
 	}, [id, data]);
 
+	const searchMerchants = async (query) => {
+		const res = await get(`/accounts/search?type=account.merchant&name=${encodeURIComponent(query)}&limit=10`);
+		return res.data ?? [];
+	};
+
 	const onGenerate = async (formData) => {
 		setGenerating(true);
 		try {
 			await post("/invoices/generate", {
-				merchantId: formData.merchantId?.trim() || undefined,
+				merchantId: selectedMerchant?._id ?? selectedMerchant?.id ?? undefined,
 				start: formData.start || undefined,
 				end: formData.end || undefined,
 			});
 			setGenerateOpen(false);
 			resetGenerate();
+			setSelectedMerchant(null);
 			setPage((p) => {
 				if (p !== 1) return 1;
 				setFetchedPage(null);
@@ -113,6 +120,20 @@ const Invoices = () => {
 				r.period?.start
 					? `${formatDate(r.period.start)} — ${formatDate(r.period.end)}`
 					: formatDate(r.createdAt),
+		},
+		{
+			key: "tier",
+			header: strings("table.invoice.tier"),
+			render: (r) => r.tier?.name ?? "—",
+		},
+		{
+			key: "ticketFee",
+			header: strings("table.invoice.ticketFee"),
+			align: "right",
+			render: (r) => {
+				const bd = r.breakdown ?? {};
+				return (bd.ticketFeeAmount ?? 0) > 0 ? formatCurrency(bd.ticketFeeAmount) : "—";
+			},
 		},
 		{
 			key: "subtotal",
@@ -194,7 +215,7 @@ const Invoices = () => {
 			{/* Generate invoice modal (admin only) */}
 			<Modal
 				isOpen={generateOpen}
-				onClose={() => setGenerateOpen(false)}
+				onClose={() => { setGenerateOpen(false); setSelectedMerchant(null); }}
 				title={strings("page.invoices.generate")}
 				footer={
 					<div className="flex justify-end gap-2">
@@ -231,11 +252,28 @@ const Invoices = () => {
 					onSubmit={handleGenerateSubmit(onGenerate)}
 					className="space-y-4"
 				>
-					<Input
-						label={strings("page.invoices.merchantId")}
-						{...register("merchantId")}
-						placeholder={strings("page.invoices.generateAll")}
+					<AsyncSearchInput
+						label={strings("page.invoices.searchMerchant")}
+						placeholder={strings("page.invoices.merchantSearchPlaceholder")}
+						searchFn={searchMerchants}
+						onSelect={(merchant) => setSelectedMerchant(merchant)}
+						onChange={(val) => { if (!val) setSelectedMerchant(null); }}
+						getOptionLabel={(m) => m.name ?? m.email ?? "—"}
+						getOptionValue={(m) => m._id ?? m.id ?? ""}
+						renderOption={(m) => (
+							<div className="flex flex-col">
+								<span className="font-medium text-slate-900">{m.name ?? "—"}</span>
+								<span className="text-xs text-slate-500">{m.email}</span>
+							</div>
+						)}
+						minChars={2}
 					/>
+					{selectedMerchant && (
+						<div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-sm">
+							<span className="font-medium text-slate-900">{selectedMerchant.name}</span>
+							<span className="ml-2 text-slate-500">{selectedMerchant.email}</span>
+						</div>
+					)}
 					<div className="grid grid-cols-2 gap-4">
 						<Input
 							label={strings("page.invoices.startDate")}

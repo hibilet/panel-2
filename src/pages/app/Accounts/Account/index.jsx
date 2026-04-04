@@ -5,18 +5,11 @@ import { FormSection, Input, Select } from "../../../../components/inputs";
 import { get, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
+import { useApp } from "../../../../context";
 
 const STATUS_OPTIONS = [
 	{ value: "active", label: strings("common.active") },
 	{ value: "inactive", label: strings("common.inactive") },
-];
-
-const COMMISSION_TYPE_OPTIONS = [
-	{
-		value: "percentage",
-		label: strings("form.account.commissionTypePercentage"),
-	},
-	{ value: "fixed", label: strings("form.account.commissionTypeFixed") },
 ];
 
 const defaultValues = {
@@ -24,12 +17,12 @@ const defaultValues = {
 	email: "",
 	phone: "",
 	status: "active",
-	commissionAmount: 1.0, // stored as decimal (0.4 = 40%)
 	commissionVat: 1.19, // stored as multiplier (1.19 = 19%)
-	commissionType: "fixed",
 };
 
 const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
+	const { account: currentUser } = useApp();
+	const isAdmin = currentUser?.type === "account.admin";
 	const isMerchant = accountType === "account.merchant";
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
@@ -39,12 +32,13 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [setInactiveLoading, setSetInactiveLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [tiers, setTiers] = useState([]);
-	const [assigningTier, setAssigningTier] = useState(false);
+	const [selectedTierUuid, setSelectedTierUuid] = useState("");
+	const [changingTier, setChangingTier] = useState(false);
+	const [tierChangeMsg, setTierChangeMsg] = useState(null);
 
-	const { register, handleSubmit, reset, control, watch, getValues } = useForm({
+	const { register, handleSubmit, reset, control, getValues } = useForm({
 		defaultValues,
 	});
-	const commissionType = watch("commissionType");
 
 	useEffect(() => {
 		if (isMerchant && !isNew) {
@@ -74,9 +68,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						email: d.email ?? "",
 						phone: d.phone ?? "",
 						status: d.status ?? "active",
-						commissionAmount: commission.amount ?? 0.4,
 						commissionVat: commission.vat ?? 1.19,
-						commissionType: commission.type ?? "percentage",
 					});
 				}
 			})
@@ -97,12 +89,9 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				status: formData.status || undefined,
 			};
 			if (isMerchant) {
-				const commissionAmount = Number(formData.commissionAmount);
 				payload.commission = {
 					...(data?.commission ?? {}),
-					amount: !Number.isNaN(commissionAmount) ? commissionAmount : 0.4,
 					vat: Number(formData.commissionVat) || 1.19,
-					type: formData.commissionType || "percentage",
 				};
 			}
 			payload.type = accountType ?? data?.type ?? "account.merchant";
@@ -144,21 +133,6 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		}
 	};
 
-	const handleAssignTier = async (tierUuid) => {
-		if (!tierUuid || !id) return;
-		setAssigningTier(true);
-		setError(null);
-		try {
-			await post(`/accounts/${id}/subscription`, { tierUuid });
-			const res = await get(`/accounts/${id}`);
-			setData(res.data ?? data);
-		} catch (err) {
-			setError(err?.message ?? strings("error.failedSave"));
-		} finally {
-			setAssigningTier(false);
-		}
-	};
-
 	const handleLoginAs = async () => {
 		if (!data?.type) {
 			setError(strings("form.account.errorLoginAs"));
@@ -180,6 +154,27 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 			setError(err?.message ?? strings("form.account.errorLoginAs"));
 		} finally {
 			setLoginAsLoading(false);
+		}
+	};
+
+	const handleChangeTier = async () => {
+		if (!selectedTierUuid) return;
+		setChangingTier(true);
+		setTierChangeMsg(null);
+		setError(null);
+		try {
+			const res = await post("/tiers/admin/change-merchant-tier", { merchantId: id, uuid: selectedTierUuid });
+			const msg = res?.data?.message ?? res?.message;
+			if (msg === "tier-upgraded") setTierChangeMsg(strings("form.account.tierChangedUpgraded"));
+			else if (msg === "tier-downgrade-queued") setTierChangeMsg(strings("form.account.tierChangedDowngradeQueued"));
+			else setTierChangeMsg(strings("form.account.tierChangedSubscribed"));
+			setSelectedTierUuid("");
+			const refreshed = await get(`/accounts/${id}`);
+			if (refreshed.data) setData(refreshed.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setChangingTier(false);
 		}
 	};
 
@@ -241,107 +236,78 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							{...register("status")}
 							options={STATUS_OPTIONS}
 						/>
-						{isMerchant && !isNew && data?.subscription && (
-							<FormSection title={strings("page.subscription.title")}>
-								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm space-y-1.5">
-									{data.subscription.tier ? (
-										<>
-											<div className="flex justify-between">
-												<span className="text-slate-500">
-													{strings("page.subscription.currentTier")}
-												</span>
-												<span className="font-medium text-slate-900">
-													{tiers.find((t) => t.id === data.subscription.tier || t.uuid === data.subscription.tierUuid)?.name ?? data.subscription.tierUuid ?? "—"}
-												</span>
-											</div>
-											{data.subscription.startedAt && (
+						{isMerchant && !isNew && (data?.subscription || isAdmin) && (
+							<FormSection title={strings("page.subscription.title")} gridClassName="space-y-3">
+								{data?.subscription && (
+									<div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm space-y-1.5">
+										{data.subscription.tier ? (
+											<>
 												<div className="flex justify-between">
 													<span className="text-slate-500">
-														{strings("page.subscription.startedAt", [""])}
+														{strings("page.subscription.currentTier")}
 													</span>
-													<span className="text-slate-700">
-														{dayjs(data.subscription.startedAt).format("D MMM YYYY")}
+													<span className="font-medium text-slate-900">
+														{tiers.find((t) => t.id === data.subscription.tier || t.uuid === data.subscription.tierUuid)?.name ?? data.subscription.tierUuid ?? "—"}
 													</span>
 												</div>
-											)}
-											{data.subscription.nextTierUuid && (
-												<p className="text-xs text-amber-600">
-													{strings("page.subscription.upgradeQueued")}
-												</p>
-											)}
-										</>
-									) : (
-										<p className="text-slate-500">
-											{strings("page.subscription.noTier")}
-										</p>
-									)}
-								</div>
-								{tiers.length > 0 && (
-									<Select
-										label={strings("page.tiers.details")}
-										value=""
-										onChange={(e) => handleAssignTier(e.target.value)}
-										disabled={assigningTier}
-										placeholder={strings("common.pleaseSelect")}
-										options={tiers.filter((t) => t.status === "active").map((t) => ({
-											value: t.uuid ?? t.id,
-											label: `${t.name} (${formatCurrency(t.baseFee ?? 0)}/mo)`,
-										}))}
-									/>
+												{data.subscription.startedAt && (
+													<div className="flex justify-between">
+														<span className="text-slate-500">
+															{strings("page.subscription.startedAt", [""])}
+														</span>
+														<span className="text-slate-700">
+															{dayjs(data.subscription.startedAt).format("D MMM YYYY")}
+														</span>
+													</div>
+												)}
+												{data.subscription.nextTierUuid && (
+													<p className="text-xs text-amber-600">
+														{strings("page.subscription.upgradeQueued")}
+													</p>
+												)}
+											</>
+										) : (
+											<p className="text-slate-500">
+												{strings("page.subscription.noTier")}
+											</p>
+										)}
+									</div>
+								)}
+								{isAdmin && (
+									<div className="space-y-2 pt-1">
+										<Select
+											label={strings("form.account.changeTier")}
+											value={selectedTierUuid}
+											onChange={(e) => { setSelectedTierUuid(e.target.value); setTierChangeMsg(null); }}
+											options={tiers.map((t) => ({
+												value: t.uuid,
+												label: `${t.name} - ${formatCurrency(t.baseFee)}/mo${(t.perTicketFee ?? 0) > 0 ? ` + ${formatCurrency(t.perTicketFee)}/ticket` : ""}`,
+											}))}
+											placeholder={strings("form.account.selectTier")}
+										/>
+										{tierChangeMsg && (
+											<p className="text-sm text-emerald-600">{tierChangeMsg}</p>
+										)}
+										<div className="flex justify-end">
+											<button
+												type="button"
+												onClick={handleChangeTier}
+												disabled={!selectedTierUuid || changingTier}
+												className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+											>
+												{changingTier ? (
+													<><i className="fa-solid fa-spinner fa-spin" aria-hidden />{strings("form.account.changingTier")}</>
+												) : (
+													<><i className="fa-solid fa-arrows-rotate" aria-hidden />{strings("form.account.changeTier")}</>
+												)}
+											</button>
+										</div>
+									</div>
 								)}
 							</FormSection>
 						)}
 						{isMerchant && (
 							<FormSection title={strings("form.account.commission")}>
-								<Select
-									label={strings("form.account.commissionType")}
-									{...register("commissionType")}
-									options={COMMISSION_TYPE_OPTIONS}
-								/>
-								{commissionType === "percentage" ? (
-									<Controller
-										control={control}
-										name="commissionAmount"
-										render={({ field }) => (
-											<Input
-												label={strings("form.account.commissionAmount")}
-												type="number"
-												step="0.01"
-												min="0"
-												max="100"
-												placeholder="40"
-												endAdornment="%"
-												value={
-													field.value != null &&
-													field.value !== "" &&
-													!Number.isNaN(Number(field.value))
-														? String(
-																Math.round(Number(field.value) * 10000) / 100,
-															)
-														: ""
-												}
-												onChange={(e) => {
-													const v = e.target.value;
-													const num = v === "" ? 0 : Number(v) / 100;
-													field.onChange(num);
-												}}
-												onBlur={field.onBlur}
-												name={field.name}
-												ref={field.ref}
-											/>
-										)}
-									/>
-								) : (
-									<Input
-										label={strings("form.account.commissionAmount")}
-										type="number"
-										step="0.01"
-										min="0"
-										{...register("commissionAmount", { valueAsNumber: true })}
-										placeholder="10.50"
-										endAdornment="€"
-									/>
-								)}
 								<Controller
 									control={control}
 									name="commissionVat"
