@@ -13,7 +13,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 	const [saving, setSaving] = useState(false);
 	const [error, setError] = useState(null);
 
-	const { register, handleSubmit, reset } = useForm({ defaultValues });
+	const { register, handleSubmit, reset, formState: { errors } } = useForm({ defaultValues });
 
 	useEffect(() => {
 		if (isNew) {
@@ -77,7 +77,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 					<button
 						type="button"
 						onClick={onClose}
-						className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+						className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 						aria-label={strings("common.ariaClose")}
 					>
 						<i className="fa-solid fa-xmark text-lg" aria-hidden />
@@ -104,7 +104,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 				<button
 					type="button"
 					onClick={onClose}
-					className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+					className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 					aria-label={strings("common.ariaClose")}
 				>
 					<i className="fa-solid fa-xmark text-lg" aria-hidden />
@@ -118,23 +118,25 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 				<div className="flex-1 overflow-y-auto px-6 py-5">
 					<div className="space-y-6">
 						{error && (
-							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{error}
 							</div>
 						)}
 
 						<div className="grid grid-cols-1 gap-4">
 							<Input
-								label={strings("form.agreement.name")}
-								{...register("name")}
+								label={`${strings("form.agreement.name")} *`}
+								{...register("name", { required: strings("error.required") })}
+								error={errors.name?.message}
 								placeholder={strings("form.agreement.namePlaceholder")}
 							/>
 						</div>
 
 						<div className="grid grid-cols-1 gap-4">
 							<Textarea
-								label={strings("form.agreement.content")}
-								{...register("content")}
+								label={`${strings("form.agreement.content")} *`}
+								{...register("content", { required: strings("error.required") })}
+								error={errors.content?.message}
 								placeholder={strings("form.agreement.contentPlaceholder")}
 								rows={16}
 								className="min-h-[300px] font-mono text-sm"
@@ -147,7 +149,7 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 					<button
 						type="submit"
 						disabled={saving}
-						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{saving ? (
 							<>

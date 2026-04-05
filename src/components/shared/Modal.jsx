@@ -66,7 +66,7 @@ const Modal = ({
 							<button
 								type="button"
 								onClick={onClose}
-								className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+								className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 								aria-label={strings("common.ariaClose")}
 							>
 								<i className="fa-solid fa-xmark text-lg" aria-hidden />

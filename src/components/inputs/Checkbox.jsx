@@ -15,7 +15,7 @@ const Checkbox = forwardRef(
 						name={name}
 						type="checkbox"
 						disabled={disabled}
-						className="mr-2 h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-500 disabled:cursor-not-allowed"
+						className="mr-2 h-5 w-5 rounded border-slate-300 text-slate-900 focus:ring-slate-500 disabled:cursor-not-allowed"
 						aria-invalid={!!error}
 						aria-describedby={error ? `${inputId}-error` : undefined}
 						{...rest}

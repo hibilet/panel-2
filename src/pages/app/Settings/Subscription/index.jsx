@@ -197,7 +197,7 @@ const Subscription = () => {
 				</h1>
 
 				{error && (
-					<div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+					<div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 						{error}
 					</div>
 				)}
@@ -282,7 +282,7 @@ const Subscription = () => {
 										<button
 											type="button"
 											onClick={() => setCancelOpen(true)}
-											className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+											className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{strings("page.subscription.cancel")}
 										</button>
@@ -475,7 +475,7 @@ const Subscription = () => {
 						<button
 							type="button"
 							onClick={() => setConfirmTier(null)}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -483,10 +483,10 @@ const Subscription = () => {
 							type="button"
 							onClick={handleConfirmSubscribe}
 							disabled={!!subscribing}
-							className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-white disabled:opacity-50 ${
+							className={`inline-flex items-center justify-center gap-2 rounded-lg border border-transparent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
 								confirmAction === "downgrade"
-									? "bg-amber-600 hover:bg-amber-700"
-									: "bg-slate-900 hover:bg-slate-800"
+									? "bg-amber-600 hover:bg-amber-700 focus:ring-amber-400 active:bg-amber-700"
+									: "bg-slate-900 hover:bg-slate-800 focus:ring-slate-400 active:bg-slate-800"
 							}`}
 						>
 							{subscribing ? (
@@ -541,7 +541,7 @@ const Subscription = () => {
 						<button
 							type="button"
 							onClick={() => setCancelOpen(false)}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -549,7 +549,7 @@ const Subscription = () => {
 							type="button"
 							onClick={handleCancel}
 							disabled={cancelling}
-							className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{cancelling ? (
 								<>
@@ -578,7 +578,7 @@ const Subscription = () => {
 						<button
 							type="button"
 							onClick={() => setCancelPendingOpen(false)}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -586,7 +586,7 @@ const Subscription = () => {
 							type="button"
 							onClick={handleCancelPending}
 							disabled={cancellingPending}
-							className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{cancellingPending ? (
 								<>

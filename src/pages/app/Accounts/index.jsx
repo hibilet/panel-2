@@ -105,7 +105,7 @@ const Accounts = () => {
 	if (error && data.length === 0) {
 		return (
 			<div className="mx-auto max-w-5xl">
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			</div>
@@ -141,7 +141,7 @@ const Accounts = () => {
 						<button
 							type="button"
 							onClick={() => setLocation(`/accounts/merchants/new`)}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<i className="fa-solid fa-plus" aria-hidden />
 							{strings("page.accounts.createAccount")}
@@ -150,7 +150,7 @@ const Accounts = () => {
 					<button
 						type="button"
 						onClick={() => setFilterDialogOpen(true)}
-						className="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						<i className="fa fa-search mr-2" aria-hidden />{" "}
 						{strings("page.accounts.filter")}
@@ -181,7 +181,7 @@ const Accounts = () => {
 						<button
 							type="button"
 							onClick={closeFilterDialog}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<i className="fa fa-close mr-2" aria-hidden />{" "}
 							{strings("common.cancel")}
@@ -189,7 +189,7 @@ const Accounts = () => {
 						<button
 							type="submit"
 							form="filter-accounts-form"
-							className="rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							<i className="fa fa-search mr-2" aria-hidden />{" "}
 							{strings("page.accounts.filter")}
@@ -224,7 +224,6 @@ const Accounts = () => {
 					bare
 					loading={loading}
 					onRowClick={(row) =>
-						row.type !== "account.customer" &&
 						row.id && setLocation(`/accounts/${activeTab}/${row.id}`)
 					}
 					emptyMessage={emptyMessage}

@@ -84,7 +84,7 @@ const Tiers = () => {
 	if (error && !loading) {
 		return (
 			<div className="mx-auto max-w-5xl space-y-6">
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			</div>

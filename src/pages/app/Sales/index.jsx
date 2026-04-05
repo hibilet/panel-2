@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
+import { Modal } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
@@ -23,6 +24,7 @@ const Sales = () => {
 	const [pastError, setPastError] = useState(null);
 	const [showMore, setShowMore] = useState(false);
 	const [revenueMode, setRevenueMode] = useState(false);
+	const [deleteTarget, setDeleteTarget] = useState(null);
 
 	useEffect(() => {
 		if (revenueMode) refreshSales({ revenue: true });
@@ -46,16 +48,21 @@ const Sales = () => {
 	const handleCalculateRevenues = () => setRevenueMode(true);
 
 	const handleDelete = (id) => {
-		if (!window.confirm(strings("confirm.deleteSale"))) return;
-		del(`/sales/${id}`)
+		setDeleteTarget(id);
+	};
+
+	const confirmDelete = () => {
+		if (!deleteTarget) return;
+		del(`/sales/${deleteTarget}`)
 			.then(() => refreshSales({ revenue: revenueMode }))
 			.catch(() => {});
+		setDeleteTarget(null);
 	};
 
 	if (appError && sales.length === 0) {
 		return (
 			<div className="mx-auto max-w-5xl">
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{appError}
 				</div>
 			</div>
@@ -72,7 +79,7 @@ const Sales = () => {
 					<button
 						type="button"
 						onClick={() => setShowMore((v) => !v)}
-						className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{showMore
 							? strings("page.sales.showLess")
@@ -82,14 +89,14 @@ const Sales = () => {
 						type="button"
 						onClick={handleCalculateRevenues}
 						disabled={loading}
-						className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("page.sales.calculateRevenues")}
 					</button>
 					{account?.type === "account.merchant" && (
 						<Link
 							href="/sales/new"
-							className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("page.sales.createNew")}
 						</Link>
@@ -116,7 +123,7 @@ const Sales = () => {
 				<button
 					type="button"
 					onClick={handleViewPastEvents}
-					className="self-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+					className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{showPastEvents
 						? strings("page.sales.hidePastEvents")
@@ -125,7 +132,7 @@ const Sales = () => {
 				{showPastEvents && (
 					<>
 						{pastError ? (
-							<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{pastError}
 							</div>
 						) : (
@@ -140,6 +147,34 @@ const Sales = () => {
 					</>
 				)}
 			</div>
+
+			<Modal
+				isOpen={!!deleteTarget}
+				onClose={() => setDeleteTarget(null)}
+				title={strings("confirm.deleteSale")}
+				footer={
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={() => setDeleteTarget(null)}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
+						>
+							{strings("common.cancel")}
+						</button>
+						<button
+							type="button"
+							onClick={confirmDelete}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700"
+						>
+							{strings("common.delete")}
+						</button>
+					</div>
+				}
+			>
+				<p className="text-sm text-slate-600">
+					{strings("confirm.deleteSaleBody")}
+				</p>
+			</Modal>
 		</div>
 	);
 };

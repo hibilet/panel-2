@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormSection, Input, Select } from "../../../../components/inputs";
+import { Modal } from "../../../../components/shared";
 import { get, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
@@ -30,6 +31,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [saving, setSaving] = useState(false);
 	const [loginAsLoading, setLoginAsLoading] = useState(false);
 	const [setInactiveLoading, setSetInactiveLoading] = useState(false);
+	const [inactiveConfirmOpen, setInactiveConfirmOpen] = useState(false);
 	const [error, setError] = useState(null);
 	const [tiers, setTiers] = useState([]);
 	const [selectedTierUuid, setSelectedTierUuid] = useState("");
@@ -116,7 +118,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 
 	const handleSetInactive = async () => {
 		if (isNew || !id) return;
-		if (!window.confirm(strings("form.account.confirmSetInactive"))) return;
+		setInactiveConfirmOpen(false);
 		setSetInactiveLoading(true);
 		setError(null);
 		try {
@@ -187,7 +189,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				<button
 					type="button"
 					onClick={onClose}
-					className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+					className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 					aria-label={strings("common.ariaClose")}
 				>
 					<i className="fa-solid fa-xmark text-xl" aria-hidden />
@@ -201,7 +203,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						<div className="h-64 animate-pulse rounded-lg bg-slate-100" />
 					</div>
 				) : !isNew && error && !data ? (
-					<div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+					<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 						{error}
 					</div>
 				) : (
@@ -211,7 +213,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						className="space-y-4"
 					>
 						{error && (
-							<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{error}
 							</div>
 						)}
@@ -293,7 +295,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 												type="button"
 												onClick={handleChangeTier}
 												disabled={!selectedTierUuid || changingTier}
-												className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+												className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 											>
 												{changingTier ? (
 													<><i className="fa-solid fa-spinner fa-spin" aria-hidden />{strings("form.account.changingTier")}</>
@@ -354,9 +356,9 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							{data?.status === "active" && (
 								<button
 									type="button"
-									onClick={handleSetInactive}
+									onClick={() => setInactiveConfirmOpen(true)}
 									disabled={setInactiveLoading}
-									className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2 text-sm font-medium text-red-800 hover:bg-red-50 disabled:opacity-50"
+									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{setInactiveLoading ? (
 										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
@@ -370,7 +372,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 								type="button"
 								onClick={handleLoginAs}
 								disabled={loginAsLoading}
-								className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+								className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{loginAsLoading ? (
 									<i className="fa-solid fa-spinner fa-spin" aria-hidden />
@@ -385,7 +387,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						type="submit"
 						form="account-form"
 						disabled={saving}
-						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{saving ? (
 							<i className="fa-solid fa-spinner fa-spin" aria-hidden />
@@ -396,6 +398,33 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 					</button>
 				</footer>
 			)}
+		<Modal
+			isOpen={inactiveConfirmOpen}
+			onClose={() => setInactiveConfirmOpen(false)}
+			title={strings("form.account.confirmSetInactive")}
+			footer={
+				<div className="flex justify-end gap-2">
+					<button
+						type="button"
+						onClick={() => setInactiveConfirmOpen(false)}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
+					>
+						{strings("common.cancel")}
+					</button>
+					<button
+						type="button"
+						onClick={handleSetInactive}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700"
+					>
+						{strings("form.account.setInactive")}
+					</button>
+				</div>
+			}
+		>
+			<p className="text-sm text-slate-600">
+				{strings("form.account.confirmSetInactiveBody", [data?.name ?? ""])}
+			</p>
+		</Modal>
 		</div>
 	);
 };

@@ -168,21 +168,13 @@ const Reports = () => {
 		{
 			key: "name",
 			header: strings("page.reports.col.name"),
-			render: (row) => (
-				<button
-					type="button"
-					onClick={() => setLocation(`/reports/${row.id}`)}
-					className="text-left font-medium text-slate-900 hover:underline"
-				>
-					{row.name}
-				</button>
-			),
+			headerCell: true,
 		},
 		{
 			key: "type",
 			header: strings("page.reports.col.type"),
 			render: (row) => (
-				<span className={`rounded-full px-2 py-0.5 text-xs font-medium capitalize ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}>
+				<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}>
 					{row.type}
 				</span>
 			),
@@ -200,7 +192,7 @@ const Reports = () => {
 			key: "status",
 			header: strings("common.status"),
 			render: (row) => (
-				<span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_BADGE[row.status] ?? "bg-slate-100 text-slate-600"}`}>
+				<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[row.status] ?? "bg-slate-100 text-slate-600"}`}>
 					{strings(row.status === "inactive" ? "common.inactive" : "common.active")}
 				</span>
 			),
@@ -229,13 +221,6 @@ const Reports = () => {
 			align: "right",
 			render: (row) => (
 				<div className="flex items-center justify-end gap-3">
-					<button
-						type="button"
-						onClick={() => setLocation(`/reports/${row.id}`)}
-						className="text-xs text-slate-500 hover:text-slate-900"
-					>
-						{strings("common.edit")}
-					</button>
 					<button
 						type="button"
 						onClick={(e) => {
@@ -275,7 +260,7 @@ const Reports = () => {
 				<button
 					type="button"
 					onClick={openCreate}
-					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800"
+					className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					<i className="fa-solid fa-plus" aria-hidden />
 					{strings("page.reports.createReport")}
@@ -283,7 +268,7 @@ const Reports = () => {
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			)}
@@ -294,6 +279,7 @@ const Reports = () => {
 					columns={columns}
 					getRowKey={(r) => r.id ?? r._id}
 					loading={loading}
+					onRowClick={(row) => row.id && setLocation(`/reports/${row.id}`)}
 					emptyMessage={strings("page.reports.noReports")}
 				/>
 			</div>
@@ -317,7 +303,7 @@ const Reports = () => {
 								type="button"
 								onClick={() => setCreateOpen(false)}
 								disabled={generating}
-								className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{strings("common.cancel")}
 							</button>
@@ -325,7 +311,7 @@ const Reports = () => {
 								type="button"
 								onClick={handleGenerate}
 								disabled={!formName.trim() || !formSaleId || generating}
-								className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{generating && <i className="fa-solid fa-spinner fa-spin" aria-hidden />}
 								{generating ? strings("page.reports.churn.generating") : strings("page.reports.createReport")}
@@ -405,7 +391,7 @@ const Reports = () => {
 							type="button"
 							onClick={() => setRenameTarget(null)}
 							disabled={renaming}
-							className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -413,7 +399,7 @@ const Reports = () => {
 							type="button"
 							onClick={handleRename}
 							disabled={!renameName.trim() || renaming}
-							className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{renaming ? strings("common.saving") : strings("common.save")}
 						</button>
@@ -440,7 +426,7 @@ const Reports = () => {
 							type="button"
 							onClick={() => setDeleteTarget(null)}
 							disabled={deleting}
-							className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -448,7 +434,7 @@ const Reports = () => {
 							type="button"
 							onClick={handleDelete}
 							disabled={deleting}
-							className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{deleting ? strings("common.saving") : strings("common.delete")}
 						</button>

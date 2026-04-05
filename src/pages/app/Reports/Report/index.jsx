@@ -297,7 +297,7 @@ const Report = () => {
 					<i className="fa-solid fa-arrow-left" aria-hidden />
 					{strings("back.reports")}
 				</Link>
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error ?? strings("error.failedLoad")}
 				</div>
 			</div>
@@ -341,14 +341,14 @@ const Report = () => {
 					<button
 						type="button"
 						onClick={() => { setRenameName(report.name); setRenameOpen(true); }}
-						className="rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("page.reports.rename")}
 					</button>
 					<button
 						type="button"
 						onClick={() => setDeleteOpen(true)}
-						className="rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("common.delete")}
 					</button>
@@ -415,7 +415,7 @@ const Report = () => {
 							type="button"
 							onClick={() => setRenameOpen(false)}
 							disabled={renaming}
-							className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -423,7 +423,7 @@ const Report = () => {
 							type="button"
 							onClick={handleRename}
 							disabled={!renameName.trim() || renaming}
-							className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{renaming ? strings("common.saving") : strings("common.save")}
 						</button>
@@ -450,7 +450,7 @@ const Report = () => {
 							type="button"
 							onClick={() => setDeleteOpen(false)}
 							disabled={deleting}
-							className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{strings("common.cancel")}
 						</button>
@@ -458,7 +458,7 @@ const Report = () => {
 							type="button"
 							onClick={handleDelete}
 							disabled={deleting}
-							className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{deleting ? strings("common.saving") : strings("common.delete")}
 						</button>

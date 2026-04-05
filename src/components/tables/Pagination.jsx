@@ -31,7 +31,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
 						type="button"
 						onClick={() => goTo(1)}
 						disabled={!hasPrev}
-						className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+						className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
 						aria-label={strings("common.firstPage")}
 					>
 						««
@@ -40,7 +40,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
 						type="button"
 						onClick={() => goTo(currentPage - 1)}
 						disabled={!hasPrev}
-						className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+						className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
 						aria-label={strings("common.previousPage")}
 					>
 						«
@@ -55,7 +55,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
 						type="button"
 						onClick={() => goTo(currentPage + 1)}
 						disabled={!hasNext}
-						className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+						className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
 						aria-label={strings("common.nextPage")}
 					>
 						»
@@ -64,7 +64,7 @@ const Pagination = ({ total, limit, page, onPageChange }) => {
 						type="button"
 						onClick={() => goTo(totalPages)}
 						disabled={!hasNext}
-						className="rounded px-2 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+						className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
 						aria-label={strings("common.lastPage")}
 					>
 						»»

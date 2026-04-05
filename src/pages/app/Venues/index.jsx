@@ -57,7 +57,7 @@ const Venues = () => {
 	if (error && data.length === 0) {
 		return (
 			<div className="mx-auto max-w-5xl">
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			</div>
@@ -74,7 +74,7 @@ const Venues = () => {
 					<button
 						type="button"
 						onClick={() => setLocation("/venues/new")}
-						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						<i className="fa-solid fa-plus" aria-hidden />
 						{strings("page.venues.createNew")}

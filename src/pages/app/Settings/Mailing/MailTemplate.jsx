@@ -125,7 +125,7 @@ const MailTemplate = () => {
 					type="button"
 					onClick={handleSave}
 					disabled={saving}
-					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+					className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{saving ? (
 						<>
@@ -148,7 +148,7 @@ const MailTemplate = () => {
 				</h1>
 
 				{error && (
-					<div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+					<div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 						{error}
 					</div>
 				)}

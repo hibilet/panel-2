@@ -57,7 +57,7 @@ export const salesColumns = (extended, onDelete) => [
 									e.stopPropagation();
 									onDelete(r.id);
 								}}
-								className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 hover:bg-red-200"
+								className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-semibold text-red-700 hover:bg-red-200"
 								aria-label={strings("common.ariaDelete")}
 							>
 								{strings("common.delete")}
@@ -272,7 +272,7 @@ export const providersColumns = [
 			<div className="flex items-center gap-2">
 				<span>{r.name ?? "—"}</span>
 				{r.isDefault && (
-					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+					<span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
 						{strings("form.provider.isDefault")}
 					</span>
 				)}
@@ -436,7 +436,7 @@ export const ticketColumns = [
 		header: strings("table.ticket.status"),
 		render: (r) => (
 			<span
-				className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
+				className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
 					r.status === "active"
 						? "bg-emerald-100 text-emerald-700"
 						: r.status === "coming-soon"
@@ -467,7 +467,7 @@ export const channelColumns = (getChannelLink, isBaseChannel, CopyButton) => [
 						: (r.name || strings("common.untitled"))}
 				</span>
 				{isBaseChannel(r) && (
-					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
+					<span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
 						{strings("form.channel.default")}
 					</span>
 				)}
@@ -530,11 +530,18 @@ const getAge = (birthday) => {
 	return age;
 };
 
+const ATTENDEE_STATUS_ICON = {
+	success: "fa-circle-check text-emerald-600",
+	read: "fa-circle-check text-emerald-600",
+	reserved: "fa-clock text-amber-500",
+	failed: "fa-circle-xmark text-red-500",
+};
+
 const ATTENDEE_STATUS_LABELS = {
-	success: `✅ ${strings("status.success")}`,
-	read: `✅ ${strings("status.read")}`,
-	reserved: `⏳ ${strings("status.reserved")}`,
-	failed: `❌ ${strings("status.failed")}`,
+	success: strings("status.success"),
+	read: strings("status.read"),
+	reserved: strings("status.reserved"),
+	failed: strings("status.failed"),
 };
 
 export const attendeeColumns = (CopyButton) => [
@@ -577,7 +584,17 @@ export const attendeeColumns = (CopyButton) => [
 	{
 		key: "status",
 		header: strings("common.status"),
-		render: (r) => ATTENDEE_STATUS_LABELS[r.status] ?? r.status ?? "—",
+		render: (r) => {
+			const icon = ATTENDEE_STATUS_ICON[r.status];
+			const label = ATTENDEE_STATUS_LABELS[r.status] ?? r.status ?? "—";
+			if (!icon) return label;
+			return (
+				<span className="inline-flex items-center gap-1.5">
+					<i className={`fa-solid ${icon}`} aria-hidden />
+					{label}
+				</span>
+			);
+		},
 		align: "right",
 	},
 	{
@@ -624,10 +641,10 @@ export const readerColumns = (onGetLink) => [
 					e.stopPropagation();
 					onGetLink(r);
 				}}
-				className="rounded border border-slate-300 bg-white px-2 py-1.5 text-sm hover:bg-slate-50"
+				className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 				aria-label={strings("form.reader.ariaGetLink")}
 			>
-				🔗
+				<i className="fa-solid fa-link text-slate-500" aria-hidden />
 			</button>
 		),
 	},

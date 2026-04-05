@@ -14,7 +14,7 @@ const Billing = () => {
 	const [error, setError] = useState(null);
 	const [billing, setBilling] = useState(null);
 
-	const { register, handleSubmit, reset } = useForm({
+	const { register, handleSubmit, reset, formState: { errors } } = useForm({
 		defaultValues: {
 			name: "",
 			email: "",
@@ -96,11 +96,7 @@ const Billing = () => {
 			</Link>
 
 			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-				<h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-slate-900">
-					<i
-						className="fa-solid fa-file-invoice text-slate-600"
-						aria-hidden
-					/>
+				<h1 className="mb-6 text-2xl font-semibold text-slate-900">
 					{strings("page.settings.billingSetup")}
 				</h1>
 
@@ -114,7 +110,7 @@ const Billing = () => {
 				) : (
 					<form onSubmit={handleSubmit(onSave)} className="space-y-6">
 						{error && (
-							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{error}
 							</div>
 						)}
@@ -127,10 +123,10 @@ const Billing = () => {
 								autoComplete="name"
 							/>
 							<Input
-								label={strings("form.billing.email")}
+								label={`${strings("form.billing.email")} *`}
 								type="email"
-								required
-								{...register("email")}
+								{...register("email", { required: strings("error.required") })}
+								error={errors.email?.message}
 								placeholder={strings("form.billing.emailPlaceholder")}
 								autoComplete="email"
 							/>
@@ -163,15 +159,15 @@ const Billing = () => {
 							</h2>
 							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 								<Input
-									label={strings("form.billing.corporateName")}
-									required
-									{...register("corporateName")}
+									label={`${strings("form.billing.corporateName")} *`}
+									{...register("corporateName", { required: strings("error.required") })}
+									error={errors.corporateName?.message}
 									placeholder={strings("form.billing.corporateNamePlaceholder")}
 								/>
 								<Input
-									label={strings("form.billing.corporateRegistry")}
-									required
-									{...register("corporateRegistry")}
+									label={`${strings("form.billing.corporateRegistry")} *`}
+									{...register("corporateRegistry", { required: strings("error.required") })}
+									error={errors.corporateRegistry?.message}
 									placeholder={strings("form.billing.corporateRegistryPlaceholder")}
 								/>
 								<Input
@@ -186,7 +182,7 @@ const Billing = () => {
 							<button
 								type="submit"
 								disabled={saving}
-								className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+								className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{saving ? (
 									<>

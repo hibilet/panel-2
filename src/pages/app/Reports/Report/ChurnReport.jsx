@@ -226,7 +226,7 @@ const ChurnReport = () => {
 							type="button"
 							disabled={!selectedSaleId || loading}
 							onClick={handleGenerate}
-							className="w-full rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+							className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{loading && <i className="fa-solid fa-spinner fa-spin mr-2" aria-hidden />}
 							{loading ? strings("page.reports.churn.generating") : strings("page.reports.churn.generateReport")}
@@ -236,7 +236,7 @@ const ChurnReport = () => {
 			</div>
 
 			{error && (
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			)}

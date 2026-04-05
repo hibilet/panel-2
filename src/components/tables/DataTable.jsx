@@ -9,7 +9,7 @@ const TD_CLASS = "px-4 py-3 text-sm";
 const TD_CLASS_MEDIUM = "font-medium text-slate-900";
 const TD_CLASS_MUTED = "text-slate-600";
 const ROW_CLASS =
-	"border-b border-slate-100 hover:bg-slate-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400";
+	"border-b border-slate-100 hover:bg-slate-50/50 active:bg-slate-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400";
 const ROW_CLASS_STATIC = "border-b border-slate-100";
 const DARK_TH = "";
 const DARK_TD = "";

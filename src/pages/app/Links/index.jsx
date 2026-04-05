@@ -108,7 +108,7 @@ const Links = () => {
 	if (error && !loading) {
 		return (
 			<div className="mx-auto max-w-5xl">
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			</div>
@@ -124,7 +124,7 @@ const Links = () => {
 				{account?.type === "account.merchant" && (
 					<Link
 						href="/links/new"
-						className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("page.links.createNew")}
 					</Link>
@@ -147,7 +147,7 @@ const Links = () => {
 				<button
 					type="button"
 					onClick={handleViewArchived}
-					className="self-start rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+					className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 				>
 					{showArchived
 						? strings("page.links.hideArchived")
@@ -155,7 +155,7 @@ const Links = () => {
 				</button>
 				{showArchived && (
 					archivedError ? (
-							<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{archivedError}
 							</div>
 						) : (

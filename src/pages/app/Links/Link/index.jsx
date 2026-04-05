@@ -8,6 +8,7 @@ import {
 } from "../../../../components/inputs";
 import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
+import { Modal } from "../../../../components/shared";
 import { getWidgetLinkUrl } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
 import { uploadImage } from "../../../../lib/imgbb";
@@ -65,6 +66,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 	const [deleting, setDeleting] = useState(false);
 	const [imageUploading, setImageUploading] = useState(false);
 	const [sales, setSales] = useState([]);
+	const [confirmAction, setConfirmAction] = useState(null); // { type, payload? }
 	const fileInputRef = useRef(null);
 
 	const { register, handleSubmit, reset, setValue, watch } = useForm({
@@ -117,8 +119,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 
 	const handleRemoveSale = (saleId) => (e) => {
 		e.stopPropagation();
-		if (!window.confirm(strings("form.link.confirmRemoveSale"))) return;
-		setSales((prev) => prev.filter((s) => s.id !== saleId));
+		setConfirmAction({ type: "removeSale", payload: saleId });
 	};
 
 	const onSave = async (formData) => {
@@ -154,7 +155,6 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 
 	const onArchive = async () => {
 		if (isNew || !data?.id) return;
-		if (!window.confirm(strings("form.link.confirmArchive"))) return;
 		setArchiving(true);
 		setError(null);
 		try {
@@ -170,7 +170,6 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 
 	const onUnarchive = async () => {
 		if (isNew || !data?.id) return;
-		if (!window.confirm(strings("form.link.confirmUnarchive"))) return;
 		setArchiving(true);
 		setError(null);
 		try {
@@ -187,7 +186,6 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 
 	const onDelete = async () => {
 		if (isNew || !data?.id) return;
-		if (!window.confirm(strings("confirm.deleteLink"))) return;
 		setDeleting(true);
 		setError(null);
 		try {
@@ -229,7 +227,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 				<button
 					type="button"
 					onClick={onClose}
-					className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+					className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 					aria-label={strings("common.ariaClose")}
 				>
 					<i className="fa-solid fa-xmark text-xl" aria-hidden />
@@ -243,7 +241,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 						<div className="h-64 animate-pulse rounded-lg bg-slate-100" />
 					</div>
 				) : error && !data && !isNew ? (
-					<div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+					<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 						{error}
 					</div>
 				) : data || isNew ? (
@@ -261,7 +259,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 
 						<form onSubmit={handleSubmit(onSave)} className="space-y-6">
 							{error && (
-								<div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-600">
+								<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 									{error}
 								</div>
 							)}
@@ -354,7 +352,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 											type="button"
 											onClick={() => fileInputRef.current?.click()}
 											disabled={imageUploading}
-											className="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+											className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{imageUploading ? strings("common.saving") : strings("form.sale.uploadImage")}
 										</button>
@@ -408,7 +406,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 								<button
 									type="submit"
 									disabled={saving}
-									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{saving ? (
 										<>
@@ -423,9 +421,9 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 									<>
 										<button
 											type="button"
-											onClick={isArchived ? onUnarchive : onArchive}
+											onClick={() => setConfirmAction({ type: isArchived ? "unarchive" : "archive" })}
 											disabled={archiving || deleting || saving}
-											className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+											className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{archiving ? (
 												<>
@@ -443,9 +441,9 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 										</button>
 										<button
 											type="button"
-											onClick={onDelete}
+											onClick={() => setConfirmAction({ type: "delete" })}
 											disabled={archiving || deleting || saving}
-											className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 shadow-sm hover:bg-red-50 disabled:opacity-50"
+											className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 										>
 											{deleting ? (
 												<>
@@ -466,6 +464,52 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 					</main>
 				) : null}
 			</div>
+
+			<Modal
+				isOpen={!!confirmAction}
+				onClose={() => setConfirmAction(null)}
+				title={
+					confirmAction?.type === "delete" ? strings("confirm.deleteLink")
+					: confirmAction?.type === "archive" ? strings("form.link.confirmArchive")
+					: confirmAction?.type === "unarchive" ? strings("form.link.confirmUnarchive")
+					: confirmAction?.type === "removeSale" ? strings("form.link.confirmRemoveSale")
+					: ""
+				}
+				footer={
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={() => setConfirmAction(null)}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
+						>
+							{strings("common.cancel")}
+						</button>
+						<button
+							type="button"
+							onClick={() => {
+								const action = confirmAction;
+								setConfirmAction(null);
+								if (action?.type === "delete") onDelete();
+								else if (action?.type === "archive") onArchive();
+								else if (action?.type === "unarchive") onUnarchive();
+								else if (action?.type === "removeSale") setSales((prev) => prev.filter((s) => s.id !== action.payload));
+							}}
+							className={`inline-flex items-center justify-center gap-2 rounded-lg border border-transparent px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors ${
+								confirmAction?.type === "delete" ? "bg-red-600 hover:bg-red-700 active:bg-red-700" : "bg-slate-900 hover:bg-slate-800 active:bg-slate-800"
+							}`}
+						>
+							{confirmAction?.type === "delete" ? strings("common.delete") : strings("common.confirm")}
+						</button>
+					</div>
+				}
+			>
+				<p className="text-sm text-slate-600">
+					{confirmAction?.type === "delete" && strings("confirm.deleteLinkBody")}
+					{confirmAction?.type === "archive" && strings("form.link.confirmArchiveBody")}
+					{confirmAction?.type === "unarchive" && strings("form.link.confirmUnarchiveBody")}
+					{confirmAction?.type === "removeSale" && strings("form.link.confirmRemoveSaleBody")}
+				</p>
+			</Modal>
 		</div>
 	);
 };

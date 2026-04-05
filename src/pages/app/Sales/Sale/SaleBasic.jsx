@@ -31,6 +31,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 	const [plans, setPlans] = useState(null);
 	const fileInputRef = useRef(null);
 	const [imageUploading, setImageUploading] = useState(false);
+	const [saving, setSaving] = useState(false);
 
 	const {
 		register,
@@ -70,18 +71,28 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 	};
 
 	const CreateSale = async (data) => {
-		const payload = buildPayload(data);
-		const res = await post(`/sales`, payload);
-		setSale(res.data);
-		await refreshSales();
-		if (res.data?.id) setLocation(`/sales/${res.data.id}`);
+		setSaving(true);
+		try {
+			const payload = buildPayload(data);
+			const res = await post(`/sales`, payload);
+			setSale(res.data);
+			await refreshSales();
+			if (res.data?.id) setLocation(`/sales/${res.data.id}`);
+		} finally {
+			setSaving(false);
+		}
 	};
 
 	const UpdateSale = async (data) => {
-		const payload = buildPayload(data);
-		const res = await put(`/sales/${sale?.id}`, payload);
-		setSale(res.data);
-		await refreshSales();
+		setSaving(true);
+		try {
+			const payload = buildPayload(data);
+			const res = await put(`/sales/${sale?.id}`, payload);
+			setSale(res.data);
+			await refreshSales();
+		} finally {
+			setSaving(false);
+		}
 	};
 
 	useEffect(() => {
@@ -126,30 +137,31 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 					</button> */}
 					<button
 						type="button"
-						className="inline-flex items-center gap-2 justify-start rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+						disabled={saving}
+						className="inline-flex items-center gap-2 justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={handleSubmit(id === "new" ? CreateSale : UpdateSale)}
 					>
-						<i className="fa-solid fa-save" aria-hidden="true" />
-						Save
+						<i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-save"}`} aria-hidden="true" />
+						{saving ? strings("common.saving") : strings("common.save")}
 					</button>
 				</div>
 			</div>
 			{/* Basic Information */}
 			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-				<div className="md:col-span-4">
+				<div className="md:col-span-3">
 					<Input
 						placeholder={strings("sale.eventNamePlaceholder")}
-						label={strings("sale.eventName")}
+						label={`${strings("sale.eventName")} *`}
 						type="text"
-						{...register("name", { required: true })}
+						{...register("name", { required: strings("error.required") })}
 						error={errors.name?.message}
 					/>
 				</div>
 				<div>
 					<Input
-						label={strings("sale.startDateTime")}
+						label={`${strings("sale.startDateTime")} *`}
 						type="datetime-local"
-						{...register("start", { required: true })}
+						{...register("start", { required: strings("error.required") })}
 						error={errors.start?.message}
 					/>
 					<Checkbox
@@ -159,9 +171,9 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 				</div>
 				<div>
 					<Input
-						label={strings("sale.endDateTime")}
+						label={`${strings("sale.endDateTime")} *`}
 						type="datetime-local"
-						{...register("end", { required: true })}
+						{...register("end", { required: strings("error.required") })}
 						error={errors.end?.message}
 					/>
 					<Checkbox
@@ -171,9 +183,9 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 				</div>
 				<div>
 					<Input
-						label={strings("sale.stopSaleAt")}
+						label={`${strings("sale.stopSaleAt")} *`}
 						type="datetime-local"
-						{...register("stopSaleAt", { required: true })}
+						{...register("stopSaleAt", { required: strings("error.required") })}
 						error={errors.stopSaleAt?.message}
 					/>
 				</div>
@@ -185,9 +197,9 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			</h2>
 			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-3">
 				<Select
-					label={strings("sale.venue")}
+					label={`${strings("sale.venue")} *`}
 					disabled={sale?.plan}
-					{...register("venue", { required: true })}
+					{...register("venue", { required: strings("error.required") })}
 					options={[
 						{ value: "", label: strings("sale.noVenue") },
 						...(venues?.map((v) => ({ value: v.id, label: v.name })) ?? []),

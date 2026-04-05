@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "wouter";
+import { Modal } from "../../../../components/shared";
 import { get, post } from "../../../../lib/client";
 import strings, { formatCurrency } from "../../../../localization";
 
@@ -25,6 +26,7 @@ const TransactionPanel = ({ id, onClose }) => {
 	const [error, setError] = useState(null);
 	const [sending, setSending] = useState(false);
 	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+	const [confirmAction, setConfirmAction] = useState(null);
 
 	useEffect(() => {
 		setLoading(true);
@@ -48,17 +50,22 @@ const TransactionPanel = ({ id, onClose }) => {
 	};
 
 	const handleCancelAll = () => {
-		if (!window.confirm(strings("confirm.cancelAllReservations"))) return;
-		// TODO: wire to actual API when available
+		setConfirmAction({ type: "cancelAll" });
 	};
 
 	const handleCancelReservation = (reservation) => (e) => {
 		e.stopPropagation();
-		if (
-			!window.confirm(strings("confirm.cancelReservation", [reservation.name]))
-		)
-			return;
-		// TODO: wire to actual API when available
+		setConfirmAction({ type: "cancelOne", payload: reservation });
+	};
+
+	const executeConfirm = () => {
+		const action = confirmAction;
+		setConfirmAction(null);
+		if (action?.type === "cancelAll") {
+			// TODO: wire to actual API when available
+		} else if (action?.type === "cancelOne") {
+			// TODO: wire to actual API when available
+		}
 	};
 
 	const reservations = data?.reservations ?? [];
@@ -72,7 +79,7 @@ const TransactionPanel = ({ id, onClose }) => {
 				<button
 					type="button"
 					onClick={onClose}
-					className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+					className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 					aria-label={strings("common.ariaClose")}
 				>
 					<i className="fa-solid fa-xmark text-xl" aria-hidden />
@@ -86,7 +93,7 @@ const TransactionPanel = ({ id, onClose }) => {
 						<div className="h-64 animate-pulse rounded-lg bg-slate-100" />
 					</div>
 				) : error ? (
-					<div className="rounded-xl border border-red-200 bg-red-50 p-6 text-center text-red-600">
+					<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 						{error}
 					</div>
 				) : data ? (
@@ -97,7 +104,7 @@ const TransactionPanel = ({ id, onClose }) => {
 									type="button"
 									onClick={handleSendEmailAgain}
 									disabled={sending}
-									className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+									className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									{sending ? (
 										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
@@ -110,7 +117,7 @@ const TransactionPanel = ({ id, onClose }) => {
 									type="button"
 									onClick={handleSendToAnotherEmail}
 									disabled={sending}
-									className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+									className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<i
 										className="fa-solid fa-envelope-circle-check"
@@ -122,7 +129,7 @@ const TransactionPanel = ({ id, onClose }) => {
 									type="button"
 									onClick={handleCancelAll}
 									disabled={sending || reservations.length === 0}
-									className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
 									<i className="fa-solid fa-ban" aria-hidden />
 									{strings("form.transaction.cancelAll")}
@@ -202,7 +209,7 @@ const TransactionPanel = ({ id, onClose }) => {
 												<button
 													type="button"
 													onClick={handleCancelReservation(r)}
-													className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+													className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 												>
 													{strings("common.cancel")}
 												</button>
@@ -235,6 +242,36 @@ const TransactionPanel = ({ id, onClose }) => {
 					</div>
 				) : null}
 			</div>
+
+			<Modal
+				isOpen={!!confirmAction}
+				onClose={() => setConfirmAction(null)}
+				title={confirmAction?.type === "cancelAll" ? strings("confirm.cancelAllReservations") : strings("confirm.cancelReservation", [confirmAction?.payload?.name ?? ""])}
+				footer={
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={() => setConfirmAction(null)}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
+						>
+							{strings("common.cancel")}
+						</button>
+						<button
+							type="button"
+							onClick={executeConfirm}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700"
+						>
+							{strings("common.confirm")}
+						</button>
+					</div>
+				}
+			>
+				<p className="text-sm text-slate-600">
+					{confirmAction?.type === "cancelAll"
+						? strings("confirm.cancelAllReservations")
+						: strings("confirm.cancelReservation", [confirmAction?.payload?.name ?? ""])}
+				</p>
+			</Modal>
 
 			{emailDialogOpen && (
 				<SendEmailDialog
@@ -303,7 +340,7 @@ const SendEmailDialog = ({ transactionId, initialEmail, onClose, setSending }) =
 					<button
 						type="button"
 						onClick={onClose}
-						className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+						className="rounded-lg p-2.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-400 active:bg-slate-100"
 						aria-label={strings("common.ariaClose")}
 					>
 						<i className="fa-solid fa-xmark text-lg" aria-hidden />
@@ -330,7 +367,7 @@ const SendEmailDialog = ({ transactionId, initialEmail, onClose, setSending }) =
 					<button
 						type="button"
 						onClick={onClose}
-						className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("common.cancel")}
 					</button>
@@ -338,7 +375,7 @@ const SendEmailDialog = ({ transactionId, initialEmail, onClose, setSending }) =
 						type="submit"
 						form="send-email-form"
 						disabled={sending}
-						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{sending ? (
 							<i className="fa-solid fa-spinner fa-spin" aria-hidden />

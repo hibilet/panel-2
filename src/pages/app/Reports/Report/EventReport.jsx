@@ -96,7 +96,7 @@ const EventReport = () => {
 					<i className="fa-solid fa-arrow-left" aria-hidden />
 					{strings("back.reports")}
 				</Link>
-				<div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error ?? strings("error.failedLoad")}
 				</div>
 			</div>
@@ -114,7 +114,7 @@ const EventReport = () => {
 			</Link>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 					{error}
 				</div>
 			)}
