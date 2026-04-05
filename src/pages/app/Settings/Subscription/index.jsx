@@ -270,6 +270,12 @@ const Subscription = () => {
 												{strings("page.subscription.commission")}:{" "}
 												{formatCommission(currentTier)}
 											</p>
+											{(currentTier.perTicketFee ?? 0) > 0 && (
+												<p className="mt-1 text-sm text-slate-500">
+													{strings("page.subscription.perTicketFee")}:{" "}
+													{formatCurrency(currentTier.perTicketFee)}/{strings("page.subscription.ticket")}
+												</p>
+											)}
 										</div>
 									</div>
 									<div className="mt-4 flex justify-end">
@@ -341,6 +347,16 @@ const Subscription = () => {
 													</span>
 													<span className="font-medium">{formatCommission(tier)}</span>
 												</div>
+												{(tier.perTicketFee ?? 0) > 0 && (
+													<div className="flex justify-between">
+														<span className="text-slate-500">
+															{strings("page.subscription.perTicketFee")}
+														</span>
+														<span className="font-medium">
+															{formatCurrency(tier.perTicketFee)}/{strings("page.subscription.ticket")}
+														</span>
+													</div>
+												)}
 												<div className="flex justify-between">
 													<span className="text-slate-500">
 														{strings("page.subscription.saleLimit")}
@@ -351,6 +367,16 @@ const Subscription = () => {
 															: strings("page.subscription.unlimited")}
 													</span>
 												</div>
+												{(tier.reservationLimit ?? 0) > 0 && (
+													<div className="flex justify-between">
+														<span className="text-slate-500">
+															{strings("page.subscription.reservationLimit")}
+														</span>
+														<span className="font-medium">
+															{tier.reservationLimit.toLocaleString()} {strings("page.subscription.tickets")}
+														</span>
+													</div>
+												)}
 											</div>
 
 											{action === "current" ? (

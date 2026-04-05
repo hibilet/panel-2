@@ -14,7 +14,7 @@ const mapRows = (rows) =>
 
 const Sales = () => {
 	const [, setLocation] = useLocation();
-	const { sales, loading, error: appError, refreshSales } = useApp();
+	const { sales, loading, error: appError, refreshSales, account } = useApp();
 
 	const [pastSales, setPastSales] = useState([]);
 	const [pastLoading, setPastLoading] = useState(false);
@@ -86,12 +86,14 @@ const Sales = () => {
 					>
 						{strings("page.sales.calculateRevenues")}
 					</button>
-					<Link
-						href="/sales/new"
-						className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
-					>
-						{strings("page.sales.createNew")}
-					</Link>
+					{account?.type === "account.merchant" && (
+						<Link
+							href="/sales/new"
+							className="inline-flex items-center justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+						>
+							{strings("page.sales.createNew")}
+						</Link>
+					)}
 					{/* <Link
 						href="/sales/new?guided=true"
 						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"

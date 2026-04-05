@@ -56,12 +56,12 @@ const LoginQRModal = ({ isOpen, onClose }) => {
 		>
 			<div className="flex flex-col items-center gap-4">
 				{!token ? (
-					<p className="text-sm text-slate-600 dark:text-slate-400">
+					<p className="text-sm text-slate-600">
 						{strings("error.failedLoad")}
 					</p>
 				) : (
 					<>
-						<p className="text-center text-sm text-slate-600 dark:text-slate-400">
+						<p className="text-center text-sm text-slate-600">
 							{strings("form.reader.readQrCode")}
 						</p>
 						{qrUrl && (
@@ -75,7 +75,7 @@ const LoginQRModal = ({ isOpen, onClose }) => {
 						<button
 							type="button"
 							onClick={handleCopyLink}
-							className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+							className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
 						>
 							{copied ? (
 								<>

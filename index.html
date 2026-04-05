@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <script>
-      document.documentElement.classList.toggle('dark', false);
+      const t = localStorage.getItem('theme');
+      document.documentElement.classList.toggle('dark',
+        t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)
+      );
     </script>
     <meta charset="UTF-8" />
     <!-- <link rel="icon" type="image/svg+xml" href="/hibilet-favicon.svg" /> -->

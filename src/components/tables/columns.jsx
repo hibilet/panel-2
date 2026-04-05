@@ -161,34 +161,19 @@ export const accountsColumns = [
 
 export const merchantsColumns = [
 	...accountBaseColumns,
-		{
-			key: "commission",
-			header: strings("table.account.commission"),
-			align: "right",
-			render: (r) => {
-				if (!r.commission || !("amount" in r.commission)) return "—";
-				if (r.commission.type === "percentage") {
-					// Show as percentage (e.g. "0.50%")
-					return `${(Number(r.commission.amount) * 100).toFixed(2)}%`;
-				}
-				// Show as EUR fixed value (e.g. "€ 1.00")
-				return `€ ${Number(r.commission.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-			},
+	{
+		key: "subscription",
+		header: strings("page.subscription.currentTier"),
+		render: (r) => {
+			if (!r.subscription?.tier && !r.subscription?.tierUuid) return "—";
+			return r.subscription?.tierName ?? "—";
 		},
-		{
-			key: "commissionVat",
-			header: strings("table.account.commissionVat"),
-			align: "right",
-			render: (r) => {
-				if (!r.commission || r.commission.vat == null) return "—";
-				return `${((Number(r.commission.vat) - 1) * 100).toFixed(2).replace(/\.00$/, "")}%`;
-			},
-		},
-		{
-			key: "createdAt",
-			header: strings("table.account.createdAt"),
-			render: (r) => formatDateTime(r.createdAt),
-		},
+	},
+	{
+		key: "createdAt",
+		header: strings("table.account.createdAt"),
+		render: (r) => formatDateTime(r.createdAt),
+	},
 ];
 
 export const customersColumns = [
@@ -287,7 +272,7 @@ export const providersColumns = [
 			<div className="flex items-center gap-2">
 				<span>{r.name ?? "—"}</span>
 				{r.isDefault && (
-					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
 						{strings("form.provider.isDefault")}
 					</span>
 				)}

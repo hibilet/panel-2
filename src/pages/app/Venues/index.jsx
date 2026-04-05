@@ -70,14 +70,16 @@ const Venues = () => {
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.venues.title")}
 				</h1>
-				<button
-					type="button"
-					onClick={() => setLocation("/venues/new")}
-					className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
-				>
-					<i className="fa-solid fa-plus" aria-hidden />
-					{strings("page.venues.createNew")}
-				</button>
+				{account?.type === "account.merchant" && (
+					<button
+						type="button"
+						onClick={() => setLocation("/venues/new")}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
+					>
+						<i className="fa-solid fa-plus" aria-hidden />
+						{strings("page.venues.createNew")}
+					</button>
+				)}
 			</div>
 
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">

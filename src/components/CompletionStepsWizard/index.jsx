@@ -51,17 +51,17 @@ const CompletionStepsWizard = () => {
 
 	return (
 		<section
-			className="rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800/50 dark:bg-amber-950/30"
+			className="rounded-xl border border-amber-200 bg-amber-50 p-6"
 			aria-labelledby="completion-steps-heading"
 		>
 			<h2
 				id="completion-steps-heading"
-				className="mb-4 flex items-center gap-2 text-lg font-semibold text-amber-900 dark:text-amber-100"
+				className="mb-4 flex items-center gap-2 text-lg font-semibold text-amber-900"
 			>
-				<i className="fa-solid fa-list-check text-amber-600 dark:text-amber-400" aria-hidden />
+				<i className="fa-solid fa-list-check text-amber-600" aria-hidden />
 				{strings("completionSteps.title")}
 			</h2>
-			<p className="mb-4 text-sm text-amber-800 dark:text-amber-200">
+			<p className="mb-4 text-sm text-amber-800">
 				{strings("completionSteps.description")}
 			</p>
 			<ol className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
@@ -69,7 +69,7 @@ const CompletionStepsWizard = () => {
 					<li key={step.key} className="flex items-center gap-2">
 						{index > 0 && (
 							<span
-								className="hidden text-amber-600 dark:text-amber-400 sm:inline"
+								className="hidden text-amber-600 sm:inline"
 								aria-hidden
 							>
 								›
@@ -77,10 +77,10 @@ const CompletionStepsWizard = () => {
 						)}
 						<Link
 							href={step.href}
-							className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-900 shadow-sm transition hover:bg-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-100 dark:hover:bg-amber-900/50 dark:hover:border-amber-600"
+							className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-900 shadow-sm transition hover:bg-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
 						>
 							<i
-								className={`fa-solid ${step.icon} text-amber-600 dark:text-amber-400`}
+								className={`fa-solid ${step.icon} text-amber-600`}
 								aria-hidden
 							/>
 							{strings(step.labelKey)}

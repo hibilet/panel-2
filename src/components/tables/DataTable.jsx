@@ -11,11 +11,11 @@ const TD_CLASS_MUTED = "text-slate-600";
 const ROW_CLASS =
 	"border-b border-slate-100 hover:bg-slate-50/50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-inset focus:ring-slate-400";
 const ROW_CLASS_STATIC = "border-b border-slate-100";
-const DARK_TH = "dark:text-slate-400";
-const DARK_TD = "dark:text-slate-300";
-const DARK_ROW = "dark:border-slate-700 dark:hover:bg-slate-700/50";
-const DARK_THEAD = "dark:bg-slate-800/50";
-const DARK_TBODY = "dark:bg-slate-800";
+const DARK_TH = "";
+const DARK_TD = "";
+const DARK_ROW = "";
+const DARK_THEAD = "";
+const DARK_TBODY = "";
 
 /**
  * Generic data table with configurable columns.
@@ -90,11 +90,11 @@ const DataTable = ({
 	if (showLoading) {
 		const wrapperClass = bare
 			? "overflow-x-auto"
-			: "overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800";
+			: "overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm";
 		return (
 			<div className={wrapperClass}>
 				<table
-					className={`w-full divide-y divide-slate-200 dark:divide-slate-700 ${minWidth}`}
+					className={`w-full divide-y divide-slate-200 ${minWidth}`}
 				>
 					<thead className={`bg-slate-50 ${dark ? DARK_THEAD : ""}`}>
 						<tr>
@@ -133,7 +133,7 @@ const DataTable = ({
 
 	const tableEl = (
 		<table
-			className={`w-full border-collapse divide-y divide-slate-200 dark:divide-slate-700 ${minWidth}`}
+			className={`w-full border-collapse divide-y divide-slate-200 ${minWidth}`}
 		>
 			<thead className={`bg-slate-50 ${dark ? DARK_THEAD : ""}`}>
 				<tr>
@@ -160,7 +160,7 @@ const DataTable = ({
 					<tr>
 						<td
 							colSpan={columns.length + (hasExpandable ? 1 : 0)}
-							className="px-4 py-8 text-center text-slate-500 dark:text-slate-400"
+							className="px-4 py-8 text-center text-slate-500"
 						>
 							{emptyMessage}
 						</td>
@@ -224,7 +224,7 @@ const DataTable = ({
 											scope={isTh ? "row" : undefined}
 											className={`whitespace-nowrap ${TD_CLASS} ${
 												col.align === "right" ? "text-right" : "text-left"
-											} ${isTh ? `${TD_CLASS_MEDIUM} ${dark ? "dark:text-white" : ""}` : TD_CLASS_MUTED} ${
+											} ${isTh ? `${TD_CLASS_MEDIUM} ${dark ? "" : ""}` : TD_CLASS_MUTED} ${
 												dark ? DARK_TD : ""
 											} ${col.printOnly ? "print-only hidden" : ""} ${col.className ?? ""}`}
 										>
@@ -237,7 +237,7 @@ const DataTable = ({
 								<tr key={`${rowKey}-detail`}>
 									<td
 										colSpan={columns.length + 1}
-										className="bg-slate-50 px-4 py-3 text-sm dark:bg-slate-800/50"
+										className="bg-slate-50 px-4 py-3 text-sm"
 									>
 										{renderRowDetail?.(row)}
 									</td>
@@ -257,7 +257,7 @@ const DataTable = ({
 
 	const wrapperClass = bare
 		? `overflow-x-auto ${className}`.trim()
-		: `overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 ${className}`.trim();
+		: `overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm ${className}`.trim();
 
 	return (
 		<div ref={tableRef} className={wrapperClass}>

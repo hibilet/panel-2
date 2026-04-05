@@ -16,16 +16,16 @@ const Mailing = () => {
 		<div className="mx-auto max-w-5xl space-y-6">
 			<Link
 				href="/settings"
-				className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+				className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
 			>
 				<i className="fa-solid fa-arrow-left" aria-hidden />
 				{strings("back.settings")}
 			</Link>
 
-			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-				<h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-slate-900 dark:text-white">
+			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+				<h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-slate-900">
 					<i
-						className="fa-solid fa-envelope text-slate-600 dark:text-slate-400"
+						className="fa-solid fa-envelope text-slate-600"
 						aria-hidden
 					/>
 					{strings("page.settings.mailingSetup")}

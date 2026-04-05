@@ -84,7 +84,7 @@ const MailingForm = ({ onSaved }) => {
 	return (
 		<form onSubmit={handleSubmit(onSave)} className="space-y-6">
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 					{error}
 				</div>
 			)}
@@ -134,7 +134,7 @@ const MailingForm = ({ onSaved }) => {
 				<button
 					type="submit"
 					disabled={saving}
-					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 				>
 					{saving ? (
 						<>
@@ -152,7 +152,7 @@ const MailingForm = ({ onSaved }) => {
 					<button
 						type="button"
 						disabled={saving}
-						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 					>
 						<i className="fa-solid fa-envelope" aria-hidden />
 						{strings("common.editTemplate")}

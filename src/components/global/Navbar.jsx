@@ -63,7 +63,7 @@ const navItems = [
 		labelKey: "nav.reports",
 		icon: "fa-chart-line",
 		tourId: "nav-reports",
-		acl: [],
+		acl: ["merchant", "admin"],
 	},
 	{
 		path: "/tiers",
@@ -195,7 +195,7 @@ const Navbar = () => {
 							{strings("nav.backToAdmin")}
 						</button>
 					)}
-					<h1 className="text-xl font-semibold text-slate-900 dark:text-white">
+					<h1 className="text-xl font-semibold text-slate-900">
 						{account?.name
 							? strings("app.welcome", [account.name])
 							: strings("app.name")}

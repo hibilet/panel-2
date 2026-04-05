@@ -116,7 +116,7 @@ const MailTemplate = () => {
 			<div className="flex flex-wrap items-center justify-between gap-4">
 				<Link
 					href="/settings/mailing"
-					className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
+					className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
 				>
 					<i className="fa-solid fa-arrow-left" aria-hidden />
 					{strings("back.mailing")}
@@ -125,7 +125,7 @@ const MailTemplate = () => {
 					type="button"
 					onClick={handleSave}
 					disabled={saving}
-					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+					className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 				>
 					{saving ? (
 						<>
@@ -141,34 +141,34 @@ const MailTemplate = () => {
 				</button>
 			</div>
 
-			<div className="rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 overflow-hidden">
-				<h1 className="border-b border-slate-200 bg-slate-50 px-6 py-4 text-lg font-semibold text-slate-900 dark:border-slate-700 dark:bg-slate-800/50 dark:text-white">
-					<i className="fa-solid fa-code mr-2 text-slate-600 dark:text-slate-400" aria-hidden />
+			<div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+				<h1 className="border-b border-slate-200 bg-slate-50 px-6 py-4 text-lg font-semibold text-slate-900">
+					<i className="fa-solid fa-code mr-2 text-slate-600" aria-hidden />
 					{strings("page.settings.mailTemplate")}
 				</h1>
 
 				{error && (
-					<div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-400">
+					<div className="mx-6 mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
 						{error}
 					</div>
 				)}
 
 				{renderError && (
-					<div className="mx-6 mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-400">
+					<div className="mx-6 mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700">
 						{strings("form.mailing.templateRenderError")}: {renderError}
 					</div>
 				)}
 
 				<div className="grid grid-cols-1 lg:grid-cols-3 gap-0 min-h-[60vh]">
 					{/* Left: 1 part — raw EJS template */}
-					<div className="lg:col-span-1 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-200 dark:border-slate-700">
-						<div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+					<div className="lg:col-span-1 flex flex-col border-b lg:border-b-0 lg:border-r border-slate-200">
+						<div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-500">
 							{strings("form.mailing.templateEjs")}
 						</div>
 						<textarea
 							value={html}
 							onChange={(e) => setHtml(e.target.value)}
-							className="flex-1 resize-none border-0 bg-slate-50 p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-0 dark:bg-slate-900/50 dark:text-slate-200"
+							className="flex-1 resize-none border-0 bg-slate-50 p-4 font-mono text-sm text-slate-800 focus:outline-none focus:ring-0"
 							spellCheck={false}
 							placeholder="<%= variable %>..."
 						/>
@@ -176,10 +176,10 @@ const MailTemplate = () => {
 
 					{/* Right: 2 parts — preview */}
 					<div className="lg:col-span-2 flex flex-col">
-						<div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-500 dark:text-slate-400">
+						<div className="px-4 py-2 text-xs font-medium uppercase tracking-wider text-slate-500">
 							{strings("form.mailing.templatePreview")}
 						</div>
-						<div className="flex-1 min-h-[200px] bg-white dark:bg-slate-900">
+						<div className="flex-1 min-h-[200px] bg-white">
 							{rendered ? (
 								<iframe
 									srcDoc={rendered}
@@ -188,7 +188,7 @@ const MailTemplate = () => {
 									className="w-full h-full min-h-[300px] border-0"
 								/>
 							) : (
-								<div className="flex h-full min-h-[300px] items-center justify-center p-6 text-slate-500 dark:text-slate-400">
+								<div className="flex h-full min-h-[300px] items-center justify-center p-6 text-slate-500">
 									{strings("form.mailing.templatePreviewError")}
 								</div>
 							)}

@@ -88,12 +88,18 @@ const InvoicePanel = ({ invoice, onClose }) => {
 								value={formatCurrency(bd.salesTotal ?? 0)}
 							/>
 							<Row
-								label={strings("page.invoices.commissionAmount")}
-								value={formatCurrency(bd.commissionAmount ?? invoice.commision ?? 0)}
-							/>
-							<Row
 								label={strings("page.invoices.baseFee")}
 								value={formatCurrency(bd.baseFee ?? 0)}
+							/>
+							{(bd.ticketFeeAmount ?? 0) > 0 && (
+								<Row
+									label={strings("page.invoices.ticketFee")}
+									value={formatCurrency(bd.ticketFeeAmount)}
+								/>
+							)}
+							<Row
+								label={strings("page.invoices.commissionAmount")}
+								value={formatCurrency(bd.commissionAmount ?? invoice.commision ?? 0)}
 							/>
 							{(bd.installFee ?? 0) > 0 && (
 								<Row
@@ -120,12 +126,12 @@ const InvoicePanel = ({ invoice, onClose }) => {
 					{(invoice.tax ?? 0) > 0 && (
 						<Row
 							label={strings("page.invoices.tax")}
-							value={formatCurrency(invoice.tax)}
+							value={formatCurrency((invoice.subtotal ?? 0) * ((invoice.tax ?? 0) - 1))}
 						/>
 					)}
 					<Row
 						label={strings("page.invoices.total")}
-						value={formatCurrency((invoice.subtotal ?? 0) + (invoice.tax ?? 0))}
+						value={formatCurrency((invoice.subtotal ?? 0) + ((invoice.subtotal ?? 0) * ((invoice.tax ?? 0) -1)))}
 						bold
 					/>
 				</div>
