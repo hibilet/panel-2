@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
 import * as XLSX from "xlsx";
-import { PageHeader } from "../../../../components/shared";
+import { PageHeader, SearchBar } from "../../../../components/shared";
 import { attendeeColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
+import { matchesQuery } from "../../../../utils/search";
 
 const LIMIT = 10000;
 
@@ -139,9 +140,15 @@ const SaleAttendees = ({ sale }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [expandedRowKeys, setExpandedRowKeys] = useState(new Set());
+	const [query, setQuery] = useState("");
 	const printRequestedRef = useRef(false);
 
 	const skip = (page - 1) * LIMIT;
+
+	const filteredReservations = useMemo(
+		() => reservations.filter((r) => matchesQuery(r.owner, query)),
+		[reservations, query],
+	);
 
 	const rowsWithDetails = reservations.filter((r) => r.answers?.length);
 	const allExpanded =
@@ -251,6 +258,22 @@ const SaleAttendees = ({ sale }) => {
 		XLSX.writeFile(wb, `attendees-${safeName}.xlsx`);
 	};
 
+	const handleRowClick = (row) => {
+		if (row.transaction) {
+			window.open(`/transactions/${row.transaction}`, "_blank");
+		} else {
+			setExpandedRowKeys((prev) => {
+				const next = new Set(prev);
+				if (next.has(row.id)) {
+					next.delete(row.id);
+				} else {
+					next.add(row.id);
+				}
+				return next;
+			});
+		}
+	};
+
 	const actions = (
 		<div className="flex gap-2">
 			<button
@@ -303,6 +326,14 @@ const SaleAttendees = ({ sale }) => {
 		<div className="mx-auto max-w-5xl">
 			<PageHeader title={strings("form.attendees.title")} actions={actions} />
 
+			<div className="mt-4">
+				<SearchBar
+					value={query}
+					onChange={setQuery}
+					placeholder={strings("form.attendees.searchPlaceholder")}
+				/>
+			</div>
+
 			{error && (
 				<div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 					{error}
@@ -311,7 +342,7 @@ const SaleAttendees = ({ sale }) => {
 
 			<div className="mt-6 overflow-auto rounded-lg border border-slate-200 bg-white">
 				<DataTable
-					data={reservations}
+					data={filteredReservations}
 					columns={columns}
 					getRowKey={(r) => r.id}
 					loading={loading}
@@ -319,6 +350,7 @@ const SaleAttendees = ({ sale }) => {
 					tableRef={printRef}
 					expandedRowKeys={Array.from(expandedRowKeys)}
 					onExpandedChange={(s) => setExpandedRowKeys(s)}
+					onRowClick={handleRowClick}
 					renderRowDetail={(row) =>
 						row.answers?.length ? (
 							<RowDetail row={row} questions={questions} />

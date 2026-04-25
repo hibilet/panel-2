@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Modal } from "../../../components/shared";
+import { Modal, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
 import { del, get } from "../../../lib/client";
 import strings from "../../../localization";
+import { matchesQuery } from "../../../utils/search";
 
 const mapRows = (rows) =>
 	(rows ?? []).map((row) => ({
@@ -25,6 +26,16 @@ const Sales = () => {
 	const [showMore, setShowMore] = useState(false);
 	const [revenueMode, setRevenueMode] = useState(false);
 	const [deleteTarget, setDeleteTarget] = useState(null);
+	const [query, setQuery] = useState("");
+
+	const filteredSales = useMemo(
+		() => (sales ?? []).filter((s) => matchesQuery(s.name, query)),
+		[sales, query],
+	);
+	const filteredPastSales = useMemo(
+		() => pastSales.filter((s) => matchesQuery(s.name, query)),
+		[pastSales, query],
+	);
 
 	useEffect(() => {
 		if (revenueMode) refreshSales({ revenue: true });
@@ -111,8 +122,14 @@ const Sales = () => {
 				</div>
 			</div>
 
+			<SearchBar
+				value={query}
+				onChange={setQuery}
+				placeholder={strings("page.sales.searchPlaceholder")}
+			/>
+
 			<DataTable
-				data={sales}
+				data={filteredSales}
 				columns={salesColumns(showMore, showMore ? handleDelete : undefined)}
 				getRowKey={(r) => r.id ?? r.name}
 				onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
@@ -137,7 +154,7 @@ const Sales = () => {
 							</div>
 						) : (
 							<DataTable
-								data={pastSales}
+								data={filteredPastSales}
 								columns={salesColumns(false)}
 								getRowKey={(r) => r.id ?? r.name}
 								onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}

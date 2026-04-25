@@ -7,6 +7,7 @@ import {
 	useRef,
 } from "react";
 import { get } from "../lib/client";
+import { getToken } from "../lib/storage";
 
 const AppContext = createContext(null);
 
@@ -53,7 +54,9 @@ export const AppProvider = ({ children }) => {
 	}, []);
 
 	useEffect(() => {
-		fetchInitial();
+		if (getToken()) {
+			fetchInitial();
+		}
 	}, [fetchInitial]);
 
 	const getVenuePlans = useCallback(async (venueId) => {
@@ -91,6 +94,50 @@ export const AppProvider = ({ children }) => {
 		}
 	}, []);
 
+	const updateAccount = useCallback((updates) => {
+		setAccount((prev) => (prev ? { ...prev, ...updates } : updates));
+	}, []);
+
+	const addVenue = useCallback((venue) => {
+		setVenues((prev) => [...prev, venue]);
+	}, []);
+
+	const updateVenue = useCallback((id, updates) => {
+		setVenues((prev) =>
+			prev.map((v) => (v.id === id || v._id === id ? { ...v, ...updates } : v))
+		);
+	}, []);
+
+	const addSale = useCallback((sale) => {
+		setSales((prev) => [sale, ...prev]);
+	}, []);
+
+	const updateSale = useCallback((id, updates) => {
+		setSales((prev) =>
+			prev.map((s) => (s.id === id || s._id === id ? { ...s, ...updates } : s))
+		);
+	}, []);
+
+	const addProvider = useCallback((provider) => {
+		setProviders((prev) => [...prev, provider]);
+	}, []);
+
+	const updateProvider = useCallback((id, updates) => {
+		setProviders((prev) =>
+			prev.map((p) => (p.id === id || p._id === id ? { ...p, ...updates } : p))
+		);
+	}, []);
+
+	const addAgreement = useCallback((agreement) => {
+		setAgreements((prev) => [...prev, agreement]);
+	}, []);
+
+	const updateAgreement = useCallback((id, updates) => {
+		setAgreements((prev) =>
+			prev.map((a) => (a.id === id || a._id === id ? { ...a, ...updates } : a))
+		);
+	}, []);
+
 	const value = {
 		account,
 		sales,
@@ -102,6 +149,15 @@ export const AppProvider = ({ children }) => {
 		error,
 		refreshSales,
 		refreshAccount,
+		updateAccount,
+		addVenue,
+		updateVenue,
+		addSale,
+		updateSale,
+		addProvider,
+		updateProvider,
+		addAgreement,
+		updateAgreement,
 	};
 
 	return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

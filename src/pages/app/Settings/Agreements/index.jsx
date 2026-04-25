@@ -11,7 +11,7 @@ import AgreementPanel from "./Agreement";
 const Agreements = () => {
 	const [, setLocation] = useLocation();
 	const { id } = useParams();
-	const { refreshAccount } = useApp();
+	const { refreshAccount, addAgreement, updateAgreement } = useApp();
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -111,10 +111,12 @@ const Agreements = () => {
 						id={id}
 						onClose={() => setLocation("/settings/agreements")}
 						onSaved={() => {
-							fetchAgreements(true);
 							refreshAccount?.();
+							fetchAgreements(true);
 							setLocation("/settings/agreements");
 						}}
+						onAgreementAdded={addAgreement}
+						onAgreementUpdated={updateAgreement}
 					/>
 				)}
 			</SlidePanel>

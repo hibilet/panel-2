@@ -1,0 +1,5626 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hibilet API",
+    "version": "2.0.0",
+    "description": "Hibilet ticketing platform API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "limitParam": {
+        "in": "query",
+        "name": "limit",
+        "schema": {
+          "type": "integer",
+          "default": 10
+        },
+        "description": "Number of results to return"
+      },
+      "skipParam": {
+        "in": "query",
+        "name": "skip",
+        "schema": {
+          "type": "integer",
+          "default": 0
+        },
+        "description": "Number of results to skip (pagination)"
+      },
+      "idParam": {
+        "in": "path",
+        "name": "id",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "Resource ID"
+      }
+    },
+    "responses": {
+      "Error": {
+        "description": "Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "log": {
+                  "nullable": true
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Account": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "account.admin",
+              "account.merchant",
+              "account.reader",
+              "account.3rdparty",
+              "account.customer"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive",
+              "suspended",
+              "deleted"
+            ]
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "realm": {
+            "type": "string",
+            "nullable": true,
+            "description": "ObjectId (merchants only)"
+          },
+          "stripeCustomerId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Customers only"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Sale": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Account ObjectId"
+          },
+          "agreement": {
+            "type": "string",
+            "description": "Agreement ObjectId"
+          },
+          "provider": {
+            "type": "string",
+            "description": "Provider ObjectId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "default": "eur"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "default": "sale.event"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "basket": {
+                "type": "object",
+                "properties": {
+                  "limit": {
+                    "type": "integer",
+                    "default": 10
+                  },
+                  "expire": {
+                    "type": "integer",
+                    "default": 300
+                  }
+                }
+              },
+              "style": {
+                "type": "string"
+              }
+            }
+          },
+          "tracking": {
+            "type": "object",
+            "properties": {
+              "ga": {
+                "type": "string"
+              },
+              "meta": {
+                "type": "string"
+              },
+              "tiktok": {
+                "type": "string"
+              }
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleQuestion"
+            }
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rules": {
+            "type": "string"
+          },
+          "venue": {
+            "type": "string",
+            "nullable": true,
+            "description": "Venue ObjectId"
+          },
+          "minAge": {
+            "type": "integer"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "SaleQuestion": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "boolean",
+              "date",
+              "time",
+              "datetime",
+              "email",
+              "phone",
+              "url",
+              "select",
+              "multiple-select"
+            ]
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sale": {
+            "type": "string",
+            "description": "Sale ObjectId"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "nullable": true
+          },
+          "promo": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "number"
+          },
+          "limit": {
+            "type": "integer",
+            "nullable": true
+          },
+          "productsToDeliver": {
+            "type": "integer",
+            "default": 1
+          },
+          "displayOrder": {
+            "type": "integer"
+          },
+          "stock": {
+            "type": "integer",
+            "description": "event-typed products only"
+          },
+          "seated": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "default": "product.event"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive",
+              "coming-soon"
+            ]
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Reservation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "sale": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "basket": {
+            "type": "string"
+          },
+          "product": {
+            "type": "string"
+          },
+          "transaction": {
+            "type": "string",
+            "nullable": true
+          },
+          "coupon": {
+            "type": "string",
+            "nullable": true
+          },
+          "parentReservation": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "pending",
+              "success",
+              "read",
+              "refunded",
+              "cancelled"
+            ]
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Transaction": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "basket": {
+            "type": "string"
+          },
+          "sale": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "conversation": {
+            "type": "string",
+            "description": "Provider-side reference"
+          },
+          "paid": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "success",
+              "failed",
+              "refunded",
+              "cancelled"
+            ]
+          },
+          "dump": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "deliveredAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Basket": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "billing": {
+            "type": "string",
+            "nullable": true
+          },
+          "sale": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "created",
+              "pending",
+              "success",
+              "refunded",
+              "cancelled",
+              "expired"
+            ]
+          },
+          "answers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "question": {
+                  "type": "string"
+                },
+                "answer": {}
+              }
+            }
+          },
+          "language": {
+            "type": "string"
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Billing": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "newsletter": {
+            "type": "boolean"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "billing.customer",
+              "billing.merchant"
+            ]
+          }
+        }
+      },
+      "Coupon": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "sale": {
+            "type": "string"
+          },
+          "channel": {
+            "type": "string",
+            "nullable": true
+          },
+          "code": {
+            "type": "string"
+          },
+          "discount": {
+            "type": "number"
+          },
+          "stock": {
+            "type": "integer"
+          },
+          "used": {
+            "type": "integer"
+          },
+          "expirationDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "applicableProducts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "bank": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string",
+            "default": "TR"
+          },
+          "currency": {
+            "type": "string",
+            "default": "TRY"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "provider.paywall",
+              "provider.stripe",
+              "provider.default"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "deletedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Venue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string",
+            "nullable": true
+          },
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Invoice": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "billing": {
+            "type": "string",
+            "nullable": true
+          },
+          "tier": {
+            "type": "string",
+            "nullable": true
+          },
+          "subscription": {
+            "type": "string",
+            "nullable": true
+          },
+          "commision": {
+            "type": "number"
+          },
+          "subtotal": {
+            "type": "number"
+          },
+          "tax": {
+            "type": "number",
+            "default": 1.21
+          },
+          "reservations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled"
+            ]
+          },
+          "period": {
+            "type": "object",
+            "properties": {
+              "start": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "end": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "breakdown": {
+            "type": "object",
+            "properties": {
+              "salesTotal": {
+                "type": "number"
+              },
+              "salesCount": {
+                "type": "integer"
+              },
+              "discount": {
+                "type": "number"
+              },
+              "commissionAmount": {
+                "type": "number"
+              },
+              "baseFee": {
+                "type": "number"
+              },
+              "ticketFeeAmount": {
+                "type": "number"
+              },
+              "installFee": {
+                "type": "number"
+              }
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Agreement": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "predecessor": {
+            "type": "string",
+            "nullable": true
+          },
+          "language": {
+            "type": "string",
+            "default": "TR"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "tos",
+              "sales",
+              "gdpr"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Realm": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          },
+          "logo": {
+            "type": "string",
+            "nullable": true
+          },
+          "domains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hostname": {
+                  "type": "string"
+                },
+                "service": {
+                  "type": "string",
+                  "enum": [
+                    "api",
+                    "dashboard",
+                    "tickets",
+                    "widget"
+                  ]
+                }
+              }
+            }
+          },
+          "urls": {
+            "type": "object",
+            "properties": {
+              "api": {
+                "type": "string"
+              },
+              "dashboard": {
+                "type": "string"
+              },
+              "tickets": {
+                "type": "string"
+              }
+            }
+          },
+          "branding": {
+            "type": "object",
+            "properties": {
+              "appName": {
+                "type": "string"
+              },
+              "primaryColor": {
+                "type": "string"
+              },
+              "favicon": {
+                "type": "string"
+              },
+              "supportEmail": {
+                "type": "string"
+              }
+            }
+          },
+          "smtp": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type": "string"
+              },
+              "port": {
+                "type": "integer"
+              },
+              "secure": {
+                "type": "boolean"
+              },
+              "user": {
+                "type": "string"
+              },
+              "pass": {
+                "type": "string"
+              },
+              "sender": {
+                "type": "string"
+              }
+            }
+          },
+          "features": {
+            "type": "object",
+            "properties": {
+              "giveaways": {
+                "type": "boolean"
+              },
+              "channels": {
+                "type": "boolean"
+              },
+              "invoices": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "ApiResponseAccount": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Account"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseSale": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Sale"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseSales": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Sale"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseProduct": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Product"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseProducts": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Product"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseReservation": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Reservation"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseTransaction": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseTransactions": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Transaction"
+            }
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseInvoice": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Invoice"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApiResponseToken": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string",
+            "description": "JWT"
+          },
+          "message": {
+            "type": "string"
+          },
+          "total": {
+            "type": "integer",
+            "nullable": true
+          },
+          "extra": {
+            "nullable": true
+          },
+          "count": {
+            "type": "integer",
+            "nullable": true
+          },
+          "token": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "log": {
+            "nullable": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Root",
+      "description": "Health check and system info"
+    },
+    {
+      "name": "Auth",
+      "description": "Authentication and authorization"
+    },
+    {
+      "name": "Auth - Stripe",
+      "description": "Stripe Connect OAuth"
+    },
+    {
+      "name": "Accounts",
+      "description": "User account management"
+    },
+    {
+      "name": "Agreements",
+      "description": "Business agreements"
+    },
+    {
+      "name": "Baskets",
+      "description": "Shopping baskets"
+    },
+    {
+      "name": "Billings",
+      "description": "Billing information"
+    },
+    {
+      "name": "Callbacks",
+      "description": "Payment provider webhooks"
+    },
+    {
+      "name": "Channels",
+      "description": "Sales channels"
+    },
+    {
+      "name": "Contracts",
+      "description": "Contracts"
+    },
+    {
+      "name": "Coupons",
+      "description": "Discount coupons"
+    },
+    {
+      "name": "Dashboards",
+      "description": "Dashboard analytics"
+    },
+    {
+      "name": "Fakers",
+      "description": "Test data generation"
+    },
+    {
+      "name": "Geolocations",
+      "description": "Geographic data"
+    },
+    {
+      "name": "Giveaways",
+      "description": "Giveaway management"
+    },
+    {
+      "name": "Invoices",
+      "description": "Invoicing"
+    },
+    {
+      "name": "Legals",
+      "description": "Legal documents"
+    },
+    {
+      "name": "Links",
+      "description": "Link management"
+    },
+    {
+      "name": "Mailing",
+      "description": "Email configuration"
+    },
+    {
+      "name": "Products",
+      "description": "Product management"
+    },
+    {
+      "name": "Providers",
+      "description": "Payment providers"
+    },
+    {
+      "name": "QR",
+      "description": "QR code generation"
+    },
+    {
+      "name": "Reports",
+      "description": "Reports"
+    },
+    {
+      "name": "Reservations",
+      "description": "Reservation management"
+    },
+    {
+      "name": "Sales",
+      "description": "Sale/event management"
+    },
+    {
+      "name": "Scrapers",
+      "description": "External data scrapers"
+    },
+    {
+      "name": "Search",
+      "description": "Global search"
+    },
+    {
+      "name": "Transactions",
+      "description": "Payment transactions"
+    },
+    {
+      "name": "Media",
+      "description": "Media file uploads"
+    },
+    {
+      "name": "Venues",
+      "description": "Venue management"
+    },
+    {
+      "name": "3rd Party",
+      "description": "Third-party integrations"
+    }
+  ],
+  "paths": {
+    "/3rdparty/{sales}/reservations": {
+      "get": {
+        "tags": [
+          "3rd Party"
+        ],
+        "summary": "Get reservations for a sale",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sales",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/me": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get current account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Update current account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get all accounts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Create account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/accounts/search": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Search accounts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/{id}": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Update account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/{id}/summary": {
+      "get": {
+        "tags": [
+          "Accounts"
+        ],
+        "summary": "Get account summary",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/agreements": {
+      "get": {
+        "tags": [
+          "Agreements"
+        ],
+        "summary": "Get all agreements (auto individualized by account type)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Agreements"
+        ],
+        "summary": "Create an agreement",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/agreements/search": {
+      "get": {
+        "tags": [
+          "Agreements"
+        ],
+        "summary": "Search agreements (admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/agreements/{id}": {
+      "get": {
+        "tags": [
+          "Agreements"
+        ],
+        "summary": "Get a single agreement",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Agreements"
+        ],
+        "summary": "Update an agreement",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/test": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Test authentication",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/request": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Request authentication",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "otp"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "otp": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseToken"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Invalid OTP or expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/token": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Create token",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Get token",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/register/checkout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Register via checkout",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/connect": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Initiate Stripe Connect",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/callback": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Stripe Connect callback",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/onboard": {
+      "post": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Start Stripe Connect onboarding (Account Links)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "country": {
+                    "type": "string",
+                    "default": "TR"
+                  },
+                  "businessType": {
+                    "type": "string",
+                    "enum": [
+                      "individual",
+                      "company"
+                    ],
+                    "default": "company"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns Account Link URL for redirect"
+          }
+        }
+      }
+    },
+    "/auth/stripe/onboard/return": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Return URL after Stripe onboarding completes",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stripe_account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to dashboard with token"
+          }
+        }
+      }
+    },
+    "/auth/stripe/onboard/refresh": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Refresh expired Account Link",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "stripe_account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to new Stripe onboarding link"
+          }
+        }
+      }
+    },
+    "/auth/stripe/required-data": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Get required Stripe data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/sync": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Sync Stripe account",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/push": {
+      "post": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Push data to Stripe",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/webhook": {
+      "post": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Stripe webhook handler",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/payment-methods": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "List saved payment methods for current customer",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Attach a payment method to current customer",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "paymentMethodId"
+                ],
+                "properties": {
+                  "paymentMethodId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/auth/stripe/setup-intent": {
+      "get": {
+        "tags": [
+          "Auth - Stripe"
+        ],
+        "summary": "Create a SetupIntent for saving a card",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns clientSecret + id"
+          }
+        }
+      }
+    },
+    "/baskets": {
+      "get": {
+        "tags": [
+          "Baskets"
+        ],
+        "summary": "Get all baskets",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/baskets/{id}": {
+      "get": {
+        "tags": [
+          "Baskets"
+        ],
+        "summary": "Get a single basket",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Baskets"
+        ],
+        "summary": "Update a basket",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/billings": {
+      "get": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Get all billings (auto individualized by account type)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Create a billing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/billings/search": {
+      "get": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Search billings (admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/billings/my": {
+      "get": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Get my billing information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/billings/{id}": {
+      "get": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Get a single billing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Billings"
+        ],
+        "summary": "Update a billing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/callbacks/transactions/paywall": {
+      "get": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Paywall transaction callback (GET)",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Paywall transaction callback (POST)",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/callbacks/transactions/stripe": {
+      "get": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Stripe transaction callback (GET)",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Stripe transaction webhook (POST)",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/callbacks/transactions/default": {
+      "get": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Default provider auto-confirm callback",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "transaction",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to confirmation page"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Callbacks"
+        ],
+        "summary": "Default provider confirm callback (widget)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "transaction"
+                ],
+                "properties": {
+                  "transaction": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction confirmed"
+          }
+        }
+      }
+    },
+    "/channels/{id}": {
+      "get": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Get a single channel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Update a channel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Delete a channel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/channels/{id}/report": {
+      "get": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Get channel report",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/channels": {
+      "post": {
+        "tags": [
+          "Channels"
+        ],
+        "summary": "Create a channel",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/contracts": {
+      "get": {
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Get all contracts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Create a contract",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/contracts/{id}": {
+      "get": {
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Get a single contract",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Contracts"
+        ],
+        "summary": "Update a contract",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/coupons": {
+      "get": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Get all coupons",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Create a coupon",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/coupons/{id}": {
+      "get": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Get a single coupon",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Update a coupon",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Delete a coupon",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/coupons/challenge": {
+      "post": {
+        "tags": [
+          "Coupons"
+        ],
+        "summary": "Challenge a coupon code",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/dashboards/transactions/between": {
+      "get": {
+        "tags": [
+          "Dashboards"
+        ],
+        "summary": "Get transactions between dates",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/dashboards/facts/sales": {
+      "get": {
+        "tags": [
+          "Dashboards"
+        ],
+        "summary": "Get sales facts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/dashboards/today/gate": {
+      "get": {
+        "tags": [
+          "Dashboards"
+        ],
+        "summary": "Get today's gate data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/fakers/accounts": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake accounts in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/fakers/billings": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake billings in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/fakers/venues": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake venues in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/fakers/transactions": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake transactions in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/fakers/agreements": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake agreements in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/fakers/providers": {
+      "post": {
+        "tags": [
+          "Fakers"
+        ],
+        "summary": "Generate fake providers in bulk",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/geolocations": {
+      "get": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Get all geolocations",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Bulk import geolocations",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/geolocations/cities": {
+      "get": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Get all cities",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/geolocations/cities/{c}/districts": {
+      "get": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Get districts of a city",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "c",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/geolocations/cities/{c}/districts/{d}/neighborhoods": {
+      "get": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Get neighborhoods of a district",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "c",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "d",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/geolocations/cities/{c}/districts/{d}/neighborhoods/{n}/streets": {
+      "get": {
+        "tags": [
+          "Geolocations"
+        ],
+        "summary": "Get streets of a neighborhood",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "c",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "d",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "n",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/giveaways": {
+      "get": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Get all giveaways",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Create a giveaway",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/giveaways/{id}/calendar.ics": {
+      "get": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Get giveaway calendar ICS file",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/giveaways/{id}": {
+      "get": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Get a single giveaway",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Update a giveaway",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Giveaways"
+        ],
+        "summary": "Delete a giveaway",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/invoices/my": {
+      "get": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Get my invoices (merchant only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/invoices/generate": {
+      "post": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Generate invoices on demand",
+        "description": "Generate invoice for a single merchant or all merchants for previous month",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "merchantId": {
+                    "type": "string",
+                    "description": "Optional - generate for specific merchant"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Optional - period start (defaults to previous month)"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Optional - period end (defaults to previous month)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/invoices": {
+      "get": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Get all invoices",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Create an invoice",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/invoices/{id}": {
+      "get": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Get a single invoice",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Update an invoice",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/invoices/reports/between": {
+      "get": {
+        "tags": [
+          "Invoices"
+        ],
+        "summary": "Get invoice reports between dates",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/legals/rules/{sale}": {
+      "get": {
+        "tags": [
+          "Legals"
+        ],
+        "summary": "Get rules for a sale",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/legals/agreements/{sale}": {
+      "get": {
+        "tags": [
+          "Legals"
+        ],
+        "summary": "Get agreements for a sale",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/legals/commons/{type}": {
+      "get": {
+        "tags": [
+          "Legals"
+        ],
+        "summary": "Get common legal documents by type",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "type",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/links": {
+      "get": {
+        "tags": [
+          "Links"
+        ],
+        "summary": "Get all links",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Links"
+        ],
+        "summary": "Create a link",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/links/{id}": {
+      "get": {
+        "tags": [
+          "Links"
+        ],
+        "summary": "Get a single link",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Links"
+        ],
+        "summary": "Update a link",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Links"
+        ],
+        "summary": "Delete a link",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/mailing": {
+      "get": {
+        "tags": [
+          "Mailing"
+        ],
+        "summary": "Get all mailings",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Mailing"
+        ],
+        "summary": "Create a mailing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/mailing/{id}": {
+      "put": {
+        "tags": [
+          "Mailing"
+        ],
+        "summary": "Update a mailing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Mailing"
+        ],
+        "summary": "Delete a mailing",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/media": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "summary": "Upload a media file",
+        "description": "Uploads a file to ImgBB and returns the hosted image URLs.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Image file to upload (max 32 MB)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File uploaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "example": "https://i.ibb.co/w04Prt6/image.jpg"
+                    },
+                    "display_url": {
+                      "type": "string",
+                      "example": "https://i.ibb.co/98W13PY/image.jpg"
+                    },
+                    "delete_url": {
+                      "type": "string",
+                      "example": "https://ibb.co/2ndCYJK/670a7e48ddcb85ac340c717a41047e5c"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file provided"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/media/enhance/{id}": {
+      "post": {
+        "tags": [
+          "Media"
+        ],
+        "summary": "Generate enhanced image for a Link via Grok and upload to ImgBB",
+        "description": "Pulls Link data (title + populated sales/venues), formats sales as \"City - Venue - MMM D, YYYY\", builds prompt from prompts/image-gen.json, calls OpenRouter Grok image gen, uploads result to ImgBB.",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Link ObjectId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Enhanced image generated and uploaded"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "500": {
+            "description": "Generation or upload failed"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get all products",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProducts"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Create a product",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Get a single product",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Update a product",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Products"
+        ],
+        "summary": "Delete a product",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/providers": {
+      "get": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Get all providers (auto individualized by account type)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Create a provider",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/providers/search": {
+      "get": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Search providers (admin only)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/providers/{id}": {
+      "get": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Get a single provider",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Update a provider",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Providers"
+        ],
+        "summary": "Delete a provider",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/qr/reservations/{id}": {
+      "get": {
+        "tags": [
+          "QR"
+        ],
+        "summary": "Create QR code for a reservation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "List reports (owner or admin in realm)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Generate and persist a report",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "type",
+                  "sale"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "churn",
+                      "sales"
+                    ]
+                  },
+                  "sale": {
+                    "type": "string"
+                  },
+                  "start": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "end": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "highValueThreshold": {
+                    "type": "number",
+                    "default": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success - full report with raw_data and leads_data"
+          }
+        }
+      }
+    },
+    "/reports/search": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Search reports",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "churn",
+                "sales"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sale",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reports/insights": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Gather comprehensive data pool for AI insights pipeline",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "format",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "encoded"
+              ]
+            },
+            "description": "Return encoded plain-text format"
+          },
+          {
+            "in": "query",
+            "name": "ai-summary",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true"
+              ]
+            },
+            "description": "Generate AI-powered human-readable summary"
+          },
+          {
+            "in": "query",
+            "name": "language",
+            "schema": {
+              "type": "string",
+              "default": "en"
+            },
+            "description": "Language for AI summary (ISO code e.g. en, de, tr)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - insights data, encoded text, or AI summary"
+          }
+        }
+      }
+    },
+    "/reports/{id}": {
+      "get": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Get single report with full data",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Update report metadata",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reports"
+        ],
+        "summary": "Soft delete report",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reservations": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Get all reservations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Create reservation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "sale",
+                  "product"
+                ],
+                "properties": {
+                  "sale": {
+                    "type": "string",
+                    "description": "Sale ObjectId"
+                  },
+                  "product": {
+                    "type": "string",
+                    "description": "Product ObjectId"
+                  },
+                  "basket": {
+                    "type": "string",
+                    "description": "Optional Basket ObjectId; created if missing"
+                  },
+                  "channel": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReservation"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Out of stock or invalid input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Delete reservation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reservations/{id}": {
+      "get": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Get reservation by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Update reservation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/reservations/ops/cancel": {
+      "put": {
+        "tags": [
+          "Reservations"
+        ],
+        "summary": "Cancel reservation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "Root"
+        ],
+        "summary": "Get root",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get all sales",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSales"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Create sale",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/sales/search": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Search sales",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{id}": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSale"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Update sale",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Delete sale",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/attendees": {
+      "post": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Add attendees to sale",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/occupations": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale occupations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/channels": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale channels",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/products": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale products",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/coupons": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale coupons",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/reservations": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale reservations",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/reservation-counts": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sale reservation counts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/reservations/readBy": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get reservations read by interval",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/{sale}/guests": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Search sale guests",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/reports/sales": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get sales reports",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/sales/reports/churn": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Get churn report (abandoned baskets per sale)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sale",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Sale ID"
+          },
+          {
+            "in": "query",
+            "name": "start",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Start date (ISO format)"
+          },
+          {
+            "in": "query",
+            "name": "end",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "End date (ISO format)"
+          },
+          {
+            "in": "query",
+            "name": "highValueThreshold",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "default": 100
+            },
+            "description": "Basket total threshold for high-value segment (default 100)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success - array of users with abandoned baskets, segmented by lead tier"
+          }
+        }
+      }
+    },
+    "/scrapers/biletix": {
+      "get": {
+        "tags": [
+          "Scrapers"
+        ],
+        "summary": "Scrape Biletix data",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/search/{model}": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Search by model",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "model",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/subscription": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Get current subscription",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/subscription/history": {
+      "get": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Get subscription history",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 25
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/subscribe": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Subscribe, upgrade, or downgrade tier",
+        "description": "Unified endpoint for tier changes.\n- No current subscription: subscribes immediately\n- Higher baseFee tier: upgrades immediately (install fee deducted from prior payments)\n- Lower baseFee tier: queues downgrade for next billing period\n",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "uuid"
+                ],
+                "properties": {
+                  "uuid": {
+                    "type": "string",
+                    "description": "Tier UUID to subscribe to"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/cancel": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Cancel subscription entirely",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/cancel-pending": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Cancel pending downgrade",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers/admin/change-merchant-tier": {
+      "post": {
+        "tags": [
+          "Subscriptions"
+        ],
+        "summary": "Admin - Change merchant tier directly",
+        "description": "Admin-only endpoint to change a merchant's subscription tier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "merchantId",
+                  "uuid"
+                ],
+                "properties": {
+                  "merchantId": {
+                    "type": "string",
+                    "description": "Merchant account ID to change tier for"
+                  },
+                  "uuid": {
+                    "type": "string",
+                    "description": "Tier UUID to subscribe merchant to"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/tiers": {
+      "get": {
+        "tags": [
+          "Tiers"
+        ],
+        "summary": "Get all tiers",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tiers"
+        ],
+        "summary": "Create a tier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "description": {
+                    "type": "string"
+                  },
+                  "baseFee": {
+                    "type": "number"
+                  },
+                  "installFee": {
+                    "type": "number"
+                  },
+                  "saleLimit": {
+                    "type": "number"
+                  },
+                  "commission": {
+                    "type": "object",
+                    "properties": {
+                      "amount": {
+                        "type": "number"
+                      },
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "fixed",
+                          "percentage"
+                        ]
+                      }
+                    }
+                  },
+                  "acl": {
+                    "type": "object"
+                  },
+                  "exclusive": {
+                    "type": "boolean"
+                  },
+                  "allowedOrganizers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/tiers/{id}": {
+      "get": {
+        "tags": [
+          "Tiers"
+        ],
+        "summary": "Get a single tier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tiers"
+        ],
+        "summary": "Update a tier",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Get all transactions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTransactions"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Create transaction",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/transactions/search": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Search transactions",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions/{id}/calendar.ics": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Get transaction calendar ICS file",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions/{id}": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Get transaction by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseTransaction"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Update transaction",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions/{id}/test-success": {
+      "get": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Test transaction success",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions/{id}/resend-email": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Resend transaction email (optionally to alternate address via body.emailAddress)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/transactions/{id}/resend-email-alternate": {
+      "post": {
+        "tags": [
+          "Transactions"
+        ],
+        "summary": "Resend transaction email (alias of resend-email; accepts emailAddress in body)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "emailAddress": {
+                    "type": "string",
+                    "description": "Optional alternate email address to send the ticket to"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/venues": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Get all venues (auto individualized by account type)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Create a venue",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/venues/search": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Search venues",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/venues/{id}": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Get a single venue",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Update a venue",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/venues/plans": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Get all venue plans (auto individualized by account type)",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Create a venue plan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      }
+    },
+    "/venues/plans/search": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Search venue plans",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/venues/plans/{id}": {
+      "get": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Get a single venue plan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Venues"
+        ],
+        "summary": "Update a venue plan",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  }
+}

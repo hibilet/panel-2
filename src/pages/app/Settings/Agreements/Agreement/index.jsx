@@ -6,7 +6,7 @@ import strings from "../../../../../localization";
 
 const defaultValues = { name: "", content: "" };
 
-const AgreementPanel = ({ id, onClose, onSaved }) => {
+const AgreementPanel = ({ id, onClose, onSaved, onAgreementAdded, onAgreementUpdated }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -52,10 +52,13 @@ const AgreementPanel = ({ id, onClose, onSaved }) => {
 				const res = await post("/agreements", payload);
 				const created = res.data ?? null;
 				setData(created);
-				if (created?.id) onSaved?.(created.id);
+				onAgreementAdded?.(created);
+				onSaved?.(created?.id);
 			} else {
-				await put(`/agreements/${id}`, payload);
-				setData((prev) => (prev ? { ...prev, ...payload } : null));
+				const res = await put(`/agreements/${id}`, payload);
+				const updated = res.data ?? payload;
+				setData((prev) => (prev ? { ...prev, ...updated } : null));
+				onAgreementUpdated?.(id, updated);
 				onSaved?.();
 			}
 		} catch (err) {

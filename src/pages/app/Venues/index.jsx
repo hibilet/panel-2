@@ -16,7 +16,7 @@ const LIMIT = 25;
 
 const Venues = () => {
 	const [, setLocation] = useLocation();
-	const { account } = useApp();
+	const { account, addVenue, updateVenue } = useApp();
 	const { id } = useParams();
 
 	const venueId = id ?? null;
@@ -127,6 +127,8 @@ const Venues = () => {
 							fetchVenues(true);
 							setLocation("/venues");
 						}}
+						onVenueAdded={addVenue}
+						onVenueUpdated={updateVenue}
 					/>
 				)}
 			</SlidePanel>

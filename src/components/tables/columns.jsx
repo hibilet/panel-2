@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { Link } from "wouter";
 import strings, { formatCurrency } from "../../localization";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
@@ -268,16 +267,7 @@ export const providersColumns = [
 	{
 		key: "name",
 		header: strings("table.provider.name"),
-		render: (r) => (
-			<div className="flex items-center gap-2">
-				<span>{r.name ?? "—"}</span>
-				{r.isDefault && (
-					<span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
-						{strings("form.provider.isDefault")}
-					</span>
-				)}
-			</div>
-		),
+		render: (r) => r.name ?? "—",
 	},
 	{
 		key: "type",
@@ -603,12 +593,15 @@ export const attendeeColumns = (CopyButton) => [
 		render: (r) => {
 			return r.transaction ? (
 				<span className="flex items-center gap-2">
-					<Link
+					<a
 						href={`/transactions/${r.transaction}`}
+						target="_blank"
+						rel="noreferrer noopener"
+						onClick={(e) => e.stopPropagation()}
 						className="text-sm text-slate-600 underline hover:text-slate-900"
 					>
 						{strings("form.channel.open")}
-					</Link>
+					</a>
 					{/* <CopyButton text={`/transactions/${r.transaction}`} stopPropagation /> */}
 				</span>
 			) : (

@@ -1,3 +1,4 @@
+import strings from "../localization";
 import { getToken } from "./storage";
 import { showToast } from "./toastStore";
 
@@ -9,12 +10,41 @@ const headerBuilder = (header, form) => ({
 	...(getToken() ? { authorization: getToken() } : null),
 });
 
+let sessionExpiredHandled = false;
+
+const handleSessionExpired = () => {
+	if (sessionExpiredHandled) return;
+	sessionExpiredHandled = true;
+	const message = strings("auth.sessionExpired");
+	localStorage.removeItem("token");
+	showToast("error", message);
+	try {
+		sessionStorage.setItem("pendingToast.error", message);
+	} catch {}
+	setTimeout(() => {
+		if (window.location.pathname === "/") {
+			window.location.reload();
+		} else {
+			window.location.replace("/");
+		}
+	}, 50);
+};
+
 const handler = async (res) => {
+	if ((res.status === 401 || res.status === 403) && getToken()) {
+		const data = await res.json();
+		if (res.status === 401 || data?.message === "session-expired") {
+			handleSessionExpired();
+			const err = new Error("session-expired");
+			err.__sessionExpired = true;
+			throw err;
+		}
+		throw data;
+	}
 	if (!res.ok) {
 		throw await res.json();
-	} else {
-		return res.json();
 	}
+	return res.json();
 };
 
 const withToast = (promise) =>
@@ -24,7 +54,7 @@ const withToast = (promise) =>
 			return data;
 		})
 		.catch((err) => {
-			showToast("error", "An Error Occurred");
+			if (!err?.__sessionExpired) showToast("error", "An Error Occurred");
 			throw err;
 		});
 

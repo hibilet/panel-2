@@ -10,6 +10,7 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { SearchableDropdown } from "../inputs";
 import strings, { formatCurrency } from "../../localization";
 
 const mergeWithCompareData = (data = [], compareData = []) => {
@@ -124,20 +125,17 @@ const SalesChart = ({
 							</option>
 						))}
 					</select>
-					<select
-						value={selectedSale}
-						onChange={(e) => onSaleChange?.(e.target.value)}
-						disabled={dropdownsDisabled}
-						className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-sm text-slate-700 shadow-sm focus:border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-300 disabled:cursor-not-allowed disabled:opacity-50"
-						aria-label={strings("common.filterBySale")}
-					>
-						<option value="all">{strings("common.allSales")}</option>
-						{sales.map((s) => (
-							<option key={s.id} value={s.id}>
-								{s.name}
-							</option>
-						))}
-					</select>
+					<div className="w-64">
+						<SearchableDropdown
+							name="saleFilter"
+							value={selectedSale === "all" ? "" : selectedSale}
+							onChange={(v) => onSaleChange?.(v || "all")}
+							disabled={dropdownsDisabled}
+							options={sales ?? []}
+							placeholder={strings("common.allSales")}
+							emptyText={strings("common.noResults")}
+						/>
+					</div>
 				</div>
 			</div>
 			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">

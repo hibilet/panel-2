@@ -59,6 +59,7 @@ const Dashboard = () => {
 		setIsOpen(true);
 	};
 	const [todaySales, setTodaySales] = useState(null);
+	const [todayCount, setTodayCount] = useState(null);
 	const [yesterdaySales, setYesterdaySales] = useState(null);
 	const [mtdSales, setMtdSales] = useState(null);
 	const [mtdProductsSold, setMtdProductsSold] = useState(null);
@@ -133,6 +134,7 @@ const Dashboard = () => {
 			.then(([todayRes, yesterdayRes, mtdRes, lastMonthRes, transactionsRes]) => {
 				const todayData = todayRes.data?.[0];
 				setTodaySales(todayData?.total ?? 0);
+				setTodayCount(todayData?.count ?? 0);
 
 				const yesterdayData = yesterdayRes.data?.[0];
 				setYesterdaySales(yesterdayData?.total ?? 0);
@@ -314,7 +316,14 @@ const Dashboard = () => {
 			>
 				<StatCard
 					label={strings("dashboard.stats.todaySales")}
-					value={formatCurrency(todaySales ?? 0)}
+					value={
+						<>
+							{formatCurrency(todaySales ?? 0)}
+							<span className="ml-2 text-sm font-medium text-slate-500">
+								🎟 {todayCount ?? 0}
+							</span>
+						</>
+					}
 					loading={statsLoading}
 					comparison={todayVsYesterday}
 				/>

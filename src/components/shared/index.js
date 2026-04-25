@@ -5,3 +5,5 @@ export { default as EmptyState } from "./EmptyState";
 export { default as SlidePanel } from "./SlidePanel";
 export { default as Modal } from "./Modal";
 export { default as PanelHeader } from "./PanelHeader";
+export { default as ImageUpload } from "./ImageUpload";
+export { default as SearchBar } from "./SearchBar";

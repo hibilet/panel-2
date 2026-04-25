@@ -26,7 +26,7 @@ const defaultValues = {
 	status: "active",
 };
 
-const VenuePanel = ({ id, onClose, onSaved }) => {
+const VenuePanel = ({ id, onClose, onSaved, onVenueAdded, onVenueUpdated }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -77,13 +77,13 @@ const VenuePanel = ({ id, onClose, onSaved }) => {
 				const res = await post("/venues", payload);
 				const created = res.data ?? null;
 				setData(created);
-				const newId = created?.id ?? created?._id;
-				if (newId) onSaved?.(newId);
+				onVenueAdded?.(created);
+				onSaved?.(created?.id ?? created?._id);
 			} else {
 				const res = await put(`/venues/${id}`, payload);
-				setData((prev) =>
-					prev ? { ...prev, ...(res.data ?? payload) } : (res.data ?? payload),
-				);
+				const updated = res.data ?? payload;
+				setData((prev) => (prev ? { ...prev, ...updated } : updated));
+				onVenueUpdated?.(id, updated);
 				onSaved?.();
 			}
 		} catch (err) {

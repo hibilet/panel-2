@@ -12,7 +12,7 @@ import ProviderPanel from "./Provider";
 const Providers = () => {
 	const [, setLocation] = useLocation();
 	const { id } = useParams();
-	const { refreshAccount } = useApp();
+	const { refreshAccount, addProvider, updateProvider } = useApp();
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -112,15 +112,17 @@ const Providers = () => {
 						id={id}
 						onClose={() => setLocation("/settings/providers")}
 						onSaved={() => {
-							fetchProviders(true);
 							refreshAccount?.();
+							fetchProviders(true);
 							setLocation("/settings/providers");
 						}}
 						onDeleted={() => {
-							fetchProviders(true);
 							refreshAccount?.();
+							fetchProviders(true);
 							setLocation("/settings/providers");
 						}}
+						onProviderAdded={addProvider}
+						onProviderUpdated={updateProvider}
 					/>
 				)}
 			</SlidePanel>

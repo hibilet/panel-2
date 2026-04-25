@@ -1,20 +1,21 @@
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 dayjs.extend(utc);
 
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { useLocation } from "wouter";
 import {
 	Checkbox,
 	Input,
+	SearchableDropdown,
 	Select,
 	Textarea,
 } from "../../../../components/inputs";
+import { ImageUpload } from "../../../../components/shared";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
-import { uploadImage } from "../../../../lib/imgbb";
 import strings from "../../../../localization";
 import { saleBasicFaker } from "../../../../utils/fakers";
 import { compact, toId } from "../../../../utils/object";
@@ -27,10 +28,10 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 		providers,
 		loading: appLoading,
 		refreshSales,
+		addSale,
+		updateSale,
 	} = useApp();
 	const [plans, setPlans] = useState(null);
-	const fileInputRef = useRef(null);
-	const [imageUploading, setImageUploading] = useState(false);
 	const [saving, setSaving] = useState(false);
 
 	const {
@@ -39,6 +40,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 		reset,
 		setValue,
 		watch,
+		control,
 		formState: { errors },
 	} = useForm();
 	const venue = watch("venue");
@@ -76,7 +78,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			const payload = buildPayload(data);
 			const res = await post(`/sales`, payload);
 			setSale(res.data);
-			await refreshSales();
+			addSale(res.data);
 			if (res.data?.id) setLocation(`/sales/${res.data.id}`);
 		} finally {
 			setSaving(false);
@@ -89,7 +91,7 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			const payload = buildPayload(data);
 			const res = await put(`/sales/${sale?.id}`, payload);
 			setSale(res.data);
-			await refreshSales();
+			updateSale(sale?.id, res.data);
 		} finally {
 			setSaving(false);
 		}
@@ -196,15 +198,23 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 				{strings("form.sale.venueDetails")}
 			</h2>
 			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-				<Select
-					label={`${strings("sale.venue")} *`}
-					disabled={sale?.plan}
-					{...register("venue", { required: strings("error.required") })}
-					options={[
-						{ value: "", label: strings("sale.noVenue") },
-						...(venues?.map((v) => ({ value: v.id, label: v.name })) ?? []),
-					]}
-					error={errors.venue?.message}
+				<Controller
+					name="venue"
+					control={control}
+					rules={{ required: strings("error.required") }}
+					render={({ field }) => (
+						<SearchableDropdown
+							label={`${strings("sale.venue")} *`}
+							name={field.name}
+							value={field.value ?? ""}
+							onChange={field.onChange}
+							disabled={sale?.plan}
+							options={venues ?? []}
+							placeholder={strings("sale.noVenue")}
+							emptyText={strings("common.noResults")}
+							error={errors.venue?.message}
+						/>
+					)}
 				/>
 				<Select
 					label={strings("sale.seatingPlan")}
@@ -229,14 +239,21 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 				{strings("form.sale.paymentInformation")}
 			</h2>
 			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-4">
-				<Select
-					label={strings("sale.transactionProvider")}
-					{...register("provider")}
-					placeholder={strings("sale.selectProvider")}
-					options={
-						providers?.map((p) => ({ value: p.id, label: p.name ?? p.id })) ??
-						[]
-					}
+				<Controller
+					name="provider"
+					control={control}
+					render={({ field }) => (
+						<SearchableDropdown
+							label={strings("sale.transactionProvider")}
+							name={field.name}
+							value={field.value ?? ""}
+							onChange={field.onChange}
+							options={providers ?? []}
+							getOptionLabel={(p) => p?.name ?? p?.id ?? "-"}
+							placeholder={strings("sale.selectProvider")}
+							emptyText={strings("common.noResults")}
+						/>
+					)}
 				/>
 				<Select
 					label={strings("sale.currency")}
@@ -247,13 +264,20 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 						{ value: "usd", label: strings("sale.currency.usd") },
 					]}
 				/>
-				<Select
-					label={strings("sale.salesAgreement")}
-					{...register("agreement")}
-					placeholder={strings("sale.selectAgreement")}
-					options={
-						agreements?.map((a) => ({ value: a.id, label: a.name })) ?? []
-					}
+				<Controller
+					name="agreement"
+					control={control}
+					render={({ field }) => (
+						<SearchableDropdown
+							label={strings("sale.salesAgreement")}
+							name={field.name}
+							value={field.value ?? ""}
+							onChange={field.onChange}
+							options={agreements ?? []}
+							placeholder={strings("sale.selectAgreement")}
+							emptyText={strings("common.noResults")}
+						/>
+					)}
 				/>
 				<Select
 					label={strings("sale.eventCategory")}
@@ -312,34 +336,15 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 							placeholder={strings("sale.uploadImagePlaceholder")}
 							className="flex-1"
 						/>
-						<input
-							ref={fileInputRef}
-							type="file"
-							accept="image/*"
-							className="hidden"
-							onChange={async (e) => {
-								const f = e.target.files?.[0];
-								if (!f) return;
-								setImageUploading(true);
-								try {
-									const url = await uploadImage(f);
-									setValue("ticketAdornment", url);
-								} catch {
-									// Error shown via toast
-								} finally {
-									setImageUploading(false);
-									e.target.value = "";
-								}
-							}}
+						<ImageUpload
+							variant="button"
+							value={watch("ticketAdornment")}
+							onChange={(url) =>
+								setValue("ticketAdornment", url, { shouldDirty: true })
+							}
+							showPreview={false}
+							uploadLabel={strings("form.sale.uploadImage")}
 						/>
-						<button
-							type="button"
-							onClick={() => fileInputRef.current?.click()}
-							disabled={imageUploading}
-							className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-						>
-							{imageUploading ? strings("common.saving") : strings("sale.uploadImage")}
-						</button>
 					</div>
 				</label>
 				<section className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">

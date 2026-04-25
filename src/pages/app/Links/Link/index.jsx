@@ -8,10 +8,11 @@ import {
 } from "../../../../components/inputs";
 import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
-import { Modal } from "../../../../components/shared";
+import { ImageUpload, Modal } from "../../../../components/shared";
 import { getWidgetLinkUrl } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
-import { uploadImage } from "../../../../lib/imgbb";
+import { enhanceImage } from "../../../../lib/imgbb";
+import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 
 const CopyButton = ({ text, stopPropagation }) => {
@@ -64,10 +65,10 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 	const [saving, setSaving] = useState(false);
 	const [archiving, setArchiving] = useState(false);
 	const [deleting, setDeleting] = useState(false);
-	const [imageUploading, setImageUploading] = useState(false);
 	const [sales, setSales] = useState([]);
 	const [confirmAction, setConfirmAction] = useState(null); // { type, payload? }
-	const fileInputRef = useRef(null);
+	const [enhancing, setEnhancing] = useState(false);
+	const [enhancedUrl, setEnhancedUrl] = useState(null);
 
 	const { register, handleSubmit, reset, setValue, watch } = useForm({
 		defaultValues,
@@ -199,18 +200,31 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 		}
 	};
 
-	const handleImageUpload = async (e) => {
-		const f = e.target.files?.[0];
-		if (!f) return;
-		setImageUploading(true);
+	const handleEnhance = async () => {
+		if (enhancing || isNew || !data?.id) return;
+		setEnhancing(true);
 		try {
-			const url = await uploadImage(f);
-			setValue("image", url);
-		} catch {
-			// Error shown via toast
+			const url = await enhanceImage(data.id);
+			if (!url) throw new Error(strings("link.image.enhanceFailed"));
+			setEnhancedUrl(url);
+		} catch (err) {
+			showToast("error", err?.message ?? strings("link.image.enhanceFailed"));
 		} finally {
-			setImageUploading(false);
-			e.target.value = "";
+			setEnhancing(false);
+		}
+	};
+
+	const handleSaveEnhanced = async () => {
+		if (!enhancedUrl || !data?.id) return;
+		setEnhancing(true);
+		try {
+			await put(`/links/${data.id}`, { image: enhancedUrl });
+			setValue("image", enhancedUrl, { shouldDirty: false });
+			setData((prev) => (prev ? { ...prev, image: enhancedUrl } : prev));
+			setEnhancedUrl(null);
+			onSaved?.();
+		} finally {
+			setEnhancing(false);
 		}
 	};
 
@@ -333,7 +347,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 									>
 										{strings("form.link.image")}
 									</label>
-									<div className="mt-1 flex items-center gap-2">
+									<div className="mt-1 flex flex-col gap-2">
 										<input
 											id="link-image"
 											type="text"
@@ -341,28 +355,35 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 											{...register("image")}
 											className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 										/>
-										<input
-											ref={fileInputRef}
-											type="file"
-											accept="image/*"
-											className="hidden"
-											onChange={handleImageUpload}
+										<ImageUpload
+											variant="button"
+											value={formValues.image}
+											onChange={(url) =>
+												setValue("image", url, { shouldDirty: true })
+											}
+											onRemove={() =>
+												setValue("image", "", { shouldDirty: true })
+											}
+											uploadLabel={strings("form.sale.uploadImage")}
+											extraActions={
+												!isNew && data?.id ? (
+													<button
+														type="button"
+														onClick={handleEnhance}
+														disabled={enhancing}
+														className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+													>
+														<i
+															className={`fa-solid ${enhancing ? "fa-spinner fa-spin" : "fa-wand-magic-sparkles"}`}
+															aria-hidden
+														/>
+														{enhancing
+															? strings("link.image.enhancing")
+															: strings("link.image.aiEnhance")}
+													</button>
+												) : null
+											}
 										/>
-										<button
-											type="button"
-											onClick={() => fileInputRef.current?.click()}
-											disabled={imageUploading}
-											className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-										>
-											{imageUploading ? strings("common.saving") : strings("form.sale.uploadImage")}
-										</button>
-										{formValues.image && (
-											<img
-												src={formValues.image}
-												alt="Preview"
-												className="h-12 w-12 shrink-0 rounded object-cover"
-											/>
-										)}
 									</div>
 								</fieldset>
 							</section>
@@ -509,6 +530,67 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 					{confirmAction?.type === "unarchive" && strings("form.link.confirmUnarchiveBody")}
 					{confirmAction?.type === "removeSale" && strings("form.link.confirmRemoveSaleBody")}
 				</p>
+			</Modal>
+
+			<Modal
+				isOpen={!!enhancedUrl || enhancing}
+				onClose={() => {
+					if (!enhancing) setEnhancedUrl(null);
+				}}
+				title={strings("link.image.enhanced")}
+				maxWidth="lg"
+				footer={
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={() => setEnhancedUrl(null)}
+							disabled={enhancing}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:opacity-50"
+						>
+							{strings("common.cancel")}
+						</button>
+						<button
+							type="button"
+							onClick={handleEnhance}
+							disabled={enhancing}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:opacity-50"
+						>
+							<i
+								className={`fa-solid ${enhancing ? "fa-spinner fa-spin" : "fa-rotate-right"}`}
+								aria-hidden
+							/>
+							{strings("common.retry")}
+						</button>
+						<button
+							type="button"
+							onClick={handleSaveEnhanced}
+							disabled={enhancing || !enhancedUrl}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 active:bg-slate-800 disabled:opacity-50"
+						>
+							{strings("common.save")}
+						</button>
+					</div>
+				}
+			>
+				<div className="flex min-h-[12rem] items-center justify-center bg-slate-50 p-2 rounded">
+					{enhancing ? (
+						<div className="flex flex-col items-center gap-2 text-slate-500">
+							<i
+								className="fa-solid fa-spinner fa-spin text-2xl"
+								aria-hidden
+							/>
+							<span className="text-sm">
+								{strings("link.image.enhancing")}
+							</span>
+						</div>
+					) : enhancedUrl ? (
+						<img
+							src={enhancedUrl}
+							alt=""
+							className="max-h-[60vh] w-auto rounded object-contain"
+						/>
+					) : null}
+				</div>
 			</Modal>
 		</div>
 	);

@@ -17,21 +17,54 @@ export const ToastProvider = ({ children }) => {
 	const [toasts, setToasts] = useState([]);
 	const timersRef = useRef({});
 
-	const show = useCallback((type, message) => {
-		const id = crypto.randomUUID();
-		setToasts((prev) => {
-			const next = [...prev, { id, type, message }];
-			return next.slice(-MAX_TOASTS);
-		});
-		const timer = setTimeout(() => {
-			setToasts((prev) => prev.filter((t) => t.id !== id));
+	const dismiss = useCallback((id) => {
+		setToasts((prev) => prev.filter((t) => t.id !== id));
+		if (timersRef.current[id]) {
+			clearTimeout(timersRef.current[id]);
 			delete timersRef.current[id];
-		}, TOAST_DURATION);
-		timersRef.current[id] = timer;
+		}
 	}, []);
+
+	const show = useCallback(
+		(type, message, options) => {
+			const id = crypto.randomUUID();
+			const duration = options?.durationMs ?? TOAST_DURATION;
+			setToasts((prev) => {
+				const next = [
+					...prev,
+					{
+						id,
+						type,
+						message,
+						actionLabel: options?.actionLabel,
+						onAction: options?.onAction,
+					},
+				];
+				return next.slice(-MAX_TOASTS);
+			});
+			const timer = setTimeout(() => {
+				setToasts((prev) => prev.filter((t) => t.id !== id));
+				delete timersRef.current[id];
+			}, duration);
+			timersRef.current[id] = timer;
+		},
+		[],
+	);
 
 	useEffect(() => {
 		setToast(show);
+		try {
+			const pendingError = sessionStorage.getItem("pendingToast.error");
+			if (pendingError) {
+				sessionStorage.removeItem("pendingToast.error");
+				show("error", pendingError);
+			}
+			const pendingSuccess = sessionStorage.getItem("pendingToast.success");
+			if (pendingSuccess) {
+				sessionStorage.removeItem("pendingToast.success");
+				show("success", pendingSuccess);
+			}
+		} catch {}
 		return () => {
 			setToast(null);
 			Object.values(timersRef.current).forEach(clearTimeout);
@@ -48,7 +81,7 @@ export const ToastProvider = ({ children }) => {
 				{toasts.map((toast) => (
 					<div
 						key={toast.id}
-						className={`animate-toast flex items-center gap-2 rounded-lg px-4 py-3 shadow-lg ${
+						className={`animate-toast flex items-center gap-3 rounded-lg px-4 py-3 shadow-lg ${
 							toast.type === "success"
 								? "bg-emerald-600 text-white"
 								: "bg-red-600 text-white"
@@ -61,6 +94,18 @@ export const ToastProvider = ({ children }) => {
 							<i className="fa-solid fa-xmark" aria-hidden />
 						)}
 						<span>{toast.message}</span>
+						{toast.actionLabel && (
+							<button
+								type="button"
+								onClick={() => {
+									toast.onAction?.();
+									dismiss(toast.id);
+								}}
+								className="ml-1 rounded border border-white/40 px-2 py-1 text-xs font-medium underline-offset-2 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/60"
+							>
+								{toast.actionLabel}
+							</button>
+						)}
 					</div>
 				))}
 			</div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Checkbox, Input, Select } from "../../../../../components/inputs";
+import { Input, Select } from "../../../../../components/inputs";
 import { Modal } from "../../../../../components/shared";
 import { del, get, post, put } from "../../../../../lib/client";
 import strings from "../../../../../localization";
@@ -18,7 +18,7 @@ const CURRENCY_OPTIONS = [
 ];
 
 const TYPE_OPTIONS = [
-	{ value: "provider.paywall", labelKey: "form.provider.typePaywall" },
+	{ value: "provider.default", labelKey: "form.provider.typeDefault" },
 	{ value: "provider.stripe", labelKey: "form.provider.typeStripe" },
 ];
 
@@ -31,10 +31,9 @@ const defaultValues = {
 	apiKey: "",
 	apiSecret: "",
 	webhookSecret: "",
-	isDefault: false,
 };
 
-const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
+const ProviderPanel = ({ id, onClose, onSaved, onDeleted, onProviderAdded, onProviderUpdated }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -70,7 +69,6 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						apiKey: d.apiKey ?? "",
 						apiSecret: d.apiSecret ?? "",
 						webhookSecret: d.webhookSecret ?? "",
-						isDefault: d.isDefault ?? false,
 					});
 				}
 			})
@@ -91,16 +89,18 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				apiKey: formData.apiKey?.trim() || undefined,
 				apiSecret: formData.apiSecret?.trim() || undefined,
 				webhookSecret: formData.webhookSecret?.trim() || undefined,
-				isDefault: formData.isDefault ?? false,
 			};
 			if (isNew) {
 				const res = await post("/providers", payload);
 				const created = res.data ?? null;
 				setData(created);
-				if (created?.id) onSaved?.(created.id);
+				onProviderAdded?.(created);
+				onSaved?.(created?.id);
 			} else {
-				await put(`/providers/${id}`, payload);
-				setData((prev) => (prev ? { ...prev, ...payload } : null));
+				const res = await put(`/providers/${id}`, payload);
+				const updated = res.data ?? payload;
+				setData((prev) => (prev ? { ...prev, ...updated } : null));
+				onProviderUpdated?.(id, updated);
 				onSaved?.();
 			}
 		} catch (err) {
@@ -262,14 +262,6 @@ const ProviderPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								</div>
 							</>
 						)}
-
-						<hr className="border-slate-200" />
-						<div className="grid grid-cols-1 gap-4">
-							<Checkbox
-								label={strings("form.provider.isDefault")}
-								{...register("isDefault")}
-							/>
-						</div>
 					</div>
 				</div>
 

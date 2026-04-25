@@ -202,9 +202,13 @@ const Navbar = () => {
 					</h1>
 					{account?.realm?.name && (
 						<span
-							className="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+							className="ml-auto flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
 							title={account.realm.name}
 						>
+							<span className="relative inline-flex">
+								<span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+								<span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
+							</span>
 							{account.realm.name}
 						</span>
 					)}

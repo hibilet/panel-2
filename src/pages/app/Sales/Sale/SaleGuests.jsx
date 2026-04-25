@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useParams } from "wouter";
 import * as XLSX from "xlsx";
 import { Input, Select } from "../../../../components/inputs";
-import { EmptyState, SlidePanel } from "../../../../components/shared";
+import { EmptyState, SearchBar, SlidePanel } from "../../../../components/shared";
 import { guestColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
+import { matchesQuery } from "../../../../utils/search";
 
 const LIMIT = 100;
 
@@ -59,6 +60,12 @@ const SaleGuests = ({ sale }) => {
 	const [panelGuest, setPanelGuest] = useState(null);
 	const [saving, setSaving] = useState(null);
 	const [deleting, setDeleting] = useState(null);
+	const [query, setQuery] = useState("");
+
+	const filteredGuests = useMemo(
+		() => guests.filter((g) => matchesQuery(g.name, query)),
+		[guests, query],
+	);
 
 	const skip = (page - 1) * LIMIT;
 	const panelOpen = panelGuest !== null;
@@ -289,6 +296,12 @@ const SaleGuests = ({ sale }) => {
 					</div>
 				</div>
 
+				<SearchBar
+					value={query}
+					onChange={setQuery}
+					placeholder={strings("form.guests.searchPlaceholder")}
+				/>
+
 				{error && (
 					<div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
 						{error}
@@ -315,7 +328,7 @@ const SaleGuests = ({ sale }) => {
 					<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 						<div ref={printRef} className="overflow-auto">
 							<DataTable
-								data={guests}
+								data={filteredGuests}
 								columns={guestColumns(formatDate)}
 								getRowKey={(r) => r._id ?? r.id}
 								onRowClick={setPanelGuest}
