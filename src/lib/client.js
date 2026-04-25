@@ -1,4 +1,5 @@
 import strings from "../localization";
+import { getRealm } from "./realm";
 import { getToken } from "./storage";
 import { showToast } from "./toastStore";
 
@@ -8,6 +9,7 @@ const headerBuilder = (header, form) => ({
 	...{ header },
 	...(form ? { "Content-Type": "application/json" } : null),
 	...(getToken() ? { authorization: getToken() } : null),
+	...(getRealm() ? { "x-realm": getRealm() } : null),
 });
 
 let sessionExpiredHandled = false;

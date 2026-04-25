@@ -20,13 +20,54 @@ const STATUS_STYLES = {
 	refunded: "bg-slate-100 text-slate-600",
 };
 
-const TransactionPanel = ({ id, onClose }) => {
+const applyDiscount = (price, discount) => {
+	const p = Number(price) || 0;
+	const d = Number(discount);
+	if (!Number.isFinite(d) || d <= 0) return p;
+	if (d < 1) return p * (1 - d);
+	return Math.max(0, p - d);
+};
+
+const formatDiscountLabel = (discount) => {
+	const d = Number(discount);
+	if (!Number.isFinite(d) || d <= 0) return null;
+	if (d < 1) return `-${(d * 100).toFixed(0)}%`;
+	return null;
+};
+
+const TransactionPanel = ({ id, onClose, onRefunded }) => {
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [sending, setSending] = useState(false);
 	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
-	const [confirmAction, setConfirmAction] = useState(null);
+	const [refundConfirm, setRefundConfirm] = useState(null);
+	const [refundSubmitting, setRefundSubmitting] = useState(false);
+	const [refunds, setRefunds] = useState([]);
+	const [refundsLoading, setRefundsLoading] = useState(false);
+	const [polling, setPolling] = useState(false);
+
+	const loadRefunds = (silent = false) => {
+		if (!silent) setRefundsLoading(true);
+		return get(`/transactions/${id}/refunds`)
+			.then((res) => {
+				const list = res.data?.refunds ?? [];
+				setRefunds(list);
+				return list;
+			})
+			.catch(() => {
+				if (!silent) setRefunds([]);
+				return null;
+			})
+			.finally(() => {
+				if (!silent) setRefundsLoading(false);
+			});
+	};
+
+	const reloadTransaction = () =>
+		get(`/transactions/${id}`)
+			.then((res) => setData(res.data ?? null))
+			.catch(() => {});
 
 	useEffect(() => {
 		setLoading(true);
@@ -37,7 +78,27 @@ const TransactionPanel = ({ id, onClose }) => {
 				setError(err?.message ?? strings("error.failedLoadTransaction")),
 			)
 			.finally(() => setLoading(false));
+		loadRefunds().then((list) => {
+			if (list && list.some((r) => r.status === "pending")) setPolling(true);
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]);
+
+	useEffect(() => {
+		if (!polling) return;
+		const tick = async () => {
+			const list = await loadRefunds(true);
+			await reloadTransaction();
+			const stillPending = list?.some((r) => r.status === "pending");
+			if (!stillPending) {
+				setPolling(false);
+				onRefunded?.();
+			}
+		};
+		const handle = setInterval(tick, 2000);
+		return () => clearInterval(handle);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [polling, id]);
 
 	const handleSendEmailAgain = () => {
 		setSending(true);
@@ -49,26 +110,47 @@ const TransactionPanel = ({ id, onClose }) => {
 		setEmailDialogOpen(true);
 	};
 
-	const handleCancelAll = () => {
-		setConfirmAction({ type: "cancelAll" });
-	};
-
-	const handleCancelReservation = (reservation) => (e) => {
-		e.stopPropagation();
-		setConfirmAction({ type: "cancelOne", payload: reservation });
-	};
-
-	const executeConfirm = () => {
-		const action = confirmAction;
-		setConfirmAction(null);
-		if (action?.type === "cancelAll") {
-			// TODO: wire to actual API when available
-		} else if (action?.type === "cancelOne") {
-			// TODO: wire to actual API when available
-		}
-	};
-
 	const reservations = data?.reservations ?? [];
+	const currency = data?.sale?.currency ?? "eur";
+
+	const reservationFinalPrice = (r) => applyDiscount(r.price, r.discount);
+
+	const totalAmount = reservations.reduce(
+		(s, r) => s + reservationFinalPrice(r),
+		0,
+	);
+
+	const startRefundAll = () => {
+		setRefundConfirm({ type: "all", amount: totalAmount });
+	};
+
+	const startRefundOne = (reservation) => (e) => {
+		e.stopPropagation();
+		setRefundConfirm({
+			type: "one",
+			reservation,
+			amount: reservationFinalPrice(reservation),
+		});
+	};
+
+	const executeRefund = () => {
+		if (!refundConfirm || refundSubmitting) return;
+		const body = {};
+		if (refundConfirm.type === "one") {
+			if (!refundConfirm.reservation?.id) return;
+			body.reservationIds = [refundConfirm.reservation.id];
+		}
+		setRefundSubmitting(true);
+		post(`/transactions/${id}/refund`, body)
+			.then(async () => {
+				setRefundConfirm(null);
+				await Promise.all([reloadTransaction(), loadRefunds()]);
+				onRefunded?.();
+				setPolling(true);
+			})
+			.catch(() => {})
+			.finally(() => setRefundSubmitting(false));
+	};
 
 	return (
 		<div className="flex h-full flex-col">
@@ -127,12 +209,17 @@ const TransactionPanel = ({ id, onClose }) => {
 								</button>
 								<button
 									type="button"
-									onClick={handleCancelAll}
-									disabled={sending || reservations.length === 0}
+									onClick={startRefundAll}
+									disabled={
+										sending ||
+										refundSubmitting ||
+										reservations.length === 0 ||
+										data?.status !== "success"
+									}
 									className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 								>
-									<i className="fa-solid fa-ban" aria-hidden />
-									{strings("form.transaction.cancelAll")}
+									<i className="fa-solid fa-rotate-left" aria-hidden />
+									{strings("form.transaction.refundAll")}
 								</button>
 							</div>
 						</section>
@@ -191,13 +278,36 @@ const TransactionPanel = ({ id, onClose }) => {
 												</span>
 											</div>
 											<div className="flex justify-between gap-4 text-sm text-slate-600">
-												<span>
-													{r.price != null
-														? formatCurrency(
-																r.price,
-																data?.sale?.currency ?? "eur",
-															)
-														: "—"}
+												<span className="flex items-center gap-2">
+													{r.price != null ? (
+														(() => {
+															const final = reservationFinalPrice(r);
+															const hasDiscount =
+																Number(r.discount) > 0 && final !== Number(r.price);
+															const label = formatDiscountLabel(r.discount);
+															return hasDiscount ? (
+																<>
+																	<span className="font-medium text-slate-900">
+																		{formatCurrency(final, currency)}
+																	</span>
+																	<span className="text-slate-400 line-through">
+																		{formatCurrency(r.price, currency)}
+																	</span>
+																	{label && (
+																		<span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700">
+																			{label}
+																		</span>
+																	)}
+																</>
+															) : (
+																<span>
+																	{formatCurrency(r.price, currency)}
+																</span>
+															);
+														})()
+													) : (
+														"—"
+													)}
 												</span>
 												<span>
 													{r.createdAt
@@ -208,11 +318,81 @@ const TransactionPanel = ({ id, onClose }) => {
 											<div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
 												<button
 													type="button"
-													onClick={handleCancelReservation(r)}
+													onClick={startRefundOne(r)}
+													disabled={
+														refundSubmitting ||
+														r.status === "refunded" ||
+														!r.price
+													}
 													className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2 active:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
 												>
-													{strings("common.cancel")}
+													<i className="fa-solid fa-rotate-left" aria-hidden />
+													{strings("form.transaction.refund")}
 												</button>
+											</div>
+										</div>
+									))}
+								</div>
+							)}
+						</section>
+
+						<section>
+							<div className="mb-3 flex items-center justify-between">
+								<h3 className="text-sm font-semibold text-slate-700">
+									{strings("form.transaction.refundHistory")}
+								</h3>
+								{refunds.length > 0 && (
+									<span className="text-sm text-slate-600">
+										{strings("form.transaction.refundedTotal", [
+											formatCurrency(
+												refunds.reduce((s, r) => s + (r.amount ?? 0), 0) / 100,
+												data?.sale?.currency ?? "eur",
+											),
+										])}
+									</span>
+								)}
+							</div>
+							{refundsLoading ? (
+								<div className="h-12 animate-pulse rounded-lg bg-slate-100" />
+							) : refunds.length === 0 ? (
+								<p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+									{strings("form.transaction.refundHistoryEmpty")}
+								</p>
+							) : (
+								<div className="grid gap-2">
+									{refunds.map((r) => (
+										<div
+											key={r.id}
+											className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm"
+										>
+											<div className="flex flex-col">
+												<span className="font-medium text-slate-900">
+													{formatCurrency(
+														(r.amount ?? 0) / 100,
+														data?.sale?.currency ?? "eur",
+													)}
+												</span>
+												{r.reason && (
+													<span className="text-xs text-slate-500">{r.reason}</span>
+												)}
+											</div>
+											<div className="flex items-center gap-2">
+												<span
+													className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+														r.status === "succeeded"
+															? "bg-emerald-100 text-emerald-800"
+															: r.status === "failed"
+																? "bg-red-100 text-red-800"
+																: "bg-amber-100 text-amber-800"
+													}`}
+												>
+													{r.status ?? "—"}
+												</span>
+												<span className="text-xs text-slate-500">
+													{r.created
+														? dayjs(r.created * 1000).format("DD MMM YYYY, HH:mm")
+														: "—"}
+												</span>
 											</div>
 										</div>
 									))}
@@ -244,32 +424,45 @@ const TransactionPanel = ({ id, onClose }) => {
 			</div>
 
 			<Modal
-				isOpen={!!confirmAction}
-				onClose={() => setConfirmAction(null)}
-				title={confirmAction?.type === "cancelAll" ? strings("confirm.cancelAllReservations") : strings("confirm.cancelReservation", [confirmAction?.payload?.name ?? ""])}
+				isOpen={!!refundConfirm}
+				onClose={() => (refundSubmitting ? null : setRefundConfirm(null))}
+				title={
+					refundConfirm?.type === "all"
+						? strings("confirm.refundTransaction")
+						: strings("confirm.refundReservation")
+				}
 				footer={
 					<div className="flex justify-end gap-2">
 						<button
 							type="button"
-							onClick={() => setConfirmAction(null)}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
+							onClick={() => setRefundConfirm(null)}
+							disabled={refundSubmitting}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:opacity-50"
 						>
 							{strings("common.cancel")}
 						</button>
 						<button
 							type="button"
-							onClick={executeConfirm}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700"
+							onClick={executeRefund}
+							disabled={refundSubmitting}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700 disabled:opacity-50"
 						>
+							{refundSubmitting && (
+								<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+							)}
 							{strings("common.confirm")}
 						</button>
 					</div>
 				}
 			>
 				<p className="text-sm text-slate-600">
-					{confirmAction?.type === "cancelAll"
-						? strings("confirm.cancelAllReservations")
-						: strings("confirm.cancelReservation", [confirmAction?.payload?.name ?? ""])}
+					{refundConfirm?.type === "all"
+						? strings("confirm.refundTransactionBody", [
+								formatCurrency(refundConfirm?.amount ?? 0, currency),
+							])
+						: strings("confirm.refundReservationBody", [
+								formatCurrency(refundConfirm?.amount ?? 0, currency),
+							])}
 				</p>
 			</Modal>
 

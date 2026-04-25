@@ -1,16 +1,27 @@
 import { useEffect, useState, useCallback } from "react";
-import { Link, useLocation, useParams } from "wouter";
+import { Link, useLocation, useParams, useSearch } from "wouter";
 
 import { useApp } from "../../../../context";
 import { get } from "../../../../lib/client";
+import { getToken } from "../../../../lib/storage";
+import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 import SlidePanel from "../../../../components/shared/SlidePanel";
 import DataTable from "../../../../components/tables/DataTable";
 import { providersColumns } from "../../../../components/tables/columns";
 import ProviderPanel from "./Provider";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const STRIPE_CONNECT_ERROR_KEYS = {
+	stripe_account_in_use: "error.stripeAccountInUse",
+	invalid_state: "error.stripeInvalidState",
+	access_denied: "error.stripeAccessDenied",
+};
+
 const Providers = () => {
 	const [, setLocation] = useLocation();
+	const search = useSearch();
 	const { id } = useParams();
 	const { refreshAccount, addProvider, updateProvider } = useApp();
 	const [data, setData] = useState([]);
@@ -35,6 +46,37 @@ const Providers = () => {
 	useEffect(() => {
 		fetchProviders();
 	}, [fetchProviders]);
+
+	useEffect(() => {
+		const params = new URLSearchParams(search);
+		const attached = params.get("stripe_attached");
+		const errCode = params.get("error");
+		if (!attached && !errCode) return;
+
+		if (attached === "1") {
+			showToast("success", strings("toast.stripeAttached"));
+			fetchProviders(true);
+			refreshAccount?.();
+		} else if (errCode) {
+			const key = STRIPE_CONNECT_ERROR_KEYS[errCode] ?? "error.stripeConnectFailed";
+			showToast("error", strings(key));
+		}
+
+		params.delete("stripe_attached");
+		params.delete("error");
+		const next = params.toString();
+		window.history.replaceState(
+			{},
+			"",
+			`/settings/providers${next ? `?${next}` : ""}`,
+		);
+	}, [search, fetchProviders, refreshAccount]);
+
+	const handleConnectStripe = () => {
+		const token = getToken();
+		if (!token) return;
+		window.location.href = `${API_BASE_URL}/auth/stripe/connect?token=${encodeURIComponent(token)}`;
+	};
 
 	if (error && !loading) {
 		return (
@@ -71,14 +113,24 @@ const Providers = () => {
 					/>
 					{strings("page.settings.saleProviders")}
 				</h1>
-				<button
-					type="button"
-					onClick={() => setLocation("/settings/providers/new")}
-					className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-				>
-					<i className="fa-solid fa-plus" aria-hidden />
-					{strings("page.settings.createNewProvider")}
-				</button>
+				<div className="flex flex-wrap gap-2">
+					<button
+						type="button"
+						onClick={handleConnectStripe}
+						className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#635bff] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#574fe6]"
+					>
+						<i className="fa-brands fa-stripe-s" aria-hidden />
+						{strings("page.settings.connectStripe")}
+					</button>
+					<button
+						type="button"
+						onClick={() => setLocation("/settings/providers/new")}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+					>
+						<i className="fa-solid fa-plus" aria-hidden />
+						{strings("page.settings.createNewProvider")}
+					</button>
+				</div>
 			</div>
 
 			<DataTable

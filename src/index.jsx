@@ -15,7 +15,7 @@ import { TourProvider } from "@reactour/tour";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import { dashboardTourSteps } from "./components/tours/DashboardTour";
-import { AppProvider, ToastProvider } from "./context";
+import { AppProvider, NotificationsProvider, ToastProvider } from "./context";
 import { getToken } from "./lib/storage";
 
 dayjs.extend(timezone);
@@ -27,9 +27,11 @@ import Auth from "./pages/auth";
 createRoot(document.body).render(
 	<ToastProvider>
 		<AppProvider>
-			<TourProvider steps={dashboardTourSteps}>
-				{getToken() ? <App /> : <Auth />}
-			</TourProvider>
+			<NotificationsProvider>
+				<TourProvider steps={dashboardTourSteps}>
+					{getToken() ? <App /> : <Auth />}
+				</TourProvider>
+			</NotificationsProvider>
 		</AppProvider>
 	</ToastProvider>,
 );

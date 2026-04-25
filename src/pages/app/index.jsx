@@ -6,9 +6,12 @@ import { useApp } from "../../context";
 import Accounts from "./Accounts";
 import Dashboard from "./Dashboard";
 import Invoices from "./Invoices";
+import Jobs from "./Jobs";
 import Links from "./Links";
 import Live from "./Live";
+import Notifications from "./Notifications";
 import Onboarding from "./Onboarding";
+import Realms from "./Realms";
 import Reports from "./Reports";
 import Report from "./Reports/Report";
 import Sales from "./Sales";
@@ -63,10 +66,14 @@ const App = () => {
 							</Route>
 							<Route path="/tiers/:id" component={Tiers} />
 							<Route path="/tiers" component={Tiers} />
+							<Route path="/realms/:id" component={Realms} />
+							<Route path="/realms" component={Realms} />
 						</>
 					)}
 					<Route path="/invoices/:id" component={Invoices} />
 					<Route path="/invoices" component={Invoices} />
+					<Route path="/jobs" component={Jobs} />
+					<Route path="/notifications" component={Notifications} />
 					<Route path="/settings" component={Settings} />
 					<Route path="/settings/providers" component={SettingsProviders} />
 					<Route path="/settings/providers/:id" component={SettingsProviders} />

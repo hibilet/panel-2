@@ -1,4 +1,8 @@
 import dayjs from "dayjs";
+import {
+	getNotificationSeverityLabel,
+	getNotificationTypeLabel,
+} from "../../lib/notifications";
 import strings, { formatCurrency } from "../../localization";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
@@ -272,7 +276,16 @@ export const providersColumns = [
 	{
 		key: "type",
 		header: strings("table.provider.type"),
-		render: (r) => formatType(r.type),
+		render: (r) => (
+			<span className="inline-flex items-center gap-2">
+				{formatType(r.type)}
+				{r.type === "provider.stripe" && r.default && (
+					<span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-blue-700">
+						{strings("table.provider.default")}
+					</span>
+				)}
+			</span>
+		),
 	},
 	{
 		key: "createdAt",
@@ -702,6 +715,264 @@ export const linkSalesColumns = (formatStartDate, getVenueName, onRemove) => [
 			>
 				<i className="fa-solid fa-trash" aria-hidden />
 			</button>
+		),
+	},
+];
+
+const jobStatusStyles = {
+	ok: "bg-emerald-100 text-emerald-800",
+	error: "bg-red-100 text-red-800",
+	running: "bg-amber-100 text-amber-800",
+	pending: "bg-slate-100 text-slate-600",
+};
+
+const StatusPill = ({ status, styles = jobStatusStyles }) =>
+	status ? (
+		<span
+			className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+				styles[status] ?? "bg-slate-100 text-slate-600"
+			}`}
+		>
+			{status}
+		</span>
+	) : (
+		<span className="text-slate-400">—</span>
+	);
+
+export const jobsColumns = ({ getTypeLabel, onRun, onEdit, onDelete } = {}) => [
+	{
+		key: "name",
+		header: strings("table.job.name"),
+		headerCell: true,
+		render: (r) => (
+			<span className="flex items-center gap-2">
+				<span className="font-medium text-slate-900">{r.name ?? "—"}</span>
+				{r.system && (
+					<span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-slate-600">
+						{strings("page.jobs.system")}
+					</span>
+				)}
+			</span>
+		),
+	},
+	{
+		key: "type",
+		header: strings("table.job.type"),
+		render: (r) => getTypeLabel?.(r.type) ?? r.type ?? "—",
+	},
+	{
+		key: "schedule",
+		header: strings("table.job.schedule"),
+		render: (r) =>
+			r.schedule ? (
+				<code className="rounded bg-slate-50 px-1.5 py-0.5 font-mono text-xs text-slate-700">
+					{r.schedule}
+				</code>
+			) : r.runAt ? (
+				formatDateTime(r.runAt)
+			) : (
+				"—"
+			),
+	},
+	{
+		key: "lastStatus",
+		header: strings("table.job.lastStatus"),
+		render: (r) => <StatusPill status={r.lastStatus} />,
+	},
+	{
+		key: "nextRunAt",
+		header: strings("table.job.nextRunAt"),
+		render: (r) => (r.enabled === false ? "—" : formatDateTime(r.nextRunAt)),
+	},
+	{
+		key: "enabled",
+		header: strings("table.job.enabled"),
+		render: (r) => (
+			<span
+				className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+					r.enabled !== false
+						? "bg-emerald-100 text-emerald-700"
+						: "bg-slate-100 text-slate-500"
+				}`}
+			>
+				{r.enabled !== false
+					? strings("common.active")
+					: strings("common.inactive")}
+			</span>
+		),
+	},
+	...(onRun || onEdit || onDelete
+		? [
+				{
+					key: "actions",
+					header: strings("table.job.actions"),
+					align: "right",
+					render: (r) =>
+						r.system ? (
+							<span className="text-slate-400">—</span>
+						) : (
+							<span className="inline-flex items-center justify-end gap-2">
+								{onRun && (
+									<button
+										type="button"
+										onClick={(e) => {
+											e.stopPropagation();
+											onRun(r);
+										}}
+										className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+										aria-label={strings("page.jobs.runNow")}
+									>
+										<i className="fa-solid fa-play mr-1" aria-hidden />
+										{strings("page.jobs.runNow")}
+									</button>
+								)}
+								{onEdit && (
+									<button
+										type="button"
+										onClick={(e) => {
+											e.stopPropagation();
+											onEdit(r);
+										}}
+										className="rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50"
+										aria-label={strings("page.jobs.edit")}
+									>
+										<i className="fa-solid fa-pen" aria-hidden />
+									</button>
+								)}
+								{onDelete && (
+									<button
+										type="button"
+										onClick={(e) => {
+											e.stopPropagation();
+											onDelete(r);
+										}}
+										className="rounded-lg border border-red-200 bg-white px-2.5 py-1 text-xs font-medium text-red-700 hover:bg-red-50"
+										aria-label={strings("page.jobs.delete")}
+									>
+										<i className="fa-solid fa-trash" aria-hidden />
+									</button>
+								)}
+							</span>
+						),
+				},
+			]
+		: []),
+];
+
+export const jobRunsColumns = [
+	{
+		key: "startedAt",
+		header: strings("table.run.startedAt"),
+		headerCell: true,
+		render: (r) => formatDateTime(r.startedAt),
+	},
+	{
+		key: "finishedAt",
+		header: strings("table.run.finishedAt"),
+		render: (r) => (r.finishedAt ? formatDateTime(r.finishedAt) : "—"),
+	},
+	{
+		key: "status",
+		header: strings("table.run.status"),
+		render: (r) => <StatusPill status={r.status} />,
+	},
+	{
+		key: "triggeredBy",
+		header: strings("table.run.triggeredBy"),
+		render: (r) => r.triggeredBy ?? "—",
+	},
+	{
+		key: "output",
+		header: strings("table.run.output"),
+		render: (r) => {
+			if (r.error) {
+				return (
+					<span className="text-red-600" title={r.error}>
+						{String(r.error).slice(0, 60)}
+					</span>
+				);
+			}
+			if (!r.output) return "—";
+			const summary = Object.entries(r.output)
+				.slice(0, 3)
+				.map(([k, v]) => `${k}: ${typeof v === "object" ? "..." : v}`)
+				.join(", ");
+			return (
+				<span className="text-slate-500" title={JSON.stringify(r.output)}>
+					{summary}
+				</span>
+			);
+		},
+	},
+];
+
+const severityStyles = {
+	info: "bg-blue-100 text-blue-700",
+	success: "bg-emerald-100 text-emerald-700",
+	warning: "bg-amber-100 text-amber-800",
+	error: "bg-red-100 text-red-700",
+};
+
+export const notificationsColumns = [
+	{
+		key: "read",
+		header: "",
+		className: "w-6",
+		render: (r) =>
+			r.readAt ? (
+				<span className="block h-2 w-2 rounded-full bg-transparent" aria-hidden />
+			) : (
+				<span
+					className="block h-2 w-2 rounded-full bg-blue-500"
+					aria-label={strings("page.notifications.unread")}
+				/>
+			),
+	},
+	{
+		key: "createdAt",
+		header: strings("table.notification.createdAt"),
+		render: (r) => formatDateTime(r.createdAt),
+	},
+	{
+		key: "title",
+		header: strings("table.notification.title"),
+		headerCell: true,
+		render: (r) => (
+			<div className="flex flex-col">
+				<span
+					className={`font-medium ${r.readAt ? "text-slate-700" : "text-slate-900"}`}
+				>
+					{r.title ?? "—"}
+				</span>
+				{r.body && (
+					<span className="text-xs text-slate-500">{r.body}</span>
+				)}
+			</div>
+		),
+	},
+	{
+		key: "type",
+		header: strings("table.notification.type"),
+		render: (r) => (
+			<span
+				className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+				title={r.type}
+			>
+				{getNotificationTypeLabel(r.type)}
+			</span>
+		),
+	},
+	{
+		key: "severity",
+		header: strings("table.notification.severity"),
+		render: (r) => (
+			<span
+				className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+					severityStyles[r.severity] ?? "bg-slate-100 text-slate-600"
+				}`}
+			>
+				{getNotificationSeverityLabel(r.severity)}
+			</span>
 		),
 	},
 ];

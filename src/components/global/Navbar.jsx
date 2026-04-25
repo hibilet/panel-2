@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useApp } from "../../context";
+import { useApp, useNotifications } from "../../context";
+import { resolveNotificationLink } from "../../lib/notifications";
 import {
 	deleteHotSwapToken,
 	getHotSwapToken,
@@ -78,6 +79,12 @@ const navItems = [
 		acl: ["merchant", "admin"],
 	},
 	{
+		path: "/jobs",
+		labelKey: "nav.jobs",
+		icon: "fa-clock",
+		acl: ["merchant", "admin"],
+	},
+	{
 		path: "/settings",
 		labelKey: "nav.settings",
 		icon: "fa-gear",
@@ -85,6 +92,149 @@ const navItems = [
 		acl: ["merchant", "admin"],
 	},
 ];
+
+const severityDot = {
+	info: "bg-blue-500",
+	success: "bg-emerald-500",
+	warning: "bg-amber-500",
+	error: "bg-red-500",
+};
+
+const formatRelative = (iso) => {
+	if (!iso) return "";
+	const diff = Date.now() - new Date(iso).getTime();
+	const mins = Math.floor(diff / 60000);
+	if (mins < 1) return "now";
+	if (mins < 60) return `${mins}m`;
+	const hrs = Math.floor(mins / 60);
+	if (hrs < 24) return `${hrs}h`;
+	const days = Math.floor(hrs / 24);
+	if (days < 7) return `${days}d`;
+	return dayjs(iso).format("D MMM");
+};
+
+const NotificationsBell = () => {
+	const [, setLocation] = useLocation();
+	const { items, unreadCount, markRead, markAllRead } = useNotifications();
+	const [open, setOpen] = useState(false);
+	const ref = useRef(null);
+
+	useEffect(() => {
+		const onClick = (e) => {
+			if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+		};
+		window.addEventListener("click", onClick);
+		return () => window.removeEventListener("click", onClick);
+	}, []);
+
+	const recent = (items ?? []).slice(0, 8);
+
+	const handleItemClick = (n) => {
+		if (!n.readAt) markRead(n.id);
+		setOpen(false);
+		const link = resolveNotificationLink(n);
+		if (link) {
+			if (link.startsWith("http")) {
+				window.open(link, "_blank", "noopener");
+			} else {
+				setLocation(link);
+			}
+		}
+	};
+
+	return (
+		<div ref={ref} className="relative">
+			<button
+				type="button"
+				onClick={() => setOpen((o) => !o)}
+				aria-label={strings("page.notifications.bellAria")}
+				aria-expanded={open}
+				className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+			>
+				<i className="fa-solid fa-bell" aria-hidden />
+				{unreadCount > 0 && (
+					<span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+						{unreadCount > 99 ? "99+" : unreadCount}
+					</span>
+				)}
+			</button>
+			{open && (
+				<div className="absolute right-0 z-[60] mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
+					<div className="flex items-center justify-between border-b border-slate-100 px-4 py-2.5">
+						<span className="text-sm font-semibold text-slate-900">
+							{strings("page.notifications.dropdownTitle")}
+						</span>
+						<button
+							type="button"
+							onClick={(e) => {
+								e.stopPropagation();
+								markAllRead();
+							}}
+							disabled={unreadCount === 0}
+							className="text-xs text-slate-500 hover:text-slate-900 disabled:opacity-50"
+						>
+							{strings("page.notifications.markAllRead")}
+						</button>
+					</div>
+					<div className="max-h-80 overflow-y-auto">
+						{recent.length === 0 ? (
+							<div className="px-4 py-6 text-center text-sm text-slate-500">
+								{strings("page.notifications.empty")}
+							</div>
+						) : (
+							recent.map((n) => (
+								<button
+									key={n.id}
+									type="button"
+									onClick={() => handleItemClick(n)}
+									className={`flex w-full items-start gap-2 border-b border-slate-100 px-4 py-3 text-left text-sm last:border-b-0 hover:bg-slate-50 ${
+										n.readAt ? "" : "bg-blue-50/40"
+									}`}
+								>
+									<span
+										className={`mt-1 inline-block h-2 w-2 shrink-0 rounded-full ${
+											severityDot[n.severity] ?? "bg-slate-400"
+										}`}
+										aria-hidden
+									/>
+									<span className="min-w-0 flex-1">
+										<span className="flex items-center justify-between gap-2">
+											<span
+												className={`truncate font-medium ${
+													n.readAt ? "text-slate-700" : "text-slate-900"
+												}`}
+											>
+												{n.title ?? n.type}
+											</span>
+											<span className="shrink-0 text-xs text-slate-400">
+												{formatRelative(n.createdAt)}
+											</span>
+										</span>
+										{n.body && (
+											<span className="mt-0.5 block truncate text-xs text-slate-500">
+												{n.body}
+											</span>
+										)}
+									</span>
+								</button>
+							))
+						)}
+					</div>
+					<button
+						type="button"
+						onClick={() => {
+							setOpen(false);
+							setLocation("/notifications");
+						}}
+						className="block w-full border-t border-slate-100 bg-slate-50 px-4 py-2 text-center text-xs font-medium text-slate-700 hover:bg-slate-100"
+					>
+						{strings("page.notifications.viewAll")}
+					</button>
+				</div>
+			)}
+		</div>
+	);
+};
 
 const Navbar = () => {
 	const [location] = useLocation();
@@ -200,18 +350,21 @@ const Navbar = () => {
 							? strings("app.welcome", [account.name])
 							: strings("app.name")}
 					</h1>
-					{account?.realm?.name && (
-						<span
-							className="ml-auto flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
-							title={account.realm.name}
-						>
-							<span className="relative inline-flex">
-								<span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-								<span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
+					<div className="ml-auto flex items-center gap-3">
+						{account?.realm?.name && (
+							<span
+								className="flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
+								title={account.realm.name}
+							>
+								<span className="relative inline-flex">
+									<span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+									<span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
+								</span>
+								{account.realm.name}
 							</span>
-							{account.realm.name}
-						</span>
-					)}
+						)}
+						<NotificationsBell />
+					</div>
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
 					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2" role="tablist">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
 import { Modal, SlidePanel } from "../../../components/shared";
 import { transactionsColumns } from "../../../components/tables/columns";
@@ -24,7 +24,7 @@ const Transactions = () => {
 
 	const loading = fetchedPage !== page;
 
-	useEffect(() => {
+	const fetchTransactions = useCallback(() => {
 		const skip = (page - 1) * LIMIT;
 		const params = new URLSearchParams({
 			limit: String(LIMIT),
@@ -46,6 +46,10 @@ const Transactions = () => {
 				setFetchedPage(page);
 			});
 	}, [page, filterId, filterEmail]);
+
+	useEffect(() => {
+		fetchTransactions();
+	}, [fetchTransactions]);
 
 	if (error && data.length === 0) {
 		return (
@@ -165,6 +169,7 @@ const Transactions = () => {
 					<TransactionPanel
 						id={id}
 						onClose={() => setLocation("/transactions")}
+						onRefunded={fetchTransactions}
 					/>
 				)}
 			</SlidePanel>

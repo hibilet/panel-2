@@ -11,6 +11,7 @@ import Pagination from "../../../components/tables/Pagination";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import AccountPanel from "./Account";
+import InvitationPanel from "./InvitationPanel";
 
 const LIMIT = 25;
 
@@ -63,6 +64,7 @@ const Accounts = () => {
 	const [error, setError] = useState(null);
 	const [filterEmail, setFilterEmail] = useState("");
 	const [filterDialogOpen, setFilterDialogOpen] = useState(false);
+	const [inviteOpen, setInviteOpen] = useState(false);
 
 	const { register, handleSubmit, reset } = useForm({
 		defaultValues: { email: "" },
@@ -138,14 +140,24 @@ const Accounts = () => {
 				</h1>
 				<div className="flex items-center gap-2">
 					{activeTab === "merchants" && (
-						<button
-							type="button"
-							onClick={() => setLocation(`/accounts/merchants/new`)}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							<i className="fa-solid fa-plus" aria-hidden />
-							{strings("page.accounts.createAccount")}
-						</button>
+						<>
+							<button
+								type="button"
+								onClick={() => setInviteOpen(true)}
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<i className="fa-solid fa-envelope" aria-hidden />
+								{strings("page.accounts.invite")}
+							</button>
+							<button
+								type="button"
+								onClick={() => setLocation(`/accounts/merchants/new`)}
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								<i className="fa-solid fa-plus" aria-hidden />
+								{strings("page.accounts.createAccount")}
+							</button>
+						</>
 					)}
 					<button
 						type="button"
@@ -235,6 +247,17 @@ const Accounts = () => {
 					onPageChange={setPage}
 				/>
 			</div>
+
+			<SlidePanel
+				isOpen={inviteOpen}
+				onClose={() => setInviteOpen(false)}
+				title={strings("page.invitations.title")}
+				aria-label={strings("page.invitations.title")}
+			>
+				{inviteOpen && (
+					<InvitationPanel onClose={() => setInviteOpen(false)} />
+				)}
+			</SlidePanel>
 
 			<SlidePanel
 				isOpen={!!accountId}

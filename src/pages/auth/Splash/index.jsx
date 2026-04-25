@@ -2,7 +2,11 @@ import { useState } from "react";
 import { useSearch } from "wouter";
 import Input from "../../../components/inputs/Input";
 import { post } from "../../../lib/client";
+import { getRealm } from "../../../lib/realm";
 import { setToken } from "../../../lib/storage";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const SHOW_STRIPE = (import.meta.env.VITE_AUTH_MODE ?? "").toLowerCase() !== "off";
 
 const Splash = () => {
 	const search = useSearch();
@@ -60,6 +64,12 @@ const Splash = () => {
 		setError(null);
 	};
 
+	const handleStripe = () => {
+		const realm = getRealm();
+		const qs = realm ? `?realm=${encodeURIComponent(realm)}` : "";
+		window.location.href = `${API_BASE_URL}/auth/stripe${qs}`;
+	};
+
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
 			<div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
@@ -68,26 +78,42 @@ const Splash = () => {
 				</h1>
 
 				{step === "email" ? (
-					<form onSubmit={handleEmailSubmit} className="space-y-4">
-						<Input
-							label="Email"
-							name="email"
-							type="email"
-							value={email}
-							onChange={(e) => setEmail(e.target.value)}
-							placeholder="you@example.com"
-							disabled={loading}
-							error={error}
-							required
-						/>
-						<button
-							type="submit"
-							disabled={loading}
-							className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
-						>
-							{loading ? "Sending..." : "Continue"}
-						</button>
-					</form>
+					<>
+						<form onSubmit={handleEmailSubmit} className="space-y-4">
+							<Input
+								label="Email"
+								name="email"
+								type="email"
+								value={email}
+								onChange={(e) => setEmail(e.target.value)}
+								placeholder="you@example.com"
+								disabled={loading}
+								error={error}
+								required
+							/>
+							<button
+								type="submit"
+								disabled={loading}
+								className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+							>
+								{loading ? "Sending..." : "Continue"}
+							</button>
+						</form>
+
+						{!isAdmin && SHOW_STRIPE && (
+							<div className="mt-6 border-t border-slate-200 pt-6">
+								<button
+									type="button"
+									onClick={handleStripe}
+									disabled={loading}
+									className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-800 transition hover:bg-slate-50 disabled:opacity-50"
+								>
+									<span>Continue with</span>
+									<img src="/stripe-logo.webp" alt="Stripe" className="h-6 w-auto translate-y-[1px]" />
+								</button>
+							</div>
+						)}
+					</>
 				) : (
 					<form onSubmit={handleOtpSubmit} className="space-y-4">
 						<p className="text-sm text-slate-600">

@@ -122,11 +122,13 @@ const Sales = () => {
 				</div>
 			</div>
 
-			<SearchBar
-				value={query}
-				onChange={setQuery}
-				placeholder={strings("page.sales.searchPlaceholder")}
-			/>
+			{(sales?.length ?? 0) > 5 && (
+				<SearchBar
+					value={query}
+					onChange={setQuery}
+					placeholder={strings("page.sales.searchPlaceholder")}
+				/>
+			)}
 
 			<DataTable
 				data={filteredSales}
