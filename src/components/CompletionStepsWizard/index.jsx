@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { useApp } from "../../context";
+import { get } from "../../lib/client";
 import strings from "../../localization";
 
 const STEPS = [
@@ -29,6 +31,13 @@ const STEPS = [
 	},
 ];
 
+const TIER_STEP = {
+	key: "subscription",
+	href: "/settings/subscription",
+	labelKey: "completionSteps.selectTier",
+	icon: "fa-layer-group",
+};
+
 export const shouldShowCompletionWizard = (account) => {
 	if (!account || account.type !== "account.merchant") return false;
 	return STEPS.some(
@@ -39,6 +48,22 @@ export const shouldShowCompletionWizard = (account) => {
 
 const CompletionStepsWizard = () => {
 	const { account } = useApp();
+	const [hasSubscription, setHasSubscription] = useState(null);
+
+	useEffect(() => {
+		if (!account || account.type !== "account.merchant") return;
+		let cancelled = false;
+		get("/tiers/subscription")
+			.then((res) => {
+				if (!cancelled) setHasSubscription(!!res?.data);
+			})
+			.catch(() => {
+				if (!cancelled) setHasSubscription(false);
+			});
+		return () => {
+			cancelled = true;
+		};
+	}, [account]);
 
 	if (!account || account.type !== "account.merchant") return null;
 
@@ -47,7 +72,12 @@ const CompletionStepsWizard = () => {
 		return value === false || value === undefined;
 	});
 
-	if (incompleteSteps.length === 0) return null;
+	const needsTier = hasSubscription === false;
+	const allSteps = needsTier
+		? [...incompleteSteps, TIER_STEP]
+		: incompleteSteps;
+
+	if (allSteps.length === 0) return null;
 
 	return (
 		<section
@@ -65,28 +95,37 @@ const CompletionStepsWizard = () => {
 				{strings("completionSteps.description")}
 			</p>
 			<ol className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-3">
-				{incompleteSteps.map((step, index) => (
-					<li key={step.key} className="flex items-center gap-2">
-						{index > 0 && (
-							<span
-								className="hidden text-amber-600 sm:inline"
-								aria-hidden
+				{allSteps.map((step, index) => {
+					const isTier = step.key === "subscription";
+					return (
+						<li key={step.key} className="flex items-center gap-2">
+							{index > 0 && (
+								<span
+									className="hidden text-amber-600 sm:inline"
+									aria-hidden
+								>
+									›
+								</span>
+							)}
+							<Link
+								href={step.href}
+								className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium shadow-sm transition focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+									isTier
+										? "border-emerald-400 bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-400"
+										: "border-amber-300 bg-white text-amber-900 hover:bg-amber-100 hover:border-amber-400 focus:ring-amber-400"
+								}`}
 							>
-								›
-							</span>
-						)}
-						<Link
-							href={step.href}
-							className="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-4 py-2.5 text-sm font-medium text-amber-900 shadow-sm transition hover:bg-amber-100 hover:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2"
-						>
-							<i
-								className={`fa-solid ${step.icon} text-amber-600`}
-								aria-hidden
-							/>
-							{strings(step.labelKey)}
-						</Link>
-					</li>
-				))}
+								<i
+									className={`fa-solid ${step.icon} ${
+										isTier ? "text-white" : "text-amber-600"
+									}`}
+									aria-hidden
+								/>
+								{strings(step.labelKey)}
+							</Link>
+						</li>
+					);
+				})}
 			</ol>
 		</section>
 	);

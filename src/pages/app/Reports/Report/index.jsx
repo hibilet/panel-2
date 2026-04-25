@@ -6,6 +6,7 @@ import { StatCard } from "../../../../components/shared";
 import { Input } from "../../../../components/inputs";
 import { del, get, put } from "../../../../lib/client";
 import strings, { formatCurrency } from "../../../../localization";
+import SalesReportView from "./SalesReportView";
 
 const SEGMENT_TYPES = {
 	upsell:                  { labelKey: "page.reports.churn.segment.upsell",                  className: "bg-violet-100 text-violet-800" },
@@ -307,6 +308,7 @@ const Report = () => {
 	const segmentInfo = report.type ? SEGMENT_TYPES[report.type] : null;
 	const leadsData = report.leads_data ?? [];
 	const rawData = report.raw_data ?? [];
+	const isSalesReport = report.type === "sales";
 
 	const totalFailedRevenue = rawData.reduce((s, e) => s + (Number(e.totalFailedRevenue) || 0), 0);
 	const totalUsers = rawData.length;
@@ -325,10 +327,19 @@ const Report = () => {
 					<div className="flex flex-wrap items-center gap-2">
 						<h1 className="text-2xl font-semibold text-slate-900">{report.name}</h1>
 						<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-							report.type === "churn" ? "bg-violet-100 text-violet-800" : "bg-sky-100 text-sky-800"
+							report.type === "churn"
+								? "bg-violet-100 text-violet-800"
+								: report.type === "sales"
+									? "bg-emerald-100 text-emerald-800"
+									: "bg-sky-100 text-sky-800"
 						}`}>
 							{report.type}
 						</span>
+						{report.type === "sales" && report.params?.period && (
+							<span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+								{strings(`page.reports.sales.period.${report.params.period}`)}
+							</span>
+						)}
 					</div>
 					<p className="mt-1 text-sm text-slate-500">
 						{formatDate(report.start)} - {formatDate(report.end)}
@@ -355,54 +366,60 @@ const Report = () => {
 				</div>
 			</div>
 
-			{/* Stats */}
-			{rawData.length > 0 && (
-				<div className="grid grid-cols-3 gap-4">
-					<StatCard label={strings("page.reports.churn.stats.users")} value={totalUsers} />
-					<StatCard label={strings("page.reports.churn.stats.failedRevenue")} value={formatCurrency(totalFailedRevenue)} />
-					<StatCard label={strings("page.reports.churn.stats.totalFailedBaskets")} value={totalFailedBaskets} />
-				</div>
-			)}
+			{isSalesReport ? (
+				<SalesReportView report={report} />
+			) : (
+				<>
+					{/* Stats */}
+					{rawData.length > 0 && (
+						<div className="grid grid-cols-3 gap-4">
+							<StatCard label={strings("page.reports.churn.stats.users")} value={totalUsers} />
+							<StatCard label={strings("page.reports.churn.stats.failedRevenue")} value={formatCurrency(totalFailedRevenue)} />
+							<StatCard label={strings("page.reports.churn.stats.totalFailedBaskets")} value={totalFailedBaskets} />
+						</div>
+					)}
 
-			{/* Tabs */}
-			<div>
-				<div className="mb-4 flex gap-1 border-b border-slate-200">
-					{[
-						{ key: "leads", label: strings("page.reports.tab.leads") },
-						{ key: "raw", label: strings("page.reports.tab.raw") },
-					].map(({ key, label }) => (
-						<button
-							key={key}
-							type="button"
-							onClick={() => setActiveTab(key)}
-							className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
-								activeTab === key
-									? "border-slate-900 text-slate-900"
-									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
-						>
-							{label}
-						</button>
-					))}
-				</div>
+					{/* Tabs */}
+					<div>
+						<div className="mb-4 flex gap-1 border-b border-slate-200">
+							{[
+								{ key: "leads", label: strings("page.reports.tab.leads") },
+								{ key: "raw", label: strings("page.reports.tab.raw") },
+							].map(({ key, label }) => (
+								<button
+									key={key}
+									type="button"
+									onClick={() => setActiveTab(key)}
+									className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+										activeTab === key
+											? "border-slate-900 text-slate-900"
+											: "border-transparent text-slate-500 hover:text-slate-700"
+									}`}
+								>
+									{label}
+								</button>
+							))}
+						</div>
 
-				{activeTab === "leads" && <LeadsSummary leadsData={leadsData} />}
+						{activeTab === "leads" && <LeadsSummary leadsData={leadsData} />}
 
-				{activeTab === "raw" && (
-					<div className="space-y-3">
-						{rawData.length === 0 ? (
-							<div className="py-12 text-center text-slate-500">
-								<i className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300" aria-hidden />
-								<p>{strings("page.reports.noLeadsData")}</p>
+						{activeTab === "raw" && (
+							<div className="space-y-3">
+								{rawData.length === 0 ? (
+									<div className="py-12 text-center text-slate-500">
+										<i className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300" aria-hidden />
+										<p>{strings("page.reports.noLeadsData")}</p>
+									</div>
+								) : (
+									rawData.map((entry) => (
+										<RawDataCard key={entry._id ?? entry.userId} entry={entry} />
+									))
+								)}
 							</div>
-						) : (
-							rawData.map((entry) => (
-								<RawDataCard key={entry._id ?? entry.userId} entry={entry} />
-							))
 						)}
 					</div>
-				)}
-			</div>
+				</>
+			)}
 
 			{/* Rename Modal */}
 			<Modal

@@ -16,6 +16,7 @@ import {
 import { ImageUpload } from "../../../../components/shared";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
+import { seedSaleJobs } from "../../../../lib/saleJobs";
 import strings from "../../../../localization";
 import { saleBasicFaker } from "../../../../utils/fakers";
 import { compact, toId } from "../../../../utils/object";
@@ -79,7 +80,10 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			const res = await post(`/sales`, payload);
 			setSale(res.data);
 			addSale(res.data);
-			if (res.data?.id) setLocation(`/sales/${res.data.id}`);
+			if (res.data?.id) {
+				seedSaleJobs(res.data.id, res.data.name);
+				setLocation(`/sales/${res.data.id}`);
+			}
 		} finally {
 			setSaving(false);
 		}

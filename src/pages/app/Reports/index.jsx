@@ -2,11 +2,12 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { Input, Select } from "../../../components/inputs";
-import { Modal } from "../../../components/shared";
+import { Modal, SearchBar } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
 import { del, get, post, put } from "../../../lib/client";
 import strings from "../../../localization";
+import { matchesQuery } from "../../../utils/search";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "-");
 
@@ -38,6 +39,7 @@ const Reports = () => {
 	const [reports, setReports] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [query, setQuery] = useState("");
 
 	const [pastSales, setPastSales] = useState([]);
 
@@ -79,6 +81,17 @@ const Reports = () => {
 			.then((res) => setPastSales(res.data ?? []))
 			.catch(() => {});
 	}, []);
+
+	const filteredReports = useMemo(
+		() =>
+			(reports ?? []).filter(
+				(r) =>
+					matchesQuery(r.name, query) ||
+					matchesQuery(r.type, query) ||
+					matchesQuery(typeof r.owner === "object" ? r.owner?.name : r.owner, query),
+			),
+		[reports, query],
+	);
 
 	const allSalesOptions = useMemo(() => {
 		const seen = new Set();
@@ -273,9 +286,15 @@ const Reports = () => {
 				</div>
 			)}
 
+			<SearchBar
+				value={query}
+				onChange={setQuery}
+				placeholder={strings("page.reports.searchPlaceholder")}
+			/>
+
 			<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
-					data={reports}
+					data={filteredReports}
 					columns={columns}
 					getRowKey={(r) => r.id ?? r._id}
 					loading={loading}

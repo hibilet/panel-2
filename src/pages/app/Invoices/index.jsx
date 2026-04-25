@@ -1,15 +1,14 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useLocation } from "wouter";
+import { useLocation } from "wouter";
 import { AsyncSearchInput, Input } from "../../../components/inputs";
-import { Modal, SlidePanel } from "../../../components/shared";
+import { Modal } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
 import { useApp } from "../../../context";
 import { get, post } from "../../../lib/client";
 import strings, { formatCurrency } from "../../../localization";
-import InvoicePanel from "./Invoice";
 
 const LIMIT = 25;
 
@@ -25,7 +24,6 @@ const statusStyles = {
 const Invoices = () => {
 	const { account } = useApp();
 	const isAdmin = account?.type === "account.admin";
-	const { id } = useParams();
 	const [, setLocation] = useLocation();
 
 	const [data, setData] = useState([]);
@@ -33,7 +31,6 @@ const Invoices = () => {
 	const [page, setPage] = useState(1);
 	const [fetchedPage, setFetchedPage] = useState(null);
 	const [error, setError] = useState(null);
-	const [selectedInvoice, setSelectedInvoice] = useState(null);
 	const [generateOpen, setGenerateOpen] = useState(false);
 	const [generating, setGenerating] = useState(false);
 	const [filterEmail, setFilterEmail] = useState("");
@@ -63,16 +60,6 @@ const Invoices = () => {
 				setFetchedPage(page);
 			});
 	}, [page, filterEmail, isAdmin, account?.type]);
-
-	// Sync selected invoice when id param changes
-	useEffect(() => {
-		if (id) {
-			const found = data.find((inv) => inv.id === id);
-			if (found) setSelectedInvoice(found);
-		} else {
-			setSelectedInvoice(null);
-		}
-	}, [id, data]);
 
 	const searchMerchants = async (query) => {
 		const res = await get(`/accounts/search?type=account.merchant&name=${encodeURIComponent(query)}&limit=10`);
@@ -197,10 +184,7 @@ const Invoices = () => {
 					bare
 					loading={loading}
 					onRowClick={(row) => {
-						if (row.id) {
-							setSelectedInvoice(row);
-							setLocation(`/invoices/${row.id}`);
-						}
+						if (row.id) setLocation(`/invoices/${row.id}`);
 					}}
 					emptyMessage={strings("table.invoice.noInvoices")}
 				/>
@@ -288,27 +272,6 @@ const Invoices = () => {
 					</div>
 				</form>
 			</Modal>
-
-			{/* Invoice detail slide panel */}
-			<SlidePanel
-				isOpen={!!selectedInvoice}
-				onClose={() => {
-					setSelectedInvoice(null);
-					setLocation("/invoices");
-				}}
-				title={strings("page.invoices.breakdown")}
-				aria-label={strings("page.invoices.breakdown")}
-			>
-				{selectedInvoice && (
-					<InvoicePanel
-						invoice={selectedInvoice}
-						onClose={() => {
-							setSelectedInvoice(null);
-							setLocation("/invoices");
-						}}
-					/>
-				)}
-			</SlidePanel>
 		</div>
 	);
 };
