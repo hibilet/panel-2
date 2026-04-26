@@ -112,7 +112,10 @@ const Subscription = () => {
 			const res = await post("/tiers/select", { tierId: tier.uuid });
 			await fetchData(true);
 			await fetchHistory();
-			if (res?.data?.invoice) routeToInvoice(res.data.invoice);
+			// Prefer routing to the draft (projection of next month) so the merchant
+			// sees what they will be billed before the period closes; fallback to setup invoice.
+			if (res?.data?.draft) routeToInvoice(res.data.draft);
+			else if (res?.data?.invoice) routeToInvoice(res.data.invoice);
 		} catch (err) {
 			setError(mapSelectError(err?.message));
 		} finally {
@@ -138,7 +141,8 @@ const Subscription = () => {
 			setAccessCode("");
 			await fetchData(true);
 			await fetchHistory();
-			if (res?.data?.invoice) routeToInvoice(res.data.invoice);
+			if (res?.data?.draft) routeToInvoice(res.data.draft);
+			else if (res?.data?.invoice) routeToInvoice(res.data.invoice);
 		} catch (err) {
 			setError(mapSelectError(err?.message));
 		} finally {

@@ -2,7 +2,6 @@
 	"app.name": "HIBilet Panel",
 	"app.welcome": "Hoş geldiniz, $0",
 	"app.description": "HIBilet Panel, satış ve işlemlerinizi yönetmek için bir platformdur",
-
 	"nav.dashboard": "Kontrol Paneli",
 	"nav.accounts": "Hesaplar",
 	"nav.venues": "Mekanlar",
@@ -14,7 +13,6 @@
 	"nav.menu": "Menü",
 	"nav.live": "Anlık Etkinlikler",
 	"nav.backToAdmin": "Admin'e Dön",
-
 	"tour.start": "Rehberli turu başlat",
 	"tour.step.dashboard": "Kontrol Paneli — Panelinizin genel görünümü. Bugünkü satışları, aylık istatistikleri, aktif satış sayısını ve son aktiviteleri bir bakışta görün.",
 	"tour.step.sales": "Satışlar — Satış etkinliklerinizi oluşturun ve yönetin. Her etkinlik için bilet, kanal, kupon, misafir ve okuyucu ayarlayın.",
@@ -27,7 +25,6 @@
 	"tour.step.dashboardWeeklyEvents": "Haftalık etkinlik satış matrisi — Haftalık etkinlik satış matrisini görüntüleyin. Bir hafta ve bir etkinlik seçerek verileri görüntüleyin.",
 	"tour.step.dashboardRecentActivity": "Son aktiviteler — Son aktiviteleri görüntüleyin. Bir işlem seçerek verileri görüntüleyin.",
 	"tour.step.dashboardRecentActivityViewAll": "Tümünü gör — Tüm son aktiviteleri görüntüleyin.",
-
 	"completionSteps.title": "Kurulumu tamamlayın",
 	"completionSteps.description": "Paneli kullanmadan önce lütfen aşağıdaki adımları tamamlayın.",
 	"completionSteps.agreements": "Sözleşmeler",
@@ -35,7 +32,6 @@
 	"completionSteps.mailings": "Posta ayarları",
 	"completionSteps.billing": "Fatura ayarları",
 	"completionSteps.selectTier": "Paketinizi seçin",
-
 	"common.save": "Kaydet",
 	"common.cancel": "İptal",
 	"common.confirm": "Onayla",
@@ -78,7 +74,6 @@
 	"common.unarchive": "Arşivden Çıkar",
 	"common.vat": "KDV",
 	"common.total": "Toplam",
-
 	"error.required": "Bu alan zorunludur",
 	"error.failedLoad": "Yüklenemedi",
 	"error.failedSave": "Kaydedilemedi",
@@ -96,7 +91,6 @@
 	"error.failedLoadTransaction": "İşlem yüklenemedi",
 	"error.failedLoadLink": "Bağlantı yüklenemedi",
 	"error.failedLoadAccounts": "Hesaplar yüklenemedi",
-
 	"confirm.deleteSale": "Satışı sil",
 	"confirm.deleteSaleBody": "Bu satışı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
 	"confirm.deleteChannel": "Bu kanalı silmek istiyor musunuz?",
@@ -117,7 +111,6 @@
 	"confirm.refundAttendeesBody": "Toplam $1 tutarında $0 katılımcı iade edilsin mi? Bu işlem geri alınamaz.",
 	"confirm.refundReservation": "Bu katılımcı iade edilsin mi?",
 	"confirm.refundReservationBody": "Müşteriye $0 iade edilsin mi? Bu işlem geri alınamaz.",
-
 	"dashboard.stats.todaySales": "Bugünkü Satışlar",
 	"dashboard.stats.mtdSales": "Aylık Satışlar",
 	"dashboard.stats.mtdProductsSold": "Aylık Satılan Ürün",
@@ -135,7 +128,6 @@
 	"dashboard.dailySales": "Günlük satışlar",
 	"dashboard.salesChartSelectedMonth": "Seçilen ay",
 	"dashboard.salesChartThisMonth": "Bu ay",
-
 	"table.sale.startDate": "Başlangıç tarihi",
 	"table.sale.name": "Ad",
 	"table.sale.venue": "Mekan",
@@ -196,7 +188,6 @@
 	"form.venue.status": "Durum",
 	"form.venue.owner": "Sahip",
 	"error.failedLoadVenues": "Mekanlar yüklenemedi",
-
 	"form.provider.newTitle": "Yeni Sağlayıcı Bilgileri",
 	"form.provider.editTitle": "Sağlayıcı Bilgileri",
 	"form.provider.name": "Sağlayıcı Adı",
@@ -239,7 +230,6 @@
 	"table.ticket.stock": "Stok",
 	"table.ticket.reservations": "Rezervasyonlar",
 	"table.ticket.status": "Durum",
-
 	"page.sales.title": "Satışlar",
 	"page.sales.showMore": "Daha Fazla",
 	"page.sales.showLess": "Daha Az",
@@ -248,7 +238,6 @@
 	"page.sales.createWithAI": "AI ile Oluştur",
 	"page.sales.viewPastEvents": "Geçmiş Etkinlikleri Gör",
 	"page.sales.hidePastEvents": "Geçmiş Etkinlikleri Gizle",
-
 	"page.sale.tab.basic": "Temel",
 	"page.sale.tab.tickets": "Biletler",
 	"page.sale.tab.channels": "Kanallar",
@@ -269,14 +258,12 @@
 	"page.sale.guided.generate": "Oluştur",
 	"page.sale.guided.generating": "Oluşturuluyor…",
 	"page.sale.guided.generatedJson": "Oluşturulan JSON",
-
 	"page.live.title": "Anlık Etkinlikler",
 	"page.live.noEventsToday": "Bugün etkinlik yok",
 	"page.live.noEventsTodayDesc": "Bugün için planlanmış etkinlikleriniz olduğunda Canlı sekmesi görünür.",
 	"page.live.readerAccounts": "Okuyucu hesapları",
 	"page.live.attendeesRead": "Katılımcılar / Okunan",
 	"page.live.attendeesReadValue": "$0 / $1",
-
 	"page.transactions.title": "İşlemler",
 	"page.transactions.details": "İşlem Detayları",
 	"page.transactions.filterTransactions": "İşlemleri Filtrele",
@@ -285,13 +272,11 @@
 	"page.transactions.transactionIdPlaceholder": "Örn: 1234567890",
 	"page.transactions.email": "E-Posta",
 	"page.transactions.emailPlaceholder": "Örn: john@doe.com",
-
 	"page.links.title": "Bağlantılar",
 	"page.links.details": "Bağlantı Detayları",
 	"page.links.createNew": "Yeni Bağlantı Oluştur",
 	"page.links.showArchived": "Arşivlenmiş Bağlantıları Göster",
 	"page.links.hideArchived": "Arşivlenmiş Bağlantıları Gizle",
-
 	"page.reports.title": "Raporlar",
 	"page.reports.createReport": "Rapor Olustur",
 	"page.reports.searchPlaceholder": "Ad, tur veya sahibe gore ara",
@@ -389,7 +374,6 @@
 	"page.reports.churn.empty.selectSale": "Churn raporunu olusturmak icin bir etkinlik secin",
 	"page.reports.churn.empty.noData": "Secilen donem icin churn verisi bulunamadi",
 	"page.reports.churn.stats.totalFailedBaskets": "Basarisiz sepetler",
-
 	"page.accounts.title": "Hesaplar",
 	"page.accounts.tab.merchants": "Satıcılar",
 	"page.accounts.tab.customers": "Müşteriler",
@@ -405,15 +389,12 @@
 	"page.accounts.typeMerchant": "Satıcı",
 	"page.accounts.typeUser": "Kullanıcı",
 	"page.accounts.details": "Hesap Detayları",
-
 	"form.account.loginAs": "Bu Hesap Olarak Giriş Yap",
 	"form.account.errorLoginAs": "Bu hesap olarak giriş yapılamadı",
 	"form.account.setInactive": "Pasif yap",
 	"form.account.confirmSetInactive": "Hesabı pasif yap",
 	"form.account.confirmSetInactiveBody": "\"$0\" hesabını pasif yapmak istediğinizden emin misiniz?",
-	"form.account.commission": "Komisyon",
 	"form.account.commissionAmount": "Komisyon tutarı",
-	"form.account.commissionVat": "KDV çarpanı",
 	"form.account.commissionType": "Komisyon tipi",
 	"form.account.commissionTypePercentage": "Yüzde",
 	"form.account.commissionTypeFixed": "Sabit",
@@ -423,7 +404,6 @@
 	"form.account.tierChangedUpgraded": "Tier yükseltildi",
 	"form.account.tierChangedDowngradeQueued": "Sonraki dönem için düşürme planlandı",
 	"form.account.tierChangedSubscribed": "Tier'e abone olundu",
-
 	"page.settings.title": "Ayarlar",
 	"page.settings.profile": "Profil",
 	"page.settings.preferences": "Tercihler",
@@ -461,7 +441,6 @@
 	"language.de": "Almanca",
 	"language.nl": "Felemenkçe",
 	"language.fr": "Fransızca",
-
 	"form.sale.info": "ℹ️ Bilgi",
 	"form.sale.eventName": "Etkinlik Adı",
 	"form.sale.eventNamePlaceholder": "Örn: Chillout Festival 2024",
@@ -519,7 +498,6 @@
 	"form.sale.trackingAndAdvertising": "Tracking and Advertising",
 	"form.sale.comboTicketAndLogo": "Combo Ticket and Logo",
 	"form.sale.eventRules": "Event Rules",
-
 	"sale.eventName": "Etkinlik Adı",
 	"sale.eventNamePlaceholder": "Örn: Chillout Festival 2024",
 	"sale.startDateTime": "Başlangıç Tarihi ve Saati",
@@ -570,7 +548,6 @@
 	"sale.rules": "Kurallar",
 	"sale.rulesPlaceholder": "Lütfen kuralları belirtin...",
 	"sale.save": "💾 Kaydet",
-
 	"form.mailing.modeDefault": "E-postaları benim adıma gönderin lütfen",
 	"form.mailing.modeDefaultDesc": "Müşterilerinize ortak bir gönderen üzerinden e-posta göndeririz. Kurulum gerektirmez.",
 	"form.mailing.modeCustom": "Kendi e-posta adresimi gireceğim",
@@ -594,7 +571,6 @@
 	"form.mailing.templatePreviewError": "Önizleme için EJS sözdizimini düzeltin",
 	"error.failedLoadMailing": "Posta ayarları yüklenemedi",
 	"error.failedLoadBilling": "Fatura ayarları yüklenemedi",
-
 	"form.billing.name": "Ad",
 	"form.billing.namePlaceholder": "Örn: Ahmet Yılmaz",
 	"form.billing.email": "E-posta",
@@ -619,7 +595,6 @@
 	"form.billing.addressZipPlaceholder": "Örn: 34000",
 	"form.billing.addressCountry": "Ülke",
 	"form.billing.vatHint": "Sınır ötesi B2B ters yükleme için KDV numarası girin.",
-
 	"form.link.title": "Bağlantı Başlığı",
 	"form.link.slug": "Bağlantı Slug",
 	"form.link.views": "Görüntülenme",
@@ -633,7 +608,6 @@
 	"form.link.confirmArchiveBody": "Bu bağlantıyı arşivlemek istediğinizden emin misiniz?",
 	"form.link.confirmUnarchive": "Bağlantıyı geri yükle",
 	"form.link.confirmUnarchiveBody": "Bu bağlantıyı aktif hale getirmek istediğinizden emin misiniz?",
-
 	"form.ticket.ticketTypes": "Bilet türleri",
 	"form.ticket.ticketTypeCount": "$0 bilet türü",
 	"form.ticket.ticketTypeCountPlural": "$0 bilet türü",
@@ -671,7 +645,6 @@
 	"form.ticket.totalCapacityLabel": "$0 toplam kapasite",
 	"form.ticket.reservationsLabel": "$0 rezervasyon",
 	"form.ticket.readLabel": "$0 okundu",
-
 	"form.attendees.title": "Satış Katılımcıları",
 	"form.attendees.printPdf": "PDF Yazdır",
 	"form.attendees.downloadExcel": "Excel İndir",
@@ -680,7 +653,6 @@
 	"form.attendees.noAttendees": "Henüz katılımcı yok",
 	"form.attendees.product": "Ürün",
 	"form.attendees.printTitle": "Katılımcılar - $0",
-
 	"form.transaction.sendEmailAgain": "E-postayı Tekrar Gönder",
 	"form.transaction.sendToAnotherMail": "Başka E-postaya Gönder",
 	"form.transaction.cancelAll": "Tümünü İptal Et",
@@ -710,7 +682,6 @@
 	"form.attendees.refundMode": "İade modu",
 	"form.attendees.refundExit": "İade modundan çık",
 	"form.attendees.refundSelected": "Seçilenleri iade et ($0)",
-
 	"status.success": "Başarılı",
 	"status.pending": "Beklemede",
 	"status.failed": "Başarısız",
@@ -719,10 +690,8 @@
 	"status.reserved": "Rezerve",
 	"status.created": "Oluşturuldu",
 	"status.cancelled": "İptal edildi",
-
 	"pagination.showing": "$0 - $1 arası, toplam $2 sonuç",
 	"pagination.pageOf": "Sayfa $0 / $1",
-
 	"back.links": "Bağlantılara Dön",
 	"back.reports": "Raporlara Dön",
 	"back.accounts": "Hesaplara Dön",
@@ -731,14 +700,12 @@
 	"back.agreements": "Satış Sözleşmelerine Dön",
 	"back.mailing": "Posta Ayarlarına Dön",
 	"back.invoices": "Faturalara Dön",
-
 	"detail.id": "ID",
 	"detail.url": "URL",
 	"detail.type": "Tür",
 	"detail.period": "Dönem",
-
 	"form.channel.title": "Satış kanalları",
-	"form.channel.count": "$0 kanal",
+	"form.channel.count": "Adet",
 	"form.channel.countPlural": "$0 kanal",
 	"form.channel.addChannel": "Kanal ekle",
 	"form.channel.saveFirst": "Önce satışı kaydedin",
@@ -772,14 +739,12 @@
 	"form.channel.noReservationData": "Rezervasyon verisi yok",
 	"form.channel.attendeeAges": "Katılımcı yaşları",
 	"form.channel.noAgeData": "Yaş verisi yok",
-	"form.channel.count": "Adet",
 	"form.channel.age": "Yaş:",
 	"form.channel.attendees": "Katılımcılar",
 	"form.channel.ariaPrintReport": "Raporu yazdır",
 	"form.channel.print": "Yazdır",
 	"form.channel.copied": "Kopyalandı",
 	"form.channel.namePlaceholder": "Örn: Instagram",
-
 	"form.question.title": "Sorular",
 	"form.question.question": "Soru",
 	"form.question.type": "Tür",
@@ -800,7 +765,6 @@
 	"form.question.optionsPlaceholder": "Her satıra bir seçenek, örn.: Vejetaryen, Vegan, Glutensiz",
 	"form.question.createQuestion": "Soru oluştur",
 	"form.question.confirmDelete": "Bu soruyu silmek istiyor musunuz?",
-
 	"form.guest.title": "Misafirler",
 	"form.guest.addGuest": "Misafir ekle",
 	"form.guest.saveFirst": "Önce satışı kaydedin",
@@ -832,7 +796,6 @@
 	"form.guest.ticketQuantity": "Bilet Miktarı",
 	"form.guest.createGuest": "Misafir oluştur",
 	"form.guest.printTitle": "Misafirler - $0",
-
 	"form.reader.title": "Okuyucular",
 	"form.reader.reader": "Okuyucu",
 	"form.reader.addReader": "Okuyucu ekle",
@@ -856,10 +819,8 @@
 	"form.reader.errorCopy": "Panoya kopyalanamadı",
 	"form.reader.namePlaceholder": "Örn: Ahmet Yılmaz",
 	"form.reader.emailPlaceholder": "Örn: ahmet@ornek.com",
-
 	"common.pleaseSelect": "Lütfen seçin",
 	"common.editTemplate": "Şablonu düzenle",
-
 	"form.coupon.title": "Kuponlar",
 	"form.coupon.addCoupon": "Kupon ekle",
 	"form.coupon.saveFirst": "Önce satışı kaydedin",
@@ -889,13 +850,10 @@
 	"form.coupon.expirationDate": "Son kullanma tarihi ve saati",
 	"form.coupon.expiresLabel": "Son kullanma:",
 	"form.coupon.cannotDeleteUsed": "Silinemez: kupon kullanılmış",
-
 	"error.failedDeleteGuest": "Misafir silinemedi",
-
 	"nav.tiers": "Planlar",
 	"nav.invoices": "Faturalar",
 	"page.settings.subscription": "Abonelik",
-
 	"page.tiers.title": "Plan Katalogu",
 	"page.tiers.createTier": "Yeni Plan",
 	"page.tiers.details": "Plan Detayları",
@@ -923,7 +881,6 @@
 	"error.failedLoadTiers": "Planlar yüklenemedi",
 	"confirm.deleteTier": "Planı sil",
 	"confirm.deleteTierBody": "\"$0\" silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-
 	"page.subscription.title": "Abonelik",
 	"page.subscription.currentTier": "Mevcut Plan",
 	"page.subscription.noTier": "Aktif plan yok",
@@ -985,7 +942,6 @@
 	"error.failedLoadSubscription": "Abonelik yüklenemedi",
 	"confirm.cancelSubscription": "Mevcut planınızı fatura döneminin sonunda iptal etmek istiyor musunuz?",
 	"confirm.cancelPending": "Planlanmış geçişi iptal edip mevcut planınızda kalmak istiyor musunuz?",
-
 	"page.invoices.title": "Faturalar",
 	"page.invoices.generate": "Fatura Oluştur",
 	"page.invoices.generating": "Oluşturuluyor...",
@@ -1029,7 +985,6 @@
 	"table.invoice.number": "Numara",
 	"table.invoice.vat": "KDV",
 	"table.invoice.total": "Toplam",
-
 	"page.invoices.print": "Yazdır",
 	"page.invoices.sellerNotConfigured": "Bu realm için satıcı / KDV yapılandırılmadı",
 	"page.invoices.sellerNotConfiguredAdmin": "Realm'i açıp Satıcı / Faturalandırma bölümünü doldurun (vergi ülkesi ve varsayılan KDV oranı).",
@@ -1039,17 +994,12 @@
 	"page.invoices.to": "Alıcı",
 	"page.invoices.vatId": "KDV no",
 	"page.invoices.registry": "Sicil no",
-
 	"vat.mode.standard": "Standart",
 	"vat.mode.reverseCharge": "Ters yükleme",
-	"vat.mode.outOfScope": "Kapsam dışı",
-	"vat.mode.ossRisk": "OSS gerekebilir",
-	"vat.mode.fallback": "Varsayılan",
 	"vat.mode.noConfig": "KDV yapılandırılmadı",
 	"vat.mode.legacy": "Eski",
 	"vat.mode.unknown": "Bilinmiyor",
 	"error.failedLoadInvoices": "Faturalar yüklenemedi",
-
 	"page.stripeOnboard.title": "Stripe ile Bağlan",
 	"page.stripeOnboard.description": "Bilet satışına başlamak için ödeme hesabınızı oluşturun.",
 	"page.stripeOnboard.submit": "Stripe'a Devam Et",
@@ -1071,20 +1021,17 @@
 	"link.image.enhancing": "Geliştiriliyor...",
 	"link.image.enhanced": "Görsel geliştirildi",
 	"link.image.enhanceFailed": "Görsel geliştirilemedi",
-
 	"form.stripeOnboard.businessType": "İşletme türü",
 	"form.stripeOnboard.businessTypeIndividual": "Şahıs",
 	"form.stripeOnboard.businessTypeCompany": "Şirket",
 	"page.stripeOnboard.invitedBanner": "Davet edildiniz. Davetin gönderildiği e-posta adresini kullanın.",
 	"error.invitationEmailMismatch": "Bu e-posta davet ile eşleşmiyor. Davet gönderilen adresi kullanın.",
-
 	"page.onboardReturn.missingTokenTitle": "Oturum bulunamadı",
 	"page.onboardReturn.missingTokenDescription": "Bu bağlantıda oturum jetonu bulunamadı. Lütfen tekrar giriş yapın.",
 	"page.onboardReturn.signingIn": "Giriş yapılıyor…",
 	"page.onboardReturn.completeProfileTitle": "Neredeyse hazır",
 	"page.onboardReturn.completeProfileDescription": "Satışa başlamadan önce Stripe şu bilgilere ihtiyaç duyuyor.",
 	"page.onboardReturn.openBilling": "Fatura ayarlarını aç",
-
 	"page.settings.connectStripe": "Stripe ile bağlan",
 	"toast.stripeAttached": "Stripe hesabı bağlandı",
 	"error.stripeAccountInUse": "Bu Stripe hesabı başka bir satıcıya bağlı.",
@@ -1092,10 +1039,8 @@
 	"error.stripeAccessDenied": "Stripe yetkilendirmesi reddedildi.",
 	"error.stripeConnectFailed": "Stripe bağlantısı başarısız. Lütfen tekrar deneyin.",
 	"table.provider.default": "Varsayılan",
-
 	"nav.realms": "Alanlar",
 	"nav.invitations": "Davetler",
-
 	"page.invitations.title": "Satıcı davet et",
 	"page.invitations.description": "Bir alana bağlı Stripe Connect ekleme bağlantısı gönderin.",
 	"page.invitations.success": "Davet gönderildi",
@@ -1109,7 +1054,6 @@
 	"error.failedCreateInvitation": "Davet oluşturulamadı",
 	"common.copy": "Kopyala",
 	"common.copied": "Kopyalandı",
-
 	"page.realms.title": "Alanlar",
 	"page.realms.create": "Yeni alan",
 	"table.realm.name": "Ad",
@@ -1156,10 +1100,8 @@
 	"error.failedLoadRealms": "Alanlar yüklenemedi",
 	"confirm.deleteRealm": "Alanı sil",
 	"confirm.deleteRealmBody": "\"$0\" alanını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-
 	"nav.jobs": "Görevler",
 	"nav.notifications": "Bildirimler",
-
 	"page.jobs.title": "Görevler",
 	"page.jobs.createNew": "Görev oluştur",
 	"page.jobs.searchPlaceholder": "Ad veya türe göre ara",
@@ -1181,7 +1123,6 @@
 	"page.jobs.alreadyRunning": "Görev zaten çalışıyor",
 	"page.jobs.runTriggered": "Görev başlatıldı",
 	"page.jobs.system.label": "Sistem",
-
 	"page.notifications.title": "Bildirimler",
 	"page.notifications.markAllRead": "Tümünü okundu işaretle",
 	"page.notifications.empty": "Bildirim yok",
@@ -1193,7 +1134,6 @@
 	"page.notifications.unread": "Okunmamış",
 	"page.notifications.bellAria": "Bildirimleri aç",
 	"page.notifications.dropdownTitle": "Bildirimler",
-
 	"table.job.name": "Ad",
 	"table.job.type": "Tür",
 	"table.job.schedule": "Zamanlama",
@@ -1211,7 +1151,6 @@
 	"table.notification.title": "Başlık",
 	"table.notification.severity": "Önem",
 	"table.notification.read": "Okundu",
-
 	"form.job.reportType": "Rapor türü",
 	"form.job.reportType.sales": "Satış raporu",
 	"form.job.reportType.churn": "Kayıp raporu",
@@ -1254,7 +1193,6 @@
 	"form.job.paramCountSingle": "Tekil",
 	"form.job.paramCountCumulative": "Kümülatif",
 	"form.job.paramAny": "Değer",
-
 	"notification.type.report.ready": "Rapor hazır",
 	"notification.type.invoice.ready": "Fatura hazır",
 	"notification.type.job.failed": "Görev başarısız",
@@ -1266,7 +1204,6 @@
 	"notification.severity.warning": "Uyarı",
 	"notification.severity.error": "Hata",
 	"page.notifications.allTypes": "Tüm türler",
-
 	"jobError.type-required": "Tür gereklidir.",
 	"jobError.unknown-job-type": "Bilinmeyen görev türü.",
 	"jobError.forbidden-job-type": "Bu görev türünü planlama yetkiniz yok.",
@@ -1274,16 +1211,12 @@
 	"jobError.schedule-or-runAt-required": "Bir zamanlama veya tek seferlik zaman girin.",
 	"jobError.cron-invalid": "Cron ifadesi geçersiz.",
 	"jobError.job-already-running": "Görev zaten çalışıyor.",
-
 	"error.failedLoadJobs": "Görevler yüklenemedi",
 	"error.failedLoadJobDefinitions": "Görev tanımları yüklenemedi",
 	"error.failedLoadJobRuns": "Çalışma geçmişi yüklenemedi",
 	"error.failedLoadNotifications": "Bildirimler yüklenemedi",
-	"error.failedSave": "Kaydedilemedi",
-
 	"confirm.deleteJob": "Görevi sil",
 	"confirm.deleteJobBody": "\"$0\" görevini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-
 	"ai.tips.title": "Bugünün ipuçları",
 	"ai.tips.refresh": "Yenile",
 	"ai.tips.refreshing": "Yenileniyor...",
@@ -1339,5 +1272,56 @@
 	"ai.draft.error.parseFailed": "AI okunamayan bir yanıt döndürdü. Tekrar deneyin.",
 	"ai.draft.error.failed": "AI taslağı başarısız oldu. Daha sonra tekrar deneyin.",
 	"ai.draft.error.imageTooLarge": "Görsel 8 MB'dan küçük olmalı.",
-	"ai.draft.error.retry": "Tekrar dene"
+	"ai.draft.error.retry": "Tekrar dene",
+	"page.sale.tab.reporting": "Raporlama",
+	"page.sale.reporting.title": "Raporlama",
+	"page.sale.reporting.subtitle": "Bu etkinlik icin otomatik satis veya churn raporlarini ac. Fiyat planinizdan gelir.",
+	"page.sale.reporting.sales": "Satis raporlamasi",
+	"page.sale.reporting.churn": "Churn raporlamasi",
+	"page.sale.reporting.sales.help": "Periyodik satis ozetleri - ciro, bilet sayisi, trend.",
+	"page.sale.reporting.churn.help": "Bu etkinlik icin terk edilen sepet ve yuksek degerli lead analizi.",
+	"page.sale.reporting.enable": "Etkinlestir",
+	"page.sale.reporting.free": "Ucretsiz",
+	"page.sale.reporting.cost": "Acikken aylik {price} ucretlendirilir.",
+	"page.sale.reporting.disabled": "Zamanlamak icin ac.",
+	"page.sale.reporting.upgrade": "Bu rapor turunu acmak icin plani yukseltin.",
+	"page.sale.reporting.freq.daily": "Gunluk",
+	"page.sale.reporting.freq.weekly": "Haftalik",
+	"page.sale.reporting.freq.monthly": "Aylik",
+	"page.sale.reporting.saving": "Kaydediliyor...",
+	"page.sale.reporting.saved": "Kaydedildi",
+	"form.tier.reportingPricing": "Raporlama fiyatlandirmasi",
+	"form.tier.reportingPricingHint": "Etkinlik basi aylik fiyat. 0 = bu seviye icin ucretsiz.",
+	"form.tier.reportingCron": "Raporlama zamanlamasi (override)",
+	"form.tier.reportingCronHint": "Cron ifadesi. Bos = platform varsayilani (23:59).",
+	"form.tier.reportingCronPlaceholder": "59 23 * * *",
+	"form.tier.reporting.sales": "Satis",
+	"form.tier.reporting.churn": "Churn",
+	"form.tier.reporting.daily": "Gunluk",
+	"form.tier.reporting.weekly": "Haftalik",
+	"form.tier.reporting.monthly": "Aylik",
+	"page.invoices.lineItems": "Kalemler",
+	"page.invoices.noLineItems": "Kalem yok.",
+	"page.invoices.description": "Aciklama",
+	"page.invoices.unit": "Birim",
+	"page.invoices.amount": "Tutar",
+	"page.invoices.addItem": "Kalem ekle",
+	"page.invoices.addItemDesc": "Aciklama",
+	"page.invoices.finalize": "Kesinlestir ve Stripe'a gonder",
+	"page.invoices.locked": "Kilitli - plan veya sistem kalemi",
+	"page.invoices.stripeLocked": "Stripe'a gonderildi. Degistirmek icin kredi notu kes.",
+	"page.invoices.ticketFee": "Bilet basi ucret",
+	"page.sale.reporting.summary.title": "Raporlama",
+	"page.sale.reporting.summary.off": "Kapali",
+	"page.sale.reporting.summary.runSales": "Satis raporu olustur",
+	"page.sale.reporting.summary.runChurn": "Churn raporu olustur",
+	"page.sale.reporting.summary.manage": "Yonet",
+	"page.sale.reporting.summary.ranOk": "{type} raporu olusturuldu.",
+	"page.sale.reporting.summary.viewReport": "Raporu goster",
+	"page.sale.reporting.feeNote": "Her calismada faturaya 1 {price} eklenir.",
+	"page.sale.reporting.summary.runNow": "Simdi calistir",
+	"page.reports.frequency": "Faturalama sikligi",
+	"page.reports.quoting": "Ucret hesaplaniyor...",
+	"page.reports.quoteLine": "{units} × {frequency} birim · €{total} sonraki faturaya eklenir.",
+	"page.reports.quoteHint": "Etkinlik, siklik ve tarih seciniz."
 }

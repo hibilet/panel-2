@@ -2,7 +2,6 @@
 	"app.name": "HIBilet Panel",
 	"app.welcome": "Willkommen, $0",
 	"app.description": "HIBilet Panel ist eine Plattform zur Verwaltung Ihrer Verkäufe und Transaktionen",
-
 	"nav.dashboard": "Dashboard",
 	"nav.accounts": "Konten",
 	"nav.venues": "Spielstätten",
@@ -14,7 +13,6 @@
 	"nav.live": "Live-Veranstaltungen",
 	"nav.menu": "Menü",
 	"nav.backToAdmin": "Zurück zu Admin",
-
 	"tour.start": "Geführte Tour starten",
 	"tour.step.dashboard": "Dashboard — Ihr Überblick über das Panel. Sehen Sie die heutigen Verkäufe, Monatsstatistiken, aktive Verkäufe und die letzten Aktivitäten auf einen Blick.",
 	"tour.step.sales": "Verkäufe — Erstellen und verwalten Sie Ihre Verkaufsveranstaltungen. Legen Sie Tickets, Kanäle, Gutscheine, Gäste und Leser für jede Veranstaltung fest.",
@@ -27,7 +25,6 @@
 	"tour.step.dashboardWeeklyEvents": "Wöchentliche Event-Matrix — Sehen Sie Ihre wöchentliche Event-Verkaufs-Matrix. Wählen Sie eine Woche und eine Veranstaltung aus, um die Daten anzuzeigen.",
 	"tour.step.dashboardRecentActivity": "Letzte Aktivität — Sehen Sie Ihre letzten Aktivitäten. Wählen Sie eine Transaktion, um die Details zu sehen.",
 	"tour.step.dashboardRecentActivityViewAll": "Alle anzeigen — Sehen Sie alle Ihre letzten Aktivitäten.",
-
 	"completionSteps.title": "Setup abschließen",
 	"completionSteps.description": "Bitte schließen Sie die folgenden Schritte ab, bevor Sie das Panel nutzen.",
 	"completionSteps.agreements": "Verträge",
@@ -35,7 +32,6 @@
 	"completionSteps.mailings": "E-Mail-Einstellungen",
 	"completionSteps.billing": "Rechnungsstellung",
 	"completionSteps.selectTier": "Tarif auswählen",
-
 	"common.save": "Speichern",
 	"common.cancel": "Abbrechen",
 	"common.confirm": "Bestätigen",
@@ -78,7 +74,6 @@
 	"common.unarchive": "Wiederherstellen",
 	"common.vat": "MwSt.",
 	"common.total": "Gesamt",
-
 	"error.required": "Dieses Feld ist erforderlich",
 	"error.failedLoad": "Laden fehlgeschlagen",
 	"error.failedSave": "Speichern fehlgeschlagen",
@@ -97,7 +92,6 @@
 	"error.failedLoadLink": "Link konnte nicht geladen werden",
 	"error.failedLoadAccounts": "Konten konnten nicht geladen werden",
 	"error.failedDeleteGuest": "Gast konnte nicht gelöscht werden",
-
 	"confirm.deleteSale": "Verkauf löschen",
 	"confirm.deleteSaleBody": "Sind Sie sicher, dass Sie diesen Verkauf löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"confirm.deleteChannel": "Diesen Kanal löschen?",
@@ -118,7 +112,6 @@
 	"confirm.refundAttendeesBody": "$0 Teilnehmer im Gesamtwert von $1 erstatten? Diese Aktion kann nicht rückgängig gemacht werden.",
 	"confirm.refundReservation": "Diesen Teilnehmer erstatten?",
 	"confirm.refundReservationBody": "$0 an den Kunden erstatten? Diese Aktion kann nicht rückgängig gemacht werden.",
-
 	"dashboard.stats.todaySales": "Heutige Verkäufe",
 	"dashboard.stats.mtdSales": "MTD Verkäufe",
 	"dashboard.stats.mtdProductsSold": "MTD Produkte verkauft",
@@ -136,7 +129,6 @@
 	"dashboard.dailySales": "Tägliche Verkäufe",
 	"dashboard.salesChartSelectedMonth": "Ausgewählter Monat",
 	"dashboard.salesChartThisMonth": "Dieser Monat",
-
 	"table.sale.startDate": "Startdatum",
 	"table.sale.name": "Name",
 	"table.sale.venue": "Veranstaltungsort",
@@ -197,7 +189,6 @@
 	"form.venue.status": "Status",
 	"form.venue.owner": "Inhaber",
 	"error.failedLoadVenues": "Spielstätten konnten nicht geladen werden",
-
 	"form.provider.newTitle": "Neue Anbieterinformationen",
 	"form.provider.editTitle": "Anbieterinformationen",
 	"form.provider.name": "Anbietername",
@@ -240,7 +231,6 @@
 	"table.ticket.stock": "Bestand",
 	"table.ticket.reservations": "Reservierungen",
 	"table.ticket.status": "Status",
-
 	"page.sales.title": "Verkäufe",
 	"page.sales.showMore": "Mehr anzeigen",
 	"page.sales.showLess": "Weniger anzeigen",
@@ -249,7 +239,6 @@
 	"page.sales.createWithAI": "Mit KI erstellen",
 	"page.sales.viewPastEvents": "Vergangene Veranstaltungen anzeigen",
 	"page.sales.hidePastEvents": "Vergangene Veranstaltungen ausblenden",
-
 	"page.sale.tab.basic": "Grunddaten",
 	"page.sale.tab.tickets": "Tickets",
 	"page.sale.tab.channels": "Kanäle",
@@ -270,14 +259,12 @@
 	"page.sale.guided.generate": "Generieren",
 	"page.sale.guided.generating": "Wird generiert…",
 	"page.sale.guided.generatedJson": "Generiertes JSON",
-
 	"page.live.title": "Live-Veranstaltungen",
 	"page.live.noEventsToday": "Heute keine Veranstaltungen",
 	"page.live.noEventsTodayDesc": "Der Live-Tab erscheint nur, wenn Sie Veranstaltungen für heute geplant haben.",
 	"page.live.readerAccounts": "Leser-Konten",
 	"page.live.attendeesRead": "Teilnehmer / Gelesen",
 	"page.live.attendeesReadValue": "$0 / $1",
-
 	"page.transactions.title": "Transaktionen",
 	"page.transactions.details": "Transaktionsdetails",
 	"page.transactions.filterTransactions": "Transaktionen filtern",
@@ -286,13 +273,11 @@
 	"page.transactions.transactionIdPlaceholder": "Z.B.: 1234567890",
 	"page.transactions.email": "E-Mail",
 	"page.transactions.emailPlaceholder": "Z.B.: max@mustermann.de",
-
 	"page.links.title": "Links",
 	"page.links.details": "Linkdetails",
 	"page.links.createNew": "Neuen Link erstellen",
 	"page.links.showArchived": "Archivierte Links anzeigen",
 	"page.links.hideArchived": "Archivierte Links ausblenden",
-
 	"page.reports.title": "Berichte",
 	"page.reports.createReport": "Bericht erstellen",
 	"page.reports.searchPlaceholder": "Suche nach Name, Typ oder Inhaber",
@@ -390,7 +375,6 @@
 	"page.reports.churn.empty.selectSale": "Wählen Sie eine Veranstaltung, um den Churn-Bericht zu erstellen",
 	"page.reports.churn.empty.noData": "Keine Churn-Daten für den ausgewählten Zeitraum gefunden",
 	"page.reports.churn.stats.totalFailedBaskets": "Fehlgeschlagene Warenkörbe",
-
 	"page.accounts.title": "Konten",
 	"page.accounts.tab.merchants": "Händler",
 	"page.accounts.tab.customers": "Kunden",
@@ -406,15 +390,12 @@
 	"page.accounts.typeMerchant": "Händler",
 	"page.accounts.typeUser": "Benutzer",
 	"page.accounts.details": "Kontodetails",
-
 	"form.account.loginAs": "Anmelden als",
 	"form.account.errorLoginAs": "Anmeldung als dieses Konto fehlgeschlagen",
 	"form.account.setInactive": "Deaktivieren",
 	"form.account.confirmSetInactive": "Konto deaktivieren",
 	"form.account.confirmSetInactiveBody": "Sind Sie sicher, dass Sie \"$0\" deaktivieren möchten?",
-	"form.account.commission": "Provision",
 	"form.account.commissionAmount": "Provisionsbetrag",
-	"form.account.commissionVat": "MwSt.-Multiplikator",
 	"form.account.commissionType": "Provisionstyp",
 	"form.account.commissionTypePercentage": "Prozent",
 	"form.account.commissionTypeFixed": "Fest",
@@ -424,7 +405,6 @@
 	"form.account.tierChangedUpgraded": "Stufe aktualisiert",
 	"form.account.tierChangedDowngradeQueued": "Downgrade für nächsten Abrechnungszeitraum geplant",
 	"form.account.tierChangedSubscribed": "Stufe abonniert",
-
 	"page.settings.title": "Einstellungen",
 	"page.settings.profile": "Profil",
 	"page.settings.preferences": "Präferenzen",
@@ -462,7 +442,6 @@
 	"language.de": "Deutsch",
 	"language.nl": "Niederländisch",
 	"language.fr": "Französisch",
-
 	"form.sale.info": "ℹ️ Info",
 	"form.sale.eventName": "Veranstaltungsname",
 	"form.sale.eventNamePlaceholder": "Z.B.: Chillout Festival 2024",
@@ -520,7 +499,6 @@
 	"form.sale.trackingAndAdvertising": "Tracking und Werbung",
 	"form.sale.comboTicketAndLogo": "Kombiticket und Logo",
 	"form.sale.eventRules": "Veranstaltungsregeln",
-
 	"sale.eventName": "Veranstaltungsname",
 	"sale.eventNamePlaceholder": "Z.B.: Chillout Festival 2024",
 	"sale.startDateTime": "Startdatum & Uhrzeit",
@@ -571,7 +549,6 @@
 	"sale.rules": "Regeln",
 	"sale.rulesPlaceholder": "Bitte Regeln angeben...",
 	"sale.save": "💾 Speichern",
-
 	"form.mailing.modeDefault": "Bitte E-Mails in meinem Namen versenden",
 	"form.mailing.modeDefaultDesc": "Wir versenden E-Mails an Ihre Kunden über einen geteilten Absender. Keine Einrichtung erforderlich.",
 	"form.mailing.modeCustom": "Ich gebe meine eigene E-Mail-Adresse ein",
@@ -595,7 +572,6 @@
 	"form.mailing.templatePreviewError": "EJS-Syntax beheben für Vorschau",
 	"error.failedLoadMailing": "Mail-Einstellungen konnten nicht geladen werden",
 	"error.failedLoadBilling": "Rechnungseinstellungen konnten nicht geladen werden",
-
 	"form.billing.name": "Name",
 	"form.billing.namePlaceholder": "Z.B.: Max Mustermann",
 	"form.billing.email": "E-Mail",
@@ -620,7 +596,6 @@
 	"form.billing.addressZipPlaceholder": "Z.B.: 10115",
 	"form.billing.addressCountry": "Land",
 	"form.billing.vatHint": "USt-IdNr. angeben für grenzüberschreitendes B2B Reverse-Charge.",
-
 	"form.link.title": "Link-Titel",
 	"form.link.slug": "Link-Slug",
 	"form.link.views": "Aufrufe",
@@ -634,7 +609,6 @@
 	"form.link.confirmArchiveBody": "Sind Sie sicher, dass Sie diesen Link archivieren möchten?",
 	"form.link.confirmUnarchive": "Link wiederherstellen",
 	"form.link.confirmUnarchiveBody": "Sind Sie sicher, dass Sie diesen Link wieder aktivieren möchten?",
-
 	"form.ticket.ticketTypes": "Ticketarten",
 	"form.ticket.ticketTypeCount": "$0 Ticketart",
 	"form.ticket.ticketTypeCountPlural": "$0 Ticketarten",
@@ -672,7 +646,6 @@
 	"form.ticket.totalCapacityLabel": "$0 Gesamtkapazität",
 	"form.ticket.reservationsLabel": "$0 Reservierungen",
 	"form.ticket.readLabel": "$0 gelesen",
-
 	"form.attendees.title": "Verkaufs-Teilnehmer",
 	"form.attendees.printPdf": "PDF drucken",
 	"form.attendees.downloadExcel": "Excel herunterladen",
@@ -681,7 +654,6 @@
 	"form.attendees.noAttendees": "Noch keine Teilnehmer",
 	"form.attendees.product": "Produkt",
 	"form.attendees.printTitle": "Teilnehmer - $0",
-
 	"form.transaction.sendEmailAgain": "E-Mail erneut senden",
 	"form.transaction.sendToAnotherMail": "An eine andere E-Mail senden",
 	"form.transaction.cancelAll": "Alle stornieren",
@@ -711,7 +683,6 @@
 	"form.attendees.refundMode": "Erstattungsmodus",
 	"form.attendees.refundExit": "Erstattungsmodus verlassen",
 	"form.attendees.refundSelected": "Ausgewählte erstatten ($0)",
-
 	"status.success": "Erfolg",
 	"status.pending": "Ausstehend",
 	"status.failed": "Fehlgeschlagen",
@@ -720,10 +691,8 @@
 	"status.reserved": "Reserviert",
 	"status.created": "Erstellt",
 	"status.cancelled": "Storniert",
-
 	"pagination.showing": "Zeige $0 bis $1 von $2 Ergebnissen",
 	"pagination.pageOf": "Seite $0 von $1",
-
 	"back.links": "Zurück zu Links",
 	"back.reports": "Zurück zu Berichten",
 	"back.accounts": "Zurück zu Konten",
@@ -732,14 +701,12 @@
 	"back.agreements": "Zurück zu Verkaufsverträgen",
 	"back.mailing": "Zurück zu Mailing",
 	"back.invoices": "Zurück zu Rechnungen",
-
 	"detail.id": "ID",
 	"detail.url": "URL",
 	"detail.type": "Typ",
 	"detail.period": "Zeitraum",
-
 	"form.channel.title": "Verkaufskanäle",
-	"form.channel.count": "$0 Kanal",
+	"form.channel.count": "Anzahl",
 	"form.channel.countPlural": "$0 Kanäle",
 	"form.channel.addChannel": "Kanal hinzufügen",
 	"form.channel.saveFirst": "Speichern Sie zuerst den Verkauf",
@@ -773,14 +740,12 @@
 	"form.channel.noReservationData": "Keine Reservierungsdaten",
 	"form.channel.attendeeAges": "Alter der Teilnehmer",
 	"form.channel.noAgeData": "Keine Altersdaten",
-	"form.channel.count": "Anzahl",
 	"form.channel.age": "Alter:",
 	"form.channel.attendees": "Teilnehmer",
 	"form.channel.ariaPrintReport": "Bericht drucken",
 	"form.channel.print": "Drucken",
 	"form.channel.copied": "Kopiert",
 	"form.channel.namePlaceholder": "Z.B.: Instagram",
-
 	"form.question.title": "Fragen",
 	"form.question.question": "Frage",
 	"form.question.type": "Typ",
@@ -801,7 +766,6 @@
 	"form.question.optionsPlaceholder": "Eine Option pro Zeile, z.B.: Vegetarisch, Vegan, Glutenfrei",
 	"form.question.createQuestion": "Frage erstellen",
 	"form.question.confirmDelete": "Diese Frage löschen?",
-
 	"form.guest.title": "Gäste",
 	"form.guest.addGuest": "Gast hinzufügen",
 	"form.guest.saveFirst": "Speichern Sie zuerst den Verkauf",
@@ -833,7 +797,6 @@
 	"form.guest.ticketQuantity": "Ticketanzahl",
 	"form.guest.createGuest": "Gast erstellen",
 	"form.guest.printTitle": "Gäste - $0",
-
 	"form.reader.title": "Leser",
 	"form.reader.reader": "Leser",
 	"form.reader.addReader": "Leser hinzufügen",
@@ -857,10 +820,8 @@
 	"form.reader.errorCopy": "Konnte nicht in die Zwischenablage kopieren",
 	"form.reader.namePlaceholder": "Z.B.: Max Mustermann",
 	"form.reader.emailPlaceholder": "Z.B.: max@mustermann.de",
-
 	"common.pleaseSelect": "Bitte auswählen",
 	"common.editTemplate": "Vorlage bearbeiten",
-
 	"form.coupon.title": "Gutscheine",
 	"form.coupon.addCoupon": "Gutschein hinzufügen",
 	"form.coupon.saveFirst": "Speichern Sie zuerst den Verkauf",
@@ -890,11 +851,9 @@
 	"form.coupon.expirationDate": "Ablaufdatum und Uhrzeit",
 	"form.coupon.expiresLabel": "Läuft ab:",
 	"form.coupon.cannotDeleteUsed": "Kann nicht gelöscht werden: Gutschein wurde verwendet",
-
 	"nav.tiers": "Tarife",
 	"nav.invoices": "Rechnungen",
 	"page.settings.subscription": "Abonnement",
-
 	"page.tiers.title": "Tarifkatalog",
 	"page.tiers.createTier": "Neuer Tarif",
 	"page.tiers.details": "Tarifdetails",
@@ -922,7 +881,6 @@
 	"error.failedLoadTiers": "Tarife konnten nicht geladen werden",
 	"confirm.deleteTier": "Tarif löschen",
 	"confirm.deleteTierBody": "Sind Sie sicher, dass Sie \"$0\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.",
-
 	"page.subscription.title": "Abonnement",
 	"page.subscription.currentTier": "Aktueller Tarif",
 	"page.subscription.noTier": "Kein aktiver Tarif",
@@ -984,7 +942,6 @@
 	"error.failedLoadSubscription": "Abonnement konnte nicht geladen werden",
 	"confirm.cancelSubscription": "Aktuellen Tarif zum Ende des Abrechnungszeitraums kündigen?",
 	"confirm.cancelPending": "Geplanten Wechsel zurückziehen und beim aktuellen Tarif bleiben?",
-
 	"page.invoices.title": "Rechnungen",
 	"page.invoices.generate": "Rechnung erstellen",
 	"page.invoices.generating": "Erstellen...",
@@ -1028,7 +985,6 @@
 	"table.invoice.number": "Nummer",
 	"table.invoice.vat": "USt.",
 	"table.invoice.total": "Gesamt",
-
 	"page.invoices.print": "Drucken",
 	"page.invoices.sellerNotConfigured": "Verkäufer / USt. ist für diesen Realm nicht konfiguriert",
 	"page.invoices.sellerNotConfiguredAdmin": "Realm öffnen und den Abschnitt Verkäufer / Rechnungsstellung ausfüllen (Steuerland und Standard-USt-Satz).",
@@ -1038,17 +994,12 @@
 	"page.invoices.to": "An",
 	"page.invoices.vatId": "USt-IdNr.",
 	"page.invoices.registry": "Register",
-
 	"vat.mode.standard": "Standard",
 	"vat.mode.reverseCharge": "Reverse-Charge",
-	"vat.mode.outOfScope": "Nicht steuerbar",
-	"vat.mode.ossRisk": "OSS evtl. relevant",
-	"vat.mode.fallback": "Fallback",
 	"vat.mode.noConfig": "USt. nicht konfiguriert",
 	"vat.mode.legacy": "Altbestand",
 	"vat.mode.unknown": "Unbekannt",
 	"error.failedLoadInvoices": "Rechnungen konnten nicht geladen werden",
-
 	"page.stripeOnboard.title": "Mit Stripe verbinden",
 	"page.stripeOnboard.description": "Richten Sie Ihr Zahlungskonto ein, um mit dem Ticketverkauf zu beginnen.",
 	"page.stripeOnboard.submit": "Weiter zu Stripe",
@@ -1070,20 +1021,17 @@
 	"link.image.enhancing": "Wird verbessert...",
 	"link.image.enhanced": "Bild verbessert",
 	"link.image.enhanceFailed": "Bild konnte nicht verbessert werden",
-
 	"form.stripeOnboard.businessType": "Geschäftsform",
 	"form.stripeOnboard.businessTypeIndividual": "Einzelperson",
 	"form.stripeOnboard.businessTypeCompany": "Unternehmen",
 	"page.stripeOnboard.invitedBanner": "Sie wurden eingeladen. Verwenden Sie die E-Mail-Adresse der Einladung.",
 	"error.invitationEmailMismatch": "Diese E-Mail passt nicht zur Einladung. Bitte die eingeladene Adresse verwenden.",
-
 	"page.onboardReturn.missingTokenTitle": "Keine Sitzung gefunden",
 	"page.onboardReturn.missingTokenDescription": "In diesem Link wurde kein Sitzungstoken gefunden. Bitte erneut anmelden.",
 	"page.onboardReturn.signingIn": "Sie werden angemeldet…",
 	"page.onboardReturn.completeProfileTitle": "Fast geschafft",
 	"page.onboardReturn.completeProfileDescription": "Stripe benötigt noch folgende Angaben, bevor Sie verkaufen können.",
 	"page.onboardReturn.openBilling": "Zu den Abrechnungseinstellungen",
-
 	"page.settings.connectStripe": "Mit Stripe verbinden",
 	"toast.stripeAttached": "Stripe-Konto verbunden",
 	"error.stripeAccountInUse": "Dieses Stripe-Konto ist bereits einem anderen Händler zugeordnet.",
@@ -1091,10 +1039,8 @@
 	"error.stripeAccessDenied": "Stripe-Zugriff verweigert.",
 	"error.stripeConnectFailed": "Verbindung mit Stripe fehlgeschlagen. Bitte erneut versuchen.",
 	"table.provider.default": "Standard",
-
 	"nav.realms": "Realms",
 	"nav.invitations": "Einladungen",
-
 	"page.invitations.title": "Händler einladen",
 	"page.invitations.description": "Senden Sie einen Stripe-Connect-Onboarding-Link, der an einen Realm gebunden ist.",
 	"page.invitations.success": "Einladung gesendet",
@@ -1108,7 +1054,6 @@
 	"error.failedCreateInvitation": "Einladung konnte nicht erstellt werden",
 	"common.copy": "Kopieren",
 	"common.copied": "Kopiert",
-
 	"page.realms.title": "Realms",
 	"page.realms.create": "Neuer Realm",
 	"table.realm.name": "Name",
@@ -1155,10 +1100,8 @@
 	"error.failedLoadRealms": "Realms konnten nicht geladen werden",
 	"confirm.deleteRealm": "Realm löschen",
 	"confirm.deleteRealmBody": "Möchten Sie \"$0\" wirklich löschen? Diese Aktion ist endgültig.",
-
 	"nav.jobs": "Jobs",
 	"nav.notifications": "Benachrichtigungen",
-
 	"page.jobs.title": "Jobs",
 	"page.jobs.createNew": "Job erstellen",
 	"page.jobs.searchPlaceholder": "Suche nach Name oder Typ",
@@ -1180,7 +1123,6 @@
 	"page.jobs.alreadyRunning": "Job läuft bereits",
 	"page.jobs.runTriggered": "Job ausgelöst",
 	"page.jobs.system.label": "System",
-
 	"page.notifications.title": "Benachrichtigungen",
 	"page.notifications.markAllRead": "Alle als gelesen markieren",
 	"page.notifications.empty": "Keine Benachrichtigungen",
@@ -1192,7 +1134,6 @@
 	"page.notifications.unread": "Ungelesen",
 	"page.notifications.bellAria": "Benachrichtigungen öffnen",
 	"page.notifications.dropdownTitle": "Benachrichtigungen",
-
 	"table.job.name": "Name",
 	"table.job.type": "Typ",
 	"table.job.schedule": "Zeitplan",
@@ -1210,7 +1151,6 @@
 	"table.notification.title": "Titel",
 	"table.notification.severity": "Wichtigkeit",
 	"table.notification.read": "Gelesen",
-
 	"form.job.reportType": "Berichtstyp",
 	"form.job.reportType.sales": "Verkaufsbericht",
 	"form.job.reportType.churn": "Abwanderungsbericht",
@@ -1253,7 +1193,6 @@
 	"form.job.paramCountSingle": "Einzeln",
 	"form.job.paramCountCumulative": "Kumulativ",
 	"form.job.paramAny": "Wert",
-
 	"notification.type.report.ready": "Bericht bereit",
 	"notification.type.invoice.ready": "Rechnung bereit",
 	"notification.type.job.failed": "Job fehlgeschlagen",
@@ -1265,7 +1204,6 @@
 	"notification.severity.warning": "Warnung",
 	"notification.severity.error": "Fehler",
 	"page.notifications.allTypes": "Alle Typen",
-
 	"jobError.type-required": "Typ ist erforderlich.",
 	"jobError.unknown-job-type": "Unbekannter Job-Typ.",
 	"jobError.forbidden-job-type": "Sie dürfen diesen Job-Typ nicht planen.",
@@ -1273,16 +1211,12 @@
 	"jobError.schedule-or-runAt-required": "Geben Sie einen Zeitplan oder eine einmalige Zeit an.",
 	"jobError.cron-invalid": "Cron-Ausdruck ist ungültig.",
 	"jobError.job-already-running": "Job läuft bereits.",
-
 	"error.failedLoadJobs": "Jobs konnten nicht geladen werden",
 	"error.failedLoadJobDefinitions": "Job-Definitionen konnten nicht geladen werden",
 	"error.failedLoadJobRuns": "Ausführungsverlauf konnte nicht geladen werden",
 	"error.failedLoadNotifications": "Benachrichtigungen konnten nicht geladen werden",
-	"error.failedSave": "Speichern fehlgeschlagen",
-
 	"confirm.deleteJob": "Job löschen",
 	"confirm.deleteJobBody": "Möchten Sie \"$0\" wirklich löschen? Diese Aktion ist endgültig.",
-
 	"ai.tips.title": "Tipps für heute",
 	"ai.tips.refresh": "Aktualisieren",
 	"ai.tips.refreshing": "Wird aktualisiert...",
@@ -1338,5 +1272,56 @@
 	"ai.draft.error.parseFailed": "Die KI hat keine verarbeitbare Antwort geliefert. Bitte erneut versuchen.",
 	"ai.draft.error.failed": "KI-Entwurf fehlgeschlagen. Später erneut versuchen.",
 	"ai.draft.error.imageTooLarge": "Bild muss kleiner als 8 MB sein.",
-	"ai.draft.error.retry": "Erneut versuchen"
+	"ai.draft.error.retry": "Erneut versuchen",
+	"page.sale.tab.reporting": "Berichte",
+	"page.sale.reporting.title": "Berichte",
+	"page.sale.reporting.subtitle": "Aktiviere automatische Verkaufs- oder Churn-Berichte fur dieses Event. Preise stammen aus deinem Plan.",
+	"page.sale.reporting.sales": "Verkaufsberichte",
+	"page.sale.reporting.churn": "Churn-Berichte",
+	"page.sale.reporting.sales.help": "Periodische Verkaufszusammenfassungen - Umsatz, Ticketanzahl, Trends.",
+	"page.sale.reporting.churn.help": "Verlorene Warenkorbe und High-Value-Leads fur dieses Event.",
+	"page.sale.reporting.enable": "Aktivieren",
+	"page.sale.reporting.free": "Kostenlos",
+	"page.sale.reporting.cost": "Kostet {price} pro Monat solange aktiv.",
+	"page.sale.reporting.disabled": "Aktivieren zum Planen.",
+	"page.sale.reporting.upgrade": "Plan upgraden, um diesen Berichtstyp zu aktivieren.",
+	"page.sale.reporting.freq.daily": "Taglich",
+	"page.sale.reporting.freq.weekly": "Wochentlich",
+	"page.sale.reporting.freq.monthly": "Monatlich",
+	"page.sale.reporting.saving": "Speichern...",
+	"page.sale.reporting.saved": "Gespeichert",
+	"form.tier.reportingPricing": "Preisliste Berichte",
+	"form.tier.reportingPricingHint": "Preis pro Event und Monat. 0 = kostenlos fur diese Stufe.",
+	"form.tier.reportingCron": "Berichts-Zeitplan-Override",
+	"form.tier.reportingCronHint": "Cron-Ausdruck. Leer = Plattform-Standard (23:59).",
+	"form.tier.reportingCronPlaceholder": "59 23 * * *",
+	"form.tier.reporting.sales": "Verkauf",
+	"form.tier.reporting.churn": "Churn",
+	"form.tier.reporting.daily": "Taglich",
+	"form.tier.reporting.weekly": "Wochentlich",
+	"form.tier.reporting.monthly": "Monatlich",
+	"page.invoices.lineItems": "Positionen",
+	"page.invoices.noLineItems": "Keine Positionen.",
+	"page.invoices.description": "Beschreibung",
+	"page.invoices.unit": "Einzelpreis",
+	"page.invoices.amount": "Betrag",
+	"page.invoices.addItem": "Position hinzufugen",
+	"page.invoices.addItemDesc": "Beschreibung",
+	"page.invoices.finalize": "Finalisieren und an Stripe senden",
+	"page.invoices.locked": "Gesperrt - Plan oder Systemposition",
+	"page.invoices.stripeLocked": "An Stripe gesendet. Zum Andern Gutschrift erstellen.",
+	"page.invoices.ticketFee": "Ticketgebuhren",
+	"page.sale.reporting.summary.title": "Berichte",
+	"page.sale.reporting.summary.off": "Aus",
+	"page.sale.reporting.summary.runSales": "Verkaufsbericht erstellen",
+	"page.sale.reporting.summary.runChurn": "Churn-Bericht erstellen",
+	"page.sale.reporting.summary.manage": "Verwalten",
+	"page.sale.reporting.summary.ranOk": "{type}-Bericht erstellt.",
+	"page.sale.reporting.summary.viewReport": "Bericht ansehen",
+	"page.sale.reporting.feeNote": "Pro Lauf wird {price} zur Rechnung addiert.",
+	"page.sale.reporting.summary.runNow": "Jetzt ausfuhren",
+	"page.reports.frequency": "Abrechnungsfrequenz",
+	"page.reports.quoting": "Kosten berechnen...",
+	"page.reports.quoteLine": "{units} × {frequency} Einheit · €{total} zur nachsten Rechnung.",
+	"page.reports.quoteHint": "Event, Frequenz und Daten wahlen."
 }

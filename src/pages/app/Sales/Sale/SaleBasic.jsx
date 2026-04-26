@@ -16,10 +16,10 @@ import {
 import { ImageUpload } from "../../../../components/shared";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
-import { seedSaleJobs } from "../../../../lib/saleJobs";
 import strings from "../../../../localization";
 import { saleBasicFaker } from "../../../../utils/fakers";
 import { compact, toId } from "../../../../utils/object";
+import SaleReportingSection from "./SaleReportingSection";
 
 const SaleBasic = ({ sale, setSale, params: { id } }) => {
 	const [, setLocation] = useLocation();
@@ -81,7 +81,6 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			setSale(res.data);
 			addSale(res.data);
 			if (res.data?.id) {
-				seedSaleJobs(res.data.id, res.data.name);
 				setLocation(`/sales/${res.data.id}`);
 			}
 		} finally {
@@ -390,6 +389,10 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 					rows={6}
 				/>
 			</section>
+
+			{sale?.id && id !== "new" && (
+				<SaleReportingSection sale={sale} setSale={setSale} />
+			)}
 		</main>
 	);
 };

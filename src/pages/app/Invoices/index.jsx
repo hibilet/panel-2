@@ -43,6 +43,7 @@ const Invoices = () => {
 	const [generating, setGenerating] = useState(false);
 	const [filterEmail, setFilterEmail] = useState("");
 	const [selectedMerchant, setSelectedMerchant] = useState(null);
+	const [reloadKey, setReloadKey] = useState(0);
 
 	const {
 		register,
@@ -63,6 +64,7 @@ const Invoices = () => {
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
 		const endpoint = isAdmin ? `/invoices?${params}` : `/invoices/my?${params}`;
+		setFetchedPage(null);
 		get(endpoint)
 			.then((res) => {
 				setData(Array.isArray(res.data?.invoices) ? res.data.invoices : []);
@@ -74,7 +76,7 @@ const Invoices = () => {
 				setError(err?.message ?? strings("error.failedLoadInvoices"));
 				setFetchedPage(page);
 			});
-	}, [page, filterEmail, isAdmin, account?.type]);
+	}, [page, filterEmail, isAdmin, account?.type, reloadKey]);
 
 	const searchMerchants = async (query) => {
 		const res = await get(
@@ -94,11 +96,8 @@ const Invoices = () => {
 			setGenerateOpen(false);
 			resetGenerate();
 			setSelectedMerchant(null);
-			setPage((p) => {
-				if (p !== 1) return 1;
-				setFetchedPage(null);
-				return 1;
-			});
+			setPage(1);
+			setReloadKey((k) => k + 1);
 		} catch {
 			// error shown via client toast
 		} finally {
@@ -129,6 +128,14 @@ const Invoices = () => {
 					},
 				]
 			: []),
+		{
+			key: "tier",
+			header: strings("table.invoice.tier"),
+			render: (r) =>
+				typeof r.tier === "string"
+					? r.tier.slice(0, 8)
+					: (r.tier?.name ?? "—"),
+		},
 		{
 			key: "period",
 			header: strings("table.invoice.period"),
@@ -162,11 +169,22 @@ const Invoices = () => {
 			key: "status",
 			header: strings("table.invoice.status"),
 			render: (r) => (
-				<span
-					className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[r.status] ?? "bg-slate-100 text-slate-600"}`}
-				>
-					{r.status ?? "—"}
-				</span>
+				<div className="flex items-center gap-1.5">
+					<span
+						className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${statusStyles[r.status] ?? "bg-slate-100 text-slate-600"}`}
+					>
+						{r.status ?? "—"}
+					</span>
+					{r.stripePushError && (
+						<span
+							className="text-amber-600"
+							title={`Stripe push failed: ${r.stripePushError}. Re-run generate to retry.`}
+						>
+							<i className="fa-solid fa-triangle-exclamation" aria-hidden />
+							<span className="sr-only">Stripe push failed</span>
+						</span>
+					)}
+				</div>
 			),
 		},
 		{

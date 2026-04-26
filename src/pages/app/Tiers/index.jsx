@@ -30,13 +30,19 @@ const tiersColumns = [
 		},
 	},
 	{
-		key: "exclusive",
-		header: strings("table.tier.exclusive"),
+		key: "visibility",
+		header: strings("table.tier.visibility"),
 		render: (r) =>
-			r.exclusive ? (
-				<i className="fa-solid fa-lock text-slate-500" aria-hidden />
+			r.visibility === "private" ? (
+				<span className="inline-flex items-center gap-1 text-slate-700">
+					<i className="fa-solid fa-lock text-slate-500" aria-hidden />
+					{strings("form.tier.visibilityPrivate")}
+				</span>
 			) : (
-				<i className="fa-solid fa-lock-open text-slate-300" aria-hidden />
+				<span className="inline-flex items-center gap-1 text-slate-500">
+					<i className="fa-solid fa-lock-open text-slate-300" aria-hidden />
+					{strings("form.tier.visibilityPublic")}
+				</span>
 			),
 	},
 	{

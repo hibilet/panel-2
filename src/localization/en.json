@@ -2,7 +2,6 @@
 	"app.name": "HIBilet Panel",
 	"app.welcome": "Welcome, $0",
 	"app.description": "HIBilet Panel is a platform for managing your sales and transactions",
-
 	"nav.dashboard": "Dashboard",
 	"nav.accounts": "Accounts",
 	"nav.venues": "Venues",
@@ -14,7 +13,6 @@
 	"nav.live": "Live Events",
 	"nav.menu": "Menu",
 	"nav.backToAdmin": "Back to Admin",
-
 	"tour.start": "Start guided tour",
 	"tour.step.dashboard": "Dashboard — Your overview of the panel. View today's sales, monthly stats, active sales count, and recent activity at a glance.",
 	"tour.step.sales": "Sales — Create and manage your sales events. Set up tickets, channels, coupons, guests, and readers for each event.",
@@ -27,7 +25,6 @@
 	"tour.step.dashboardWeeklyEvents": "Weekly event sale matrix — View your weekly event sale matrix. Select a week and an event to see the data.",
 	"tour.step.dashboardRecentActivity": "Recent activity — View your recent activity. Select a transaction to see the data.",
 	"tour.step.dashboardRecentActivityViewAll": "View all — View all your recent activity.",
-
 	"completionSteps.title": "Complete your setup",
 	"completionSteps.description": "Please complete the following steps before using the panel.",
 	"completionSteps.agreements": "Agreements",
@@ -35,7 +32,6 @@
 	"completionSteps.mailings": "Mailings",
 	"completionSteps.billing": "Billing",
 	"completionSteps.selectTier": "Select your tier",
-
 	"common.save": "Save",
 	"common.cancel": "Cancel",
 	"common.delete": "Delete",
@@ -77,7 +73,6 @@
 	"common.unarchive": "Unarchive",
 	"common.vat": "VAT",
 	"common.total": "Total",
-
 	"error.required": "This field is required",
 	"error.failedLoad": "Failed to load",
 	"error.failedSave": "Failed to save",
@@ -96,7 +91,6 @@
 	"error.failedLoadLink": "Failed to load link",
 	"error.failedLoadAccounts": "Failed to load accounts",
 	"error.failedDeleteGuest": "Failed to delete guest",
-
 	"confirm.deleteSale": "Delete sale",
 	"confirm.deleteSaleBody": "Are you sure you want to delete this sale? This action cannot be undone.",
 	"confirm.deleteChannel": "Delete this channel?",
@@ -105,7 +99,7 @@
 	"confirm.deleteCoupon": "Delete this coupon?",
 	"confirm.deleteLink": "Delete link",
 	"confirm.deleteLinkBody": "Are you sure you want to delete this link? This action cannot be undone.",
-	"confirm.deleteTier": "Delete tier",
+	"confirm.deleteTier": "Delete this tier?",
 	"confirm.deleteTierBody": "Are you sure you want to delete \"$0\"? This action cannot be undone.",
 	"common.confirm": "Confirm",
 	"confirm.deleteProvider": "Delete provider",
@@ -120,7 +114,6 @@
 	"confirm.refundAttendeesBody": "Refund $0 attendee(s) totaling $1? This action cannot be undone.",
 	"confirm.refundReservation": "Refund this attendee?",
 	"confirm.refundReservationBody": "Refund $0 to the customer? This action cannot be undone.",
-
 	"dashboard.stats.todaySales": "Today's Sales",
 	"dashboard.stats.mtdSales": "MTD Sales",
 	"dashboard.stats.mtdProductsSold": "MTD Products Sold",
@@ -138,7 +131,6 @@
 	"dashboard.dailySales": "Daily sales",
 	"dashboard.salesChartSelectedMonth": "Selected month",
 	"dashboard.salesChartThisMonth": "This month",
-
 	"table.sale.startDate": "Start date",
 	"table.sale.name": "Name",
 	"table.sale.venue": "Venue",
@@ -186,11 +178,9 @@
 	"table.venue.status": "Status",
 	"table.venue.createdAt": "Created at",
 	"table.venue.noVenues": "No venues yet",
-
 	"page.venues.title": "Venues",
 	"page.venues.details": "Venue Details",
 	"page.venues.createNew": "Create Venue",
-
 	"form.venue.newTitle": "New Venue",
 	"form.venue.name": "Name",
 	"form.venue.namePlaceholder": "Eg: Admiralspalast, Berlin",
@@ -200,9 +190,7 @@
 	"form.venue.categoryPlaceholder": "Select category",
 	"form.venue.status": "Status",
 	"form.venue.owner": "Owner",
-
 	"error.failedLoadVenues": "Failed to load venues",
-
 	"form.provider.newTitle": "New Provider Information",
 	"form.provider.editTitle": "Provider Information",
 	"form.provider.name": "Provider Name",
@@ -245,7 +233,6 @@
 	"table.ticket.stock": "Stock",
 	"table.ticket.reservations": "Reservations",
 	"table.ticket.status": "Status",
-
 	"page.sales.title": "Sales",
 	"page.sales.showMore": "Show More",
 	"page.sales.showLess": "Show Less",
@@ -254,7 +241,6 @@
 	"page.sales.createWithAI": "Create with AI",
 	"page.sales.viewPastEvents": "View Past Events",
 	"page.sales.hidePastEvents": "Hide Past Events",
-
 	"page.sale.tab.basic": "Basic",
 	"page.sale.tab.tickets": "Tickets",
 	"page.sale.tab.channels": "Channels",
@@ -275,14 +261,12 @@
 	"page.sale.guided.generate": "Generate",
 	"page.sale.guided.generating": "Generating…",
 	"page.sale.guided.generatedJson": "Generated JSON",
-
 	"page.live.title": "Live Events",
 	"page.live.noEventsToday": "No events today",
 	"page.live.noEventsTodayDesc": "The Live tab appears when you have events scheduled for today.",
 	"page.live.readerAccounts": "Reader accounts",
 	"page.live.attendeesRead": "Attendees / Read",
 	"page.live.attendeesReadValue": "$0 / $1",
-
 	"page.transactions.title": "Transactions",
 	"page.transactions.details": "Transaction Details",
 	"page.transactions.filterTransactions": "Filter Transactions",
@@ -291,13 +275,11 @@
 	"page.transactions.transactionIdPlaceholder": "Eg: 1234567890",
 	"page.transactions.email": "E-Mail",
 	"page.transactions.emailPlaceholder": "Eg: john@doe.com",
-
 	"page.links.title": "Links",
 	"page.links.details": "Link Details",
 	"page.links.createNew": "Create New Link",
 	"page.links.showArchived": "Show Archived Links",
 	"page.links.hideArchived": "Hide Archived Links",
-
 	"page.reports.title": "Reports",
 	"page.reports.createReport": "Create Report",
 	"page.reports.searchPlaceholder": "Search by name, type, or owner",
@@ -395,7 +377,6 @@
 	"page.reports.churn.empty.selectSale": "Select a sale to generate the churn report",
 	"page.reports.churn.empty.noData": "No churn data found for the selected period",
 	"page.reports.churn.stats.totalFailedBaskets": "Failed baskets",
-
 	"page.accounts.title": "Accounts",
 	"page.accounts.tab.merchants": "Merchants",
 	"page.accounts.tab.customers": "Customers",
@@ -411,15 +392,12 @@
 	"page.accounts.typeMerchant": "Merchant",
 	"page.accounts.typeUser": "User",
 	"page.accounts.details": "Account Details",
-
 	"form.account.loginAs": "Login As",
 	"form.account.errorLoginAs": "Failed to login as this account",
 	"form.account.setInactive": "Set Inactive",
 	"form.account.confirmSetInactive": "Set account inactive",
 	"form.account.confirmSetInactiveBody": "Are you sure you want to set \"$0\" to inactive?",
-	"form.account.commission": "Commission",
 	"form.account.commissionAmount": "Commission amount",
-	"form.account.commissionVat": "VAT multiplier",
 	"form.account.commissionType": "Commission type",
 	"form.account.commissionTypePercentage": "Percentage",
 	"form.account.commissionTypeFixed": "Fixed",
@@ -429,7 +407,7 @@
 	"form.account.tierChangedUpgraded": "Tier upgraded",
 	"form.account.tierChangedDowngradeQueued": "Downgrade queued for next billing cycle",
 	"form.account.tierChangedSubscribed": "Subscribed to tier",
-
+	"form.account.tierAlreadySubscribed": "Merchant is already on this tier",
 	"page.settings.title": "Settings",
 	"page.settings.profile": "Profile",
 	"page.settings.preferences": "Preferences",
@@ -467,7 +445,6 @@
 	"language.de": "Deutsch",
 	"language.nl": "Nederlands",
 	"language.fr": "Français",
-
 	"form.sale.info": "ℹ️ Info",
 	"form.sale.eventName": "Event Name",
 	"form.sale.eventNamePlaceholder": "Eg: Chillout Festival 2024",
@@ -525,7 +502,6 @@
 	"form.sale.trackingAndAdvertising": "Tracking and Advertising",
 	"form.sale.comboTicketAndLogo": "Combo Ticket and Logo",
 	"form.sale.eventRules": "Event Rules",
-
 	"sale.eventName": "Event Name",
 	"sale.eventNamePlaceholder": "Eg: Chillout Festival 2024",
 	"sale.startDateTime": "Start Date & Time",
@@ -576,7 +552,6 @@
 	"sale.rules": "Rules",
 	"sale.rulesPlaceholder": "Please provide rules...",
 	"sale.save": "💾 Save",
-
 	"form.mailing.modeDefault": "Send emails on behalf of me please",
 	"form.mailing.modeDefaultDesc": "We'll send emails to your customers from a shared sender. No setup required.",
 	"form.mailing.modeCustom": "I'll enter my own email address",
@@ -600,7 +575,6 @@
 	"form.mailing.templatePreviewError": "Fix EJS syntax to see preview",
 	"error.failedLoadMailing": "Failed to load mailing settings",
 	"error.failedLoadBilling": "Failed to load billing settings",
-
 	"form.billing.name": "Name",
 	"form.billing.namePlaceholder": "Eg: John Doe",
 	"form.billing.email": "Email",
@@ -625,7 +599,6 @@
 	"form.billing.addressZipPlaceholder": "Eg: 1011AA",
 	"form.billing.addressCountry": "Country",
 	"form.billing.vatHint": "Provide a VAT number for cross-border B2B reverse charge.",
-
 	"form.link.title": "Link Title",
 	"form.link.slug": "Link Slug",
 	"form.link.views": "Views",
@@ -639,7 +612,6 @@
 	"form.link.confirmArchiveBody": "Are you sure you want to archive this link?",
 	"form.link.confirmUnarchive": "Restore link",
 	"form.link.confirmUnarchiveBody": "Are you sure you want to restore this link to active?",
-
 	"form.ticket.ticketTypes": "Ticket types",
 	"form.ticket.ticketTypeCount": "$0 ticket type",
 	"form.ticket.ticketTypeCountPlural": "$0 ticket types",
@@ -677,7 +649,6 @@
 	"form.ticket.totalCapacityLabel": "$0 total capacity",
 	"form.ticket.reservationsLabel": "$0 reservations",
 	"form.ticket.readLabel": "$0 read",
-
 	"form.attendees.title": "Sale Attendees",
 	"form.attendees.printPdf": "Print PDF",
 	"form.attendees.downloadExcel": "Download Excel",
@@ -686,7 +657,6 @@
 	"form.attendees.noAttendees": "No attendees yet",
 	"form.attendees.product": "Product",
 	"form.attendees.printTitle": "Attendees - $0",
-
 	"form.transaction.sendEmailAgain": "Send Email Again",
 	"form.transaction.sendToAnotherMail": "Send To Another Mail",
 	"form.transaction.cancelAll": "Cancel All",
@@ -716,7 +686,6 @@
 	"form.attendees.refundMode": "Refund mode",
 	"form.attendees.refundExit": "Exit refund mode",
 	"form.attendees.refundSelected": "Refund selected ($0)",
-
 	"status.success": "Success",
 	"status.pending": "Pending",
 	"status.failed": "Failed",
@@ -725,10 +694,8 @@
 	"status.reserved": "Reserved",
 	"status.created": "Created",
 	"status.cancelled": "Cancelled",
-
 	"pagination.showing": "Showing $0 to $1 of $2 results",
 	"pagination.pageOf": "Page $0 of $1",
-
 	"back.links": "Back to Links",
 	"back.reports": "Back to Reports",
 	"back.accounts": "Back to Accounts",
@@ -737,14 +704,12 @@
 	"back.agreements": "Back to Sales Agreements",
 	"back.mailing": "Back to Mailing",
 	"back.invoices": "Back to Invoices",
-
 	"detail.id": "ID",
 	"detail.url": "URL",
 	"detail.type": "Type",
 	"detail.period": "Period",
-
 	"form.channel.title": "Sale channels",
-	"form.channel.count": "$0 channel",
+	"form.channel.count": "Count",
 	"form.channel.countPlural": "$0 channels",
 	"form.channel.addChannel": "Add channel",
 	"form.channel.saveFirst": "Save the sale first",
@@ -778,14 +743,12 @@
 	"form.channel.noReservationData": "No reservation data",
 	"form.channel.attendeeAges": "Attendee ages",
 	"form.channel.noAgeData": "No age data",
-	"form.channel.count": "Count",
 	"form.channel.age": "Age:",
 	"form.channel.attendees": "Attendees",
 	"form.channel.ariaPrintReport": "Print report",
 	"form.channel.print": "Print",
 	"form.channel.copied": "Copied",
 	"form.channel.namePlaceholder": "Eg: Instagram",
-
 	"form.question.title": "Questions",
 	"form.question.question": "Question",
 	"form.question.type": "Type",
@@ -806,7 +769,6 @@
 	"form.question.optionsPlaceholder": "One option per line, e.g.: Vegetarian, Vegan, Gluten-free",
 	"form.question.createQuestion": "Create question",
 	"form.question.confirmDelete": "Delete this question?",
-
 	"form.guest.title": "Guests",
 	"form.guest.addGuest": "Add guest",
 	"form.guest.saveFirst": "Save the sale first",
@@ -838,7 +800,6 @@
 	"form.guest.ticketQuantity": "Ticket Quantity",
 	"form.guest.createGuest": "Create guest",
 	"form.guest.printTitle": "Guests - $0",
-
 	"form.reader.title": "Readers",
 	"form.reader.reader": "Reader",
 	"form.reader.addReader": "Add reader",
@@ -862,10 +823,8 @@
 	"form.reader.errorCopy": "Failed to copy to clipboard",
 	"form.reader.namePlaceholder": "Eg: John Doe",
 	"form.reader.emailPlaceholder": "Eg: john@doe.com",
-
 	"common.pleaseSelect": "Please select",
 	"common.editTemplate": "Edit template",
-
 	"form.coupon.title": "Coupons",
 	"form.coupon.addCoupon": "Add coupon",
 	"form.coupon.saveFirst": "Save the sale first",
@@ -895,11 +854,9 @@
 	"form.coupon.expirationDate": "Expiration date & time",
 	"form.coupon.expiresLabel": "Expires:",
 	"form.coupon.cannotDeleteUsed": "Cannot delete: coupon has been used",
-
 	"nav.tiers": "Tiers",
 	"nav.invoices": "Invoices",
 	"page.settings.subscription": "Subscription",
-
 	"page.tiers.title": "Tier Catalog",
 	"page.tiers.createTier": "New Tier",
 	"page.tiers.details": "Tier Details",
@@ -914,8 +871,20 @@
 	"form.tier.commissionType": "Commission Type",
 	"form.tier.commissionTypeFixed": "Fixed",
 	"form.tier.commissionTypePercentage": "Percentage",
-	"form.tier.exclusive": "Exclusive (invite only)",
 	"form.tier.status": "Status",
+	"form.tier.visibility": "Visibility",
+	"form.tier.visibilityPublic": "Public",
+	"form.tier.visibilityPrivate": "Private (invite only)",
+	"form.tier.accessCode": "Invite code",
+	"form.tier.accessCodeHint": "Share this code with merchants to let them subscribe to this private tier.",
+	"form.tier.accessCodeAutoGen": "Will be generated on save",
+	"form.tier.accessCodeCopy": "Copy",
+	"form.tier.accessCodeRotate": "Rotate code",
+	"form.tier.capabilities": "Capabilities",
+	"form.tier.capabilitiesHint": "Plan defaults granted to merchants on this tier. Numeric quotas use 9999 for unlimited. Per-account overrides win.",
+	"form.tier.aclEnableAll": "Enable all",
+	"form.tier.aclDisableAll": "Disable all",
+	"form.tier.aclResetDefaults": "Reset defaults",
 	"form.tier.newTitle": "New Tier",
 	"form.tier.editTitle": "Edit Tier",
 	"table.tier.noTiers": "No tiers found",
@@ -923,10 +892,8 @@
 	"table.tier.baseFee": "Base Fee",
 	"table.tier.commission": "Commission",
 	"table.tier.status": "Status",
-	"table.tier.exclusive": "Exclusive",
+	"table.tier.visibility": "Visibility",
 	"error.failedLoadTiers": "Failed to load tiers",
-	"confirm.deleteTier": "Delete this tier?",
-
 	"page.subscription.title": "Subscription",
 	"page.subscription.currentTier": "Current Plan",
 	"page.subscription.noTier": "No active plan",
@@ -988,7 +955,6 @@
 	"error.failedLoadSubscription": "Failed to load subscription",
 	"confirm.cancelSubscription": "Cancel your current plan at end of billing period?",
 	"confirm.cancelPending": "Cancel your scheduled downgrade and stay on your current plan?",
-
 	"page.invoices.title": "Invoices",
 	"page.invoices.generate": "Generate Invoice",
 	"page.invoices.generating": "Generating...",
@@ -1015,6 +981,8 @@
 	"page.invoices.merchantSearchPlaceholder": "Search by name or email...",
 	"page.invoices.payNow": "Pay Now",
 	"page.invoices.viewOnStripe": "View on Stripe",
+	"page.invoices.sync": "Sync from Stripe",
+	"page.invoices.syncHint": "Pull current Stripe status into the dashboard. Use when payment is made but status hasn't updated.",
 	"page.invoices.paidOn": "Paid on $0",
 	"page.invoices.notFound": "Invoice not found",
 	"page.invoices.createdAt": "Created",
@@ -1032,7 +1000,6 @@
 	"table.invoice.number": "Number",
 	"table.invoice.vat": "VAT",
 	"table.invoice.total": "Total",
-
 	"page.invoices.print": "Print",
 	"page.invoices.sellerNotConfigured": "Seller / VAT is not configured for this realm",
 	"page.invoices.sellerNotConfiguredAdmin": "Open the realm and fill in the Seller / Invoicing section (tax country and default VAT rate).",
@@ -1042,17 +1009,12 @@
 	"page.invoices.to": "To",
 	"page.invoices.vatId": "VAT id",
 	"page.invoices.registry": "Registry",
-
 	"vat.mode.standard": "Standard",
 	"vat.mode.reverseCharge": "Reverse charge",
-	"vat.mode.outOfScope": "Out of scope",
-	"vat.mode.ossRisk": "OSS may apply",
-	"vat.mode.fallback": "Fallback",
 	"vat.mode.noConfig": "VAT not configured",
 	"vat.mode.legacy": "Legacy",
 	"vat.mode.unknown": "Unknown",
 	"error.failedLoadInvoices": "Failed to load invoices",
-
 	"page.stripeOnboard.title": "Connect with Stripe",
 	"page.stripeOnboard.description": "Set up your payment account to start selling tickets.",
 	"page.stripeOnboard.submit": "Continue to Stripe",
@@ -1074,20 +1036,17 @@
 	"link.image.enhancing": "Enhancing...",
 	"link.image.enhanced": "Image enhanced",
 	"link.image.enhanceFailed": "Could not enhance image",
-
 	"form.stripeOnboard.businessType": "Business type",
 	"form.stripeOnboard.businessTypeIndividual": "Individual",
 	"form.stripeOnboard.businessTypeCompany": "Company",
 	"page.stripeOnboard.invitedBanner": "You've been invited. Use the email this invitation was sent to.",
 	"error.invitationEmailMismatch": "This email doesn't match the invitation. Use the address the invite was sent to.",
-
 	"page.onboardReturn.missingTokenTitle": "No session found",
 	"page.onboardReturn.missingTokenDescription": "We couldn't find a session token in this link. Please try signing in again.",
 	"page.onboardReturn.signingIn": "Signing you in…",
 	"page.onboardReturn.completeProfileTitle": "Almost there",
 	"page.onboardReturn.completeProfileDescription": "Stripe still needs the following details before you can start selling.",
 	"page.onboardReturn.openBilling": "Open billing settings",
-
 	"page.settings.connectStripe": "Connect with Stripe",
 	"toast.stripeAttached": "Stripe account connected",
 	"error.stripeAccountInUse": "This Stripe account is already linked to another merchant.",
@@ -1095,10 +1054,8 @@
 	"error.stripeAccessDenied": "Stripe authorization was denied.",
 	"error.stripeConnectFailed": "Couldn't connect Stripe. Please try again.",
 	"table.provider.default": "Default",
-
 	"nav.realms": "Realms",
 	"nav.invitations": "Invitations",
-
 	"page.invitations.title": "Invite a merchant",
 	"page.invitations.description": "Send a Stripe-Connect onboarding link tied to a realm.",
 	"page.invitations.success": "Invitation sent",
@@ -1112,7 +1069,6 @@
 	"error.failedCreateInvitation": "Failed to create invitation",
 	"common.copy": "Copy",
 	"common.copied": "Copied",
-
 	"page.realms.title": "Realms",
 	"page.realms.create": "New realm",
 	"table.realm.name": "Name",
@@ -1159,10 +1115,8 @@
 	"error.failedLoadRealms": "Failed to load realms",
 	"confirm.deleteRealm": "Delete realm",
 	"confirm.deleteRealmBody": "Are you sure you want to delete \"$0\"? This action cannot be undone.",
-
 	"nav.jobs": "Jobs",
 	"nav.notifications": "Notifications",
-
 	"page.jobs.title": "Jobs",
 	"page.jobs.createNew": "Create job",
 	"page.jobs.searchPlaceholder": "Search by name or type",
@@ -1184,7 +1138,6 @@
 	"page.jobs.alreadyRunning": "Job is already running",
 	"page.jobs.runTriggered": "Job triggered",
 	"page.jobs.system.label": "System",
-
 	"page.notifications.title": "Notifications",
 	"page.notifications.markAllRead": "Mark all read",
 	"page.notifications.empty": "No notifications",
@@ -1196,7 +1149,6 @@
 	"page.notifications.unread": "Unread",
 	"page.notifications.bellAria": "Open notifications",
 	"page.notifications.dropdownTitle": "Notifications",
-
 	"table.job.name": "Name",
 	"table.job.type": "Type",
 	"table.job.schedule": "Schedule",
@@ -1214,7 +1166,6 @@
 	"table.notification.title": "Title",
 	"table.notification.severity": "Severity",
 	"table.notification.read": "Read",
-
 	"form.job.reportType": "Report type",
 	"form.job.reportType.sales": "Sales report",
 	"form.job.reportType.churn": "Churn report",
@@ -1257,7 +1208,6 @@
 	"form.job.paramCountSingle": "Single",
 	"form.job.paramCountCumulative": "Cumulative",
 	"form.job.paramAny": "Value",
-
 	"notification.type.report.ready": "Report ready",
 	"notification.type.invoice.ready": "Invoice ready",
 	"notification.type.job.failed": "Job failed",
@@ -1269,7 +1219,6 @@
 	"notification.severity.warning": "Warning",
 	"notification.severity.error": "Error",
 	"page.notifications.allTypes": "All types",
-
 	"jobError.type-required": "Type is required.",
 	"jobError.unknown-job-type": "Unknown job type.",
 	"jobError.forbidden-job-type": "You're not allowed to schedule this job type.",
@@ -1277,16 +1226,12 @@
 	"jobError.schedule-or-runAt-required": "Provide a schedule or a one-shot time.",
 	"jobError.cron-invalid": "Cron expression is invalid.",
 	"jobError.job-already-running": "Job is already running.",
-
 	"error.failedLoadJobs": "Failed to load jobs",
 	"error.failedLoadJobDefinitions": "Failed to load job definitions",
 	"error.failedLoadJobRuns": "Failed to load run history",
 	"error.failedLoadNotifications": "Failed to load notifications",
-	"error.failedSave": "Failed to save",
-
 	"confirm.deleteJob": "Delete job",
 	"confirm.deleteJobBody": "Are you sure you want to delete \"$0\"? This action cannot be undone.",
-
 	"ai.tips.title": "Today's tips",
 	"ai.tips.refresh": "Refresh",
 	"ai.tips.refreshing": "Refreshing...",
@@ -1342,5 +1287,56 @@
 	"ai.draft.error.parseFailed": "AI returned an unparseable response. Try again.",
 	"ai.draft.error.failed": "AI draft failed. Try again later.",
 	"ai.draft.error.imageTooLarge": "Image must be under 8 MB.",
-	"ai.draft.error.retry": "Try again"
+	"ai.draft.error.retry": "Try again",
+	"page.sale.tab.reporting": "Reporting",
+	"page.sale.reporting.title": "Reporting",
+	"page.sale.reporting.subtitle": "Opt this event into automated sales or churn reports. Pricing comes from your plan.",
+	"page.sale.reporting.sales": "Sales reporting",
+	"page.sale.reporting.churn": "Churn reporting",
+	"page.sale.reporting.sales.help": "Periodic sales aggregates - revenue, ticket counts, trends.",
+	"page.sale.reporting.churn.help": "Lost-cart and high-value lead breakdown for this event.",
+	"page.sale.reporting.enable": "Enable",
+	"page.sale.reporting.free": "Free",
+	"page.sale.reporting.cost": "Costs {price} per month while enabled.",
+	"page.sale.reporting.disabled": "Toggle on to schedule.",
+	"page.sale.reporting.upgrade": "Upgrade your plan to enable this report type.",
+	"page.sale.reporting.freq.daily": "Daily",
+	"page.sale.reporting.freq.weekly": "Weekly",
+	"page.sale.reporting.freq.monthly": "Monthly",
+	"page.sale.reporting.saving": "Saving...",
+	"page.sale.reporting.saved": "Saved",
+	"form.tier.reportingPricing": "Reporting pricing",
+	"form.tier.reportingPricingHint": "Per-event monthly price. 0 = free for this tier.",
+	"form.tier.reportingCron": "Reporting schedule overrides",
+	"form.tier.reportingCronHint": "Cron expression. Blank = platform default (23:59).",
+	"form.tier.reportingCronPlaceholder": "59 23 * * *",
+	"form.tier.reporting.sales": "Sales",
+	"form.tier.reporting.churn": "Churn",
+	"form.tier.reporting.daily": "Daily",
+	"form.tier.reporting.weekly": "Weekly",
+	"form.tier.reporting.monthly": "Monthly",
+	"page.invoices.lineItems": "Line items",
+	"page.invoices.noLineItems": "No line items.",
+	"page.invoices.description": "Description",
+	"page.invoices.unit": "Unit",
+	"page.invoices.amount": "Amount",
+	"page.invoices.addItem": "Add item",
+	"page.invoices.addItemDesc": "Description",
+	"page.invoices.finalize": "Finalize & push to Stripe",
+	"page.invoices.locked": "Locked - tier or system item",
+	"page.invoices.stripeLocked": "Pushed to Stripe. To change, issue a credit note.",
+	"page.invoices.ticketFee": "Per-ticket fees",
+	"page.sale.reporting.summary.title": "Reporting",
+	"page.sale.reporting.summary.off": "Off",
+	"page.sale.reporting.summary.runSales": "Run sales report",
+	"page.sale.reporting.summary.runChurn": "Run churn report",
+	"page.sale.reporting.summary.manage": "Manage",
+	"page.sale.reporting.summary.ranOk": "{type} report generated.",
+	"page.sale.reporting.summary.viewReport": "View report",
+	"page.sale.reporting.feeNote": "1 {price} fee added to invoice on each run.",
+	"page.sale.reporting.summary.runNow": "Run now",
+	"page.reports.frequency": "Billing frequency",
+	"page.reports.quoting": "Calculating cost...",
+	"page.reports.quoteLine": "{units} × {frequency} unit · €{total} added to next invoice.",
+	"page.reports.quoteHint": "Pick sale, frequency and dates to see cost."
 }

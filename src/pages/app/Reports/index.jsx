@@ -5,7 +5,9 @@ import { Input, Select } from "../../../components/inputs";
 import InsightsPanel from "../../../components/reports/InsightsPanel";
 import { Modal, SearchBar } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
+import Can from "../../../components/Can";
 import { useApp } from "../../../context";
+import { can } from "../../../lib/capabilities";
 import { del, get, post, put } from "../../../lib/client";
 import strings from "../../../localization";
 import { matchesQuery } from "../../../utils/search";
@@ -22,8 +24,9 @@ const STATUS_BADGE = {
 	inactive: "bg-slate-100 text-slate-600",
 };
 
-const TYPE_OPTIONS = [
-	{ value: "churn", label: "Churn" },
+const ALL_TYPE_OPTIONS = [
+	{ value: "churn", label: "Churn", caps: ["reporting.churn"] },
+	{ value: "sales", label: "Sales", caps: ["reporting.sales"] },
 ];
 
 const defaultStart = () => {
@@ -36,6 +39,14 @@ const Reports = () => {
 	const { account, sales: contextSales } = useApp();
 	const [, setLocation] = useLocation();
 	const isAdmin = account?.type === "account.admin";
+	const typeOptions = useMemo(
+		() => (
+			isAdmin
+				? ALL_TYPE_OPTIONS
+				: ALL_TYPE_OPTIONS.filter((o) => o.caps.some((c) => can(account, c)))
+		),
+		[isAdmin, account],
+	);
 
 	const [reports, setReports] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -48,12 +59,13 @@ const Reports = () => {
 	const [createOpen, setCreateOpen] = useState(false);
 	const [generating, setGenerating] = useState(false);
 	const [createError, setCreateError] = useState(null);
-	const [formName, setFormName] = useState("");
 	const [formType, setFormType] = useState("churn");
 	const [formSaleId, setFormSaleId] = useState("");
 	const [formStart, setFormStart] = useState(defaultStart);
 	const [formEnd, setFormEnd] = useState(() => new Date().toISOString().slice(0, 10));
-	const [formHvThreshold, setFormHvThreshold] = useState("100");
+	const [formFrequency, setFormFrequency] = useState("weekly");
+	const [quote, setQuote] = useState(null);
+	const [quoting, setQuoting] = useState(false);
 
 	// Rename modal
 	const [renameTarget, setRenameTarget] = useState(null);
@@ -107,34 +119,43 @@ const Reports = () => {
 	}, [contextSales, pastSales]);
 
 	const openCreate = () => {
-		setFormName("");
 		setFormType("churn");
 		setFormSaleId("");
 		setFormStart(defaultStart());
 		setFormEnd(new Date().toISOString().slice(0, 10));
-		setFormHvThreshold("100");
+		setFormFrequency("weekly");
+		setQuote(null);
 		setCreateError(null);
 		setCreateOpen(true);
 	};
 
+	useEffect(() => {
+		if (!createOpen || !formSaleId || !formType || !formFrequency || !formStart || !formEnd) {
+			setQuote(null);
+			return;
+		}
+		setQuoting(true);
+		const url = `/sales/${formSaleId}/reports/range/quote?type=${formType}&frequency=${formFrequency}&start=${formStart}&end=${formEnd}`;
+		get(url)
+			.then((res) => setQuote(res?.data ?? null))
+			.catch(() => setQuote(null))
+			.finally(() => setQuoting(false));
+	}, [createOpen, formSaleId, formType, formFrequency, formStart, formEnd]);
+
 	const handleGenerate = async () => {
-		if (!formName.trim() || !formSaleId) return;
+		if (!formSaleId || !formStart || !formEnd) return;
 		setGenerating(true);
 		setCreateError(null);
 		try {
 			const body = {
-				name: formName.trim(),
 				type: formType,
-				sale: formSaleId,
-				start: formStart || undefined,
-				end: formEnd || undefined,
+				frequency: formFrequency,
+				start: formStart,
+				end: formEnd,
 			};
-			if (formType === "churn" && formHvThreshold) {
-				body.highValueThreshold = Number(formHvThreshold);
-			}
-			const res = await post("/reports", body);
+			const res = await post(`/sales/${formSaleId}/reports/range`, body);
 			setCreateOpen(false);
-			const id = res.data?.id ?? res.data?._id;
+			const id = res.data?.report?.id ?? res.data?.report?._id;
 			if (id) setLocation(`/reports/${id}`);
 			else fetchReports();
 		} catch (err) {
@@ -271,14 +292,16 @@ const Reports = () => {
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.reports.title")}
 				</h1>
-				<button
-					type="button"
-					onClick={openCreate}
-					className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					<i className="fa-solid fa-plus" aria-hidden />
-					{strings("page.reports.createReport")}
-				</button>
+				<Can family="reporting">
+					<button
+						type="button"
+						onClick={openCreate}
+						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<i className="fa-solid fa-plus" aria-hidden />
+						{strings("page.reports.createReport")}
+					</button>
+				</Can>
 			</div>
 
 			{error && (
@@ -332,7 +355,7 @@ const Reports = () => {
 							<button
 								type="button"
 								onClick={handleGenerate}
-								disabled={!formName.trim() || !formSaleId || generating}
+								disabled={!formSaleId || !formStart || !formEnd || generating}
 								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
 								{generating && <i className="fa-solid fa-spinner fa-spin" aria-hidden />}
@@ -343,21 +366,13 @@ const Reports = () => {
 				}
 			>
 				<div className="space-y-4">
-					<Input
-						label={strings("page.reports.reportName")}
-						name="reportName"
-						value={formName}
-						onChange={(e) => setFormName(e.target.value)}
-						placeholder={strings("page.reports.reportNamePlaceholder")}
-						disabled={generating}
-					/>
 					<Select
 						label={strings("page.reports.reportType")}
 						name="reportType"
 						value={formType}
 						onChange={(e) => setFormType(e.target.value)}
-						options={TYPE_OPTIONS}
-						disabled={generating}
+						options={typeOptions}
+						disabled={generating || typeOptions.length === 0}
 					/>
 					<Select
 						label={strings("page.reports.churn.selectSale")}
@@ -368,6 +383,28 @@ const Reports = () => {
 						placeholder={strings("page.reports.churn.selectSale")}
 						disabled={generating}
 					/>
+					<div>
+						<label className="mb-1 block text-sm font-medium text-slate-700">
+							{strings("page.reports.frequency")}
+						</label>
+						<div className="flex gap-2">
+							{["daily", "weekly", "monthly"].map((f) => (
+								<button
+									type="button"
+									key={f}
+									onClick={() => setFormFrequency(f)}
+									disabled={generating}
+									className={`flex-1 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+										formFrequency === f
+											? "border-slate-900 bg-slate-900 text-white"
+											: "border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+									}`}
+								>
+									{strings(`page.sale.reporting.freq.${f}`)}
+								</button>
+							))}
+						</div>
+					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<Input
 							label={strings("page.reports.churn.startDate")}
@@ -386,16 +423,31 @@ const Reports = () => {
 							disabled={generating}
 						/>
 					</div>
-					{formType === "churn" && (
-						<Input
-							label={strings("page.reports.hvThreshold")}
-							type="number"
-							name="hvThreshold"
-							value={formHvThreshold}
-							onChange={(e) => setFormHvThreshold(e.target.value)}
-							disabled={generating}
-						/>
-					)}
+					<div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+						{quoting ? (
+							<span className="text-slate-500">
+								<i className="fa-solid fa-spinner fa-spin mr-1.5" aria-hidden />
+								{strings("page.reports.quoting")}
+							</span>
+						) : quote ? (
+							quote.total > 0 ? (
+								<span className="text-slate-700">
+									<i className="fa-solid fa-receipt mr-1.5 text-slate-500" aria-hidden />
+									{strings("page.reports.quoteLine")
+										.replace("{units}", String(quote.units))
+										.replace("{frequency}", strings(`page.sale.reporting.freq.${formFrequency}`))
+										.replace("{total}", `${(quote.total ?? 0).toFixed(2)}`)}
+								</span>
+							) : (
+								<span className="text-emerald-700">
+									<i className="fa-solid fa-circle-check mr-1.5" aria-hidden />
+									{strings("page.sale.reporting.free")}
+								</span>
+							)
+						) : (
+							<span className="text-slate-400">{strings("page.reports.quoteHint")}</span>
+						)}
+					</div>
 					{createError && (
 						<p className="text-sm text-red-600">{createError}</p>
 					)}

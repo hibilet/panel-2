@@ -68,11 +68,6 @@ const Jobs = () => {
 		setPanelMode("detail");
 	};
 
-	const handleCreate = () => {
-		setActiveJob(null);
-		setPanelMode("form");
-	};
-
 	const handleEdit = (row) => {
 		setActiveJob(row);
 		setPanelMode("form");
@@ -129,16 +124,7 @@ const Jobs = () => {
 				<h1 className="text-2xl font-semibold text-slate-900">
 					{strings("page.jobs.title")}
 				</h1>
-				<div className="flex flex-wrap items-center justify-end gap-2">
-					<button
-						type="button"
-						onClick={handleCreate}
-						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
-					>
-						<i className="fa-solid fa-plus" aria-hidden />
-						{strings("page.jobs.createNew")}
-					</button>
-				</div>
+				<div className="flex flex-wrap items-center justify-end gap-2" />
 			</div>
 
 			{error && (
@@ -163,16 +149,6 @@ const Jobs = () => {
 					icon="fa-clock"
 					title={strings("page.jobs.empty")}
 					description={strings("page.jobs.emptyDesc")}
-					action={
-						<button
-							type="button"
-							onClick={handleCreate}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
-						>
-							<i className="fa-solid fa-plus" aria-hidden />
-							{strings("page.jobs.createNew")}
-						</button>
-					}
 				/>
 			) : (
 				<DataTable

@@ -3,6 +3,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { Input, Select } from "../../../../components/inputs";
 import SellerBlock from "../../../../components/invoices/SellerBlock";
 import { Modal } from "../../../../components/shared";
+import { FAMILIES } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -28,12 +29,18 @@ const emptySeller = {
 	invoiceFooter: "",
 };
 
+const defaultFeatures = FAMILIES.reduce((acc, f) => {
+	acc[f] = true;
+	return acc;
+}, {});
+
 const defaultValues = {
 	name: "",
 	domains: [{ hostname: "", service: "dashboard" }],
 	urls: { dashboard: "", widget: "" },
 	branding: { logo: "", primaryColor: "" },
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
+	features: defaultFeatures,
 	seller: emptySeller,
 };
 
@@ -98,6 +105,10 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							pass: d.smtp?.pass ?? "",
 							from: d.smtp?.from ?? "",
 						},
+						features: FAMILIES.reduce((acc, f) => {
+							acc[f] = d.features?.[f] !== false;
+							return acc;
+						}, {}),
 						seller: {
 							legalName: d.seller?.legalName ?? "",
 							tradeName: d.seller?.tradeName ?? "",
@@ -189,6 +200,10 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 					pass: formData.smtp?.pass || undefined,
 					from: formData.smtp?.from?.trim() || undefined,
 				},
+				features: FAMILIES.reduce((acc, f) => {
+					acc[f] = Boolean(formData.features?.[f]);
+					return acc;
+				}, {}),
 				seller: sellerPayload,
 			};
 			if (isNew) {
@@ -410,6 +425,33 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 									</div>
 								</div>
 							)}
+						</div>
+
+						<div className="rounded-lg border border-slate-200 p-4">
+							<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+								<i className="fa-solid fa-toggle-on text-slate-500" aria-hidden />
+								Realm features
+							</div>
+							<p className="mb-3 text-xs text-slate-500">
+								Realm-wide hard ceiling. Disabling a family hides every related
+								capability for every account on this realm regardless of tier or
+								account override.
+							</p>
+							<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+								{FAMILIES.map((f) => (
+									<label
+										key={f}
+										className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+									>
+										<input
+											type="checkbox"
+											{...register(`features.${f}`)}
+											className="h-4 w-4 rounded border-slate-300"
+										/>
+										<span className="capitalize">{f}</span>
+									</label>
+								))}
+							</div>
 						</div>
 
 						<SellerBlock

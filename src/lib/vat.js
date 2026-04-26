@@ -77,17 +77,16 @@ export const previewVat = ({ seller, buyerCountry, buyerVatId, subtotal }) => {
 	const r = Number(seller.defaultRate) || 0;
 	const prof = profile(seller);
 
-	if (!b)
-		return { mode: "standard_fallback", rate: r, amount: round2(subtotal * r) };
-	if (b === s)
-		return { mode: "standard", rate: r, amount: round2(subtotal * r) };
-
-	if (prof === "eu" && EU.has(b)) {
-		if (buyerVatId?.trim())
-			return { mode: "reverse_charge", rate: 0, amount: 0 };
-		return { mode: "standard_oss_risk", rate: r, amount: round2(subtotal * r) };
+	if (
+		prof === "eu"
+		&& b
+		&& b !== s
+		&& EU.has(b)
+		&& buyerVatId?.trim()
+	) {
+		return { mode: "reverse_charge", rate: 0, amount: 0 };
 	}
-	return { mode: "out_of_scope", rate: 0, amount: 0 };
+	return { mode: "standard", rate: r, amount: round2(subtotal * r) };
 };
 
 export const VAT_MODE_META = {
@@ -98,18 +97,6 @@ export const VAT_MODE_META = {
 	reverse_charge: {
 		color: "bg-blue-100 text-blue-800",
 		labelKey: "vat.mode.reverseCharge",
-	},
-	out_of_scope: {
-		color: "bg-slate-100 text-slate-500",
-		labelKey: "vat.mode.outOfScope",
-	},
-	standard_oss_risk: {
-		color: "bg-amber-100 text-amber-800",
-		labelKey: "vat.mode.ossRisk",
-	},
-	standard_fallback: {
-		color: "bg-amber-100 text-amber-800",
-		labelKey: "vat.mode.fallback",
 	},
 	no_seller_config: {
 		color: "bg-red-100 text-red-700",

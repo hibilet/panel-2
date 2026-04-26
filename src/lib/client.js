@@ -124,4 +124,13 @@ const del = (endpoint, form = null, header = null) =>
 		}).then(handler),
 	);
 
-export { api as API_BASE_URL, del, get, getText, post, postForm, put };
+const patch = (endpoint, form = null, header = null) =>
+	withToast(
+		fetch(api + endpoint, {
+			method: "patch",
+			body: JSON.stringify(form),
+			headers: headerBuilder(header, form),
+		}).then(handler),
+	);
+
+export { api as API_BASE_URL, del, get, getText, patch, post, postForm, put };

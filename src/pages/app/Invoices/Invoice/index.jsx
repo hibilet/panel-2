@@ -2,7 +2,8 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import VatBadge from "../../../../components/invoices/VatBadge";
-import { API_BASE_URL, get } from "../../../../lib/client";
+import { useApp } from "../../../../context";
+import { API_BASE_URL, del, get, patch, post } from "../../../../lib/client";
 import { getToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
 
@@ -65,10 +66,72 @@ const Party = ({ title, name, vatId, registry, address, email }) => (
 
 const Invoice = () => {
 	const { id } = useParams();
+	const { account } = useApp();
+	const isAdmin = account?.type === "account.admin";
 	const [invoice, setInvoice] = useState(null);
 	const [fetchedId, setFetchedId] = useState(null);
 	const [error, setError] = useState(null);
+	const [syncing, setSyncing] = useState(false);
+	const [adding, setAdding] = useState(false);
+	const [addForm, setAddForm] = useState({ description: "", qty: 1, unitAmount: 0 });
 	const loading = fetchedId !== id;
+	const canEdit = isAdmin && invoice && !invoice.stripeInvoiceId
+		&& (invoice.status === "draft" || invoice.status === "pending");
+
+	const onAddItem = async () => {
+		if (!addForm.description) return;
+		setAdding(true);
+		try {
+			const res = await post(`/invoices/${id}/line-items`, {
+				description: addForm.description,
+				qty: Number(addForm.qty) || 1,
+				unitAmount: Number(addForm.unitAmount) || 0,
+			});
+			if (res?.data) setInvoice(res.data);
+			setAddForm({ description: "", qty: 1, unitAmount: 0 });
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setAdding(false);
+		}
+	};
+	const onRemoveItem = async (itemId) => {
+		try {
+			const res = await del(`/invoices/${id}/line-items/${itemId}`);
+			if (res?.data) setInvoice(res.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedDelete"));
+		}
+	};
+	const onPatchItem = async (itemId, body) => {
+		try {
+			const res = await patch(`/invoices/${id}/line-items/${itemId}`, body);
+			if (res?.data) setInvoice(res.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		}
+	};
+	const onFinalize = async () => {
+		try {
+			const res = await post(`/invoices/${id}/finalize`, {});
+			if (res?.data) setInvoice(res.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		}
+	};
+
+	const onSync = async () => {
+		if (!id) return;
+		setSyncing(true);
+		try {
+			const res = await post(`/invoices/${id}/sync`, {});
+			if (res?.data) setInvoice(res.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedLoadInvoices"));
+		} finally {
+			setSyncing(false);
+		}
+	};
 
 	useEffect(() => {
 		if (!id) return;
@@ -208,50 +271,126 @@ const Invoice = () => {
 
 						<div>
 							<p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-								{strings("page.invoices.breakdown")}
+								{strings("page.invoices.lineItems")}
 							</p>
-							<div className="rounded-lg border border-slate-200 px-4">
-								<Row
-									label={strings("page.invoices.salesCount")}
-									value={(
-										bd.salesCount ??
-										invoice.reservations?.length ??
-										0
-									).toLocaleString()}
-								/>
-								<Row
-									label={strings("page.invoices.salesTotal")}
-									value={formatCurrency(bd.salesTotal ?? 0)}
-								/>
-								<Row
-									label={strings("page.invoices.baseFee")}
-									value={formatCurrency(bd.baseFee ?? 0)}
-								/>
-								{(bd.ticketFeeAmount ?? 0) > 0 && (
-									<Row
-										label={strings("page.invoices.ticketFee")}
-										value={formatCurrency(bd.ticketFeeAmount)}
+							{(invoice.lineItems || []).filter((li) => !li.removedAt).length === 0 ? (
+								<div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-500">
+									{strings("page.invoices.noLineItems")}
+								</div>
+							) : (
+								<div className="overflow-hidden rounded-lg border border-slate-200">
+									<table className="w-full text-sm">
+										<thead className="bg-slate-50 text-xs uppercase text-slate-500">
+											<tr>
+												<th className="px-3 py-2 text-left">{strings("page.invoices.description")}</th>
+												<th className="px-3 py-2 text-right">Qty</th>
+												<th className="px-3 py-2 text-right">{strings("page.invoices.unit")}</th>
+												<th className="px-3 py-2 text-right">{strings("page.invoices.amount")}</th>
+												{canEdit && <th className="px-3 py-2"></th>}
+											</tr>
+										</thead>
+										<tbody>
+											{(invoice.lineItems || []).filter((li) => !li.removedAt).map((li) => (
+												<tr key={li._id || li.id} className="border-t border-slate-100">
+													<td className="px-3 py-2">
+														{canEdit && li.removable ? (
+															<input
+																type="text"
+																defaultValue={li.description}
+																onBlur={(e) => e.target.value !== li.description && onPatchItem(li._id || li.id, { description: e.target.value })}
+																className="w-full rounded-md border border-slate-200 px-2 py-1 text-sm"
+															/>
+														) : (
+															<span>{li.description}</span>
+														)}
+														<span className="ml-2 text-xs text-slate-400">{li.code}</span>
+													</td>
+													<td className="px-3 py-2 text-right">
+														{canEdit && li.removable ? (
+															<input
+																type="number"
+																min="0"
+																defaultValue={li.qty}
+																onBlur={(e) => Number(e.target.value) !== li.qty && onPatchItem(li._id || li.id, { qty: Number(e.target.value) })}
+																className="w-16 rounded-md border border-slate-200 px-2 py-1 text-right text-sm"
+															/>
+														) : li.qty}
+													</td>
+													<td className="px-3 py-2 text-right">
+														{canEdit && li.removable ? (
+															<input
+																type="number"
+																step="0.01"
+																defaultValue={li.unitAmount}
+																onBlur={(e) => Number(e.target.value) !== li.unitAmount && onPatchItem(li._id || li.id, { unitAmount: Number(e.target.value) })}
+																className="w-24 rounded-md border border-slate-200 px-2 py-1 text-right text-sm"
+															/>
+														) : formatCurrency(li.unitAmount)}
+													</td>
+													<td className="px-3 py-2 text-right font-medium">{formatCurrency(li.amount)}</td>
+													{canEdit && (
+														<td className="px-3 py-2 text-right">
+															{li.removable ? (
+																<button
+																	type="button"
+																	onClick={() => onRemoveItem(li._id || li.id)}
+																	className="text-slate-400 hover:text-red-600"
+																	title={strings("common.remove")}
+																>
+																	<i className="fa-solid fa-trash" aria-hidden />
+																</button>
+															) : (
+																<i className="fa-solid fa-lock text-slate-300" aria-hidden title={strings("page.invoices.locked")} />
+															)}
+														</td>
+													)}
+												</tr>
+											))}
+										</tbody>
+									</table>
+								</div>
+							)}
+							{canEdit && (
+								<div className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-slate-300 p-3">
+									<input
+										type="text"
+										value={addForm.description}
+										onChange={(e) => setAddForm({ ...addForm, description: e.target.value })}
+										placeholder={strings("page.invoices.addItemDesc")}
+										className="flex-1 rounded-md border border-slate-300 px-2 py-1 text-sm"
 									/>
-								)}
-								<Row
-									label={strings("page.invoices.commissionAmount")}
-									value={formatCurrency(
-										bd.commissionAmount ?? invoice.commision ?? 0,
-									)}
-								/>
-								{(bd.installFee ?? 0) > 0 && (
-									<Row
-										label={strings("page.invoices.installFee")}
-										value={formatCurrency(bd.installFee)}
+									<input
+										type="number"
+										min="0"
+										value={addForm.qty}
+										onChange={(e) => setAddForm({ ...addForm, qty: e.target.value })}
+										className="w-16 rounded-md border border-slate-300 px-2 py-1 text-right text-sm"
 									/>
-								)}
-								{(bd.discount ?? 0) > 0 && (
-									<Row
-										label={strings("page.invoices.discount")}
-										value={`-${formatCurrency(bd.discount)}`}
+									<input
+										type="number"
+										step="0.01"
+										value={addForm.unitAmount}
+										onChange={(e) => setAddForm({ ...addForm, unitAmount: e.target.value })}
+										className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-sm"
+										placeholder="€"
 									/>
-								)}
-							</div>
+									<button
+										type="button"
+										onClick={onAddItem}
+										disabled={adding || !addForm.description}
+										className="rounded-md border border-transparent bg-slate-900 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 disabled:opacity-50"
+									>
+										<i className={`fa-solid ${adding ? "fa-spinner fa-spin" : "fa-plus"} mr-1`} aria-hidden />
+										{strings("page.invoices.addItem")}
+									</button>
+								</div>
+							)}
+							{isAdmin && invoice.stripeInvoiceId && (
+								<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2 text-xs text-slate-600">
+									<i className="fa-solid fa-lock mr-1.5" aria-hidden />
+									{strings("page.invoices.stripeLocked")}
+								</div>
+							)}
 						</div>
 
 						<div className="rounded-lg border border-slate-200 px-4">
@@ -294,6 +433,16 @@ const Invoice = () => {
 						)}
 
 						<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+							{isAdmin && invoice.status === "draft" && (
+								<button
+									type="button"
+									onClick={onFinalize}
+									className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
+								>
+									<i className="fa-solid fa-paper-plane" aria-hidden />
+									{strings("page.invoices.finalize")}
+								</button>
+							)}
 							{canPay && (
 								<a
 									href={payUrl}
@@ -327,7 +476,32 @@ const Invoice = () => {
 									{strings("page.invoices.viewOnStripe")}
 								</a>
 							)}
+							{invoice.stripeInvoiceId && (
+								<button
+									type="button"
+									onClick={onSync}
+									disabled={syncing}
+									className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+									title={strings("page.invoices.syncHint")}
+								>
+									<i
+										className={`fa-solid ${syncing ? "fa-spinner fa-spin" : "fa-rotate"}`}
+										aria-hidden
+									/>
+									{strings("page.invoices.sync")}
+								</button>
+							)}
 						</div>
+
+						{invoice.stripePushError && (
+							<div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+								<i
+									className="fa-solid fa-triangle-exclamation mr-1.5"
+									aria-hidden
+								/>
+								Stripe push error: {invoice.stripePushError}
+							</div>
+						)}
 
 						<div className="rounded-lg border border-slate-200 px-4 text-xs">
 							<Row

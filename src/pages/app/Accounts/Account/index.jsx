@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { FormSection, Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
-import { get, post, put } from "../../../../lib/client";
+import { CAPABILITIES, UNLIMITED } from "../../../../lib/capabilities";
+import { get, patch, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
 import { useApp } from "../../../../context";
@@ -13,12 +14,155 @@ const STATUS_OPTIONS = [
 	{ value: "inactive", label: strings("common.inactive") },
 ];
 
+const ACL_KEYS = Object.keys(CAPABILITIES);
+
+const AclOverrideEditor = ({ accountId, initialAcl, onSaved }) => {
+	const [overrides, setOverrides] = useState(initialAcl ?? {});
+	const [saving, setSaving] = useState(false);
+	const [msg, setMsg] = useState(null);
+	const [error, setError] = useState(null);
+
+	useEffect(() => {
+		setOverrides(initialAcl ?? {});
+	}, [initialAcl]);
+
+	const setOverride = (key, value) => {
+		setOverrides((prev) => {
+			const next = { ...prev };
+			if (value === undefined) delete next[key];
+			else next[key] = value;
+			return next;
+		});
+	};
+
+	const isOverridden = (key) => Object.prototype.hasOwnProperty.call(overrides, key);
+
+	const onSave = async () => {
+		setSaving(true);
+		setMsg(null);
+		setError(null);
+		try {
+			const patchBody = {};
+			for (const key of ACL_KEYS) {
+				if (isOverridden(key)) patchBody[key] = overrides[key];
+				else patchBody[key] = null;
+			}
+			const res = await patch(`/accounts/${accountId}/acl`, patchBody);
+			setMsg("Saved.");
+			onSaved?.(res?.data ?? null);
+		} catch (e) {
+			setError(e?.message ?? "Save failed");
+		} finally {
+			setSaving(false);
+		}
+	};
+
+	return (
+		<FormSection title="ACL override (admin)" gridClassName="space-y-3">
+			<p className="text-xs text-slate-500">
+				Per-account override beats the tier value. Realm family disables still
+				win. Choose Inherit to fall back to the tier default.
+			</p>
+			{error && (
+				<div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700">{error}</div>
+			)}
+			{msg && (
+				<div className="rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">{msg}</div>
+			)}
+			<div className="space-y-2">
+				{ACL_KEYS.map((key) => {
+					const spec = CAPABILITIES[key];
+					const current = overrides[key];
+					const overridden = isOverridden(key);
+					return (
+						<div
+							key={key}
+							className="flex flex-wrap items-center gap-3 rounded-md border border-slate-100 px-3 py-2"
+						>
+							<span className="flex-1 text-sm text-slate-700">
+								<span className="font-medium">{spec.label}</span>
+								<span className="ml-2 text-xs text-slate-400">{key}</span>
+							</span>
+							{spec.type === "bool" ? (
+								<div className="flex gap-1 text-xs">
+									<button
+										type="button"
+										onClick={() => setOverride(key, undefined)}
+										className={`rounded-md border px-2 py-1 ${!overridden ? "border-slate-400 bg-slate-100 text-slate-800" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+									>
+										Inherit
+									</button>
+									<button
+										type="button"
+										onClick={() => setOverride(key, true)}
+										className={`rounded-md border px-2 py-1 ${overridden && current === true ? "border-emerald-400 bg-emerald-50 text-emerald-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+									>
+										On
+									</button>
+									<button
+										type="button"
+										onClick={() => setOverride(key, false)}
+										className={`rounded-md border px-2 py-1 ${overridden && current === false ? "border-red-400 bg-red-50 text-red-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+									>
+										Off
+									</button>
+								</div>
+							) : (
+								<div className="flex items-center gap-2">
+									<button
+										type="button"
+										onClick={() => setOverride(key, undefined)}
+										className={`rounded-md border px-2 py-1 text-xs ${!overridden ? "border-slate-400 bg-slate-100 text-slate-800" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+									>
+										Inherit
+									</button>
+									<input
+										type="number"
+										min="0"
+										value={overridden ? Number(current) : ""}
+										placeholder="—"
+										onChange={(e) => {
+											const v = e.target.value;
+											setOverride(key, v === "" ? undefined : Math.max(0, Math.floor(Number(v))));
+										}}
+										className="w-24 rounded-md border border-slate-300 px-2 py-1 text-sm"
+									/>
+									<button
+										type="button"
+										onClick={() => setOverride(key, UNLIMITED)}
+										className={`rounded-md border px-2 py-1 text-xs ${overridden && current === UNLIMITED ? "border-emerald-400 bg-emerald-50 text-emerald-700" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
+									>
+										Unlimited
+									</button>
+								</div>
+							)}
+						</div>
+					);
+				})}
+			</div>
+			<div className="flex justify-end">
+				<button
+					type="button"
+					onClick={onSave}
+					disabled={saving}
+					className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 disabled:opacity-50"
+				>
+					{saving ? (
+						<><i className="fa-solid fa-spinner fa-spin" aria-hidden />Saving</>
+					) : (
+						<><i className="fa-solid fa-floppy-disk" aria-hidden />Save ACL</>
+					)}
+				</button>
+			</div>
+		</FormSection>
+	);
+};
+
 const defaultValues = {
 	name: "",
 	email: "",
 	phone: "",
 	status: "active",
-	commissionVat: 1.19, // stored as multiplier (1.19 = 19%)
 };
 
 const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
@@ -38,7 +182,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [changingTier, setChangingTier] = useState(false);
 	const [tierChangeMsg, setTierChangeMsg] = useState(null);
 
-	const { register, handleSubmit, reset, control, getValues } = useForm({
+	const { register, handleSubmit, reset, getValues } = useForm({
 		defaultValues,
 	});
 
@@ -64,13 +208,11 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				const d = res.data ?? null;
 				setData(d);
 				if (d) {
-					const commission = d.commission ?? {};
 					reset({
 						name: d.name ?? "",
 						email: d.email ?? "",
 						phone: d.phone ?? "",
 						status: d.status ?? "active",
-						commissionVat: commission.vat ?? 1.19,
 					});
 				}
 			})
@@ -90,12 +232,6 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				phone: formData.phone?.trim() || undefined,
 				status: formData.status || undefined,
 			};
-			if (isMerchant) {
-				payload.commission = {
-					...(data?.commission ?? {}),
-					vat: Number(formData.commissionVat) || 1.19,
-				};
-			}
 			payload.type = accountType ?? data?.type ?? "account.merchant";
 			if (isNew) {
 				const res = await post("/accounts", payload);
@@ -165,11 +301,17 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		setTierChangeMsg(null);
 		setError(null);
 		try {
-			const res = await post("/tiers/admin/change-merchant-tier", { merchantId: id, uuid: selectedTierUuid });
-			const msg = res?.data?.message ?? res?.message;
-			if (msg === "tier-upgraded") setTierChangeMsg(strings("form.account.tierChangedUpgraded"));
-			else if (msg === "tier-downgrade-queued") setTierChangeMsg(strings("form.account.tierChangedDowngradeQueued"));
-			else setTierChangeMsg(strings("form.account.tierChangedSubscribed"));
+			const res = await post("/tiers/admin/change-merchant-tier", { merchantId: id, tierId: selectedTierUuid });
+			const msg = res?.message;
+			if (msg === "already-subscribed") {
+				setTierChangeMsg(strings("form.account.tierAlreadySubscribed"));
+			} else if (msg === "tier-changed") {
+				setTierChangeMsg(strings("form.account.tierChangedSubscribed"));
+			} else if (msg === "tier-assigned") {
+				setTierChangeMsg(strings("form.account.tierChangedSubscribed"));
+			} else {
+				setTierChangeMsg(strings("form.account.tierChangedSubscribed"));
+			}
 			setSelectedTierUuid("");
 			const refreshed = await get(`/accounts/${id}`);
 			if (refreshed.data) setData(refreshed.data);
@@ -249,16 +391,19 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 														{strings("page.subscription.currentTier")}
 													</span>
 													<span className="font-medium text-slate-900">
-														{tiers.find((t) => t.id === data.subscription.tier || t.uuid === data.subscription.tierUuid)?.name ?? data.subscription.tierUuid ?? "—"}
+														{(typeof data.subscription.tier === "object" ? data.subscription.tier?.name : null)
+															?? tiers.find((t) => t.uuid === data.subscription.tierUuid || t.id === data.subscription.tier)?.name
+															?? data.subscription.tierUuid
+															?? "—"}
 													</span>
 												</div>
-												{data.subscription.startedAt && (
+												{(data.subscription.startDate || data.subscription.startedAt) && (
 													<div className="flex justify-between">
 														<span className="text-slate-500">
 															{strings("page.subscription.startedAt", [""])}
 														</span>
 														<span className="text-slate-700">
-															{dayjs(data.subscription.startedAt).format("D MMM YYYY")}
+															{dayjs(data.subscription.startDate ?? data.subscription.startedAt).format("D MMM YYYY")}
 														</span>
 													</div>
 												)}
@@ -308,42 +453,14 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 								)}
 							</FormSection>
 						)}
-						{isMerchant && (
-							<FormSection title={strings("form.account.commission")}>
-								<Controller
-									control={control}
-									name="commissionVat"
-									render={({ field }) => (
-										<Input
-											label={strings("form.account.commissionVat")}
-											type="number"
-											step="0.01"
-											min="0"
-											max="100"
-											placeholder="19"
-											endAdornment="%"
-											value={
-												field.value != null &&
-												field.value !== "" &&
-												!Number.isNaN(Number(field.value))
-													? String(
-															Math.round((Number(field.value) - 1) * 10000) /
-																100,
-														)
-													: ""
-											}
-											onChange={(e) => {
-												const v = e.target.value;
-												const num = v === "" ? 1 : 1 + Number(v) / 100;
-												field.onChange(num);
-											}}
-											onBlur={field.onBlur}
-											name={field.name}
-											ref={field.ref}
-										/>
-									)}
-								/>
-							</FormSection>
+						{isAdmin && !isNew && data && (
+							<AclOverrideEditor
+								accountId={id}
+								initialAcl={data.acl ?? {}}
+								onSaved={(updated) => {
+									if (updated) setData((prev) => (prev ? { ...prev, acl: updated.acl ?? {} } : prev));
+								}}
+							/>
 						)}
 					</form>
 				)}

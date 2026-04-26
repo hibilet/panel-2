@@ -2,7 +2,6 @@
 	"app.name": "HIBilet Paneel",
 	"app.welcome": "Welkom, $0",
 	"app.description": "HIBilet Paneel is een platform voor het beheren van uw verkopen en transacties",
-
 	"nav.dashboard": "Dashboard",
 	"nav.accounts": "Accounts",
 	"nav.venues": "Locaties",
@@ -14,7 +13,6 @@
 	"nav.live": "Live Evenementen",
 	"nav.menu": "Menu",
 	"nav.backToAdmin": "Terug naar Admin",
-
 	"tour.start": "Rondleiding starten",
 	"tour.step.dashboard": "Dashboard — Uw overzicht van het paneel. Bekijk de verkopen van vandaag, maandstatistieken, aantal actieve verkopen en recente activiteiten in één oogopslag.",
 	"tour.step.sales": "Verkopen — Maak en beheer uw verkoopevenementen. Stel tickets, kanalen, coupons, gasten en scanners in voor elk evenement.",
@@ -27,7 +25,6 @@
 	"tour.step.dashboardWeeklyEvents": "Wekelijkse evenementverkoopmatrix — Bekijk uw wekelijkse verkoopmatrix. Selecteer een week en evenement om de gegevens te bekijken.",
 	"tour.step.dashboardRecentActivity": "Recente activiteit — Bekijk uw recente acties. Selecteer een transactie om de gegevens te zien.",
 	"tour.step.dashboardRecentActivityViewAll": "Alles bekijken — Bekijk al uw recente activiteiten.",
-
 	"completionSteps.title": "Voltooi uw configuratie",
 	"completionSteps.description": "Voltooi de volgende stappen voordat u het paneel gebruikt.",
 	"completionSteps.agreements": "Overeenkomsten",
@@ -35,7 +32,6 @@
 	"completionSteps.mailings": "Mailinstellingen",
 	"completionSteps.billing": "Facturatie",
 	"completionSteps.selectTier": "Kies uw pakket",
-
 	"common.save": "Opslaan",
 	"common.cancel": "Annuleren",
 	"common.confirm": "Bevestigen",
@@ -72,13 +68,12 @@
 	"common.untitled": "Naamloos",
 	"common.active": "Actief",
 	"common.inactive": "Inactief",
-	"common.ariaDelete": "Verwijderen",	
+	"common.ariaDelete": "Verwijderen",
 	"common.ariaClose": "Paneel sluiten",
 	"common.archive": "Archiveren",
 	"common.unarchive": "Uit archief halen",
 	"common.vat": "BTW",
 	"common.total": "Totaal",
-
 	"error.required": "Dit veld is verplicht",
 	"error.failedLoad": "Laden mislukt",
 	"error.failedSave": "Opslaan mislukt",
@@ -97,7 +92,6 @@
 	"error.failedLoadLink": "Link laden mislukt",
 	"error.failedLoadAccounts": "Accounts laden mislukt",
 	"error.failedDeleteGuest": "Gast verwijderen mislukt",
-
 	"confirm.deleteSale": "Verkoop verwijderen",
 	"confirm.deleteSaleBody": "Weet u zeker dat u deze verkoop wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
 	"confirm.deleteChannel": "Dit kanaal verwijderen?",
@@ -118,7 +112,6 @@
 	"confirm.refundAttendeesBody": "$0 deelnemer(s) ter waarde van $1 terugbetalen? Deze actie kan niet ongedaan worden gemaakt.",
 	"confirm.refundReservation": "Deze deelnemer terugbetalen?",
 	"confirm.refundReservationBody": "$0 terugbetalen aan de klant? Deze actie kan niet ongedaan worden gemaakt.",
-
 	"dashboard.stats.todaySales": "Verkopen vandaag",
 	"dashboard.stats.mtdSales": "Verkopen (MTD)",
 	"dashboard.stats.mtdProductsSold": "Verkochte producten (MTD)",
@@ -136,7 +129,6 @@
 	"dashboard.dailySales": "Dagelijkse verkopen",
 	"dashboard.salesChartSelectedMonth": "Geselecteerde maand",
 	"dashboard.salesChartThisMonth": "Deze maand",
-
 	"table.sale.startDate": "Startdatum",
 	"table.sale.name": "Naam",
 	"table.sale.venue": "Locatie",
@@ -197,7 +189,6 @@
 	"form.venue.status": "Status",
 	"form.venue.owner": "Eigenaar",
 	"error.failedLoadVenues": "Locaties konden niet worden geladen",
-
 	"form.provider.newTitle": "Nieuwe aanbiederinformatie",
 	"form.provider.editTitle": "Aanbiederinformatie",
 	"form.provider.name": "Naam aanbieder",
@@ -240,7 +231,6 @@
 	"table.ticket.stock": "Voorraad",
 	"table.ticket.reservations": "Reserveringen",
 	"table.ticket.status": "Status",
-
 	"page.sales.title": "Verkopen",
 	"page.sales.showMore": "Meer weergeven",
 	"page.sales.showLess": "Minder weergeven",
@@ -249,7 +239,6 @@
 	"page.sales.createWithAI": "Maken met AI",
 	"page.sales.viewPastEvents": "Vorige evenementen bekijken",
 	"page.sales.hidePastEvents": "Vorige evenementen verbergen",
-
 	"page.sale.tab.basic": "Basis",
 	"page.sale.tab.tickets": "Tickets",
 	"page.sale.tab.channels": "Kanalen",
@@ -270,14 +259,12 @@
 	"page.sale.guided.generate": "Genereren",
 	"page.sale.guided.generating": "Bezig met genereren…",
 	"page.sale.guided.generatedJson": "Gegenereerde JSON",
-
 	"page.live.title": "Live Evenementen",
 	"page.live.noEventsToday": "Geen evenementen vandaag",
 	"page.live.noEventsTodayDesc": "De Live-tab verschijnt wanneer u evenementen heeft die vandaag plaatsvinden.",
 	"page.live.readerAccounts": "Scanner-accounts",
 	"page.live.attendeesRead": "Deelnemers / Gescand",
 	"page.live.attendeesReadValue": "$0 / $1",
-
 	"page.transactions.title": "Transacties",
 	"page.transactions.details": "Transactiedetails",
 	"page.transactions.filterTransactions": "Transacties filteren",
@@ -286,13 +273,11 @@
 	"page.transactions.transactionIdPlaceholder": "Bijv: 1234567890",
 	"page.transactions.email": "E-mail",
 	"page.transactions.emailPlaceholder": "Bijv: jan@voorbeeld.com",
-
 	"page.links.title": "Links",
 	"page.links.details": "Linkdetails",
 	"page.links.createNew": "Nieuwe link aanmaken",
 	"page.links.showArchived": "Gearchiveerde links weergeven",
 	"page.links.hideArchived": "Gearchiveerde links verbergen",
-
 	"page.reports.title": "Rapporten",
 	"page.reports.createReport": "Rapport maken",
 	"page.reports.searchPlaceholder": "Zoek op naam, type of eigenaar",
@@ -390,7 +375,6 @@
 	"page.reports.churn.empty.selectSale": "Selecteer een evenement om het churn-rapport te genereren",
 	"page.reports.churn.empty.noData": "Geen churn-gegevens gevonden voor de geselecteerde periode",
 	"page.reports.churn.stats.totalFailedBaskets": "Mislukte mandjes",
-
 	"page.accounts.title": "Accounts",
 	"page.accounts.tab.merchants": "Handelaren",
 	"page.accounts.tab.customers": "Klanten",
@@ -406,15 +390,12 @@
 	"page.accounts.typeMerchant": "Handelaar",
 	"page.accounts.typeUser": "Gebruiker",
 	"page.accounts.details": "Accountdetails",
-
 	"form.account.loginAs": "Inloggen als",
 	"form.account.errorLoginAs": "Inloggen als dit account mislukt",
 	"form.account.setInactive": "Deactiveren",
 	"form.account.confirmSetInactive": "Account deactiveren",
 	"form.account.confirmSetInactiveBody": "Weet u zeker dat u \"$0\" wilt deactiveren?",
-	"form.account.commission": "Commissie",
 	"form.account.commissionAmount": "Commissiebedrag",
-	"form.account.commissionVat": "BTW-vermenigvuldiger",
 	"form.account.commissionType": "Commissietype",
 	"form.account.commissionTypePercentage": "Percentage",
 	"form.account.commissionTypeFixed": "Vast",
@@ -424,7 +405,6 @@
 	"form.account.tierChangedUpgraded": "Laag bijgewerkt",
 	"form.account.tierChangedDowngradeQueued": "Downgrade gepland voor volgende factuurperiode",
 	"form.account.tierChangedSubscribed": "Geabonneerd op laag",
-
 	"page.settings.title": "Instellingen",
 	"page.settings.profile": "Profiel",
 	"page.settings.preferences": "Voorkeuren",
@@ -462,7 +442,6 @@
 	"language.de": "Duits",
 	"language.nl": "Nederlands",
 	"language.fr": "Frans",
-
 	"form.sale.info": "ℹ️ Info",
 	"form.sale.eventName": "Evenementsnaam",
 	"form.sale.eventNamePlaceholder": "Bijv: Chillout Festival 2024",
@@ -520,7 +499,6 @@
 	"form.sale.trackingAndAdvertising": "Tracking en Advertising",
 	"form.sale.comboTicketAndLogo": "Combi-ticket en logo",
 	"form.sale.eventRules": "Evenementsregels",
-
 	"sale.eventName": "Evenementsnaam",
 	"sale.eventNamePlaceholder": "Bijv: Chillout Festival 2024",
 	"sale.startDateTime": "Startdatum & tijd",
@@ -571,7 +549,6 @@
 	"sale.rules": "Regels",
 	"sale.rulesPlaceholder": "Geef regels op...",
 	"sale.save": "💾 Opslaan",
-
 	"form.mailing.modeDefault": "Verstuur e-mails namens mij",
 	"form.mailing.modeDefaultDesc": "We versturen e-mails naar uw klanten vanaf een gedeelde afzender. Geen setup nodig.",
 	"form.mailing.modeCustom": "Ik vul mijn eigen e-mailadres in",
@@ -595,7 +572,6 @@
 	"form.mailing.templatePreviewError": "Repareer EJS-syntax voor voorbeeld",
 	"error.failedLoadMailing": "Mailinstellingen laden mislukt",
 	"error.failedLoadBilling": "Facturatie-instellingen laden mislukt",
-
 	"form.billing.name": "Naam",
 	"form.billing.namePlaceholder": "Bijv: Jan Jansen",
 	"form.billing.email": "E-mail",
@@ -620,7 +596,6 @@
 	"form.billing.addressZipPlaceholder": "Bijv: 1011AA",
 	"form.billing.addressCountry": "Land",
 	"form.billing.vatHint": "Geef een BTW-nummer op voor grensoverschrijdende B2B-verlegging.",
-
 	"form.link.title": "Linktitel",
 	"form.link.slug": "Linkslug",
 	"form.link.views": "Weergaven",
@@ -634,7 +609,6 @@
 	"form.link.confirmArchiveBody": "Weet u zeker dat u deze link wilt archiveren?",
 	"form.link.confirmUnarchive": "Link herstellen",
 	"form.link.confirmUnarchiveBody": "Weet u zeker dat u deze link wilt herstellen?",
-
 	"form.ticket.ticketTypes": "Tickettypes",
 	"form.ticket.ticketTypeCount": "$0 tickettype",
 	"form.ticket.ticketTypeCountPlural": "$0 tickettypes",
@@ -672,7 +646,6 @@
 	"form.ticket.totalCapacityLabel": "$0 totale capaciteit",
 	"form.ticket.reservationsLabel": "$0 reserveringen",
 	"form.ticket.readLabel": "$0 gelezen",
-
 	"form.attendees.title": "Evenementdeelnemers",
 	"form.attendees.printPdf": "PDF afdrukken",
 	"form.attendees.downloadExcel": "Excel downloaden",
@@ -681,7 +654,6 @@
 	"form.attendees.noAttendees": "Nog geen deelnemers",
 	"form.attendees.product": "Product",
 	"form.attendees.printTitle": "Deelnemers - $0",
-
 	"form.transaction.sendEmailAgain": "E-mail opnieuw verzenden",
 	"form.transaction.sendToAnotherMail": "Verzenden naar ander e-mailadres",
 	"form.transaction.cancelAll": "Alles annuleren",
@@ -711,7 +683,6 @@
 	"form.attendees.refundMode": "Terugbetaalmodus",
 	"form.attendees.refundExit": "Terugbetaalmodus verlaten",
 	"form.attendees.refundSelected": "Geselecteerde terugbetalen ($0)",
-
 	"status.success": "Succes",
 	"status.pending": "In behandeling",
 	"status.failed": "Mislukt",
@@ -720,10 +691,8 @@
 	"status.reserved": "Gereserveerd",
 	"status.created": "Aangemaakt",
 	"status.cancelled": "Geannuleerd",
-
 	"pagination.showing": "Toont $0 tot $1 van $2 resultaten",
 	"pagination.pageOf": "Pagina $0 van $1",
-
 	"back.links": "Terug naar links",
 	"back.reports": "Terug naar rapporten",
 	"back.accounts": "Terug naar accounts",
@@ -732,14 +701,12 @@
 	"back.agreements": "Terug naar verkoopovereenkomsten",
 	"back.mailing": "Terug naar mailing",
 	"back.invoices": "Terug naar facturen",
-
 	"detail.id": "ID",
 	"detail.url": "URL",
 	"detail.type": "Type",
 	"detail.period": "Periode",
-
 	"form.channel.title": "Verkoopkanalen",
-	"form.channel.count": "$0 kanaal",
+	"form.channel.count": "Aantal",
 	"form.channel.countPlural": "$0 kanalen",
 	"form.channel.addChannel": "Kanaal toevoegen",
 	"form.channel.saveFirst": "Sla de verkoop eerst op",
@@ -773,14 +740,12 @@
 	"form.channel.noReservationData": "Geen reserveringsgegevens",
 	"form.channel.attendeeAges": "Leeftijden deelnemers",
 	"form.channel.noAgeData": "Geen leeftijdsgegevens",
-	"form.channel.count": "Aantal",
 	"form.channel.age": "Leeftijd:",
 	"form.channel.attendees": "Deelnemers",
 	"form.channel.ariaPrintReport": "Rapport afdrukken",
 	"form.channel.print": "Afdrukken",
 	"form.channel.copied": "Gekopieerd",
 	"form.channel.namePlaceholder": "Bijv: Instagram",
-
 	"form.question.title": "Vragen",
 	"form.question.question": "Vraag",
 	"form.question.type": "Type",
@@ -801,7 +766,6 @@
 	"form.question.optionsPlaceholder": "Eén optie per regel, bijv.: Vegetarisch, Vegan, Glutenvrij",
 	"form.question.createQuestion": "Vraag aanmaken",
 	"form.question.confirmDelete": "Deze vraag verwijderen?",
-
 	"form.guest.title": "Gasten",
 	"form.guest.addGuest": "Gast toevoegen",
 	"form.guest.saveFirst": "Sla de verkoop eerst op",
@@ -833,7 +797,6 @@
 	"form.guest.ticketQuantity": "Aantal tickets",
 	"form.guest.createGuest": "Gast aanmaken",
 	"form.guest.printTitle": "Gasten - $0",
-
 	"form.reader.title": "Scanners",
 	"form.reader.reader": "Scanner",
 	"form.reader.addReader": "Scanner toevoegen",
@@ -857,10 +820,8 @@
 	"form.reader.errorCopy": "Kopiëren naar klembord mislukt",
 	"form.reader.namePlaceholder": "Bijv: Jan Jansen",
 	"form.reader.emailPlaceholder": "Bijv: jan@voorbeeld.com",
-
 	"common.pleaseSelect": "Selecteer",
 	"common.editTemplate": "Template bewerken",
-
 	"form.coupon.title": "Kortingscodes",
 	"form.coupon.addCoupon": "Kortingscode toevoegen",
 	"form.coupon.saveFirst": "Sla de verkoop eerst op",
@@ -890,11 +851,9 @@
 	"form.coupon.expirationDate": "Vervaldatum en tijd",
 	"form.coupon.expiresLabel": "Verloopt:",
 	"form.coupon.cannotDeleteUsed": "Kan niet verwijderen: kortingscode is gebruikt",
-
 	"nav.tiers": "Tarieven",
 	"nav.invoices": "Facturen",
 	"page.settings.subscription": "Abonnement",
-
 	"page.tiers.title": "Tariefcatalogus",
 	"page.tiers.createTier": "Nieuw tarief",
 	"page.tiers.details": "Tariefdetails",
@@ -922,7 +881,6 @@
 	"error.failedLoadTiers": "Laden van tarieven mislukt",
 	"confirm.deleteTier": "Tarief verwijderen",
 	"confirm.deleteTierBody": "Weet u zeker dat u \"$0\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-
 	"page.subscription.title": "Abonnement",
 	"page.subscription.currentTier": "Huidig abonnement",
 	"page.subscription.noTier": "Geen actief abonnement",
@@ -984,7 +942,6 @@
 	"error.failedLoadSubscription": "Laden van abonnement mislukt",
 	"confirm.cancelSubscription": "Uw huidige abonnement opzeggen aan het einde van de facturatieperiode?",
 	"confirm.cancelPending": "Geplande downgrade annuleren en huidig abonnement behouden?",
-
 	"page.invoices.title": "Facturen",
 	"page.invoices.generate": "Factuur genereren",
 	"page.invoices.generating": "Genereren...",
@@ -1028,7 +985,6 @@
 	"table.invoice.number": "Nummer",
 	"table.invoice.vat": "BTW",
 	"table.invoice.total": "Totaal",
-
 	"page.invoices.print": "Afdrukken",
 	"page.invoices.sellerNotConfigured": "Verkoper / BTW is niet geconfigureerd voor deze realm",
 	"page.invoices.sellerNotConfiguredAdmin": "Open de realm en vul het gedeelte Verkoper / Facturering in (belastingland en standaard BTW-tarief).",
@@ -1038,17 +994,12 @@
 	"page.invoices.to": "Aan",
 	"page.invoices.vatId": "BTW-nummer",
 	"page.invoices.registry": "Register",
-
 	"vat.mode.standard": "Standaard",
 	"vat.mode.reverseCharge": "Verlegging",
-	"vat.mode.outOfScope": "Buiten heffing",
-	"vat.mode.ossRisk": "OSS mogelijk",
-	"vat.mode.fallback": "Fallback",
 	"vat.mode.noConfig": "BTW niet geconfigureerd",
 	"vat.mode.legacy": "Verouderd",
 	"vat.mode.unknown": "Onbekend",
 	"error.failedLoadInvoices": "Laden van facturen mislukt",
-
 	"page.stripeOnboard.title": "Verbinden met Stripe",
 	"page.stripeOnboard.description": "Stel uw betalingsaccount in om te beginnen met het verkopen van tickets.",
 	"page.stripeOnboard.submit": "Doorgaan naar Stripe",
@@ -1070,20 +1021,17 @@
 	"link.image.enhancing": "Bezig met verbeteren...",
 	"link.image.enhanced": "Afbeelding verbeterd",
 	"link.image.enhanceFailed": "Afbeelding kon niet worden verbeterd",
-
 	"form.stripeOnboard.businessType": "Bedrijfstype",
 	"form.stripeOnboard.businessTypeIndividual": "Individueel",
 	"form.stripeOnboard.businessTypeCompany": "Bedrijf",
 	"page.stripeOnboard.invitedBanner": "U bent uitgenodigd. Gebruik het e-mailadres waarnaar de uitnodiging is gestuurd.",
 	"error.invitationEmailMismatch": "Deze e-mail komt niet overeen met de uitnodiging. Gebruik het uitgenodigde adres.",
-
 	"page.onboardReturn.missingTokenTitle": "Geen sessie gevonden",
 	"page.onboardReturn.missingTokenDescription": "We konden geen sessietoken vinden in deze link. Log opnieuw in.",
 	"page.onboardReturn.signingIn": "Bezig met inloggen…",
 	"page.onboardReturn.completeProfileTitle": "Bijna klaar",
 	"page.onboardReturn.completeProfileDescription": "Stripe heeft nog de volgende gegevens nodig voordat u kunt verkopen.",
 	"page.onboardReturn.openBilling": "Facturatie openen",
-
 	"page.settings.connectStripe": "Verbind met Stripe",
 	"toast.stripeAttached": "Stripe-account gekoppeld",
 	"error.stripeAccountInUse": "Dit Stripe-account is al gekoppeld aan een andere handelaar.",
@@ -1091,10 +1039,8 @@
 	"error.stripeAccessDenied": "Stripe-toegang geweigerd.",
 	"error.stripeConnectFailed": "Verbinden met Stripe is mislukt. Probeer het opnieuw.",
 	"table.provider.default": "Standaard",
-
 	"nav.realms": "Realms",
 	"nav.invitations": "Uitnodigingen",
-
 	"page.invitations.title": "Handelaar uitnodigen",
 	"page.invitations.description": "Verstuur een Stripe Connect-onboardinglink gekoppeld aan een realm.",
 	"page.invitations.success": "Uitnodiging verzonden",
@@ -1108,7 +1054,6 @@
 	"error.failedCreateInvitation": "Kon uitnodiging niet aanmaken",
 	"common.copy": "Kopiëren",
 	"common.copied": "Gekopieerd",
-
 	"page.realms.title": "Realms",
 	"page.realms.create": "Nieuwe realm",
 	"table.realm.name": "Naam",
@@ -1155,10 +1100,8 @@
 	"error.failedLoadRealms": "Kon realms niet laden",
 	"confirm.deleteRealm": "Realm verwijderen",
 	"confirm.deleteRealmBody": "Weet u zeker dat u \"$0\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-
 	"nav.jobs": "Taken",
 	"nav.notifications": "Meldingen",
-
 	"page.jobs.title": "Taken",
 	"page.jobs.createNew": "Taak aanmaken",
 	"page.jobs.searchPlaceholder": "Zoek op naam of type",
@@ -1180,7 +1123,6 @@
 	"page.jobs.alreadyRunning": "Taak loopt al",
 	"page.jobs.runTriggered": "Taak gestart",
 	"page.jobs.system.label": "Systeem",
-
 	"page.notifications.title": "Meldingen",
 	"page.notifications.markAllRead": "Alles als gelezen markeren",
 	"page.notifications.empty": "Geen meldingen",
@@ -1192,7 +1134,6 @@
 	"page.notifications.unread": "Ongelezen",
 	"page.notifications.bellAria": "Meldingen openen",
 	"page.notifications.dropdownTitle": "Meldingen",
-
 	"table.job.name": "Naam",
 	"table.job.type": "Type",
 	"table.job.schedule": "Planning",
@@ -1210,7 +1151,6 @@
 	"table.notification.title": "Titel",
 	"table.notification.severity": "Ernst",
 	"table.notification.read": "Gelezen",
-
 	"form.job.reportType": "Rapporttype",
 	"form.job.reportType.sales": "Verkooprapport",
 	"form.job.reportType.churn": "Churnrapport",
@@ -1253,7 +1193,6 @@
 	"form.job.paramCountSingle": "Enkel",
 	"form.job.paramCountCumulative": "Cumulatief",
 	"form.job.paramAny": "Waarde",
-
 	"notification.type.report.ready": "Rapport klaar",
 	"notification.type.invoice.ready": "Factuur klaar",
 	"notification.type.job.failed": "Taak mislukt",
@@ -1265,7 +1204,6 @@
 	"notification.severity.warning": "Waarschuwing",
 	"notification.severity.error": "Fout",
 	"page.notifications.allTypes": "Alle typen",
-
 	"jobError.type-required": "Type is verplicht.",
 	"jobError.unknown-job-type": "Onbekend taaktype.",
 	"jobError.forbidden-job-type": "U mag dit taaktype niet plannen.",
@@ -1273,16 +1211,12 @@
 	"jobError.schedule-or-runAt-required": "Geef een planning of een eenmalig tijdstip op.",
 	"jobError.cron-invalid": "Cron-expressie is ongeldig.",
 	"jobError.job-already-running": "Taak loopt al.",
-
 	"error.failedLoadJobs": "Kon taken niet laden",
 	"error.failedLoadJobDefinitions": "Kon taakdefinities niet laden",
 	"error.failedLoadJobRuns": "Kon uitvoeringsgeschiedenis niet laden",
 	"error.failedLoadNotifications": "Kon meldingen niet laden",
-	"error.failedSave": "Opslaan mislukt",
-
 	"confirm.deleteJob": "Taak verwijderen",
 	"confirm.deleteJobBody": "Weet u zeker dat u \"$0\" wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.",
-
 	"ai.tips.title": "Tips voor vandaag",
 	"ai.tips.refresh": "Vernieuwen",
 	"ai.tips.refreshing": "Vernieuwen...",
@@ -1338,5 +1272,56 @@
 	"ai.draft.error.parseFailed": "AI gaf een onleesbaar antwoord. Probeer opnieuw.",
 	"ai.draft.error.failed": "AI-concept mislukt. Probeer later opnieuw.",
 	"ai.draft.error.imageTooLarge": "Afbeelding moet kleiner zijn dan 8 MB.",
-	"ai.draft.error.retry": "Opnieuw proberen"
+	"ai.draft.error.retry": "Opnieuw proberen",
+	"page.sale.tab.reporting": "Rapportage",
+	"page.sale.reporting.title": "Rapportage",
+	"page.sale.reporting.subtitle": "Schakel automatische verkoop- of churnrapporten in voor dit evenement. Tarieven uit je plan.",
+	"page.sale.reporting.sales": "Verkooprapportage",
+	"page.sale.reporting.churn": "Churnrapportage",
+	"page.sale.reporting.sales.help": "Periodieke verkoopoverzichten - omzet, ticketaantal, trends.",
+	"page.sale.reporting.churn.help": "Verlaten winkelmandjes en high-value leads voor dit evenement.",
+	"page.sale.reporting.enable": "Inschakelen",
+	"page.sale.reporting.free": "Gratis",
+	"page.sale.reporting.cost": "Kost {price} per maand zolang actief.",
+	"page.sale.reporting.disabled": "Inschakelen om in te plannen.",
+	"page.sale.reporting.upgrade": "Upgrade je plan om dit rapporttype in te schakelen.",
+	"page.sale.reporting.freq.daily": "Dagelijks",
+	"page.sale.reporting.freq.weekly": "Wekelijks",
+	"page.sale.reporting.freq.monthly": "Maandelijks",
+	"page.sale.reporting.saving": "Opslaan...",
+	"page.sale.reporting.saved": "Opgeslagen",
+	"form.tier.reportingPricing": "Rapportageprijzen",
+	"form.tier.reportingPricingHint": "Maandprijs per evenement. 0 = gratis voor dit niveau.",
+	"form.tier.reportingCron": "Schema-overrides",
+	"form.tier.reportingCronHint": "Cron-expressie. Leeg = platformstandaard (23:59).",
+	"form.tier.reportingCronPlaceholder": "59 23 * * *",
+	"form.tier.reporting.sales": "Verkoop",
+	"form.tier.reporting.churn": "Churn",
+	"form.tier.reporting.daily": "Dagelijks",
+	"form.tier.reporting.weekly": "Wekelijks",
+	"form.tier.reporting.monthly": "Maandelijks",
+	"page.invoices.lineItems": "Regels",
+	"page.invoices.noLineItems": "Geen regels.",
+	"page.invoices.description": "Omschrijving",
+	"page.invoices.unit": "Stuksprijs",
+	"page.invoices.amount": "Bedrag",
+	"page.invoices.addItem": "Regel toevoegen",
+	"page.invoices.addItemDesc": "Omschrijving",
+	"page.invoices.finalize": "Finaliseren en naar Stripe sturen",
+	"page.invoices.locked": "Vergrendeld - plan of systeemregel",
+	"page.invoices.stripeLocked": "Naar Stripe verzonden. Maak een creditnota om te wijzigen.",
+	"page.invoices.ticketFee": "Tickettarieven",
+	"page.sale.reporting.summary.title": "Rapportage",
+	"page.sale.reporting.summary.off": "Uit",
+	"page.sale.reporting.summary.runSales": "Verkooprapport maken",
+	"page.sale.reporting.summary.runChurn": "Churnrapport maken",
+	"page.sale.reporting.summary.manage": "Beheren",
+	"page.sale.reporting.summary.ranOk": "{type}-rapport gegenereerd.",
+	"page.sale.reporting.summary.viewReport": "Rapport bekijken",
+	"page.sale.reporting.feeNote": "Per run wordt {price} aan factuur toegevoegd.",
+	"page.sale.reporting.summary.runNow": "Nu uitvoeren",
+	"page.reports.frequency": "Factureringsfrequentie",
+	"page.reports.quoting": "Kosten berekenen...",
+	"page.reports.quoteLine": "{units} × {frequency} eenheid · €{total} toegevoegd aan volgende factuur.",
+	"page.reports.quoteHint": "Kies sale, frequentie en data."
 }

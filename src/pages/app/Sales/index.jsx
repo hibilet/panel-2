@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
+import Can from "../../../components/Can";
 import AiDraftModal from "../../../components/sales/AiDraftModal";
 import { Modal, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
@@ -108,14 +109,16 @@ const Sales = () => {
 					</button>
 					{account?.type === "account.merchant" && (
 						<>
-							<button
-								type="button"
-								onClick={() => setAiDraftOpen(true)}
-								className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-700 shadow-sm transition-colors hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 active:bg-violet-100"
-							>
-								<i className="fa-solid fa-sparkles" aria-hidden />
-								{strings("ai.draft.button")}
-							</button>
+							<Can family="ai">
+								<button
+									type="button"
+									onClick={() => setAiDraftOpen(true)}
+									className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-700 shadow-sm transition-colors hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 active:bg-violet-100"
+								>
+									<i className="fa-solid fa-sparkles" aria-hidden />
+									{strings("ai.draft.button")}
+								</button>
+							</Can>
 							<Link
 								href="/sales/new"
 								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
