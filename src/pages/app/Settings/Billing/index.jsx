@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation } from "wouter";
-import { Checkbox, Input } from "../../../../components/inputs";
+import { Checkbox, Input, Select } from "../../../../components/inputs";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
+import { COUNTRIES } from "../../../../lib/vat";
 import strings from "../../../../localization";
+
+const COUNTRY_OPTIONS = [{ value: "", label: "-" }, ...COUNTRIES];
 
 const Billing = () => {
 	const [, setLocation] = useLocation();
@@ -14,13 +17,21 @@ const Billing = () => {
 	const [error, setError] = useState(null);
 	const [billing, setBilling] = useState(null);
 
-	const { register, handleSubmit, reset, formState: { errors } } = useForm({
+	const {
+		register,
+		handleSubmit,
+		reset,
+		formState: { errors },
+	} = useForm({
 		defaultValues: {
 			name: "",
 			email: "",
 			phone: "",
 			newsletter: false,
-			address: "",
+			addressStreet: "",
+			addressCity: "",
+			addressZip: "",
+			addressCountry: "",
 			corporateName: "",
 			corporateRegistry: "",
 			corporateTax: "",
@@ -34,12 +45,17 @@ const Billing = () => {
 				const data = res.data;
 				if (data) {
 					setBilling(data);
+					const addr = data.address;
+					const isStringAddr = typeof addr === "string";
 					reset({
 						name: data.name ?? "",
 						email: data.email ?? "",
 						phone: data.phone ?? "",
 						newsletter: data.newsletter ?? false,
-						address: data.address ?? "",
+						addressStreet: isStringAddr ? addr : (addr?.street ?? ""),
+						addressCity: isStringAddr ? "" : (addr?.city ?? ""),
+						addressZip: isStringAddr ? "" : (addr?.zip ?? ""),
+						addressCountry: isStringAddr ? "" : (addr?.country ?? ""),
 						corporateName: data.corporate?.name ?? "",
 						corporateRegistry: data.corporate?.registry ?? "",
 						corporateTax: data.corporate?.tax ?? "",
@@ -61,7 +77,12 @@ const Billing = () => {
 				email: data.email?.trim(),
 				phone: data.phone?.trim() || undefined,
 				newsletter: !!data.newsletter,
-				address: data.address?.trim() || undefined,
+				address: {
+					street: data.addressStreet?.trim() || undefined,
+					city: data.addressCity?.trim() || undefined,
+					zip: data.addressZip?.trim() || undefined,
+					country: data.addressCountry?.trim() || undefined,
+				},
 				corporate: {
 					name: data.corporateName?.trim(),
 					registry: data.corporateRegistry?.trim(),
@@ -110,7 +131,10 @@ const Billing = () => {
 				) : (
 					<form onSubmit={handleSubmit(onSave)} className="space-y-6">
 						{error && (
-							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
+							<div
+								className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
+								role="alert"
+							>
 								{error}
 							</div>
 						)}
@@ -132,19 +156,40 @@ const Billing = () => {
 							/>
 						</div>
 
+						<Input
+							label={strings("form.billing.phone")}
+							type="tel"
+							{...register("phone")}
+							placeholder={strings("form.billing.phonePlaceholder")}
+							autoComplete="tel"
+						/>
+
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<Input
-								label={strings("form.billing.phone")}
-								type="tel"
-								{...register("phone")}
-								placeholder={strings("form.billing.phonePlaceholder")}
-								autoComplete="tel"
+								label={strings("form.billing.addressStreet")}
+								{...register("addressStreet")}
+								placeholder={strings("form.billing.addressStreetPlaceholder")}
+								autoComplete="street-address"
 							/>
 							<Input
-								label={strings("form.billing.address")}
-								{...register("address")}
-								placeholder={strings("form.billing.addressPlaceholder")}
-								autoComplete="street-address"
+								label={strings("form.billing.addressCity")}
+								{...register("addressCity")}
+								placeholder={strings("form.billing.addressCityPlaceholder")}
+								autoComplete="address-level2"
+							/>
+							<Input
+								label={strings("form.billing.addressZip")}
+								{...register("addressZip")}
+								placeholder={strings("form.billing.addressZipPlaceholder")}
+								autoComplete="postal-code"
+							/>
+							<Select
+								label={`${strings("form.billing.addressCountry")} *`}
+								{...register("addressCountry", {
+									required: strings("error.required"),
+								})}
+								options={COUNTRY_OPTIONS}
+								error={errors.addressCountry?.message}
 							/>
 						</div>
 
@@ -154,21 +199,30 @@ const Billing = () => {
 						/>
 
 						<div className="border-t border-slate-200 pt-6">
-							<h2 className="mb-4 text-lg font-medium text-slate-900">
+							<h2 className="mb-2 text-lg font-medium text-slate-900">
 								{strings("form.billing.corporateSection")}
 							</h2>
+							<p className="mb-4 text-xs text-slate-500">
+								{strings("form.billing.vatHint")}
+							</p>
 							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 								<Input
 									label={`${strings("form.billing.corporateName")} *`}
-									{...register("corporateName", { required: strings("error.required") })}
+									{...register("corporateName", {
+										required: strings("error.required"),
+									})}
 									error={errors.corporateName?.message}
 									placeholder={strings("form.billing.corporateNamePlaceholder")}
 								/>
 								<Input
 									label={`${strings("form.billing.corporateRegistry")} *`}
-									{...register("corporateRegistry", { required: strings("error.required") })}
+									{...register("corporateRegistry", {
+										required: strings("error.required"),
+									})}
 									error={errors.corporateRegistry?.message}
-									placeholder={strings("form.billing.corporateRegistryPlaceholder")}
+									placeholder={strings(
+										"form.billing.corporateRegistryPlaceholder",
+									)}
 								/>
 								<Input
 									label={strings("form.billing.corporateTax")}

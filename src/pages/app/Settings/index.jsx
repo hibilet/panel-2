@@ -98,35 +98,27 @@ const Settings = () => {
 							<dt className="text-sm font-medium text-slate-500">
 								{strings("page.settings.name")}
 							</dt>
-							<dd className="mt-0.5 text-slate-900">
-								{account.name}
-							</dd>
+							<dd className="mt-0.5 text-slate-900">{account.name}</dd>
 						</div>
 						<div>
 							<dt className="text-sm font-medium text-slate-500">
 								{strings("page.settings.email")}
 							</dt>
-							<dd className="mt-0.5 text-slate-900">
-								{account.email}
-							</dd>
+							<dd className="mt-0.5 text-slate-900">{account.email}</dd>
 						</div>
 						{account.phone && (
 							<div>
 								<dt className="text-sm font-medium text-slate-500">
 									{strings("page.settings.phone")}
 								</dt>
-								<dd className="mt-0.5 text-slate-900">
-									{account.phone}
-								</dd>
+								<dd className="mt-0.5 text-slate-900">{account.phone}</dd>
 							</div>
 						)}
 						<div>
 							<dt className="text-sm font-medium text-slate-500">
 								{strings("common.status")}
 							</dt>
-							<dd className="mt-0.5 text-slate-900">
-								{account.status}
-							</dd>
+							<dd className="mt-0.5 text-slate-900">{account.status}</dd>
 						</div>
 					</dl>
 
@@ -156,6 +148,21 @@ const Settings = () => {
 					{strings("page.settings.preferences")}
 				</h2>
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+					{account?.type === "account.admin" && (
+						<Link
+							href="/settings/realm"
+							className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+						>
+							<i
+								className="fa-solid fa-globe text-xl text-slate-600"
+								aria-hidden
+							/>
+							<span className="font-medium text-slate-900">
+								{strings("page.settings.realmTitle")}
+							</span>
+						</Link>
+					)}
+
 					{account?.type === "account.merchant" && (
 						<Link
 							href="/settings/mailing"
@@ -232,8 +239,7 @@ const Settings = () => {
 					)}
 
 					{/* Theme switch card */}
-					<div
-						className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+					<div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 						<i
 							className={`fa-solid ${darkMode ? "fa-moon" : "fa-sun"} text-xl text-slate-600`}
 							aria-hidden

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
+import AiDraftModal from "../../../components/sales/AiDraftModal";
 import { Modal, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -26,6 +27,7 @@ const Sales = () => {
 	const [showMore, setShowMore] = useState(false);
 	const [revenueMode, setRevenueMode] = useState(false);
 	const [deleteTarget, setDeleteTarget] = useState(null);
+	const [aiDraftOpen, setAiDraftOpen] = useState(false);
 	const [query, setQuery] = useState("");
 
 	const filteredSales = useMemo(
@@ -105,20 +107,23 @@ const Sales = () => {
 						{strings("page.sales.calculateRevenues")}
 					</button>
 					{account?.type === "account.merchant" && (
-						<Link
-							href="/sales/new"
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{strings("page.sales.createNew")}
-						</Link>
+						<>
+							<button
+								type="button"
+								onClick={() => setAiDraftOpen(true)}
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-200 bg-violet-50 px-4 py-2.5 text-sm font-medium text-violet-700 shadow-sm transition-colors hover:bg-violet-100 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:ring-offset-2 active:bg-violet-100"
+							>
+								<i className="fa-solid fa-sparkles" aria-hidden />
+								{strings("ai.draft.button")}
+							</button>
+							<Link
+								href="/sales/new"
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+							>
+								{strings("page.sales.createNew")}
+							</Link>
+						</>
 					)}
-					{/* <Link
-						href="/sales/new?guided=true"
-						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-					>
-						<i className="fa-solid fa-sparkles" aria-hidden />
-						{strings("page.sales.createWithAI")}
-					</Link> */}
 				</div>
 			</div>
 
@@ -166,6 +171,12 @@ const Sales = () => {
 					</>
 				)}
 			</div>
+
+			<AiDraftModal
+				isOpen={aiDraftOpen}
+				onClose={() => setAiDraftOpen(false)}
+				onCreated={() => refreshSales({ revenue: revenueMode })}
+			/>
 
 			<Modal
 				isOpen={!!deleteTarget}

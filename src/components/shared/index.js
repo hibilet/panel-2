@@ -7,3 +7,4 @@ export { default as Modal } from "./Modal";
 export { default as PanelHeader } from "./PanelHeader";
 export { default as ImageUpload } from "./ImageUpload";
 export { default as SearchBar } from "./SearchBar";
+export { default as Markdown } from "./Markdown";

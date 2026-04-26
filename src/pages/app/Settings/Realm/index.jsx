@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
+import { Link, useLocation } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import SellerBlock from "../../../../components/invoices/SellerBlock";
-import { Modal } from "../../../../components/shared";
-import { del, get, post, put } from "../../../../lib/client";
+import { useApp } from "../../../../context";
+import { put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
 const SERVICE_OPTIONS = [
@@ -37,15 +38,15 @@ const defaultValues = {
 	seller: emptySeller,
 };
 
-const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
-	const isNew = id === "new";
-	const [data, setData] = useState(null);
-	const [loading, setLoading] = useState(!isNew);
+const SettingsRealm = () => {
+	const { account, realm, refreshRealm } = useApp();
+	const [, setLocation] = useLocation();
 	const [saving, setSaving] = useState(false);
-	const [deleting, setDeleting] = useState(false);
-	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const [smtpOpen, setSmtpOpen] = useState(false);
 	const [error, setError] = useState(null);
+
+	const isAdmin = account?.type === "account.admin";
+	const realmId = realm?._id ?? realm?.id ?? null;
 
 	const {
 		register,
@@ -61,74 +62,59 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 	});
 
 	useEffect(() => {
-		if (isNew) {
-			setLoading(false);
-			setData(null);
-			reset(defaultValues);
-			return;
-		}
-		setLoading(true);
-		setError(null);
-		get(`/realms/${id}`)
-			.then((res) => {
-				const d = res.data ?? null;
-				setData(d);
-				if (d) {
-					reset({
-						name: d.name ?? "",
-						domains:
-							Array.isArray(d.domains) && d.domains.length > 0
-								? d.domains.map((dom) => ({
-										hostname: dom.hostname ?? "",
-										service: dom.service ?? "dashboard",
-									}))
-								: [{ hostname: "", service: "dashboard" }],
-						urls: {
-							dashboard: d.urls?.dashboard ?? "",
-							widget: d.urls?.widget ?? "",
-						},
-						branding: {
-							logo: d.branding?.logo ?? "",
-							primaryColor: d.branding?.primaryColor ?? "",
-						},
-						smtp: {
-							host: d.smtp?.host ?? "",
-							port: d.smtp?.port ?? "",
-							user: d.smtp?.user ?? "",
-							pass: d.smtp?.pass ?? "",
-							from: d.smtp?.from ?? "",
-						},
-						seller: {
-							legalName: d.seller?.legalName ?? "",
-							tradeName: d.seller?.tradeName ?? "",
-							vatId: d.seller?.vatId ?? "",
-							registry: d.seller?.registry ?? "",
-							iban: d.seller?.iban ?? "",
-							email: d.seller?.email ?? "",
-							phone: d.seller?.phone ?? "",
-							address: {
-								country: d.seller?.address?.country ?? "",
-								city: d.seller?.address?.city ?? "",
-								zip: d.seller?.address?.zip ?? "",
-								street: d.seller?.address?.street ?? "",
-							},
-							country: d.seller?.country ?? "",
-							defaultRate:
-								d.seller?.defaultRate != null
-									? String(d.seller.defaultRate)
-									: "",
-							taxProfile: d.seller?.taxProfile ?? "",
-							invoiceNumberPrefix: d.seller?.invoiceNumberPrefix ?? "",
-							invoiceFooter: d.seller?.invoiceFooter ?? "",
-						},
-					});
-				}
-			})
-			.catch((err) => setError(err?.message ?? strings("error.failedLoad")))
-			.finally(() => setLoading(false));
-	}, [id, isNew, reset]);
+		if (!realm) return;
+		reset({
+			name: realm.name ?? "",
+			domains:
+				Array.isArray(realm.domains) && realm.domains.length > 0
+					? realm.domains.map((d) => ({
+							hostname: d.hostname ?? "",
+							service: d.service ?? "dashboard",
+						}))
+					: [{ hostname: "", service: "dashboard" }],
+			urls: {
+				dashboard: realm.urls?.dashboard ?? "",
+				widget: realm.urls?.widget ?? "",
+			},
+			branding: {
+				logo: realm.branding?.logo ?? "",
+				primaryColor: realm.branding?.primaryColor ?? "",
+			},
+			smtp: {
+				host: realm.smtp?.host ?? "",
+				port: realm.smtp?.port ?? "",
+				user: realm.smtp?.user ?? "",
+				pass: realm.smtp?.pass ?? "",
+				from: realm.smtp?.from ?? "",
+			},
+			seller: {
+				legalName: realm.seller?.legalName ?? "",
+				tradeName: realm.seller?.tradeName ?? "",
+				vatId: realm.seller?.vatId ?? "",
+				registry: realm.seller?.registry ?? "",
+				iban: realm.seller?.iban ?? "",
+				email: realm.seller?.email ?? "",
+				phone: realm.seller?.phone ?? "",
+				address: {
+					country: realm.seller?.address?.country ?? "",
+					city: realm.seller?.address?.city ?? "",
+					zip: realm.seller?.address?.zip ?? "",
+					street: realm.seller?.address?.street ?? "",
+				},
+				country: realm.seller?.country ?? "",
+				defaultRate:
+					realm.seller?.defaultRate != null
+						? String(realm.seller.defaultRate)
+						: "",
+				taxProfile: realm.seller?.taxProfile ?? "",
+				invoiceNumberPrefix: realm.seller?.invoiceNumberPrefix ?? "",
+				invoiceFooter: realm.seller?.invoiceFooter ?? "",
+			},
+		});
+	}, [realm, reset]);
 
 	const onSave = async (formData) => {
+		if (!realmId) return;
 		setSaving(true);
 		setError(null);
 		try {
@@ -191,17 +177,9 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				},
 				seller: sellerPayload,
 			};
-			if (isNew) {
-				const res = await post("/realms", payload);
-				setData(res.data ?? null);
-				onSaved?.();
-			} else {
-				const res = await put(`/realms/${id}`, payload);
-				setData((prev) =>
-					prev ? { ...prev, ...(res.data ?? payload) } : res.data,
-				);
-				onSaved?.();
-			}
+			await put(`/realms/${realmId}`, payload);
+			await refreshRealm();
+			setLocation("/settings");
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
@@ -209,74 +187,44 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 		}
 	};
 
-	const onDelete = async () => {
-		if (isNew || !id) return;
-		setDeleteConfirmOpen(false);
-		setDeleting(true);
-		setError(null);
-		try {
-			await del(`/realms/${id}`);
-			onDeleted?.();
-			onClose?.();
-		} catch (err) {
-			setError(err?.message ?? strings("error.failedDelete"));
-		} finally {
-			setDeleting(false);
-		}
-	};
-
-	if (loading) {
+	if (!isAdmin) {
 		return (
-			<div className="flex h-full flex-col">
-				<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
-					<h2 className="text-lg font-semibold text-slate-900">
-						{isNew
-							? strings("form.realm.newTitle")
-							: strings("form.realm.editTitle")}
-					</h2>
-					<button
-						type="button"
-						onClick={onClose}
-						className="rounded-lg p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-						aria-label={strings("common.ariaClose")}
-					>
-						<i className="fa-solid fa-xmark text-lg" aria-hidden />
-					</button>
-				</header>
-				<div className="flex flex-1 items-center justify-center p-6">
-					<i
-						className="fa-solid fa-spinner fa-spin text-3xl text-slate-400"
-						aria-hidden
-					/>
+			<div className="mx-auto max-w-3xl">
+				<div className="rounded-lg border border-slate-200 bg-slate-50 p-6 text-sm text-slate-500">
+					{strings("page.settings.realmAdminOnly")}
 				</div>
 			</div>
 		);
 	}
 
-	return (
-		<div className="flex h-full flex-col">
-			<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
-				<h2 className="text-lg font-semibold text-slate-900">
-					{isNew
-						? strings("form.realm.newTitle")
-						: (data?.name ?? strings("form.realm.editTitle"))}
-				</h2>
-				<button
-					type="button"
-					onClick={onClose}
-					className="rounded-lg p-2.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
-					aria-label={strings("common.ariaClose")}
-				>
-					<i className="fa-solid fa-xmark text-lg" aria-hidden />
-				</button>
-			</header>
+	const sellerNeedsSetup =
+		!!realm && (!realm.seller?.country || realm.seller?.defaultRate == null);
 
-			<form
-				onSubmit={handleSubmit(onSave)}
-				className="flex flex-1 flex-col overflow-hidden"
+	return (
+		<div className="mx-auto max-w-5xl space-y-6">
+			<Link
+				href="/settings"
+				className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
 			>
-				<div className="flex-1 overflow-y-auto px-6 py-5">
-					<div className="space-y-6">
+				<i className="fa-solid fa-arrow-left" aria-hidden />
+				{strings("back.settings")}
+			</Link>
+
+			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+				<h1 className="mb-6 flex items-center gap-2 text-2xl font-semibold text-slate-900">
+					<i className="fa-solid fa-globe text-slate-600" aria-hidden />
+					{strings("page.settings.realmTitle")}
+				</h1>
+
+				{!realm ? (
+					<div className="flex items-center justify-center py-12">
+						<i
+							className="fa-solid fa-spinner fa-spin text-3xl text-slate-400"
+							aria-hidden
+						/>
+					</div>
+				) : (
+					<form onSubmit={handleSubmit(onSave)} className="space-y-6">
 						{error && (
 							<div
 								className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
@@ -288,7 +236,9 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 
 						<Input
 							label={`${strings("form.realm.name")} *`}
-							{...register("name", { required: strings("error.required") })}
+							{...register("name", {
+								required: strings("error.required"),
+							})}
 							error={errors.name?.message}
 							placeholder={strings("form.realm.namePlaceholder")}
 						/>
@@ -413,80 +363,35 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						</div>
 
 						<SellerBlock
-						register={register}
-						errors={errors}
-						needsSetup={
-							!isNew &&
-							data &&
-							(!data.seller?.country || data.seller?.defaultRate == null)
-						}
-					/>
-					</div>
-				</div>
+							register={register}
+							errors={errors}
+							needsSetup={sellerNeedsSetup}
+						/>
 
-				<footer className="flex shrink-0 items-center justify-between gap-4 border-t border-slate-200 px-6 py-4">
-					<div>
-						{!isNew && (
+						<div className="pt-2">
 							<button
-								type="button"
-								onClick={() => setDeleteConfirmOpen(true)}
-								disabled={saving || deleting}
-								className="inline-flex items-center gap-2 rounded-lg border border-red-300 px-4 py-2.5 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+								type="submit"
+								disabled={saving}
+								className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 							>
-								<i className="fa-solid fa-trash" aria-hidden />
-								{strings("common.delete")}
+								{saving ? (
+									<>
+										<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+										{strings("common.saving")}
+									</>
+								) : (
+									<>
+										<i className="fa-solid fa-floppy-disk" aria-hidden />
+										{strings("common.save")}
+									</>
+								)}
 							</button>
-						)}
-					</div>
-					<button
-						type="submit"
-						disabled={saving || deleting}
-						className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-					>
-						{saving ? (
-							<>
-								<i className="fa-solid fa-spinner fa-spin" aria-hidden />
-								{strings("common.saving")}
-							</>
-						) : (
-							<>
-								<i className="fa-solid fa-floppy-disk" aria-hidden />
-								{strings("common.save")}
-							</>
-						)}
-					</button>
-				</footer>
-			</form>
-
-			<Modal
-				isOpen={deleteConfirmOpen}
-				onClose={() => setDeleteConfirmOpen(false)}
-				title={strings("confirm.deleteRealm")}
-				footer={
-					<div className="flex justify-end gap-2">
-						<button
-							type="button"
-							onClick={() => setDeleteConfirmOpen(false)}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-						>
-							{strings("common.cancel")}
-						</button>
-						<button
-							type="button"
-							onClick={onDelete}
-							className="inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-700"
-						>
-							{strings("common.delete")}
-						</button>
-					</div>
-				}
-			>
-				<p className="text-sm text-slate-600">
-					{strings("confirm.deleteRealmBody", [data?.name ?? ""])}
-				</p>
-			</Modal>
+						</div>
+					</form>
+				)}
+			</div>
 		</div>
 	);
 };
 
-export default RealmPanel;
+export default SettingsRealm;

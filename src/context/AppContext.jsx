@@ -17,8 +17,12 @@ const mapSalesRows = (rows) =>
 		startDate: row.start ?? row.startDate,
 	}));
 
+const realmIdOf = (account) =>
+	account?.realm?._id ?? account?.realm?.id ?? null;
+
 export const AppProvider = ({ children }) => {
 	const [account, setAccount] = useState(null);
+	const [realm, setRealm] = useState(null);
 	const [sales, setSales] = useState([]);
 	const [providers, setProviders] = useState([]);
 	const [agreements, setAgreements] = useState([]);
@@ -26,6 +30,18 @@ export const AppProvider = ({ children }) => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const venuePlansRef = useRef({});
+
+	const fetchRealmFor = useCallback(async (accountObj) => {
+		if (accountObj?.type !== "account.admin") return null;
+		const id = realmIdOf(accountObj);
+		if (!id) return null;
+		try {
+			const r = await get(`/realms/${id}`);
+			return r?.data ?? null;
+		} catch {
+			return null;
+		}
+	}, []);
 
 	const fetchInitial = useCallback(async () => {
 		setLoading(true);
@@ -41,17 +57,19 @@ export const AppProvider = ({ children }) => {
 					get("/agreements"),
 					get("/venues"),
 				]);
-			setAccount(accountRes?.data ?? null);
+			const accountData = accountRes?.data ?? null;
+			setAccount(accountData);
 			setSales(mapSalesRows(salesRes.data ?? []));
 			setProviders(providersRes.data ?? []);
 			setAgreements(agreementsRes.data ?? []);
 			setVenues(venuesRes.data ?? []);
+			setRealm(await fetchRealmFor(accountData));
 		} catch (err) {
 			setError(err?.message ?? "Failed to load app data");
 		} finally {
 			setLoading(false);
 		}
-	}, []);
+	}, [fetchRealmFor]);
 
 	useEffect(() => {
 		if (getToken()) {
@@ -94,6 +112,12 @@ export const AppProvider = ({ children }) => {
 		}
 	}, []);
 
+	const refreshRealm = useCallback(async () => {
+		const next = await fetchRealmFor(account);
+		setRealm(next);
+		return next;
+	}, [account, fetchRealmFor]);
+
 	const updateAccount = useCallback((updates) => {
 		setAccount((prev) => (prev ? { ...prev, ...updates } : updates));
 	}, []);
@@ -104,7 +128,7 @@ export const AppProvider = ({ children }) => {
 
 	const updateVenue = useCallback((id, updates) => {
 		setVenues((prev) =>
-			prev.map((v) => (v.id === id || v._id === id ? { ...v, ...updates } : v))
+			prev.map((v) => (v.id === id || v._id === id ? { ...v, ...updates } : v)),
 		);
 	}, []);
 
@@ -114,7 +138,7 @@ export const AppProvider = ({ children }) => {
 
 	const updateSale = useCallback((id, updates) => {
 		setSales((prev) =>
-			prev.map((s) => (s.id === id || s._id === id ? { ...s, ...updates } : s))
+			prev.map((s) => (s.id === id || s._id === id ? { ...s, ...updates } : s)),
 		);
 	}, []);
 
@@ -124,7 +148,7 @@ export const AppProvider = ({ children }) => {
 
 	const updateProvider = useCallback((id, updates) => {
 		setProviders((prev) =>
-			prev.map((p) => (p.id === id || p._id === id ? { ...p, ...updates } : p))
+			prev.map((p) => (p.id === id || p._id === id ? { ...p, ...updates } : p)),
 		);
 	}, []);
 
@@ -134,12 +158,13 @@ export const AppProvider = ({ children }) => {
 
 	const updateAgreement = useCallback((id, updates) => {
 		setAgreements((prev) =>
-			prev.map((a) => (a.id === id || a._id === id ? { ...a, ...updates } : a))
+			prev.map((a) => (a.id === id || a._id === id ? { ...a, ...updates } : a)),
 		);
 	}, []);
 
 	const value = {
 		account,
+		realm,
 		sales,
 		providers,
 		agreements,
@@ -149,6 +174,7 @@ export const AppProvider = ({ children }) => {
 		error,
 		refreshSales,
 		refreshAccount,
+		refreshRealm,
 		updateAccount,
 		addVenue,
 		updateVenue,

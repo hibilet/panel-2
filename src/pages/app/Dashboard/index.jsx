@@ -68,16 +68,6 @@ const Dashboard = () => {
 	const [chartData, setChartData] = useState(null);
 	const [currentMonthChartData, setCurrentMonthChartData] = useState(null);
 
-	const commission = account?.commission ?? {
-		amount: 0,
-		vat: 1.19,
-		type: "fixed",
-	};
-	const amountDue =
-		(mtdProductsSold ?? 0) *
-		((commission.type === "fixed" ? 0 : 1) + (commission.amount ?? 0));
-	const subtotal = amountDue * (commission.vat ?? 1.19);
-	const vatPercent = Math.round(((commission.vat ?? 1.19) - 1) * 100);
 	const [chartLoading, setChartLoading] = useState(true);
 	const [selectedSale, setSelectedSale] = useState("all");
 	const [selectedMonthOffset, setSelectedMonthOffset] = useState(0);
@@ -112,9 +102,7 @@ const Dashboard = () => {
 		const lastMonthDaysInMonth = lastMonth.daysInMonth();
 		const currentDayOfMonth = dayjs().date();
 		const lastMonthSameDay = Math.min(currentDayOfMonth, lastMonthDaysInMonth);
-		const lastMonthEnd = lastMonth
-			.date(lastMonthSameDay)
-			.format("YYYY-MM-DD");
+		const lastMonthEnd = lastMonth.date(lastMonthSameDay).format("YYYY-MM-DD");
 
 		Promise.all([
 			get(
@@ -131,28 +119,36 @@ const Dashboard = () => {
 			),
 			get("/transactions/search?limit=5&skip=0&status=success"),
 		])
-			.then(([todayRes, yesterdayRes, mtdRes, lastMonthRes, transactionsRes]) => {
-				const todayData = todayRes.data?.[0];
-				setTodaySales(todayData?.total ?? 0);
-				setTodayCount(todayData?.count ?? 0);
+			.then(
+				([todayRes, yesterdayRes, mtdRes, lastMonthRes, transactionsRes]) => {
+					const todayData = todayRes.data?.[0];
+					setTodaySales(todayData?.total ?? 0);
+					setTodayCount(todayData?.count ?? 0);
 
-				const yesterdayData = yesterdayRes.data?.[0];
-				setYesterdaySales(yesterdayData?.total ?? 0);
+					const yesterdayData = yesterdayRes.data?.[0];
+					setYesterdaySales(yesterdayData?.total ?? 0);
 
-				const mtdData = mtdRes.data ?? [];
-				const mtdTotal = mtdData.reduce((sum, d) => sum + (d.total ?? 0), 0);
-				const mtdCount = mtdData.reduce((sum, d) => sum + (d.count ?? 0), 0);
-				setMtdSales(mtdTotal);
-				setMtdProductsSold(mtdCount);
+					const mtdData = mtdRes.data ?? [];
+					const mtdTotal = mtdData.reduce((sum, d) => sum + (d.total ?? 0), 0);
+					const mtdCount = mtdData.reduce((sum, d) => sum + (d.count ?? 0), 0);
+					setMtdSales(mtdTotal);
+					setMtdProductsSold(mtdCount);
 
-				const lastMonthData = lastMonthRes.data ?? [];
-				const lastTotal = lastMonthData.reduce((sum, d) => sum + (d.total ?? 0), 0);
-				const lastCount = lastMonthData.reduce((sum, d) => sum + (d.count ?? 0), 0);
-				setLastMonthSales(lastTotal);
-				setLastMonthProductsSold(lastCount);
+					const lastMonthData = lastMonthRes.data ?? [];
+					const lastTotal = lastMonthData.reduce(
+						(sum, d) => sum + (d.total ?? 0),
+						0,
+					);
+					const lastCount = lastMonthData.reduce(
+						(sum, d) => sum + (d.count ?? 0),
+						0,
+					);
+					setLastMonthSales(lastTotal);
+					setLastMonthProductsSold(lastCount);
 
-				setRecentTransactions(transactionsRes.data ?? []);
-			})
+					setRecentTransactions(transactionsRes.data ?? []);
+				},
+			)
 			.catch((err) => {
 				setError(err?.message ?? strings("error.failedLoadDashboard"));
 			});
@@ -265,7 +261,9 @@ const Dashboard = () => {
 		const diff = current - previous;
 		const percent =
 			previous === 0
-				? (current > 0 ? 100 : 0)
+				? current > 0
+					? 100
+					: 0
 				: ((current - previous) / previous) * 100;
 		return {
 			diff,
@@ -297,7 +295,10 @@ const Dashboard = () => {
 	if (error && todaySales === null) {
 		return (
 			<div className="mx-auto max-w-5xl">
-				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
+				<div
+					className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
+					role="alert"
+				>
 					{error}
 				</div>
 			</div>
@@ -311,7 +312,7 @@ const Dashboard = () => {
 			<CompletionStepsWizard />
 
 			<div
-				className={`grid grid-cols-2 gap-4 sm:grid-cols-4 mb-8 ${showWizard ? "mt-8" : ""}`}
+				className={`grid grid-cols-2 gap-4 sm:grid-cols-3 mb-8 ${showWizard ? "mt-8" : ""}`}
 				data-tour="dashboard-stats"
 			>
 				<StatCard
@@ -339,28 +340,6 @@ const Dashboard = () => {
 					loading={statsLoading}
 					comparison={mtdProductsVsLastMonth}
 				/>
-				{statsLoading ? (
-					<StatCard
-						label={strings("dashboard.stats.amountDue")}
-						value=""
-						loading
-					/>
-				) : (
-					<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-						<p className="text-sm text-slate-500">
-							{strings("dashboard.stats.amountDue")}
-						</p>
-						<p className="mt-1 text-2xl font-bold text-slate-900">
-							{formatCurrency(amountDue)} 
-							<span className="text-sm text-slate-500 ml-1">
-								+ {vatPercent}% {strings("common.vat")}
-							</span>
-						</p>
-						<p className="mt-1 text-xs font-bold text-slate-500">
-							{formatCurrency(subtotal)} {strings("common.total")}
-						</p>
-					</div>
-				)}
 			</div>
 
 			<SalesChart

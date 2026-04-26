@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Redirect, Route, Switch, useLocation } from "wouter";
 
 import Navbar from "../../components/global/Navbar";
+import SellerSetupBanner from "../../components/global/SellerSetupBanner";
 import { useApp } from "../../context";
 import Accounts from "./Accounts";
 import Dashboard from "./Dashboard";
@@ -23,6 +24,7 @@ import SettingsBilling from "./Settings/Billing";
 import SettingsMailing from "./Settings/Mailing";
 import SettingsMailTemplate from "./Settings/Mailing/MailTemplate";
 import SettingsProviders from "./Settings/Providers";
+import SettingsRealm from "./Settings/Realm";
 import SettingsSubscription from "./Settings/Subscription";
 import Tiers from "./Tiers";
 import Transactions from "./Transactions";
@@ -41,6 +43,7 @@ const App = () => {
 	return (
 		<>
 			<Navbar />
+			<SellerSetupBanner />
 			<main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
 				<Switch>
 					<Route path="/live" component={Live} />
@@ -80,13 +83,22 @@ const App = () => {
 					<Route path="/settings/providers/:id" component={SettingsProviders} />
 					<Route path="/settings/mailing" component={SettingsMailing} />
 					<Route path="/settings/billing" component={SettingsBilling} />
-					<Route path="/settings/mailing/template" component={SettingsMailTemplate} />
+					<Route
+						path="/settings/mailing/template"
+						component={SettingsMailTemplate}
+					/>
 					<Route path="/settings/agreements" component={SettingsAgreements} />
 					<Route
 						path="/settings/agreements/:id"
 						component={SettingsAgreements}
 					/>
-					<Route path="/settings/subscription" component={SettingsSubscription} />
+					<Route
+						path="/settings/subscription"
+						component={SettingsSubscription}
+					/>
+					{account?.type === "account.admin" && (
+						<Route path="/settings/realm" component={SettingsRealm} />
+					)}
 					<Route path="*">
 						<NotFound />
 					</Route>

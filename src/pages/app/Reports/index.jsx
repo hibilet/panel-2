@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import { Input, Select } from "../../../components/inputs";
+import InsightsPanel from "../../../components/reports/InsightsPanel";
 import { Modal, SearchBar } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
@@ -285,6 +286,8 @@ const Reports = () => {
 					{error}
 				</div>
 			)}
+
+			<InsightsPanel />
 
 			<SearchBar
 				value={query}

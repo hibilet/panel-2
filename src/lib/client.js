@@ -66,6 +66,37 @@ const get = (endpoint, header = null) =>
 		headers: headerBuilder(header),
 	}).then(handler);
 
+const getText = async (endpoint, header = null) => {
+	const res = await fetch(api + endpoint, {
+		method: "get",
+		headers: headerBuilder(header),
+	});
+	if ((res.status === 401 || res.status === 403) && getToken()) {
+		const data = await res.json().catch(() => ({ message: "auth-error" }));
+		if (res.status === 401 || data?.message === "session-expired") {
+			localStorage.removeItem("token");
+			showToast("error", strings("auth.sessionExpired"));
+			setTimeout(() => window.location.replace("/"), 50);
+			const err = new Error("session-expired");
+			err.__sessionExpired = true;
+			throw err;
+		}
+		throw data;
+	}
+	const text = await res.text();
+	if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+	return { text, headers: res.headers };
+};
+
+const postForm = (endpoint, formData, header = null) => {
+	const headers = headerBuilder(header);
+	return fetch(api + endpoint, {
+		method: "post",
+		body: formData,
+		headers,
+	}).then(handler);
+};
+
 const post = (endpoint, form = null, header = null) =>
 	withToast(
 		fetch(api + endpoint, {
@@ -93,4 +124,4 @@ const del = (endpoint, form = null, header = null) =>
 		}).then(handler),
 	);
 
-export { api as API_BASE_URL, del, get, post, put };
+export { api as API_BASE_URL, del, get, getText, post, postForm, put };
