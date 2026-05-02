@@ -32,6 +32,13 @@ export const AppProvider = ({ children }) => {
 	const venuePlansRef = useRef({});
 
 	const fetchRealmFor = useCallback(async (accountObj) => {
+		// Merchants get their realm inlined on /accounts/me (the api me()
+		// aggregator $lookups it with secrets stripped). Use that directly
+		// so channel/link URL helpers work without a /realms/:id call
+		// (which is admin-only).
+		if (accountObj?.realm && typeof accountObj.realm === "object") {
+			return accountObj.realm;
+		}
 		if (accountObj?.type !== "account.admin") return null;
 		const id = realmIdOf(accountObj);
 		if (!id) return null;
