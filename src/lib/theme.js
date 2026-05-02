@@ -18,9 +18,7 @@ export const setTheme = (value) => {
 
 export const applyTheme = (value) => {
 	const stored = value || getStoredTheme();
-	const isDark =
-		stored === "dark" ||
-		(!stored && window.matchMedia("(prefers-color-scheme: dark)").matches);
+	const isDark = stored === "dark";
 	document.documentElement.classList.toggle("dark", isDark);
 	window.dispatchEvent(new CustomEvent("themechange", { detail: { isDark } }));
 	return isDark;

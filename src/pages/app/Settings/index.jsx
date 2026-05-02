@@ -23,11 +23,7 @@ const Settings = () => {
 	const langDropdownRef = useRef(null);
 
 	useEffect(() => {
-		const stored = getStoredTheme();
-		setDarkMode(
-			stored === "dark" ||
-				(!stored && window.matchMedia("(prefers-color-scheme: dark)").matches),
-		);
+		setDarkMode(getStoredTheme() === "dark");
 	}, []);
 
 	useEffect(() => {
