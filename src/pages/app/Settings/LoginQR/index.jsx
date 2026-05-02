@@ -8,7 +8,7 @@ const QR_API = "https://api.qrserver.com/v1/create-qr-code/";
 const LoginQRModal = ({ isOpen, onClose }) => {
 	const [copied, setCopied] = useState(false);
 
-	const baseUrl = (import.meta.env.VITE_APP_URL || "").replace(/\/$/, "");
+	const baseUrl = window.location.origin.replace(/\/$/, "");
 	const token = getToken();
 	const loginUrl = token
 		? `${baseUrl}/oauth?token=${encodeURIComponent(token)}`
