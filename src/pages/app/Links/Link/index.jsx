@@ -10,6 +10,7 @@ import { linkSalesColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import { ImageUpload, Modal } from "../../../../components/shared";
 import { getWidgetLinkUrl } from "../../../../lib/appUrl";
+import { useApp } from "../../../../context";
 import { del, get, post, put } from "../../../../lib/client";
 import { enhanceImage } from "../../../../lib/imgbb";
 import { showToast } from "../../../../lib/toastStore";
@@ -58,6 +59,7 @@ const sortSalesByStart = (sales) =>
 const defaultValues = { title: "", slug: "", description: "", image: "" };
 
 const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
+	const { realm } = useApp();
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
@@ -320,14 +322,14 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 										</h4>
 										<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3">
 											<a
-												href={getWidgetLinkUrl(formValues.slug || data?.slug)}
+												href={getWidgetLinkUrl(formValues.slug || data?.slug, realm)}
 												target="_blank"
 												rel="noreferrer"
 												className="min-w-0 flex-1 truncate text-sm text-slate-600 underline hover:text-slate-900"
 											>
-												{getWidgetLinkUrl(formValues.slug || data?.slug)}
+												{getWidgetLinkUrl(formValues.slug || data?.slug, realm)}
 											</a>
-											<CopyButton text={getWidgetLinkUrl(formValues.slug || data?.slug)} />
+											<CopyButton text={getWidgetLinkUrl(formValues.slug || data?.slug, realm)} />
 										</div>
 									</div>
 								)}

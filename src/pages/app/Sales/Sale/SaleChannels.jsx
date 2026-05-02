@@ -53,7 +53,7 @@ const getChannelDisplayName = (channel) => {
 
 const SaleChannels = () => {
 	const { id } = useParams();
-	const { account } = useApp();
+	const { account, realm } = useApp();
 	const canEdit = account?.type === "account.merchant";
 	const isNew = id === "new";
 
@@ -225,7 +225,11 @@ const SaleChannels = () => {
 				) : (
 					<DataTable
 						data={channels}
-						columns={channelColumns(getWidgetChannelLink, isBaseChannel, CopyButton)}
+						columns={channelColumns(
+							(channelId) => getWidgetChannelLink(channelId, realm),
+							isBaseChannel,
+							CopyButton,
+						)}
 						getRowKey={(r) => r.id}
 						onRowClick={setPanelChannel}
 					/>
@@ -259,6 +263,7 @@ const SaleChannels = () => {
 					onReportsClick={handleReportsClick}
 					saving={saving}
 					deleting={deleting}
+					realm={realm}
 				/>
 			</SlidePanel>
 		</div>
@@ -541,6 +546,7 @@ const ChannelPanel = ({
 	onReportsClick,
 	saving,
 	deleting,
+	realm,
 }) => {
 	const isNew = channel === null;
 	const isBase =
@@ -560,7 +566,7 @@ const ChannelPanel = ({
 		onSave(channel, payload);
 	};
 
-	const link = !isNew && channel ? getWidgetChannelLink(channel.id) : null;
+	const link = !isNew && channel ? getWidgetChannelLink(channel.id, realm) : null;
 
 	return (
 		<div className="flex h-full flex-col">

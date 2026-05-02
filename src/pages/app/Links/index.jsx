@@ -64,7 +64,7 @@ const Links = () => {
 	const [archivedFetched, setArchivedFetched] = useState(false);
 	const [showArchived, setShowArchived] = useState(false);
 	const [archivedError, setArchivedError] = useState(null);
-	const { account } = useApp();
+	const { account, realm } = useApp();
 
 	const fetchLinks = useCallback(() => {
 		setError(null);
@@ -147,7 +147,7 @@ const Links = () => {
 					data={query
 						? data.filter((l) => matchesQuery(l.name, query) || matchesQuery(l.slug, query))
 						: data}
-					columns={linksColumns(getWidgetLinkUrl, CopyButton)}
+					columns={linksColumns((slug) => getWidgetLinkUrl(slug, realm), CopyButton)}
 					getRowKey={(r) => r._id ?? r.slug}
 					onRowClick={(row) => {
 						const id = row._id ?? row.slug;
@@ -176,7 +176,7 @@ const Links = () => {
 							<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 								<DataTable
 									data={archivedLinks}
-									columns={linksColumns(getWidgetLinkUrl, CopyButton)}
+									columns={linksColumns((slug) => getWidgetLinkUrl(slug, realm), CopyButton)}
 									getRowKey={(r) => r.id ?? r.slug}
 									onRowClick={(row) => {
 										const id = row.id ?? row.slug;
