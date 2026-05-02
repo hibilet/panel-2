@@ -6,6 +6,7 @@ import { EmptyState, SlidePanel } from "../../../../components/shared";
 import { readerColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import { useApp } from "../../../../context";
+import { getReaderBase } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -377,6 +378,7 @@ const ReaderPanel = ({
 };
 
 const ReaderLinkDialog = ({ reader, onClose }) => {
+	const { realm } = useApp();
 	const [token, setToken] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
@@ -404,17 +406,20 @@ const ReaderLinkDialog = ({ reader, onClose }) => {
 			.finally(() => setLoading(false));
 	}, [reader]);
 
+	const readerBase = getReaderBase(realm);
+	const readerUrl = token && readerBase ? `${readerBase}/?auth=${token}` : null;
+
 	const handleCopyLink = async () => {
-		if (!token) return;
+		if (!readerUrl) return;
 		try {
-			await navigator.clipboard.writeText(token);
+			await navigator.clipboard.writeText(readerUrl);
 		} catch {
 			setError(strings("form.reader.errorCopy"));
 		}
 	};
 
-	const qrUrl = token
-		? `${QR_API}?size=600x600&margin=0&data=${encodeURIComponent(token)}`
+	const qrUrl = readerUrl
+		? `${QR_API}?size=600x600&margin=0&data=${encodeURIComponent(readerUrl)}`
 		: null;
 
 	return (

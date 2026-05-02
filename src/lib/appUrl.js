@@ -70,3 +70,38 @@ export const getWidgetChannelLink = (channelId, realm) => {
 	const base = getWidgetBase(realm)?.replace(/\/$/, "");
 	return base ? `${base}/${channelId}` : null;
 };
+
+const swapSubdomain = (hostname, sub) => {
+	if (!hostname) return null;
+	const parts = hostname.split(".");
+	if (parts.length >= 3) {
+		parts[0] = sub;
+		return parts.join(".");
+	}
+	return `${sub}.${hostname}`;
+};
+
+const firstRealmHostname = (realm) => {
+	const list = realm?.domains;
+	if (Array.isArray(list)) {
+		const match = list.find((d) => d?.hostname);
+		if (match) return match.hostname;
+	}
+	const fromUrls = realm?.urls?.dashboard
+		|| realm?.urls?.widget
+		|| realm?.urls?.tickets;
+	if (fromUrls) {
+		try {
+			return new URL(fromUrls).hostname;
+		} catch {
+			return null;
+		}
+	}
+	return null;
+};
+
+export const getReaderBase = (realm) => {
+	const host = firstRealmHostname(realm);
+	const reader = swapSubdomain(host, "reader");
+	return reader ? `https://${reader}` : null;
+};
