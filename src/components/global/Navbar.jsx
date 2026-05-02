@@ -81,12 +81,12 @@ const navItems = [
 		icon: "fa-file-invoice-dollar",
 		acl: ["merchant", "admin"],
 	},
-	{
-		path: "/events",
-		labelKey: "nav.events",
-		icon: "fa-clipboard-list",
-		acl: ["admin"],
-	},
+	// {
+	// 	path: "/events",
+	// 	labelKey: "nav.events",
+	// 	icon: "fa-clipboard-list",
+	// 	acl: ["admin"],
+	// },
 	{
 		path: "/settings",
 		labelKey: "nav.settings",
