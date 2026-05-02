@@ -51,4 +51,4 @@ const formatCurrency = (value, currency = DEFAULT_CURRENCY) => {
 };
 
 export default strings;
-export { dictionary, formatCurrency, DEFAULT_CURRENCY, locales };
+export { DEFAULT_CURRENCY, dictionary, formatCurrency, locales };

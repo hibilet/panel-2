@@ -17,6 +17,7 @@ import { Input } from "../../../../components/inputs";
 import { EmptyState, Modal, SlidePanel } from "../../../../components/shared";
 import { channelColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
+import { useApp } from "../../../../context";
 import { getWidgetChannelLink } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
@@ -52,6 +53,8 @@ const getChannelDisplayName = (channel) => {
 
 const SaleChannels = () => {
 	const { id } = useParams();
+	const { account } = useApp();
+	const canEdit = account?.type === "account.merchant";
 	const isNew = id === "new";
 
 	const [channels, setChannels] = useState([]);
@@ -178,7 +181,7 @@ const SaleChannels = () => {
 								: strings("form.channel.countPlural", [channels.length])}
 						</p>
 					</div>
-					{!isNew && (
+					{!isNew && canEdit && (
 						<button
 							type="button"
 							onClick={() => setPanelChannel("new")}

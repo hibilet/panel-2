@@ -330,7 +330,14 @@ const Dashboard = () => {
 				/>
 				<StatCard
 					label={strings("dashboard.stats.mtdSales")}
-					value={formatCurrency(mtdSales ?? 0)}
+					value={
+						<>
+							{formatCurrency(mtdSales ?? 0)}
+							<span className="ml-2 text-sm font-medium text-slate-500">
+								🎟 {mtdProductsSold ?? 0}
+							</span>
+						</>
+					}
 					loading={statsLoading}
 					comparison={mtdVsLastMonth}
 				/>

@@ -75,7 +75,7 @@ const Providers = () => {
 	const handleConnectStripe = () => {
 		const token = getToken();
 		if (!token) return;
-		window.location.href = `${API_BASE_URL}/auth/stripe/connect?token=${encodeURIComponent(token)}`;
+		window.location.href = `${API_BASE_URL}/auth/stripe?token=${encodeURIComponent(token)}`;
 	};
 
 	if (error && !loading) {

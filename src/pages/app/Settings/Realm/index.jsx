@@ -35,6 +35,12 @@ const defaultValues = {
 	urls: { dashboard: "", widget: "" },
 	branding: { logo: "", primaryColor: "" },
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
+	stripe: {
+		connectClientId: "",
+		connectSecret: "",
+		connectWebhookSecret: "",
+		transactionWebhookSecret: "",
+	},
 	seller: emptySeller,
 };
 
@@ -43,6 +49,7 @@ const SettingsRealm = () => {
 	const [, setLocation] = useLocation();
 	const [saving, setSaving] = useState(false);
 	const [smtpOpen, setSmtpOpen] = useState(false);
+	const [stripeOpen, setStripeOpen] = useState(false);
 	const [error, setError] = useState(null);
 
 	const isAdmin = account?.type === "account.admin";
@@ -86,6 +93,13 @@ const SettingsRealm = () => {
 				user: realm.smtp?.user ?? "",
 				pass: realm.smtp?.pass ?? "",
 				from: realm.smtp?.from ?? "",
+			},
+			stripe: {
+				connectClientId: realm.stripe?.connectClientId ?? "",
+				connectSecret: realm.stripe?.connectSecret ?? "",
+				connectWebhookSecret: realm.stripe?.connectWebhookSecret ?? "",
+				transactionWebhookSecret:
+					realm.stripe?.transactionWebhookSecret ?? "",
 			},
 			seller: {
 				legalName: realm.seller?.legalName ?? "",
@@ -174,6 +188,15 @@ const SettingsRealm = () => {
 					user: formData.smtp?.user?.trim() || undefined,
 					pass: formData.smtp?.pass || undefined,
 					from: formData.smtp?.from?.trim() || undefined,
+				},
+				stripe: {
+					connectClientId:
+						formData.stripe?.connectClientId?.trim() || undefined,
+					connectSecret: formData.stripe?.connectSecret?.trim() || undefined,
+					connectWebhookSecret:
+						formData.stripe?.connectWebhookSecret?.trim() || undefined,
+					transactionWebhookSecret:
+						formData.stripe?.transactionWebhookSecret?.trim() || undefined,
 				},
 				seller: sellerPayload,
 			};
@@ -356,6 +379,64 @@ const SettingsRealm = () => {
 											label={strings("form.realm.smtpFrom")}
 											{...register("smtp.from")}
 											placeholder="no-reply@example.com"
+										/>
+									</div>
+								</div>
+							)}
+						</div>
+
+						<div className="rounded-lg border border-slate-200">
+							<button
+								type="button"
+								onClick={() => setStripeOpen((v) => !v)}
+								className="flex w-full items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							>
+								<span className="inline-flex items-center gap-2">
+									<i
+										className="fa-brands fa-stripe-s text-slate-500"
+										aria-hidden
+									/>
+									Stripe Connect (whitelabel)
+								</span>
+								<i
+									className={`fa-solid ${stripeOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
+									aria-hidden
+								/>
+							</button>
+							{stripeOpen && (
+								<div className="space-y-4 border-t border-slate-200 px-4 py-4">
+									<p className="text-xs text-slate-500">
+										Optional. When set, this realm runs its merchant Connect
+										flow against its own Stripe platform. Empty fields fall
+										back to the default platform credentials.
+									</p>
+									<div className="grid grid-cols-1 gap-4">
+										<Input
+											label="Connect Client ID"
+											{...register("stripe.connectClientId")}
+											placeholder="ca_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Platform Secret Key"
+											type="password"
+											{...register("stripe.connectSecret")}
+											placeholder="sk_live_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Connect Webhook Signing Secret"
+											type="password"
+											{...register("stripe.connectWebhookSecret")}
+											placeholder="whsec_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Transaction Webhook Signing Secret"
+											type="password"
+											{...register("stripe.transactionWebhookSecret")}
+											placeholder="whsec_..."
+											autoComplete="off"
 										/>
 									</div>
 								</div>

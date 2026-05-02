@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useParams } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
+import { useApp } from "../../../../context";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -46,6 +47,8 @@ const getInitialForm = (coupon) => {
 
 const SaleCoupons = () => {
 	const { id } = useParams();
+	const { account } = useApp();
+	const canEdit = account?.type === "account.merchant";
 	const isNew = id === "new";
 
 	const [coupons, setCoupons] = useState([]);
@@ -174,7 +177,7 @@ const SaleCoupons = () => {
 								: strings("form.coupon.countPlural", [coupons.length])}
 						</p>
 					</div>
-					{!isNew && (
+					{!isNew && canEdit && (
 						<button
 							type="button"
 							onClick={() => setPanelCoupon("new")}

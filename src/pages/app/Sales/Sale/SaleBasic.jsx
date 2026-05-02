@@ -31,7 +31,9 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 		refreshSales,
 		addSale,
 		updateSale,
+		account,
 	} = useApp();
+	const canEdit = account?.type === "account.merchant";
 	const [plans, setPlans] = useState(null);
 	const [saving, setSaving] = useState(false);
 
@@ -140,15 +142,17 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 						<i className="fa-solid fa-wand-magic-sparkles" aria-hidden="true" />
 						Fill form
 					</button> */}
-					<button
-						type="button"
-						disabled={saving}
-						className="inline-flex items-center gap-2 justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-						onClick={handleSubmit(id === "new" ? CreateSale : UpdateSale)}
-					>
-						<i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-save"}`} aria-hidden="true" />
-						{saving ? strings("common.saving") : strings("common.save")}
-					</button>
+					{canEdit && (
+						<button
+							type="button"
+							disabled={saving}
+							className="inline-flex items-center gap-2 justify-center rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+							onClick={handleSubmit(id === "new" ? CreateSale : UpdateSale)}
+						>
+							<i className={`fa-solid ${saving ? "fa-spinner fa-spin" : "fa-save"}`} aria-hidden="true" />
+							{saving ? strings("common.saving") : strings("common.save")}
+						</button>
+					)}
 				</div>
 			</div>
 			{/* Basic Information */}

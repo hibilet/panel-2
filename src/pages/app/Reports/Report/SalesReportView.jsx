@@ -1,11 +1,15 @@
 import dayjs from "dayjs";
 import { useMemo, useState } from "react";
 import {
+	Area,
+	AreaChart,
 	Bar,
 	BarChart,
 	CartesianGrid,
 	Cell,
 	Legend,
+	Line,
+	LineChart,
 	ResponsiveContainer,
 	Tooltip,
 	XAxis,
@@ -87,6 +91,39 @@ const buildDailyChart = (raw, leads, start, end) => {
 	return days;
 };
 
+// Bucket each daily entry into the Monday-anchored week it belongs to.
+// Avoids the dayjs isoWeek plugin so the computation is dependency-free.
+const isoWeekStart = (dayStr) => {
+	const d = dayjs(dayStr);
+	const dow = d.day(); // 0=Sun ... 6=Sat
+	const offset = dow === 0 ? -6 : 1 - dow;
+	return d.add(offset, "day").startOf("day");
+};
+
+const buildWeeklyChart = (dailyChart) => {
+	const map = new Map();
+	for (const d of dailyChart ?? []) {
+		const wkStart = isoWeekStart(d.key);
+		const key = wkStart.format("YYYY-MM-DD");
+		const cur = map.get(key) ?? {
+			key,
+			start: wkStart,
+			end: wkStart.add(6, "day"),
+			reservations: 0,
+			leads: 0,
+		};
+		cur.reservations += d.reservations || 0;
+		cur.leads += d.leads || 0;
+		map.set(key, cur);
+	}
+	return Array.from(map.values())
+		.sort((a, b) => (a.key < b.key ? -1 : 1))
+		.map((w) => ({
+			...w,
+			label: `${w.start.format("D MMM")} - ${w.end.format("D MMM")}`,
+		}));
+};
+
 const aggregateByChannel = (rows) => {
 	const map = new Map();
 	for (const r of rows ?? []) {
@@ -114,6 +151,13 @@ const SalesReportView = ({ report }) => {
 		[isHourly, raw, leads, report?.start, report?.end],
 	);
 
+	// Weekly aggregation derived from the daily chart - only meaningful for
+	// non-hourly reports that span multiple weeks.
+	const weeklyChart = useMemo(
+		() => (isHourly ? [] : buildWeeklyChart(chartData)),
+		[isHourly, chartData],
+	);
+
 	const channels = useMemo(() => aggregateByChannel(raw), [raw]);
 	const channelTotal = channels.reduce((s, c) => s + c.count, 0);
 
@@ -121,6 +165,10 @@ const SalesReportView = ({ report }) => {
 	const totalLeads = sumCount(leads);
 	const nonZeroBuckets = chartData.filter((d) => d.reservations > 0);
 	const peak = nonZeroBuckets.reduce(
+		(best, cur) => (cur.reservations > (best?.reservations ?? 0) ? cur : best),
+		null,
+	);
+	const bestWeek = weeklyChart.reduce(
 		(best, cur) => (cur.reservations > (best?.reservations ?? 0) ? cur : best),
 		null,
 	);
@@ -145,21 +193,26 @@ const SalesReportView = ({ report }) => {
 					value={channels.length}
 				/>
 				<StatCard
-					label={strings("page.reports.sales.stats.peak")}
-					value={
-						peak
-							? `${peak.label} (${peak.reservations})`
-							: "—"
-					}
-				/>
-				<StatCard
 					label={
 						isHourly
-							? strings("page.reports.sales.stats.avgPerHour")
-							: strings("page.reports.sales.stats.avgPerDay")
+							? strings("page.reports.sales.stats.peak")
+							: strings("page.reports.sales.stats.bestDay")
 					}
-					value={avg.toLocaleString()}
+					value={peak ? `${peak.label} (${peak.reservations})` : "—"}
 				/>
+				{isHourly ? (
+					<StatCard
+						label={strings("page.reports.sales.stats.avgPerHour")}
+						value={avg.toLocaleString()}
+					/>
+				) : (
+					<StatCard
+						label={strings("page.reports.sales.stats.bestWeek")}
+						value={
+							bestWeek ? `${bestWeek.label} (${bestWeek.reservations})` : "—"
+						}
+					/>
+				)}
 			</div>
 
 			<div>
@@ -216,51 +269,189 @@ const SalesReportView = ({ report }) => {
 						) : (
 							<div className="h-64 w-full sm:h-80">
 								<ResponsiveContainer width="100%" height="100%">
-									<BarChart
-										data={chartData}
-										margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
-									>
-										<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-										<XAxis
-											dataKey="label"
-											tick={{ fontSize: 11, fill: "#64748b" }}
-											interval={isHourly ? 1 : "preserveStartEnd"}
-										/>
-										<YAxis
-											tick={{ fontSize: 11, fill: "#64748b" }}
-											allowDecimals={false}
-										/>
-										<Tooltip
-											contentStyle={{
-												backgroundColor: "white",
-												border: "1px solid #e2e8f0",
-												borderRadius: "8px",
-												fontSize: "12px",
-											}}
-										/>
-										{showsLeads && (
-											<Legend
-												wrapperStyle={{ fontSize: 12 }}
-												iconType="circle"
-												iconSize={8}
+									{isHourly ? (
+										<BarChart
+											data={chartData}
+											margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+										>
+											<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+											<XAxis
+												dataKey="label"
+												tick={{ fontSize: 11, fill: "#64748b" }}
+												interval={1}
 											/>
-										)}
-										<Bar
-											dataKey="reservations"
-											name={strings("page.reports.sales.legendReservations")}
-											fill="#0f172a"
-											radius={[4, 4, 0, 0]}
-										/>
-										{showsLeads && (
+											<YAxis
+												tick={{ fontSize: 11, fill: "#64748b" }}
+												allowDecimals={false}
+											/>
+											<Tooltip
+												contentStyle={{
+													backgroundColor: "white",
+													border: "1px solid #e2e8f0",
+													borderRadius: "8px",
+													fontSize: "12px",
+												}}
+											/>
+											{showsLeads && (
+												<Legend
+													wrapperStyle={{ fontSize: 12 }}
+													iconType="circle"
+													iconSize={8}
+												/>
+											)}
 											<Bar
-												dataKey="leads"
-												name={strings("page.reports.sales.legendLeads")}
-												fill="#0ea5e9"
+												dataKey="reservations"
+												name={strings("page.reports.sales.legendReservations")}
+												fill="#0f172a"
 												radius={[4, 4, 0, 0]}
 											/>
-										)}
-									</BarChart>
+											{showsLeads && (
+												<Bar
+													dataKey="leads"
+													name={strings("page.reports.sales.legendLeads")}
+													fill="#0ea5e9"
+													radius={[4, 4, 0, 0]}
+												/>
+											)}
+										</BarChart>
+									) : (
+										<AreaChart
+											data={chartData}
+											margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+										>
+											<defs>
+												<linearGradient
+													id="reservationsGradient"
+													x1="0"
+													y1="0"
+													x2="0"
+													y2="1"
+												>
+													<stop
+														offset="0%"
+														stopColor="#0f172a"
+														stopOpacity={0.25}
+													/>
+													<stop
+														offset="100%"
+														stopColor="#0f172a"
+														stopOpacity={0}
+													/>
+												</linearGradient>
+												<linearGradient
+													id="leadsGradient"
+													x1="0"
+													y1="0"
+													x2="0"
+													y2="1"
+												>
+													<stop
+														offset="0%"
+														stopColor="#0ea5e9"
+														stopOpacity={0.25}
+													/>
+													<stop
+														offset="100%"
+														stopColor="#0ea5e9"
+														stopOpacity={0}
+													/>
+												</linearGradient>
+											</defs>
+											<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+											<XAxis
+												dataKey="label"
+												tick={{ fontSize: 11, fill: "#64748b" }}
+												interval="preserveStartEnd"
+												minTickGap={24}
+											/>
+											<YAxis
+												tick={{ fontSize: 11, fill: "#64748b" }}
+												allowDecimals={false}
+											/>
+											<Tooltip
+												contentStyle={{
+													backgroundColor: "white",
+													border: "1px solid #e2e8f0",
+													borderRadius: "8px",
+													fontSize: "12px",
+												}}
+											/>
+											{showsLeads && (
+												<Legend
+													wrapperStyle={{ fontSize: 12 }}
+													iconType="circle"
+													iconSize={8}
+												/>
+											)}
+											<Area
+												type="monotone"
+												dataKey="reservations"
+												name={strings("page.reports.sales.legendReservations")}
+												stroke="#0f172a"
+												strokeWidth={2}
+												fill="url(#reservationsGradient)"
+												dot={chartData.length <= 60 ? { r: 2 } : false}
+												activeDot={{ r: 4 }}
+											/>
+											{showsLeads && (
+												<Area
+													type="monotone"
+													dataKey="leads"
+													name={strings("page.reports.sales.legendLeads")}
+													stroke="#0ea5e9"
+													strokeWidth={2}
+													fill="url(#leadsGradient)"
+													dot={false}
+												/>
+											)}
+										</AreaChart>
+									)}
 								</ResponsiveContainer>
+							</div>
+						)}
+
+						{!isHourly && weeklyChart.length > 1 && (
+							<div className="mt-6 border-t border-slate-200 pt-4">
+								<h4 className="mb-2 text-sm font-medium text-slate-700">
+									{strings("page.reports.sales.chart.weekly")}
+								</h4>
+								<div className="h-44 w-full">
+									<ResponsiveContainer width="100%" height="100%">
+										<LineChart
+											data={weeklyChart}
+											margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+										>
+											<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+											<XAxis
+												dataKey="label"
+												tick={{ fontSize: 10, fill: "#64748b" }}
+												interval="preserveStartEnd"
+												minTickGap={32}
+											/>
+											<YAxis
+												tick={{ fontSize: 10, fill: "#64748b" }}
+												allowDecimals={false}
+											/>
+											<Tooltip
+												contentStyle={{
+													backgroundColor: "white",
+													border: "1px solid #e2e8f0",
+													borderRadius: "8px",
+													fontSize: "12px",
+												}}
+											/>
+											<Line
+												type="monotone"
+												dataKey="reservations"
+												name={strings("page.reports.sales.legendReservations")}
+												stroke="#0f172a"
+												strokeWidth={2}
+												dot={{ r: 3 }}
+												activeDot={{ r: 5 }}
+											/>
+										</LineChart>
+									</ResponsiveContainer>
+								</div>
 							</div>
 						)}
 					</div>
@@ -354,9 +545,7 @@ const SalesReportView = ({ report }) => {
 																	className="inline-block h-2.5 w-2.5 rounded-sm"
 																	style={{
 																		backgroundColor:
-																			CHANNEL_COLORS[
-																				i % CHANNEL_COLORS.length
-																			],
+																			CHANNEL_COLORS[i % CHANNEL_COLORS.length],
 																	}}
 																	aria-hidden
 																/>
@@ -376,9 +565,7 @@ const SalesReportView = ({ report }) => {
 																	style={{
 																		width: `${share}%`,
 																		backgroundColor:
-																			CHANNEL_COLORS[
-																				i % CHANNEL_COLORS.length
-																			],
+																			CHANNEL_COLORS[i % CHANNEL_COLORS.length],
 																	}}
 																/>
 															</div>

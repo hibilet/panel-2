@@ -4,6 +4,7 @@ import { useParams } from "wouter";
 import { Checkbox, Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
 import DataTable from "../../../../components/tables/DataTable";
+import { useApp } from "../../../../context";
 import { put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -76,6 +77,8 @@ const needsOptions = (type) =>
 
 const SaleQuestions = ({ sale, setSale }) => {
 	const { id } = useParams();
+	const { account } = useApp();
+	const canEdit = account?.type === "account.merchant";
 	const isNew = id === "new";
 
 	const questions = sale?.questions ?? [];
@@ -178,7 +181,7 @@ const SaleQuestions = ({ sale, setSale }) => {
 								: strings("form.question.countPlural", [questions.length])}
 						</p>
 					</div>
-					{!isNew && (
+					{!isNew && canEdit && (
 						<button
 							type="button"
 							onClick={() => setPanelQuestion("new")}

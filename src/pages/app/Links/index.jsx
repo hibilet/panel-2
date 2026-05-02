@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
+import { SearchBar } from "../../../components/shared";
 import SlidePanel from "../../../components/shared/SlidePanel";
 import { linksColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -7,6 +8,7 @@ import { useApp } from "../../../context";
 import { getWidgetLinkUrl } from "../../../lib/appUrl";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
+import { matchesQuery } from "../../../utils/search";
 import LinkPanel from "./Link";
 
 const CopyButton = ({ text, stopPropagation }) => {
@@ -56,6 +58,7 @@ const Links = () => {
 	const [data, setData] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [query, setQuery] = useState("");
 	const [archivedLinks, setArchivedLinks] = useState([]);
 	const [archivedLoading, setArchivedLoading] = useState(false);
 	const [archivedFetched, setArchivedFetched] = useState(false);
@@ -130,9 +133,20 @@ const Links = () => {
 					</Link>
 				)}
 			</div>
+
+			{(data?.length ?? 0) > 5 && (
+				<SearchBar
+					value={query}
+					onChange={setQuery}
+					placeholder={strings("page.links.searchPlaceholder") || strings("page.links.title")}
+				/>
+			)}
+
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
-					data={data}
+					data={query
+						? data.filter((l) => matchesQuery(l.name, query) || matchesQuery(l.slug, query))
+						: data}
 					columns={linksColumns(getWidgetLinkUrl, CopyButton)}
 					getRowKey={(r) => r._id ?? r.slug}
 					onRowClick={(row) => {

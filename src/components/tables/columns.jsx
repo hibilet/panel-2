@@ -173,6 +173,18 @@ export const merchantsColumns = [
 		},
 	},
 	{
+		key: "amountDue",
+		header: strings("table.account.amountDue") || "Amount Due",
+		render: (r) => {
+			const due = Number(r.amountDue) || 0;
+			return (
+				<span className={due > 0 ? "font-medium text-slate-900" : "text-slate-400"}>
+					{formatCurrency(due)}
+				</span>
+			);
+		},
+	},
+	{
 		key: "createdAt",
 		header: strings("table.account.createdAt"),
 		render: (r) => formatDateTime(r.createdAt),

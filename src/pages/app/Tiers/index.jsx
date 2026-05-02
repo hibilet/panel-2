@@ -23,10 +23,16 @@ const tiersColumns = [
 		key: "commission",
 		header: strings("table.tier.commission"),
 		render: (r) => {
-			if (!r.commission) return "—";
-			const { amount, type } = r.commission;
-			if (type === "percentage") return `${(amount * 100).toFixed(1)}%`;
-			return formatCurrency(amount ?? 0);
+			// New flat shape. Legacy { amount, type } docs are migrated by
+			// scripts/migrate-tiers-commission.js, but render both for the
+			// transition window so a stale fetch doesn't show "—".
+			const rate = typeof r.commissionRate === "number"
+				? r.commissionRate
+				: r.commission?.type === "percentage" && r.commission.amount > 1
+					? r.commission.amount - 1
+					: 0;
+			if (!rate) return "0%";
+			return `${(rate * 100).toFixed(1)}%`;
 		},
 	},
 	{

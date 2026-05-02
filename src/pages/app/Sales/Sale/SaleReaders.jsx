@@ -5,6 +5,7 @@ import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
 import { readerColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
+import { useApp } from "../../../../context";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -31,6 +32,8 @@ const getInitialForm = (reader) => {
 
 const SaleReaders = () => {
 	const { id } = useParams();
+	const { account } = useApp();
+	const canEdit = account?.type === "account.merchant";
 	const isNew = id === "new";
 
 	const [readers, setReaders] = useState([]);
@@ -158,14 +161,16 @@ const SaleReaders = () => {
 								: strings("form.reader.countPlural", [readers.length])}
 						</p>
 					</div>
-					<button
-						type="button"
-						onClick={() => setPanelReader("new")}
-						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
-					>
-						<i className="fa-solid fa-plus" aria-hidden />
-						{strings("form.reader.addReader")}
-					</button>
+					{canEdit && (
+						<button
+							type="button"
+							onClick={() => setPanelReader("new")}
+							className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2"
+						>
+							<i className="fa-solid fa-plus" aria-hidden />
+							{strings("form.reader.addReader")}
+						</button>
+					)}
 				</div>
 
 				{error && (
@@ -179,7 +184,7 @@ const SaleReaders = () => {
 						icon="fa-tablet-screen-button"
 						title={strings("form.reader.noReaders")}
 						description={strings("form.reader.noReadersDesc")}
-						action={
+						action={canEdit ? (
 							<button
 								type="button"
 								onClick={() => setPanelReader("new")}
@@ -188,7 +193,7 @@ const SaleReaders = () => {
 								<i className="fa-solid fa-plus" aria-hidden />
 								{strings("form.reader.addReader")}
 							</button>
-						}
+						) : null}
 					/>
 				) : (
 					<DataTable

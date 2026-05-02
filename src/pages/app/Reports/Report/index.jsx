@@ -1,40 +1,24 @@
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
-import { Modal } from "../../../../components/shared";
-import { StatCard } from "../../../../components/shared";
 import { Input } from "../../../../components/inputs";
+import { Modal, StatCard } from "../../../../components/shared";
 import { del, get, put } from "../../../../lib/client";
 import strings, { formatCurrency } from "../../../../localization";
 import SalesReportView from "./SalesReportView";
-
-const SEGMENT_TYPES = {
-	upsell:                  { labelKey: "page.reports.churn.segment.upsell",                  className: "bg-violet-100 text-violet-800" },
-	high_value:              { labelKey: "page.reports.churn.segment.high_value",              className: "bg-amber-100 text-amber-800" },
-	loyal_merchant_customer: { labelKey: "page.reports.churn.segment.loyal_merchant_customer", className: "bg-emerald-100 text-emerald-800" },
-	excellent_lead:          { labelKey: "page.reports.churn.segment.excellent_lead",          className: "bg-sky-100 text-sky-800" },
-	good_lead:               { labelKey: "page.reports.churn.segment.good_lead",               className: "bg-teal-100 text-teal-800" },
-	group_organizer:         { labelKey: "page.reports.churn.segment.group_organizer",         className: "bg-indigo-100 text-indigo-800" },
-	deadline_abandoner:      { labelKey: "page.reports.churn.segment.deadline_abandoner",      className: "bg-orange-100 text-orange-800" },
-	medium_signal_lead:      { labelKey: "page.reports.churn.segment.medium_signal_lead",      className: "bg-slate-200 text-slate-700" },
-	low_signal_lead:         { labelKey: "page.reports.churn.segment.low_signal_lead",         className: "bg-slate-100 text-slate-500" },
-};
-
-const SEGMENT_ORDER = [
-	"upsell", "high_value", "loyal_merchant_customer", "excellent_lead",
-	"good_lead", "group_organizer", "deadline_abandoner", "medium_signal_lead", "low_signal_lead",
-];
+import AbandonmentInsights from "./shared/AbandonmentInsights";
+import ChurnTable from "./shared/ChurnTable";
+import {
+	formatDuration,
+	SEGMENT_ORDER,
+	SEGMENT_TYPES,
+} from "./shared/churn-utils.js";
+import JourneyTimeline from "./shared/JourneyTimeline";
+import SalesVsChurnChart, {
+	collectSalesByDay,
+} from "./shared/SalesVsChurnChart";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "-");
-
-const formatDuration = (seconds) => {
-	if (seconds == null || Number.isNaN(Number(seconds))) return "-";
-	const s = Number(seconds);
-	if (s < 60) return `${Math.round(s)}s`;
-	const m = Math.floor(s / 60);
-	const sec = Math.round(s % 60);
-	return sec > 0 ? `${m}m ${sec}s` : `${m}m`;
-};
 
 // Leads Summary Tab - segment breakdown from leads_data
 const LeadsSummary = ({ leadsData }) => {
@@ -43,7 +27,10 @@ const LeadsSummary = ({ leadsData }) => {
 	if (!Array.isArray(leadsData) || leadsData.length === 0) {
 		return (
 			<div className="py-12 text-center text-slate-500">
-				<i className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300" aria-hidden />
+				<i
+					className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300"
+					aria-hidden
+				/>
 				<p>{strings("page.reports.noLeadsData")}</p>
 			</div>
 		);
@@ -62,7 +49,10 @@ const LeadsSummary = ({ leadsData }) => {
 		return {
 			segment: seg,
 			count: leads.length,
-			totalFailedRevenue: leads.reduce((s, l) => s + (Number(l.totalFailedRevenue) || 0), 0),
+			totalFailedRevenue: leads.reduce(
+				(s, l) => s + (Number(l.totalFailedRevenue) || 0),
+				0,
+			),
 			leads,
 		};
 	});
@@ -73,9 +63,15 @@ const LeadsSummary = ({ leadsData }) => {
 				<table className="w-full text-sm">
 					<thead>
 						<tr className="border-b border-slate-200 bg-slate-50">
-							<th className="px-4 py-3 text-left font-medium text-slate-600">{strings("page.reports.col.segment")}</th>
-							<th className="px-4 py-3 text-right font-medium text-slate-600">{strings("page.reports.col.count")}</th>
-							<th className="px-4 py-3 text-right font-medium text-slate-600">{strings("page.reports.col.failedRevenue")}</th>
+							<th className="px-4 py-3 text-left font-medium text-slate-600">
+								{strings("page.reports.col.segment")}
+							</th>
+							<th className="px-4 py-3 text-right font-medium text-slate-600">
+								{strings("page.reports.col.count")}
+							</th>
+							<th className="px-4 py-3 text-right font-medium text-slate-600">
+								{strings("page.reports.col.failedRevenue")}
+							</th>
 							<th className="w-10 px-4 py-3" />
 						</tr>
 					</thead>
@@ -88,42 +84,71 @@ const LeadsSummary = ({ leadsData }) => {
 									<tr
 										key={segment}
 										className="cursor-pointer hover:bg-slate-50"
-										onClick={() => setExpandedSegment(isExpanded ? null : segment)}
+										onClick={() =>
+											setExpandedSegment(isExpanded ? null : segment)
+										}
 									>
 										<td className="px-4 py-3">
-											<span className={`rounded-full px-2 py-0.5 text-xs font-medium ${info?.className ?? "bg-slate-100 text-slate-600"}`}>
+											<span
+												className={`rounded-full px-2 py-0.5 text-xs font-medium ${info?.className ?? "bg-slate-100 text-slate-600"}`}
+											>
 												{info ? strings(info.labelKey) : segment}
 											</span>
 										</td>
-										<td className="px-4 py-3 text-right font-medium text-slate-900">{count}</td>
-										<td className="px-4 py-3 text-right font-medium text-slate-900">{formatCurrency(totalFailedRevenue)}</td>
+										<td className="px-4 py-3 text-right font-medium text-slate-900">
+											{count}
+										</td>
+										<td className="px-4 py-3 text-right font-medium text-slate-900">
+											{formatCurrency(totalFailedRevenue)}
+										</td>
 										<td className="px-4 py-3 text-right text-slate-400">
-											<i className={`fa-solid fa-chevron-${isExpanded ? "up" : "down"} text-xs`} aria-hidden />
+											<i
+												className={`fa-solid fa-chevron-${isExpanded ? "up" : "down"} text-xs`}
+												aria-hidden
+											/>
 										</td>
 									</tr>
-									{isExpanded && leads.map((lead) => (
-										<tr key={lead.userId ?? lead._id} className="bg-slate-50/50">
-											<td colSpan={4} className="px-4 py-2">
-												<div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-													<div>
-														<span className="font-medium text-slate-900">{lead.owner?.name ?? lead.userId ?? "-"}</span>
-														{lead.owner?.email && (
-															<span className="ml-2 text-slate-500">{lead.owner.email}</span>
-														)}
-													</div>
-													<div className="flex flex-wrap gap-3 text-slate-600">
-														<span>{strings("page.reports.churn.failedRevenue")}: <strong>{formatCurrency(Number(lead.totalFailedRevenue) || 0)}</strong></span>
-														<span>{strings("page.reports.churn.failedBaskets")}: <strong>{lead.totalFailedBaskets ?? 0}</strong></span>
-														{lead.isPaidCustomer && (
-															<span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
-																{strings("page.reports.churn.paidCustomer")}
+									{isExpanded &&
+										leads.map((lead) => (
+											<tr
+												key={lead.userId ?? lead._id}
+												className="bg-slate-50/50"
+											>
+												<td colSpan={4} className="px-4 py-2">
+													<div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+														<div>
+															<span className="font-medium text-slate-900">
+																{lead.owner?.name ?? lead.userId ?? "-"}
 															</span>
-														)}
+															{lead.owner?.email && (
+																<span className="ml-2 text-slate-500">
+																	{lead.owner.email}
+																</span>
+															)}
+														</div>
+														<div className="flex flex-wrap gap-3 text-slate-600">
+															<span>
+																{strings("page.reports.churn.failedRevenue")}:{" "}
+																<strong>
+																	{formatCurrency(
+																		Number(lead.totalFailedRevenue) || 0,
+																	)}
+																</strong>
+															</span>
+															<span>
+																{strings("page.reports.churn.failedBaskets")}:{" "}
+																<strong>{lead.totalFailedBaskets ?? 0}</strong>
+															</span>
+															{lead.isPaidCustomer && (
+																<span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700">
+																	{strings("page.reports.churn.paidCustomer")}
+																</span>
+															)}
+														</div>
 													</div>
-												</div>
-											</td>
-										</tr>
-									))}
+												</td>
+											</tr>
+										))}
 								</>
 							);
 						})}
@@ -158,70 +183,53 @@ const RawDataCard = ({ entry }) => {
 						<span className="text-sm text-slate-500">{email}</span>
 					</div>
 					<div className="mt-1 flex flex-wrap gap-3 text-sm text-slate-600">
-						<span>{strings("page.reports.churn.failedRevenue")}: <strong>{formatCurrency(Number(entry.totalFailedRevenue) || 0)}</strong></span>
-						<span>{strings("page.reports.churn.failedBaskets")}: <strong>{Number(entry.totalFailedBaskets) || 0}</strong></span>
-						<span>{strings("page.reports.churn.avgSessionDuration")}: <strong>{formatDuration(entry.avgFailedSessionTime)}</strong></span>
+						<span>
+							{strings("page.reports.churn.failedRevenue")}:{" "}
+							<strong>
+								{formatCurrency(Number(entry.totalFailedRevenue) || 0)}
+							</strong>
+						</span>
+						<span>
+							{strings("page.reports.churn.failedBaskets")}:{" "}
+							<strong>{Number(entry.totalFailedBaskets) || 0}</strong>
+						</span>
+						<span>
+							{strings("page.reports.churn.avgSessionDuration")}:{" "}
+							<strong>{formatDuration(entry.avgFailedSessionTime)}</strong>
+						</span>
 					</div>
 				</div>
 				<div className="flex shrink-0 flex-wrap items-start gap-1.5">
 					{segmentInfo && (
-						<span className={`rounded-full px-2 py-0.5 text-xs font-medium ${segmentInfo.className}`}>
+						<span
+							className={`rounded-full px-2 py-0.5 text-xs font-medium ${segmentInfo.className}`}
+						>
 							{strings(segmentInfo.labelKey)}
 						</span>
 					)}
-					<span className={`rounded-full px-2 py-0.5 text-xs font-medium ${isPaid ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-						{isPaid ? strings("page.reports.churn.paidCustomer") : strings("page.reports.churn.notPaid")}
+					<span
+						className={`rounded-full px-2 py-0.5 text-xs font-medium ${isPaid ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
+					>
+						{isPaid
+							? strings("page.reports.churn.paidCustomer")
+							: strings("page.reports.churn.notPaid")}
 					</span>
-					<i className={`fa-solid fa-chevron-${expanded ? "up" : "down"} mt-0.5 text-xs text-slate-400`} aria-hidden />
+					<i
+						className={`fa-solid fa-chevron-${expanded ? "up" : "down"} mt-0.5 text-xs text-slate-400`}
+						aria-hidden
+					/>
 				</div>
 			</button>
 
 			{expanded && (
-				<div className="border-t border-slate-100 px-4 pb-4 pt-3 space-y-4">
-					{failedBaskets.length > 0 && (
-						<div>
-							<p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">{strings("page.reports.churn.failedEvents")}</p>
-							<div className="space-y-2">
-								{failedBaskets.map((fb, i) => (
-									<div key={i} className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm">
-										<div className="flex flex-wrap items-center justify-between gap-2">
-											<span className="font-medium text-slate-700">{fb.sale ?? "-"}</span>
-											<span className="text-slate-500">{formatDuration(fb.sessionTimeSeconds)}</span>
-										</div>
-										{Array.isArray(fb.reservations) && fb.reservations.length > 0 && (
-											<ul className="mt-1.5 space-y-0.5">
-												{fb.reservations.map((r, j) => (
-													<li key={j} className="flex justify-between text-xs text-slate-600">
-														<span>{r.name}</span>
-														<span>{formatCurrency(r.price)}</span>
-													</li>
-												))}
-											</ul>
-										)}
-										{fb.hasReturned && (
-											<p className="mt-1 text-xs text-emerald-600">
-												<i className="fa-solid fa-check mr-1" aria-hidden />
-												{strings("page.reports.churn.successfulEvents")} ({formatDuration(fb.timeToReturnSeconds)})
-											</p>
-										)}
-									</div>
-								))}
-							</div>
-						</div>
-					)}
-					{successfulBaskets.length > 0 && (
-						<div>
-							<p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">{strings("page.reports.churn.successfulEvents")}</p>
-							<div className="space-y-1">
-								{successfulBaskets.map((sb, i) => (
-									<div key={i} className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-1.5 text-sm">
-										<span className="text-slate-700">{sb.sale_name ?? sb.sale ?? "-"}</span>
-										<span className="font-medium text-emerald-700">{formatCurrency(Number(sb.basketTotal) || 0)}</span>
-									</div>
-								))}
-							</div>
-						</div>
-					)}
+				<div className="border-t border-slate-100 px-4 pb-4 pt-3">
+					<p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+						{strings("page.reports.churn.journey.title")}
+					</p>
+					<JourneyTimeline
+						failedBaskets={failedBaskets}
+						successfulBaskets={successfulBaskets}
+					/>
 				</div>
 			)}
 		</div>
@@ -235,6 +243,14 @@ const Report = () => {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [activeTab, setActiveTab] = useState("leads");
+	const [salesData, setSalesData] = useState(null);
+
+	const openPrintView = () => {
+		// Dedicated /print route renders a self-contained A4-scaled page
+		// with charts at fixed dimensions and triggers window.print() on
+		// load. Opening in a new tab keeps the working view intact.
+		window.open(`/reports/${id}/print`, "_blank", "noopener");
+	};
 
 	// Rename modal
 	const [renameOpen, setRenameOpen] = useState(false);
@@ -255,12 +271,39 @@ const Report = () => {
 			.finally(() => setLoading(false));
 	}, [id]);
 
+	// Lazy-fetch daily sales for the same sale + window so we can render the
+	// Sales-vs-Churn comparison chart on a saved churn report. Sales data
+	// isn't embedded in the report itself; it's reconstructed on the fly.
+	useEffect(() => {
+		if (report?.type !== "churn" || !report?.params?.sale) {
+			setSalesData(null);
+			return;
+		}
+		const params = new URLSearchParams({
+			sale: report.params.sale,
+			start: dayjs(report.start).format("YYYY-MM-DD"),
+			end: dayjs(report.end).format("YYYY-MM-DD"),
+			period: "monthly",
+		});
+		get(`/sales/reports/sales?${params}`)
+			.then((res) => setSalesData(Array.isArray(res.data) ? res.data : []))
+			.catch(() => setSalesData([]));
+	}, [report]);
+
+	const salesByDay = useMemo(
+		() => collectSalesByDay(salesData ?? []),
+		[salesData],
+	);
+
 	const handleRename = async () => {
 		if (!renameName.trim()) return;
 		setRenaming(true);
 		try {
 			const res = await put(`/reports/${id}`, { name: renameName.trim() });
-			setReport((prev) => ({ ...prev, name: res.data?.name ?? renameName.trim() }));
+			setReport((prev) => ({
+				...prev,
+				name: res.data?.name ?? renameName.trim(),
+			}));
 			setRenameOpen(false);
 		} catch {
 			// toast handled by client
@@ -294,29 +337,44 @@ const Report = () => {
 	if (error || !report) {
 		return (
 			<div className="mx-auto max-w-5xl space-y-6">
-				<Link href="/reports" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+				<Link
+					href="/reports"
+					className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+				>
 					<i className="fa-solid fa-arrow-left" aria-hidden />
 					{strings("back.reports")}
 				</Link>
-				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
+				<div
+					className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
+					role="alert"
+				>
 					{error ?? strings("error.failedLoad")}
 				</div>
 			</div>
 		);
 	}
 
-	const segmentInfo = report.type ? SEGMENT_TYPES[report.type] : null;
+	const _segmentInfo = report.type ? SEGMENT_TYPES[report.type] : null;
 	const leadsData = report.leads_data ?? [];
 	const rawData = report.raw_data ?? [];
 	const isSalesReport = report.type === "sales";
 
-	const totalFailedRevenue = rawData.reduce((s, e) => s + (Number(e.totalFailedRevenue) || 0), 0);
+	const totalFailedRevenue = rawData.reduce(
+		(s, e) => s + (Number(e.totalFailedRevenue) || 0),
+		0,
+	);
 	const totalUsers = rawData.length;
-	const totalFailedBaskets = rawData.reduce((s, e) => s + (Number(e.totalFailedBaskets) || 0), 0);
+	const totalFailedBaskets = rawData.reduce(
+		(s, e) => s + (Number(e.totalFailedBaskets) || 0),
+		0,
+	);
 
 	return (
 		<div className="mx-auto max-w-5xl space-y-6">
-			<Link href="/reports" className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900">
+			<Link
+				href="/reports"
+				className="inline-flex items-center gap-2 text-sm text-slate-600 hover:text-slate-900"
+			>
 				<i className="fa-solid fa-arrow-left" aria-hidden />
 				{strings("back.reports")}
 			</Link>
@@ -325,14 +383,18 @@ const Report = () => {
 			<div className="flex items-start justify-between gap-4">
 				<div>
 					<div className="flex flex-wrap items-center gap-2">
-						<h1 className="text-2xl font-semibold text-slate-900">{report.name}</h1>
-						<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-							report.type === "churn"
-								? "bg-violet-100 text-violet-800"
-								: report.type === "sales"
-									? "bg-emerald-100 text-emerald-800"
-									: "bg-sky-100 text-sky-800"
-						}`}>
+						<h1 className="text-2xl font-semibold text-slate-900">
+							{report.name}
+						</h1>
+						<span
+							className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+								report.type === "churn"
+									? "bg-violet-100 text-violet-800"
+									: report.type === "sales"
+										? "bg-emerald-100 text-emerald-800"
+										: "bg-sky-100 text-sky-800"
+							}`}
+						>
 							{report.type}
 						</span>
 						{report.type === "sales" && report.params?.period && (
@@ -342,16 +404,30 @@ const Report = () => {
 						)}
 					</div>
 					<p className="mt-1 text-sm text-slate-500">
-						{formatDate(report.start)} - {formatDate(report.end)}
+						{formatDate(report.end)} - {formatDate(report.start)}
 						{report.createdAt && (
-							<span className="ml-3">{strings("page.reports.generatedOn")} {formatDate(report.createdAt)}</span>
+							<span className="ml-3">
+								{strings("page.reports.generatedOn")}{" "}
+								{formatDate(report.createdAt)}
+							</span>
 						)}
 					</p>
 				</div>
-				<div className="flex shrink-0 gap-2">
+				<div className="report-actions flex shrink-0 gap-2">
 					<button
 						type="button"
-						onClick={() => { setRenameName(report.name); setRenameOpen(true); }}
+						onClick={openPrintView}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<i className="fa-solid fa-print" aria-hidden />
+						{strings("page.reports.print") || "Print"}
+					</button>
+					<button
+						type="button"
+						onClick={() => {
+							setRenameName(report.name);
+							setRenameOpen(true);
+						}}
 						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{strings("page.reports.rename")}
@@ -373,17 +449,38 @@ const Report = () => {
 					{/* Stats */}
 					{rawData.length > 0 && (
 						<div className="grid grid-cols-3 gap-4">
-							<StatCard label={strings("page.reports.churn.stats.users")} value={totalUsers} />
-							<StatCard label={strings("page.reports.churn.stats.failedRevenue")} value={formatCurrency(totalFailedRevenue)} />
-							<StatCard label={strings("page.reports.churn.stats.totalFailedBaskets")} value={totalFailedBaskets} />
+							<StatCard
+								label={strings("page.reports.churn.stats.users")}
+								value={totalUsers}
+							/>
+							<StatCard
+								label={strings("page.reports.churn.stats.failedRevenue")}
+								value={formatCurrency(totalFailedRevenue)}
+							/>
+							<StatCard
+								label={strings("page.reports.churn.stats.totalFailedBaskets")}
+								value={totalFailedBaskets}
+							/>
 						</div>
 					)}
+
+					{rawData.length > 0 && (
+						<SalesVsChurnChart
+							entries={rawData}
+							salesByDay={salesByDay}
+							start={report.start}
+							end={report.end}
+						/>
+					)}
+
+					{rawData.length > 0 && <AbandonmentInsights entries={rawData} />}
 
 					{/* Tabs */}
 					<div>
 						<div className="mb-4 flex gap-1 border-b border-slate-200">
 							{[
 								{ key: "leads", label: strings("page.reports.tab.leads") },
+								{ key: "table", label: strings("page.reports.tab.table") },
 								{ key: "raw", label: strings("page.reports.tab.raw") },
 							].map(({ key, label }) => (
 								<button
@@ -401,18 +498,33 @@ const Report = () => {
 							))}
 						</div>
 
-						{activeTab === "leads" && <LeadsSummary leadsData={leadsData} />}
+						{activeTab === "leads" && (
+							<LeadsSummary leadsData={leadsData} />
+						)}
+
+						{activeTab === "table" && (
+							<ChurnTable
+								entries={rawData}
+								filename={`${report.name?.replace(/[^a-z0-9-_]+/gi, "_") ?? "churn"}.csv`}
+							/>
+						)}
 
 						{activeTab === "raw" && (
 							<div className="space-y-3">
 								{rawData.length === 0 ? (
 									<div className="py-12 text-center text-slate-500">
-										<i className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300" aria-hidden />
+										<i
+											className="fa-solid fa-chart-line mb-3 text-4xl text-slate-300"
+											aria-hidden
+										/>
 										<p>{strings("page.reports.noLeadsData")}</p>
 									</div>
 								) : (
 									rawData.map((entry) => (
-										<RawDataCard key={entry._id ?? entry.userId} entry={entry} />
+										<RawDataCard
+											key={entry._id ?? entry.userId}
+											entry={entry}
+										/>
 									))
 								)}
 							</div>

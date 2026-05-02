@@ -40,6 +40,12 @@ const defaultValues = {
 	urls: { dashboard: "", widget: "" },
 	branding: { logo: "", primaryColor: "" },
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
+	stripe: {
+		connectClientId: "",
+		connectSecret: "",
+		connectWebhookSecret: "",
+		transactionWebhookSecret: "",
+	},
 	features: defaultFeatures,
 	seller: emptySeller,
 };
@@ -52,6 +58,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 	const [deleting, setDeleting] = useState(false);
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
 	const [smtpOpen, setSmtpOpen] = useState(false);
+	const [stripeOpen, setStripeOpen] = useState(false);
 	const [error, setError] = useState(null);
 
 	const {
@@ -104,6 +111,12 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							user: d.smtp?.user ?? "",
 							pass: d.smtp?.pass ?? "",
 							from: d.smtp?.from ?? "",
+						},
+						stripe: {
+							connectClientId: d.stripe?.connectClientId ?? "",
+							connectSecret: d.stripe?.connectSecret ?? "",
+							connectWebhookSecret: d.stripe?.connectWebhookSecret ?? "",
+							transactionWebhookSecret: d.stripe?.transactionWebhookSecret ?? "",
 						},
 						features: FAMILIES.reduce((acc, f) => {
 							acc[f] = d.features?.[f] !== false;
@@ -199,6 +212,15 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 					user: formData.smtp?.user?.trim() || undefined,
 					pass: formData.smtp?.pass || undefined,
 					from: formData.smtp?.from?.trim() || undefined,
+				},
+				stripe: {
+					connectClientId:
+						formData.stripe?.connectClientId?.trim() || undefined,
+					connectSecret: formData.stripe?.connectSecret?.trim() || undefined,
+					connectWebhookSecret:
+						formData.stripe?.connectWebhookSecret?.trim() || undefined,
+					transactionWebhookSecret:
+						formData.stripe?.transactionWebhookSecret?.trim() || undefined,
 				},
 				features: FAMILIES.reduce((acc, f) => {
 					acc[f] = Boolean(formData.features?.[f]);
@@ -421,6 +443,64 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 											label={strings("form.realm.smtpFrom")}
 											{...register("smtp.from")}
 											placeholder="no-reply@example.com"
+										/>
+									</div>
+								</div>
+							)}
+						</div>
+
+						<div className="rounded-lg border border-slate-200">
+							<button
+								type="button"
+								onClick={() => setStripeOpen((v) => !v)}
+								className="flex w-full items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							>
+								<span className="inline-flex items-center gap-2">
+									<i
+										className="fa-brands fa-stripe-s text-slate-500"
+										aria-hidden
+									/>
+									Stripe Connect (whitelabel)
+								</span>
+								<i
+									className={`fa-solid ${stripeOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
+									aria-hidden
+								/>
+							</button>
+							{stripeOpen && (
+								<div className="space-y-4 border-t border-slate-200 px-4 py-4">
+									<p className="text-xs text-slate-500">
+										Optional. When set, this realm runs its merchant Connect
+										flow against its own Stripe platform. Empty fields fall
+										back to the default platform credentials.
+									</p>
+									<div className="grid grid-cols-1 gap-4">
+										<Input
+											label="Connect Client ID"
+											{...register("stripe.connectClientId")}
+											placeholder="ca_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Platform Secret Key"
+											type="password"
+											{...register("stripe.connectSecret")}
+											placeholder="sk_live_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Connect Webhook Signing Secret"
+											type="password"
+											{...register("stripe.connectWebhookSecret")}
+											placeholder="whsec_..."
+											autoComplete="off"
+										/>
+										<Input
+											label="Transaction Webhook Signing Secret"
+											type="password"
+											{...register("stripe.transactionWebhookSecret")}
+											placeholder="whsec_..."
+											autoComplete="off"
 										/>
 									</div>
 								</div>

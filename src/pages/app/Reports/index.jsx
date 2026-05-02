@@ -1,16 +1,16 @@
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation } from "wouter";
+import Can from "../../../components/Can";
 import { Input, Select } from "../../../components/inputs";
 import InsightsPanel from "../../../components/reports/InsightsPanel";
 import { Modal, SearchBar } from "../../../components/shared";
 import DataTable from "../../../components/tables/DataTable";
-import Can from "../../../components/Can";
+import Pagination from "../../../components/tables/Pagination";
 import { useApp } from "../../../context";
 import { can } from "../../../lib/capabilities";
 import { del, get, post, put } from "../../../lib/client";
 import strings from "../../../localization";
-import { matchesQuery } from "../../../utils/search";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "-");
 
@@ -40,18 +40,31 @@ const Reports = () => {
 	const [, setLocation] = useLocation();
 	const isAdmin = account?.type === "account.admin";
 	const typeOptions = useMemo(
-		() => (
+		() =>
 			isAdmin
 				? ALL_TYPE_OPTIONS
-				: ALL_TYPE_OPTIONS.filter((o) => o.caps.some((c) => can(account, c)))
-		),
+				: ALL_TYPE_OPTIONS.filter((o) => o.caps.some((c) => can(account, c))),
 		[isAdmin, account],
 	);
 
 	const [reports, setReports] = useState([]);
+	const [total, setTotal] = useState(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [page, setPage] = useState(1);
+
+	// Debounce search input so each keystroke doesn't fire a request.
+	useEffect(() => {
+		const t = setTimeout(() => setDebouncedQuery(query.trim()), 300);
+		return () => clearTimeout(t);
+	}, [query]);
+
+	// Reset to page 1 whenever the debounced query changes.
+	useEffect(() => {
+		setPage(1);
+	}, [debouncedQuery]);
 
 	const [pastSales, setPastSales] = useState([]);
 
@@ -62,7 +75,9 @@ const Reports = () => {
 	const [formType, setFormType] = useState("churn");
 	const [formSaleId, setFormSaleId] = useState("");
 	const [formStart, setFormStart] = useState(defaultStart);
-	const [formEnd, setFormEnd] = useState(() => new Date().toISOString().slice(0, 10));
+	const [formEnd, setFormEnd] = useState(() =>
+		new Date().toISOString().slice(0, 10),
+	);
 	const [formFrequency, setFormFrequency] = useState("weekly");
 	const [quote, setQuote] = useState(null);
 	const [quoting, setQuoting] = useState(false);
@@ -76,14 +91,24 @@ const Reports = () => {
 	const [deleteTarget, setDeleteTarget] = useState(null);
 	const [deleting, setDeleting] = useState(false);
 
+	const PAGE_SIZE = 25;
+
 	const fetchReports = useCallback(() => {
 		setLoading(true);
 		setError(null);
-		get("/reports")
-			.then((res) => setReports(Array.isArray(res.data) ? res.data : []))
+		const params = new URLSearchParams({
+			limit: String(PAGE_SIZE),
+			skip: String((page - 1) * PAGE_SIZE),
+		});
+		if (debouncedQuery) params.set("q", debouncedQuery);
+		get(`/reports?${params}`)
+			.then((res) => {
+				setReports(Array.isArray(res.data) ? res.data : []);
+				setTotal(Number(res.total) || 0);
+			})
 			.catch((err) => setError(err?.message ?? strings("error.failedLoad")))
 			.finally(() => setLoading(false));
-	}, []);
+	}, [page, debouncedQuery]);
 
 	useEffect(() => {
 		fetchReports();
@@ -95,16 +120,8 @@ const Reports = () => {
 			.catch(() => {});
 	}, []);
 
-	const filteredReports = useMemo(
-		() =>
-			(reports ?? []).filter(
-				(r) =>
-					matchesQuery(r.name, query) ||
-					matchesQuery(r.type, query) ||
-					matchesQuery(typeof r.owner === "object" ? r.owner?.name : r.owner, query),
-			),
-		[reports, query],
-	);
+	// Server filters via ?q= so the client just renders the page.
+	const filteredReports = reports;
 
 	const allSalesOptions = useMemo(() => {
 		const seen = new Set();
@@ -130,7 +147,14 @@ const Reports = () => {
 	};
 
 	useEffect(() => {
-		if (!createOpen || !formSaleId || !formType || !formFrequency || !formStart || !formEnd) {
+		if (
+			!createOpen ||
+			!formSaleId ||
+			!formType ||
+			!formFrequency ||
+			!formStart ||
+			!formEnd
+		) {
 			setQuote(null);
 			return;
 		}
@@ -201,25 +225,27 @@ const Reports = () => {
 
 	const columns = [
 		{
+			key: "period",
+			header: strings("page.reports.col.period"),
+			headerCell: true,
+			render: (row) => (
+				<span className="text-sm text-slate-600">
+					{formatDate(row.end)} - {formatDate(row.start)}
+				</span>
+			),
+		},
+		{
 			key: "name",
 			header: strings("page.reports.col.name"),
-			headerCell: true,
 		},
 		{
 			key: "type",
 			header: strings("page.reports.col.type"),
 			render: (row) => (
-				<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}>
+				<span
+					className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}
+				>
 					{row.type}
-				</span>
-			),
-		},
-		{
-			key: "period",
-			header: strings("page.reports.col.period"),
-			render: (row) => (
-				<span className="text-sm text-slate-600">
-					{formatDate(row.start)} - {formatDate(row.end)}
 				</span>
 			),
 		},
@@ -227,15 +253,23 @@ const Reports = () => {
 			key: "status",
 			header: strings("common.status"),
 			render: (row) => (
-				<span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[row.status] ?? "bg-slate-100 text-slate-600"}`}>
-					{strings(row.status === "inactive" ? "common.inactive" : "common.active")}
+				<span
+					className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_BADGE[row.status] ?? "bg-slate-100 text-slate-600"}`}
+				>
+					{strings(
+						row.status === "inactive" ? "common.inactive" : "common.active",
+					)}
 				</span>
 			),
 		},
 		{
 			key: "createdAt",
 			header: strings("page.reports.col.created"),
-			render: (row) => <span className="text-sm text-slate-500">{formatDate(row.createdAt)}</span>,
+			render: (row) => (
+				<span className="text-sm text-slate-500">
+					{formatDate(row.createdAt)}
+				</span>
+			),
 		},
 		...(isAdmin
 			? [
@@ -269,14 +303,22 @@ const Reports = () => {
 					</button>
 					<button
 						type="button"
-						onClick={(e) => { e.stopPropagation(); handleArchive(row); }}
+						onClick={(e) => {
+							e.stopPropagation();
+							handleArchive(row);
+						}}
 						className="text-xs text-slate-500 hover:text-slate-900"
 					>
-						{row.status === "inactive" ? strings("common.unarchive") : strings("common.archive")}
+						{row.status === "inactive"
+							? strings("common.unarchive")
+							: strings("common.archive")}
 					</button>
 					<button
 						type="button"
-						onClick={(e) => { e.stopPropagation(); setDeleteTarget(row); }}
+						onClick={(e) => {
+							e.stopPropagation();
+							setDeleteTarget(row);
+						}}
 						className="text-xs text-red-500 hover:text-red-700"
 					>
 						{strings("common.delete")}
@@ -305,18 +347,25 @@ const Reports = () => {
 			</div>
 
 			{error && (
-				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
+				<div
+					className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600"
+					role="alert"
+				>
 					{error}
 				</div>
 			)}
 
-			<InsightsPanel />
+			<Can cap="ai.report.summary">
+				<InsightsPanel />
+			</Can>
 
-			<SearchBar
-				value={query}
-				onChange={setQuery}
-				placeholder={strings("page.reports.searchPlaceholder")}
-			/>
+			{(total > 5 || query) && (
+				<SearchBar
+					value={query}
+					onChange={setQuery}
+					placeholder={strings("page.reports.searchPlaceholder")}
+				/>
+			)}
 
 			<div className="rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
@@ -328,6 +377,13 @@ const Reports = () => {
 					emptyMessage={strings("page.reports.noReports")}
 				/>
 			</div>
+
+			<Pagination
+				total={total}
+				limit={PAGE_SIZE}
+				page={page}
+				onPageChange={setPage}
+			/>
 
 			{/* Create Report Modal */}
 			<Modal
@@ -358,8 +414,12 @@ const Reports = () => {
 								disabled={!formSaleId || !formStart || !formEnd || generating}
 								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								{generating && <i className="fa-solid fa-spinner fa-spin" aria-hidden />}
-								{generating ? strings("page.reports.churn.generating") : strings("page.reports.createReport")}
+								{generating && (
+									<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+								)}
+								{generating
+									? strings("page.reports.churn.generating")
+									: strings("page.reports.createReport")}
 							</button>
 						</div>
 					</div>
@@ -432,10 +492,16 @@ const Reports = () => {
 						) : quote ? (
 							quote.total > 0 ? (
 								<span className="text-slate-700">
-									<i className="fa-solid fa-receipt mr-1.5 text-slate-500" aria-hidden />
+									<i
+										className="fa-solid fa-receipt mr-1.5 text-slate-500"
+										aria-hidden
+									/>
 									{strings("page.reports.quoteLine")
 										.replace("{units}", String(quote.units))
-										.replace("{frequency}", strings(`page.sale.reporting.freq.${formFrequency}`))
+										.replace(
+											"{frequency}",
+											strings(`page.sale.reporting.freq.${formFrequency}`),
+										)
 										.replace("{total}", `${(quote.total ?? 0).toFixed(2)}`)}
 								</span>
 							) : (
@@ -445,12 +511,12 @@ const Reports = () => {
 								</span>
 							)
 						) : (
-							<span className="text-slate-400">{strings("page.reports.quoteHint")}</span>
+							<span className="text-slate-400">
+								{strings("page.reports.quoteHint")}
+							</span>
 						)}
 					</div>
-					{createError && (
-						<p className="text-sm text-red-600">{createError}</p>
-					)}
+					{createError && <p className="text-sm text-red-600">{createError}</p>}
 				</div>
 			</Modal>
 
@@ -516,7 +582,9 @@ const Reports = () => {
 				}
 			>
 				<p className="text-sm text-slate-600">
-					{strings("page.reports.deleteConfirmBody", [deleteTarget?.name ?? ""])}
+					{strings("page.reports.deleteConfirmBody", [
+						deleteTarget?.name ?? "",
+					])}
 				</p>
 			</Modal>
 		</div>

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useParams } from "wouter";
 import { Input, Select } from "../../../../components/inputs";
 import { EmptyState, SlidePanel } from "../../../../components/shared";
+import { useApp } from "../../../../context";
 
 import { ticketColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
@@ -42,7 +43,9 @@ const getInitialForm = (product) => {
 
 const SaleTickets = ({ sale, setSale }) => {
 	const { id } = useParams();
+	const { account } = useApp();
 	const isNew = id === "new";
+	const canEdit = account?.type === "account.merchant";
 
 	const [products, setProducts] = useState([]);
 	const [loading, setLoading] = useState(!isNew);
@@ -172,7 +175,7 @@ const SaleTickets = ({ sale, setSale }) => {
 							)}
 						</p>
 					</div>
-					{!isNew && (
+					{!isNew && canEdit && (
 						<button
 							type="button"
 							onClick={() => setPanelProduct("new")}
@@ -202,7 +205,7 @@ const SaleTickets = ({ sale, setSale }) => {
 						icon="fa-ticket"
 						title={strings("form.ticket.noTicketTypes")}
 						description={strings("form.ticket.noTicketTypesDesc")}
-						action={
+						action={canEdit ? (
 							<button
 								type="button"
 								onClick={() => setPanelProduct("new")}
@@ -211,7 +214,7 @@ const SaleTickets = ({ sale, setSale }) => {
 								<i className="fa-solid fa-plus" aria-hidden />
 								{strings("form.ticket.addTicketType")}
 							</button>
-						}
+						) : null}
 					/>
 				) : (
 					<>

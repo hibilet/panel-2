@@ -82,9 +82,9 @@ const navItems = [
 		acl: ["merchant", "admin"],
 	},
 	{
-		path: "/jobs",
-		labelKey: "nav.jobs",
-		icon: "fa-clock",
+		path: "/events",
+		labelKey: "nav.events",
+		icon: "fa-clipboard-list",
 		acl: ["admin"],
 	},
 	{

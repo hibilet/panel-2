@@ -35,11 +35,6 @@ const buildDefaultAcl = () =>
 	ACL_KEYS.reduce((acc, k) => writeAcl(acc, k, CAPABILITIES[k].default), {});
 const defaultAcl = buildDefaultAcl();
 
-const COMMISSION_TYPE_OPTIONS = [
-	{ value: "percentage", label: strings("form.tier.commissionTypePercentage") },
-	{ value: "fixed", label: strings("form.tier.commissionTypeFixed") },
-];
-
 const STATUS_OPTIONS = [
 	{ value: "active", label: strings("common.active") },
 	{ value: "inactive", label: strings("common.inactive") },
@@ -63,9 +58,11 @@ const defaultValues = {
 	description: "",
 	baseFee: 0,
 	installFee: 0,
+	perTicketFee: 0,
 	saleLimit: 0,
-	commissionAmount: 0,
-	commissionType: "percentage",
+	// Stored as a percentage in the form (eg 1.5 = 1.5%) and converted
+	// to the API's decimal multiplier on save.
+	commissionPercent: 0,
 	visibility: "public",
 	accessCode: "",
 	status: "active",
@@ -144,14 +141,22 @@ const TierPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				const d = res.data ?? null;
 				setData(d);
 				if (d) {
+					// Read commissionRate (decimal) and surface as percent
+					// for editing. Fall back to legacy { amount, type } for
+					// any tier the migration hasn't touched yet.
+					const rate = typeof d.commissionRate === "number"
+						? d.commissionRate
+						: d.commission?.type === "percentage" && d.commission.amount > 1
+							? d.commission.amount - 1
+							: 0;
 					reset({
 						name: d.name ?? "",
 						description: d.description ?? "",
 						baseFee: d.baseFee ?? 0,
 						installFee: d.installFee ?? 0,
+						perTicketFee: d.perTicketFee ?? 0,
 						saleLimit: d.saleLimit ?? 0,
-						commissionAmount: d.commission?.amount ?? 0,
-						commissionType: d.commission?.type ?? "percentage",
+						commissionPercent: Math.round(rate * 10000) / 100,
 						visibility: d.visibility ?? "public",
 						accessCode: d.accessCode ?? "",
 						status: d.status ?? "active",
@@ -212,11 +217,12 @@ const TierPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				description: formData.description?.trim() || undefined,
 				baseFee: Number(formData.baseFee) || 0,
 				installFee: Number(formData.installFee) || 0,
+				perTicketFee: Math.max(0, Number(formData.perTicketFee) || 0),
 				saleLimit: Number(formData.saleLimit) || 0,
-				commission: {
-					amount: Number(formData.commissionAmount) || 0,
-					type: formData.commissionType || "percentage",
-				},
+				// Form has commissionPercent (1.5 = 1.5%); API stores
+				// decimal multiplier (0.015). perTicketFee + commissionRate
+				// are independent and additive.
+				commissionRate: Math.max(0, Number(formData.commissionPercent) || 0) / 100,
 				visibility: formData.visibility === "private" ? "private" : "public",
 				status: formData.status || "active",
 				acl,
@@ -351,19 +357,27 @@ const TierPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						<hr className="border-slate-200" />
 
 						<div className="grid grid-cols-2 gap-4">
-							<Select
-								label={strings("form.tier.commissionType")}
-								{...register("commissionType")}
-								options={COMMISSION_TYPE_OPTIONS}
-							/>
 							<Input
-								label={strings("form.tier.commissionAmount")}
+								label={strings("form.tier.perTicketFee") || "Per-ticket fee"}
 								type="number"
 								step="0.01"
 								min="0"
-								{...register("commissionAmount", { valueAsNumber: true })}
+								{...register("perTicketFee", { valueAsNumber: true })}
+								endAdornment="€"
+							/>
+							<Input
+								label={strings("form.tier.commissionPercent") || "Commission"}
+								type="number"
+								step="0.01"
+								min="0"
+								{...register("commissionPercent", { valueAsNumber: true })}
+								endAdornment="%"
 							/>
 						</div>
+						<p className="text-xs text-slate-500 -mt-2">
+							{strings("form.tier.feeHelp") ||
+								"Both can be set together (eg €0.50/ticket + 1% commission)."}
+						</p>
 
 						<hr className="border-slate-200" />
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 
+import { useApp } from "../../../../context";
 import { get } from "../../../../lib/client";
 import strings from "../../../../localization";
 import SaleAttendees from "./SaleAttendees";
@@ -73,11 +74,20 @@ const Sale = () => {
 	const { id } = useParams();
 	const [location, setLocation] = useLocation();
 	const search = useSearch();
+	const { account } = useApp();
 	const [sale, setSale] = useState(undefined); // undefined=loading, null=new/error, object=loaded
 
 	const basePath = `/sales/${id}`;
 	const isNew = id === "new";
 	const isGuided = new URLSearchParams(search || "").get("guided") === "true";
+
+	// Sales are merchant-owned. Admins reviewing existing sales is fine,
+	// but creating new ones is out of scope - bounce them back to the list.
+	useEffect(() => {
+		if (isNew && account?.type === "account.admin") {
+			setLocation("/sales", true);
+		}
+	}, [isNew, account?.type, setLocation]);
 
 	const handleCloseGuided = () => {
 		setLocation("/sales/new", true);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useParams } from "wouter";
-import { SlidePanel } from "../../../components/shared";
+import { SearchBar, SlidePanel } from "../../../components/shared";
 import {
 	venuesColumns,
 	venuesMerchantColumns,
@@ -10,6 +10,7 @@ import Pagination from "../../../components/tables/Pagination";
 import { useApp } from "../../../context/AppContext";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
+import { matchesQuery } from "../../../utils/search";
 import VenuePanel from "./Venue";
 
 const LIMIT = 25;
@@ -21,11 +22,21 @@ const Venues = () => {
 
 	const venueId = id ?? null;
 
+	// Venues are merchant-owned. Bounce admin if they navigate directly to
+	// /venues/new (the list-page button is already gated, this is defense
+	// for typed-URL access).
+	useEffect(() => {
+		if (venueId === "new" && account?.type === "account.admin") {
+			setLocation("/venues", { replace: true });
+		}
+	}, [venueId, account?.type, setLocation]);
+
 	const [data, setData] = useState([]);
 	const [total, setTotal] = useState(0);
 	const [page, setPage] = useState(1);
 	const [fetchedPage, setFetchedPage] = useState(null);
 	const [error, setError] = useState(null);
+	const [query, setQuery] = useState("");
 
 	const loading = fetchedPage !== page;
 
@@ -52,7 +63,10 @@ const Venues = () => {
 		fetchVenues();
 	}, [fetchVenues]);
 
-	const paginatedData = data.slice((page - 1) * LIMIT, page * LIMIT);
+	const filteredData = query
+		? data.filter((v) => matchesQuery(v.name, query) || matchesQuery(v.address, query))
+		: data;
+	const paginatedData = filteredData.slice((page - 1) * LIMIT, page * LIMIT);
 
 	if (error && data.length === 0) {
 		return (
@@ -82,6 +96,17 @@ const Venues = () => {
 				)}
 			</div>
 
+			{(data?.length ?? 0) > 5 && (
+				<SearchBar
+					value={query}
+					onChange={(v) => {
+						setQuery(v);
+						setPage(1);
+					}}
+					placeholder={strings("page.venues.searchPlaceholder") || strings("page.venues.title")}
+				/>
+			)}
+
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
 				<DataTable
 					data={paginatedData}
@@ -100,7 +125,7 @@ const Venues = () => {
 					emptyMessage={strings("table.venue.noVenues")}
 				/>
 				<Pagination
-					total={total}
+					total={query ? filteredData.length : total}
 					limit={LIMIT}
 					page={page}
 					onPageChange={setPage}

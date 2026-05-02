@@ -27,6 +27,12 @@ export const CAPABILITIES = {
 		label: "Churn reporting",
 	},
 
+	"branding.disable": {
+		type: "bool",
+		default: false,
+		label: "Hide platform branding",
+	},
+
 	channels: { type: "number", default: 0, label: "Channels" },
 	sales: { type: "number", default: 0, label: "Sales" },
 	reservations: { type: "number", default: 0, label: "Reservations" },
@@ -37,6 +43,7 @@ export const CAPABILITIES = {
 export const FAMILIES = [
 	"ai",
 	"reporting",
+	"branding",
 	"channels",
 	"sales",
 	"reservations",

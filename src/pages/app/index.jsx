@@ -6,6 +6,7 @@ import SellerSetupBanner from "../../components/global/SellerSetupBanner";
 import { useApp } from "../../context";
 import Accounts from "./Accounts";
 import Dashboard from "./Dashboard";
+import Events from "./Events";
 import Invoices from "./Invoices";
 import Invoice from "./Invoices/Invoice";
 import Jobs from "./Jobs";
@@ -16,6 +17,7 @@ import Onboarding from "./Onboarding";
 import Realms from "./Realms";
 import Reports from "./Reports";
 import Report from "./Reports/Report";
+import ReportPrint from "./Reports/Report/Print";
 import Sales from "./Sales";
 import Sale from "./Sales/Sale";
 import Settings from "./Settings";
@@ -40,12 +42,18 @@ const NotFound = () => {
 
 const App = () => {
 	const { account } = useApp();
+
+	// Top-level Switch lets the print route match and own the document
+	// (no Navbar, no banner, no Tailwind container) while still going
+	// through wouter's Route so `useParams()` resolves `:id`.
 	return (
-		<>
-			<Navbar />
-			<SellerSetupBanner />
-			<main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
-				<Switch>
+		<Switch>
+			<Route path="/reports/:id/print" component={ReportPrint} />
+			<Route>
+				<Navbar />
+				<SellerSetupBanner />
+				<main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
+					<Switch>
 					<Route path="/live" component={Live} />
 					<Route path="/" component={Dashboard} />
 					<Route path="/sales" component={Sales} />
@@ -72,6 +80,7 @@ const App = () => {
 							<Route path="/tiers" component={Tiers} />
 							<Route path="/realms/:id" component={Realms} />
 							<Route path="/realms" component={Realms} />
+							<Route path="/events" component={Events} />
 						</>
 					)}
 					<Route path="/invoices/:id" component={Invoice} />
@@ -103,8 +112,9 @@ const App = () => {
 						<NotFound />
 					</Route>
 				</Switch>
-			</main>
-		</>
+				</main>
+			</Route>
+		</Switch>
 	);
 };
 
