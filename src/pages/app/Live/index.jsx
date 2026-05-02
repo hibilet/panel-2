@@ -53,8 +53,10 @@ const Live = () => {
 						get(`/sales/${id}/reservations?status=read&limit=10000&skip=0`),
 					]);
 					const readers = readersRes?.data ?? [];
-					const attendeesCount = attendeesRes?.count ?? 0;
-					const readCount = readRes?.count ?? 0;
+					const sumTickets = (res) =>
+						(res?.data ?? []).reduce((n, r) => n + (r.tickets ?? 0), 0);
+					const attendeesCount = sumTickets(attendeesRes);
+					const readCount = sumTickets(readRes);
 					return {
 						...sale,
 						readerCount: readers.length,
