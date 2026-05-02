@@ -75,7 +75,11 @@ const Providers = () => {
 	const handleConnectStripe = () => {
 		const token = getToken();
 		if (!token) return;
-		window.location.href = `${API_BASE_URL}/auth/stripe?token=${encodeURIComponent(token)}`;
+		// route=settings.providers tells the api to round-trip the user back
+		// here after the OAuth dance instead of dumping them on the realm
+		// dashboard root.
+		const params = new URLSearchParams({ token, route: "settings.providers" });
+		window.location.href = `${API_BASE_URL}/auth/stripe?${params.toString()}`;
 	};
 
 	if (error && !loading) {
