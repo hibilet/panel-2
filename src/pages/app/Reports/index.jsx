@@ -271,19 +271,6 @@ const Reports = () => {
 				</span>
 			),
 		},
-		...(isAdmin
-			? [
-					{
-						key: "owner",
-						header: strings("page.reports.col.owner"),
-						render: (row) => (
-							<span className="text-sm text-slate-600">
-								{typeof row.owner === "object" ? row.owner?.name : row.owner}
-							</span>
-						),
-					},
-				]
-			: []),
 		{
 			key: "actions",
 			header: "",
@@ -373,7 +360,10 @@ const Reports = () => {
 					columns={columns}
 					getRowKey={(r) => r.id ?? r._id}
 					loading={loading}
-					onRowClick={(row) => row.id && setLocation(`/reports/${row.id}`)}
+					onRowClick={(row) => {
+						const id = row.id ?? row._id;
+						if (id) setLocation(`/reports/${id}`);
+					}}
 					emptyMessage={strings("page.reports.noReports")}
 				/>
 			</div>
