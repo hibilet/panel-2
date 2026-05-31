@@ -16,7 +16,7 @@ import {
 	YAxis,
 } from "recharts";
 import { StatCard } from "../../../../components/shared";
-import strings from "../../../../localization";
+import strings, { formatCurrency } from "../../../../localization";
 
 const CHANNEL_COLORS = [
 	"#0f172a",
@@ -33,6 +33,9 @@ const padHour = (h) => String(h).padStart(2, "0");
 
 const sumCount = (rows) =>
 	(rows ?? []).reduce((s, r) => s + (Number(r?.count) || 0), 0);
+
+const sumField = (rows, field) =>
+	(rows ?? []).reduce((s, r) => s + (Number(r?.[field]) || 0), 0);
 
 const aggregateByBucket = (rows, bucketKey) => {
 	const map = new Map();
@@ -161,6 +164,11 @@ const SalesReportView = ({ report }) => {
 	const channels = useMemo(() => aggregateByChannel(raw), [raw]);
 	const channelTotal = channels.reduce((s, c) => s + c.count, 0);
 
+	const currency = report?.params?.currency;
+	const breakdown = report?.breakdown ?? [];
+	const totalRevenue = sumField(raw, "revenue");
+	const breakdownRevenueTotal = sumField(breakdown, "revenue");
+
 	const totalReservations = sumCount(raw);
 	const totalLeads = sumCount(leads);
 	const nonZeroBuckets = chartData.filter((d) => d.reservations > 0);
@@ -189,8 +197,8 @@ const SalesReportView = ({ report }) => {
 					value={totalReservations.toLocaleString()}
 				/>
 				<StatCard
-					label={strings("page.reports.sales.stats.channels")}
-					value={channels.length}
+					label={strings("page.reports.sales.stats.collected")}
+					value={formatCurrency(totalRevenue, currency)}
 				/>
 				<StatCard
 					label={
@@ -221,6 +229,10 @@ const SalesReportView = ({ report }) => {
 						{
 							key: "overview",
 							label: strings("page.reports.sales.tab.overview"),
+						},
+						{
+							key: "ticketTypes",
+							label: strings("page.reports.sales.tab.ticketTypes"),
 						},
 						{
 							key: "channels",
@@ -457,6 +469,86 @@ const SalesReportView = ({ report }) => {
 					</div>
 				)}
 
+				{tab === "ticketTypes" && (
+					<div className="overflow-hidden rounded-xl border border-slate-200">
+						<table className="w-full text-sm">
+							<thead>
+								<tr className="border-b border-slate-200 bg-slate-50">
+									<th className="px-4 py-3 text-left font-medium text-slate-600">
+										{strings("page.reports.sales.col.ticketType")}
+									</th>
+									<th className="px-4 py-3 text-right font-medium text-slate-600">
+										{strings("page.reports.sales.col.ticketsSold")}
+									</th>
+									<th className="px-4 py-3 text-right font-medium text-slate-600">
+										{strings("page.reports.sales.col.collected")}
+									</th>
+									<th className="px-4 py-3 text-right font-medium text-slate-600">
+										{strings("page.reports.sales.col.share")}
+									</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-slate-100">
+								{breakdown.length === 0 ? (
+									<tr>
+										<td
+											colSpan={4}
+											className="px-4 py-8 text-center text-slate-500"
+										>
+											{strings("page.reports.sales.ticketTypes.empty")}
+										</td>
+									</tr>
+								) : (
+									breakdown.map((b, i) => {
+										const share = breakdownRevenueTotal
+											? (Number(b.revenue) / breakdownRevenueTotal) * 100
+											: 0;
+										const color =
+											CHANNEL_COLORS[i % CHANNEL_COLORS.length];
+										return (
+											<tr
+												key={b.product ?? b.name ?? i}
+												className="hover:bg-slate-50/60"
+											>
+												<td className="px-4 py-3">
+													<span className="inline-flex items-center gap-2">
+														<span
+															className="inline-block h-2.5 w-2.5 rounded-sm"
+															style={{ backgroundColor: color }}
+															aria-hidden
+														/>
+														<span className="font-medium text-slate-900">
+															{b.name ?? "—"}
+														</span>
+													</span>
+												</td>
+												<td className="px-4 py-3 text-right font-medium text-slate-900">
+													{Number(b.count ?? 0).toLocaleString()}
+												</td>
+												<td className="px-4 py-3 text-right font-medium text-slate-900">
+													{formatCurrency(Number(b.revenue) || 0, currency)}
+												</td>
+												<td className="px-4 py-3 text-right text-slate-600">
+													{share.toFixed(1)}%
+													<div className="mt-1 h-1.5 w-full rounded-full bg-slate-100">
+														<div
+															className="h-1.5 rounded-full"
+															style={{
+																width: `${share}%`,
+																backgroundColor: color,
+															}}
+														/>
+													</div>
+												</td>
+											</tr>
+										);
+									})
+								)}
+							</tbody>
+						</table>
+					</div>
+				)}
+
 				{tab === "channels" && (
 					<div className="space-y-4">
 						{channels.length === 0 ? (
@@ -597,13 +689,16 @@ const SalesReportView = ({ report }) => {
 									<th className="px-4 py-3 text-right font-medium text-slate-600">
 										{strings("page.reports.sales.col.count")}
 									</th>
+									<th className="px-4 py-3 text-right font-medium text-slate-600">
+										{strings("page.reports.sales.col.revenue")}
+									</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-slate-100">
 								{raw.length === 0 ? (
 									<tr>
 										<td
-											colSpan={3}
+											colSpan={4}
 											className="px-4 py-8 text-center text-slate-500"
 										>
 											{strings("page.reports.sales.chart.empty")}
@@ -623,6 +718,9 @@ const SalesReportView = ({ report }) => {
 											</td>
 											<td className="px-4 py-2.5 text-right font-medium text-slate-900">
 												{Number(r.count ?? 0).toLocaleString()}
+											</td>
+											<td className="px-4 py-2.5 text-right font-medium text-slate-900">
+												{formatCurrency(Number(r.revenue) || 0, currency)}
 											</td>
 										</tr>
 									))

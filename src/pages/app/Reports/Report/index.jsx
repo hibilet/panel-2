@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import { Input } from "../../../../components/inputs";
 import { Modal, StatCard } from "../../../../components/shared";
-import { del, get, put } from "../../../../lib/client";
+import { del, get, post, put } from "../../../../lib/client";
 import strings, { formatCurrency } from "../../../../localization";
 import SalesReportView from "./SalesReportView";
 import AbandonmentInsights from "./shared/AbandonmentInsights";
@@ -261,6 +261,9 @@ const Report = () => {
 	const [deleteOpen, setDeleteOpen] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 
+	// Regenerate (refresh data in place from stored params)
+	const [regenerating, setRegenerating] = useState(false);
+
 	useEffect(() => {
 		if (!id) return;
 		setLoading(true);
@@ -321,6 +324,18 @@ const Report = () => {
 			// toast handled by client
 		} finally {
 			setDeleting(false);
+		}
+	};
+
+	const handleRegenerate = async () => {
+		setRegenerating(true);
+		try {
+			const res = await post(`/reports/${id}/regenerate`);
+			if (res?.data) setReport(res.data);
+		} catch {
+			// toast handled by client
+		} finally {
+			setRegenerating(false);
 		}
 	};
 
@@ -414,6 +429,20 @@ const Report = () => {
 					</p>
 				</div>
 				<div className="report-actions flex shrink-0 gap-2">
+					<button
+						type="button"
+						onClick={handleRegenerate}
+						disabled={regenerating}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<i
+							className={`fa-solid fa-arrows-rotate ${regenerating ? "fa-spin" : ""}`}
+							aria-hidden
+						/>
+						{regenerating
+							? strings("page.reports.regenerating")
+							: strings("page.reports.regenerate")}
+					</button>
 					<button
 						type="button"
 						onClick={openPrintView}
