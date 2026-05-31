@@ -3,13 +3,11 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 import { useParams } from "wouter";
 import {
 	Area,
-	AreaChart,
 	Bar,
 	BarChart,
 	Cell,
 	CartesianGrid,
 	ComposedChart,
-	Legend,
 	Line,
 	ReferenceLine,
 	Tooltip,
@@ -64,7 +62,10 @@ const aggregateByBucket = (rows, key) => {
 		const raw = r?.[key];
 		if (raw == null) continue;
 		const k = key === "hour" ? padHour(raw) : String(raw);
-		m.set(k, (m.get(k) ?? 0) + (Number(r?.count) || 0));
+		const cur = m.get(k) ?? { count: 0, revenue: 0 };
+		cur.count += Number(r?.count) || 0;
+		cur.revenue += Number(r?.revenue) || 0;
+		m.set(k, cur);
 	}
 	return m;
 };
@@ -76,8 +77,9 @@ const buildHourly = (raw, leads) => {
 		const key = padHour(h);
 		return {
 			label: `${key}:00`,
-			reservations: r.get(key) ?? 0,
-			leads: l.get(key) ?? 0,
+			reservations: r.get(key)?.count ?? 0,
+			revenue: r.get(key)?.revenue ?? 0,
+			leads: l.get(key)?.count ?? 0,
 		};
 	});
 };
@@ -85,25 +87,25 @@ const buildHourly = (raw, leads) => {
 const buildDaily = (raw, leads, start, end) => {
 	const r = aggregateByBucket(raw, "day");
 	const l = aggregateByBucket(leads, "day");
+	const keys = Array.from(new Set([...r.keys(), ...l.keys()])).sort();
+	if (keys.length === 0) return [];
+	const earliest = dayjs(keys[0]);
 	const s = start ? dayjs(start) : null;
 	const e = end ? dayjs(end) : null;
-	if (!s?.isValid?.() || !e?.isValid?.()) {
-		const keys = Array.from(new Set([...r.keys(), ...l.keys()])).sort();
-		return keys.map((k) => ({
-			label: dayjs(k).format("D MMM"),
-			reservations: r.get(k) ?? 0,
-			leads: l.get(k) ?? 0,
-		}));
-	}
+	// Cap the lower bound to the earliest day that actually has data so the
+	// chart doesn't pad leading empty days before the first sale.
+	const from = s?.isValid?.() && s.isAfter(earliest) ? s : earliest;
+	const to = e?.isValid?.() ? e : dayjs(keys[keys.length - 1]);
 	const out = [];
-	let cur = s.startOf("day");
-	const last = e.startOf("day");
+	let cur = from.startOf("day");
+	const last = to.startOf("day");
 	while (cur.isBefore(last) || cur.isSame(last, "day")) {
 		const k = cur.format("YYYY-MM-DD");
 		out.push({
 			label: cur.format("D MMM"),
-			reservations: r.get(k) ?? 0,
-			leads: l.get(k) ?? 0,
+			reservations: r.get(k)?.count ?? 0,
+			revenue: r.get(k)?.revenue ?? 0,
+			leads: l.get(k)?.count ?? 0,
 		});
 		cur = cur.add(1, "day");
 	}
@@ -114,11 +116,24 @@ const aggregateByChannel = (rows) => {
 	const m = new Map();
 	for (const r of rows ?? []) {
 		const name = r?.name ?? "—";
-		m.set(name, (m.get(name) ?? 0) + (Number(r?.count) || 0));
+		const cur = m.get(name) ?? { count: 0, revenue: 0 };
+		cur.count += Number(r?.count) || 0;
+		cur.revenue += Number(r?.revenue) || 0;
+		m.set(name, cur);
 	}
 	return Array.from(m.entries())
-		.map(([name, count]) => ({ name, count }))
+		.map(([name, v]) => ({ name, count: v.count, revenue: v.revenue }))
 		.sort((a, b) => b.count - a.count);
+};
+
+const sumField = (rows, field) =>
+	(rows ?? []).reduce((s, r) => s + (Number(r?.[field]) || 0), 0);
+
+const abbrevNumber = (v) => {
+	const n = Number(v) || 0;
+	if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+	if (Math.abs(n) >= 1_000) return `${Math.round(n / 1_000)}k`;
+	return String(Math.round(n));
 };
 
 // ---------- shared layout primitives ----------
@@ -144,6 +159,8 @@ const SalesPrint = ({ report }) => {
 	const isHourly = period === "daily";
 	const raw = report?.raw_data ?? [];
 	const leads = report?.leads_data ?? [];
+	const breakdown = report?.breakdown ?? [];
+	const currency = report?.params?.currency;
 
 	const chartData = isHourly
 		? buildHourly(raw, leads)
@@ -151,6 +168,12 @@ const SalesPrint = ({ report }) => {
 	const channels = aggregateByChannel(raw);
 	const channelTotal = channels.reduce((s, c) => s + c.count, 0);
 	const totalReservations = sumCount(raw);
+	const totalRevenue = sumField(raw, "revenue");
+	const breakdownRevenueTotal = sumField(breakdown, "revenue");
+	const showsRevenue = totalRevenue > 0;
+	// A single channel makes the breakdown redundant - hide it.
+	const showsChannels = channels.length > 1;
+	const revenueLabel = strings("page.reports.sales.col.revenue");
 	const peak = chartData.reduce(
 		(best, cur) =>
 			cur.reservations > (best?.reservations ?? 0) ? cur : best,
@@ -166,8 +189,8 @@ const SalesPrint = ({ report }) => {
 						value={totalReservations.toLocaleString()}
 					/>
 					<Stat
-						label={strings("page.reports.sales.stats.channels")}
-						value={channels.length}
+						label={strings("page.reports.sales.stats.collected")}
+						value={formatCurrency(totalRevenue, currency)}
 					/>
 					<Stat
 						label={
@@ -187,48 +210,34 @@ const SalesPrint = ({ report }) => {
 						: strings("page.reports.sales.chart.byDay")
 				}
 			>
-				{isHourly ? (
-					<BarChart
-						width={PAGE_WIDTH}
-						height={CHART_HEIGHT}
-						data={chartData}
-						margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
-					>
-						<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-						<XAxis
-							dataKey="label"
-							tick={{ fontSize: 9, fill: "#475569" }}
-							interval={2}
-						/>
-						<YAxis tick={{ fontSize: 9, fill: "#475569" }} allowDecimals={false} />
+				<ComposedChart
+					width={PAGE_WIDTH}
+					height={CHART_HEIGHT}
+					data={chartData}
+					margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+				>
+					<defs>
+						<linearGradient id="salesArea" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stopColor="#0f172a" stopOpacity={0.3} />
+							<stop offset="100%" stopColor="#0f172a" stopOpacity={0} />
+						</linearGradient>
+					</defs>
+					<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+					<XAxis
+						dataKey="label"
+						tick={{ fontSize: 9, fill: "#475569" }}
+						interval={isHourly ? 2 : "preserveStartEnd"}
+						minTickGap={isHourly ? 0 : 24}
+					/>
+					<YAxis tick={{ fontSize: 9, fill: "#475569" }} allowDecimals={false} />
+					{isHourly ? (
 						<Bar
-					dataKey="reservations"
-					fill="#0f172a"
-					radius={[3, 3, 0, 0]}
-					isAnimationActive={false}
-				/>
-					</BarChart>
-				) : (
-					<AreaChart
-						width={PAGE_WIDTH}
-						height={CHART_HEIGHT}
-						data={chartData}
-						margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
-					>
-						<defs>
-							<linearGradient id="salesArea" x1="0" y1="0" x2="0" y2="1">
-								<stop offset="0%" stopColor="#0f172a" stopOpacity={0.3} />
-								<stop offset="100%" stopColor="#0f172a" stopOpacity={0} />
-							</linearGradient>
-						</defs>
-						<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-						<XAxis
-							dataKey="label"
-							tick={{ fontSize: 9, fill: "#475569" }}
-							interval="preserveStartEnd"
-							minTickGap={24}
+							dataKey="reservations"
+							fill="#0f172a"
+							radius={[3, 3, 0, 0]}
+							isAnimationActive={false}
 						/>
-						<YAxis tick={{ fontSize: 9, fill: "#475569" }} allowDecimals={false} />
+					) : (
 						<Area
 							type="monotone"
 							dataKey="reservations"
@@ -237,11 +246,97 @@ const SalesPrint = ({ report }) => {
 							strokeWidth={1.5}
 							isAnimationActive={false}
 						/>
-					</AreaChart>
-				)}
+					)}
+				</ComposedChart>
 			</Section>
 
-			{channels.length > 0 && (
+			{showsRevenue && (
+				<Section title={revenueLabel}>
+					<ComposedChart
+						width={PAGE_WIDTH}
+						height={CHART_HEIGHT}
+						data={chartData}
+						margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+					>
+						<defs>
+							<linearGradient id="revenueArea" x1="0" y1="0" x2="0" y2="1">
+								<stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+								<stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+							</linearGradient>
+						</defs>
+						<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+						<XAxis
+							dataKey="label"
+							tick={{ fontSize: 9, fill: "#475569" }}
+							interval={isHourly ? 2 : "preserveStartEnd"}
+							minTickGap={isHourly ? 0 : 24}
+						/>
+						<YAxis
+							tick={{ fontSize: 9, fill: "#475569" }}
+							tickFormatter={abbrevNumber}
+						/>
+						{isHourly ? (
+							<Bar
+								dataKey="revenue"
+								fill="#10b981"
+								radius={[3, 3, 0, 0]}
+								isAnimationActive={false}
+							/>
+						) : (
+							<Area
+								type="monotone"
+								dataKey="revenue"
+								stroke="#10b981"
+								fill="url(#revenueArea)"
+								strokeWidth={1.5}
+								isAnimationActive={false}
+							/>
+						)}
+					</ComposedChart>
+				</Section>
+			)}
+
+			{breakdown.length > 1 && (
+				<Section title={strings("page.reports.sales.tab.ticketTypes")}>
+					<table className="data-table">
+						<thead>
+							<tr>
+								<th>{strings("page.reports.sales.col.ticketType")}</th>
+								<th className="num">
+									{strings("page.reports.sales.col.ticketsSold")}
+								</th>
+								<th className="num">
+									{strings("page.reports.sales.col.collected")}
+								</th>
+								<th className="num">
+									{strings("page.reports.sales.col.share")}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{breakdown.map((b, i) => {
+								const share = breakdownRevenueTotal
+									? (Number(b.revenue) / breakdownRevenueTotal) * 100
+									: 0;
+								return (
+									<tr key={b.product ?? b.name ?? i}>
+										<td>{b.name ?? "—"}</td>
+										<td className="num">
+											{Number(b.count ?? 0).toLocaleString()}
+										</td>
+										<td className="num">
+											{formatCurrency(Number(b.revenue) || 0, currency)}
+										</td>
+										<td className="num">{share.toFixed(1)}%</td>
+									</tr>
+								);
+							})}
+						</tbody>
+					</table>
+				</Section>
+			)}
+
+			{showsChannels && (
 				<Section title={strings("page.reports.sales.byChannel.title")}>
 					<BarChart
 						width={PAGE_WIDTH}
@@ -287,6 +382,11 @@ const SalesPrint = ({ report }) => {
 								<th className="num">
 									{strings("page.reports.sales.col.count")}
 								</th>
+								{showsRevenue && (
+									<th className="num">
+										{strings("page.reports.sales.col.revenue")}
+									</th>
+								)}
 								<th className="num">
 									{strings("page.reports.sales.col.share")}
 								</th>
@@ -301,6 +401,11 @@ const SalesPrint = ({ report }) => {
 									<tr key={c.name}>
 										<td>{c.name}</td>
 										<td className="num">{c.count.toLocaleString()}</td>
+										{showsRevenue && (
+											<td className="num">
+												{formatCurrency(c.revenue || 0, currency)}
+											</td>
+										)}
 										<td className="num">{share.toFixed(1)}%</td>
 									</tr>
 								);
@@ -309,6 +414,45 @@ const SalesPrint = ({ report }) => {
 					</table>
 				</Section>
 			)}
+
+			<Section title={strings("page.reports.sales.tab.raw")}>
+				<table className="data-table">
+					<thead>
+						<tr>
+							<th>{strings("page.reports.sales.col.channel")}</th>
+							<th>
+								{isHourly
+									? strings("page.reports.sales.col.hour")
+									: strings("page.reports.sales.col.day")}
+							</th>
+							<th className="num">
+								{strings("page.reports.sales.col.count")}
+							</th>
+							<th className="num">
+								{strings("page.reports.sales.col.revenue")}
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						{raw.map((r, i) => (
+							<tr key={`${r.name}-${r.hour ?? r.day}-${i}`}>
+								<td>{r.name}</td>
+								<td>
+									{isHourly
+										? `${padHour(r.hour)}:00`
+										: dayjs(r.day).format("D MMM YYYY")}
+								</td>
+								<td className="num">
+									{Number(r.count ?? 0).toLocaleString()}
+								</td>
+								<td className="num">
+									{formatCurrency(Number(r.revenue) || 0, currency)}
+								</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</Section>
 		</>
 	);
 };

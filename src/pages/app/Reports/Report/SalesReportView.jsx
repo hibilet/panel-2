@@ -43,7 +43,10 @@ const aggregateByBucket = (rows, bucketKey) => {
 		const raw = r?.[bucketKey];
 		if (raw == null) continue;
 		const key = bucketKey === "hour" ? padHour(raw) : String(raw);
-		map.set(key, (map.get(key) ?? 0) + (Number(r?.count) || 0));
+		const cur = map.get(key) ?? { count: 0, revenue: 0 };
+		cur.count += Number(r?.count) || 0;
+		cur.revenue += Number(r?.revenue) || 0;
+		map.set(key, cur);
 	}
 	return map;
 };
@@ -56,8 +59,9 @@ const buildHourlyChart = (raw, leads) => {
 		return {
 			label: `${key}:00`,
 			key,
-			reservations: rawByHour.get(key) ?? 0,
-			leads: leadsByHour.get(key) ?? 0,
+			reservations: rawByHour.get(key)?.count ?? 0,
+			revenue: rawByHour.get(key)?.revenue ?? 0,
+			leads: leadsByHour.get(key)?.count ?? 0,
 		};
 	});
 };
@@ -65,29 +69,31 @@ const buildHourlyChart = (raw, leads) => {
 const buildDailyChart = (raw, leads, start, end) => {
 	const rawByDay = aggregateByBucket(raw, "day");
 	const leadsByDay = aggregateByBucket(leads, "day");
+	const dataKeys = Array.from(
+		new Set([...rawByDay.keys(), ...leadsByDay.keys()]),
+	).sort();
+	if (dataKeys.length === 0) return [];
+	const earliest = dayjs(dataKeys[0]);
 	const startDate = start ? dayjs(start) : null;
 	const endDate = end ? dayjs(end) : null;
-	if (!startDate?.isValid() || !endDate?.isValid()) {
-		const allKeys = Array.from(
-			new Set([...(rawByDay.keys() ?? []), ...(leadsByDay.keys() ?? [])]),
-		).sort();
-		return allKeys.map((key) => ({
-			label: dayjs(key).format("D MMM"),
-			key,
-			reservations: rawByDay.get(key) ?? 0,
-			leads: leadsByDay.get(key) ?? 0,
-		}));
-	}
+	// Cap the lower bound to the earliest day that actually has data so the
+	// chart doesn't pad leading empty days before the first sale.
+	const from =
+		startDate?.isValid() && startDate.isAfter(earliest) ? startDate : earliest;
+	const to = endDate?.isValid()
+		? endDate
+		: dayjs(dataKeys[dataKeys.length - 1]);
 	const days = [];
-	let cur = startDate.startOf("day");
-	const last = endDate.startOf("day");
+	let cur = from.startOf("day");
+	const last = to.startOf("day");
 	while (cur.isBefore(last) || cur.isSame(last, "day")) {
 		const key = cur.format("YYYY-MM-DD");
 		days.push({
 			label: cur.format("D MMM"),
 			key,
-			reservations: rawByDay.get(key) ?? 0,
-			leads: leadsByDay.get(key) ?? 0,
+			reservations: rawByDay.get(key)?.count ?? 0,
+			revenue: rawByDay.get(key)?.revenue ?? 0,
+			leads: leadsByDay.get(key)?.count ?? 0,
 		});
 		cur = cur.add(1, "day");
 	}
@@ -113,9 +119,11 @@ const buildWeeklyChart = (dailyChart) => {
 			start: wkStart,
 			end: wkStart.add(6, "day"),
 			reservations: 0,
+			revenue: 0,
 			leads: 0,
 		};
 		cur.reservations += d.reservations || 0;
+		cur.revenue += d.revenue || 0;
 		cur.leads += d.leads || 0;
 		map.set(key, cur);
 	}
@@ -131,11 +139,23 @@ const aggregateByChannel = (rows) => {
 	const map = new Map();
 	for (const r of rows ?? []) {
 		const name = r?.name ?? "—";
-		map.set(name, (map.get(name) ?? 0) + (Number(r?.count) || 0));
+		const cur = map.get(name) ?? { count: 0, revenue: 0 };
+		cur.count += Number(r?.count) || 0;
+		cur.revenue += Number(r?.revenue) || 0;
+		map.set(name, cur);
 	}
 	return Array.from(map.entries())
-		.map(([name, count]) => ({ name, count }))
+		.map(([name, v]) => ({ name, count: v.count, revenue: v.revenue }))
 		.sort((a, b) => b.count - a.count);
+};
+
+// Axis ticks for the revenue series - keep them short so the right-hand
+// scale doesn't crowd the plot.
+const abbrevNumber = (v) => {
+	const n = Number(v) || 0;
+	if (Math.abs(n) >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+	if (Math.abs(n) >= 1_000) return `${Math.round(n / 1_000)}k`;
+	return String(Math.round(n));
 };
 
 const SalesReportView = ({ report }) => {
@@ -163,11 +183,21 @@ const SalesReportView = ({ report }) => {
 
 	const channels = useMemo(() => aggregateByChannel(raw), [raw]);
 	const channelTotal = channels.reduce((s, c) => s + c.count, 0);
+	// A single channel makes the channel breakdown redundant - hide it.
+	const showsChannels = channels.length > 1;
 
 	const currency = report?.params?.currency;
 	const breakdown = report?.breakdown ?? [];
+	// A single ticket type makes the breakdown redundant - hide it.
+	const showsTicketTypes = breakdown.length > 1;
 	const totalRevenue = sumField(raw, "revenue");
 	const breakdownRevenueTotal = sumField(breakdown, "revenue");
+	const showsRevenue = totalRevenue > 0;
+	const revenueLabel = strings("page.reports.sales.col.revenue");
+	const reservationsLabel = strings("page.reports.sales.legendReservations");
+	const leadsLabel = strings("page.reports.sales.legendLeads");
+	const revenueTooltipFormatter = (value) =>
+		formatCurrency(Number(value) || 0, currency);
 
 	const totalReservations = sumCount(raw);
 	const totalLeads = sumCount(leads);
@@ -230,14 +260,22 @@ const SalesReportView = ({ report }) => {
 							key: "overview",
 							label: strings("page.reports.sales.tab.overview"),
 						},
-						{
-							key: "ticketTypes",
-							label: strings("page.reports.sales.tab.ticketTypes"),
-						},
-						{
-							key: "channels",
-							label: strings("page.reports.sales.tab.byChannel"),
-						},
+						...(showsTicketTypes
+							? [
+									{
+										key: "ticketTypes",
+										label: strings("page.reports.sales.tab.ticketTypes"),
+									},
+								]
+							: []),
+						...(showsChannels
+							? [
+									{
+										key: "channels",
+										label: strings("page.reports.sales.tab.byChannel"),
+									},
+								]
+							: []),
 						{
 							key: "raw",
 							label: strings("page.reports.sales.tab.raw"),
@@ -259,6 +297,7 @@ const SalesReportView = ({ report }) => {
 				</div>
 
 				{tab === "overview" && (
+					<div className="space-y-6">
 					<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 						<div className="mb-2 flex items-center justify-between">
 							<h3 className="text-sm font-medium text-slate-700">
@@ -313,14 +352,14 @@ const SalesReportView = ({ report }) => {
 											)}
 											<Bar
 												dataKey="reservations"
-												name={strings("page.reports.sales.legendReservations")}
+												name={reservationsLabel}
 												fill="#0f172a"
 												radius={[4, 4, 0, 0]}
 											/>
 											{showsLeads && (
 												<Bar
 													dataKey="leads"
-													name={strings("page.reports.sales.legendLeads")}
+													name={leadsLabel}
 													fill="#0ea5e9"
 													radius={[4, 4, 0, 0]}
 												/>
@@ -339,16 +378,8 @@ const SalesReportView = ({ report }) => {
 													x2="0"
 													y2="1"
 												>
-													<stop
-														offset="0%"
-														stopColor="#0f172a"
-														stopOpacity={0.25}
-													/>
-													<stop
-														offset="100%"
-														stopColor="#0f172a"
-														stopOpacity={0}
-													/>
+													<stop offset="0%" stopColor="#0f172a" stopOpacity={0.25} />
+													<stop offset="100%" stopColor="#0f172a" stopOpacity={0} />
 												</linearGradient>
 												<linearGradient
 													id="leadsGradient"
@@ -357,16 +388,8 @@ const SalesReportView = ({ report }) => {
 													x2="0"
 													y2="1"
 												>
-													<stop
-														offset="0%"
-														stopColor="#0ea5e9"
-														stopOpacity={0.25}
-													/>
-													<stop
-														offset="100%"
-														stopColor="#0ea5e9"
-														stopOpacity={0}
-													/>
+													<stop offset="0%" stopColor="#0ea5e9" stopOpacity={0.25} />
+													<stop offset="100%" stopColor="#0ea5e9" stopOpacity={0} />
 												</linearGradient>
 											</defs>
 											<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -398,7 +421,7 @@ const SalesReportView = ({ report }) => {
 											<Area
 												type="monotone"
 												dataKey="reservations"
-												name={strings("page.reports.sales.legendReservations")}
+												name={reservationsLabel}
 												stroke="#0f172a"
 												strokeWidth={2}
 												fill="url(#reservationsGradient)"
@@ -409,7 +432,7 @@ const SalesReportView = ({ report }) => {
 												<Area
 													type="monotone"
 													dataKey="leads"
-													name={strings("page.reports.sales.legendLeads")}
+													name={leadsLabel}
 													stroke="#0ea5e9"
 													strokeWidth={2}
 													fill="url(#leadsGradient)"
@@ -455,7 +478,7 @@ const SalesReportView = ({ report }) => {
 											<Line
 												type="monotone"
 												dataKey="reservations"
-												name={strings("page.reports.sales.legendReservations")}
+												name={reservationsLabel}
 												stroke="#0f172a"
 												strokeWidth={2}
 												dot={{ r: 3 }}
@@ -466,10 +489,110 @@ const SalesReportView = ({ report }) => {
 								</div>
 							</div>
 						)}
+						</div>
+
+						{/* Revenue - kept on its own chart so the money scale never
+						    competes with the reservation-count scale. */}
+						{showsRevenue && chartData.length > 0 && (
+							<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+								<div className="mb-2 flex items-center justify-between">
+									<h3 className="text-sm font-medium text-slate-700">
+										{revenueLabel}
+									</h3>
+									<span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+										{periodLabel}
+									</span>
+								</div>
+								<div className="h-56 w-full sm:h-72">
+									<ResponsiveContainer width="100%" height="100%">
+										{isHourly ? (
+											<BarChart
+												data={chartData}
+												margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+											>
+												<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+												<XAxis
+													dataKey="label"
+													tick={{ fontSize: 11, fill: "#64748b" }}
+													interval={1}
+												/>
+												<YAxis
+													tick={{ fontSize: 11, fill: "#64748b" }}
+													tickFormatter={abbrevNumber}
+												/>
+												<Tooltip
+													formatter={revenueTooltipFormatter}
+													contentStyle={{
+														backgroundColor: "white",
+														border: "1px solid #e2e8f0",
+														borderRadius: "8px",
+														fontSize: "12px",
+													}}
+												/>
+												<Bar
+													dataKey="revenue"
+													name={revenueLabel}
+													fill="#10b981"
+													radius={[4, 4, 0, 0]}
+												/>
+											</BarChart>
+										) : (
+											<AreaChart
+												data={chartData}
+												margin={{ top: 5, right: 16, left: 0, bottom: 5 }}
+											>
+												<defs>
+													<linearGradient
+														id="revenueGradient"
+														x1="0"
+														y1="0"
+														x2="0"
+														y2="1"
+													>
+														<stop offset="0%" stopColor="#10b981" stopOpacity={0.3} />
+														<stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+													</linearGradient>
+												</defs>
+												<CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+												<XAxis
+													dataKey="label"
+													tick={{ fontSize: 11, fill: "#64748b" }}
+													interval="preserveStartEnd"
+													minTickGap={24}
+												/>
+												<YAxis
+													tick={{ fontSize: 11, fill: "#64748b" }}
+													tickFormatter={abbrevNumber}
+												/>
+												<Tooltip
+													formatter={revenueTooltipFormatter}
+													contentStyle={{
+														backgroundColor: "white",
+														border: "1px solid #e2e8f0",
+														borderRadius: "8px",
+														fontSize: "12px",
+													}}
+												/>
+												<Area
+													type="monotone"
+													dataKey="revenue"
+													name={revenueLabel}
+													stroke="#10b981"
+													strokeWidth={2}
+													fill="url(#revenueGradient)"
+													dot={chartData.length <= 60 ? { r: 2 } : false}
+													activeDot={{ r: 4 }}
+												/>
+											</AreaChart>
+										)}
+									</ResponsiveContainer>
+								</div>
+							</div>
+						)}
 					</div>
 				)}
 
-				{tab === "ticketTypes" && (
+				{tab === "ticketTypes" && showsTicketTypes && (
 					<div className="overflow-hidden rounded-xl border border-slate-200">
 						<table className="w-full text-sm">
 							<thead>
@@ -549,7 +672,7 @@ const SalesReportView = ({ report }) => {
 					</div>
 				)}
 
-				{tab === "channels" && (
+				{tab === "channels" && showsChannels && (
 					<div className="space-y-4">
 						{channels.length === 0 ? (
 							<div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-slate-500">
@@ -619,6 +742,11 @@ const SalesReportView = ({ report }) => {
 												<th className="px-4 py-3 text-right font-medium text-slate-600">
 													{strings("page.reports.sales.col.count")}
 												</th>
+												{showsRevenue && (
+													<th className="px-4 py-3 text-right font-medium text-slate-600">
+														{strings("page.reports.sales.col.revenue")}
+													</th>
+												)}
 												<th className="px-4 py-3 text-right font-medium text-slate-600">
 													{strings("page.reports.sales.col.share")}
 												</th>
@@ -649,6 +777,11 @@ const SalesReportView = ({ report }) => {
 														<td className="px-4 py-3 text-right font-medium text-slate-900">
 															{c.count.toLocaleString()}
 														</td>
+														{showsRevenue && (
+															<td className="px-4 py-3 text-right font-medium text-slate-900">
+																{formatCurrency(c.revenue || 0, currency)}
+															</td>
+														)}
 														<td className="px-4 py-3 text-right text-slate-600">
 															{share.toFixed(1)}%
 															<div className="mt-1 h-1.5 w-full rounded-full bg-slate-100">
