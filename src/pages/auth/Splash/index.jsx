@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useSearch } from "wouter";
 import Input from "../../../components/inputs/Input";
-import { post } from "../../../lib/client";
+import { get, post } from "../../../lib/client";
 import { getRealm } from "../../../lib/realm";
 import { setToken } from "../../../lib/storage";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const SHOW_STRIPE = (import.meta.env.VITE_AUTH_MODE ?? "").toLowerCase() !== "off";
+// dev:local runs `vite --mode loc`; only then expose the one-click dev login.
+const DEV_LOGIN = import.meta.env.MODE === "loc";
 
 const Splash = () => {
 	const search = useSearch();
@@ -68,6 +70,20 @@ const Splash = () => {
 		const realm = getRealm();
 		const qs = realm ? `?realm=${encodeURIComponent(realm)}` : "";
 		window.location.href = `${API_BASE_URL}/auth/stripe${qs}`;
+	};
+
+	const handleDevLogin = async (role) => {
+		setError(null);
+		setLoading(true);
+		try {
+			const res = await get(`/auth/dev/login?role=${role}`);
+			const token = res?.data?.token;
+			if (token) setToken(token);
+			else setError("No dev token received");
+		} catch (err) {
+			setError(err?.message ?? "Dev login failed");
+			setLoading(false);
+		}
 	};
 
 	return (
@@ -153,6 +169,32 @@ const Splash = () => {
 							← Use different email
 						</button>
 					</form>
+				)}
+
+				{DEV_LOGIN && (
+					<div className="mt-6 border-t border-dashed border-amber-300 pt-4">
+						<p className="mb-2 text-center text-xs font-medium text-amber-600">
+							Local dev login (no OTP)
+						</p>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={() => handleDevLogin("admin")}
+								disabled={loading}
+								className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+							>
+								Admin
+							</button>
+							<button
+								type="button"
+								onClick={() => handleDevLogin("merchant")}
+								disabled={loading}
+								className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
+							>
+								Merchant
+							</button>
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

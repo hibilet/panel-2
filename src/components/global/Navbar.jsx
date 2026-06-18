@@ -70,6 +70,12 @@ const navItems = [
 		cap: { family: "reporting" },
 	},
 	{
+		path: "/analytics",
+		labelKey: "nav.analytics",
+		icon: "fa-chart-pie",
+		acl: ["merchant", "admin"],
+	},
+	{
 		path: "/tiers",
 		labelKey: "nav.tiers",
 		icon: "fa-layer-group",

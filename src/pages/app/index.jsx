@@ -5,6 +5,7 @@ import Navbar from "../../components/global/Navbar";
 import SellerSetupBanner from "../../components/global/SellerSetupBanner";
 import { useApp } from "../../context";
 import Accounts from "./Accounts";
+import Analytics from "./Analytics";
 import Dashboard from "./Dashboard";
 import Events from "./Events";
 import Invoices from "./Invoices";
@@ -63,6 +64,7 @@ const App = () => {
 					<Route path="/transactions/:id" component={Transactions} />
 					<Route path="/links/:id" component={Links} />
 					<Route path="/links" component={Links} />
+					<Route path="/analytics" component={Analytics} />
 					<Route path="/reports" component={Reports} />
 					<Route path="/reports/:id" component={Report} />
 					<Route path="/venues/:id" component={Venues} />
