@@ -12,6 +12,7 @@ import {
 	YAxis,
 } from "recharts";
 import { useApp } from "../../../context";
+import { ExpiryBadge, Info } from "../../../components/shared";
 import { get, getText } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
 
@@ -82,6 +83,24 @@ const Stat = ({ label, value, sub, tone, info }) => (
 
 const NO_SHOW_INFO =
 	"Tickets sold but never scanned at the gate, for events that have ended. Only meaningful if you scan tickets with the Reader - unscanned events read as 100% no-show.";
+const SEGMENT_INFO = {
+	whale: "Highest lifetime spend - your most valuable buyers.",
+	fan: "Bought tickets to 3+ different events - loyal followers.",
+	repeat: "Came back for a second event.",
+	hesitant: "Abandoned 2+ baskets - interested but wavering. Prime win-back targets.",
+	direct: "Bought quickly with no abandoned baskets - decisive first-timers.",
+	one_time: "Bought a single event, then stopped.",
+};
+const INFO = {
+	buyers: "Distinct customers with at least one successful purchase in scope.",
+	returning: "Buyers who came back - whales, fans and repeat customers combined.",
+	winback: "Share of previously-churned leads who later purchased. Your remarketing effectiveness.",
+	tickets: "Successful + scanned tickets, summed over the selected range.",
+	sellThrough: "Tickets sold vs total capacity across the events in scope.",
+	refund: "Share of an event's reservations that were refunded.",
+	trend: "Tickets confirmed per day. For a single event this spans its full on-sale lifetime.",
+	segment: "Behavioral group derived from purchase history and checkout journey.",
+};
 
 const Analytics = () => {
 	const { sales: allSales } = useApp();
@@ -146,10 +165,13 @@ const Analytics = () => {
 	useEffect(() => {
 		let alive = true;
 		setScopeLoading(true);
+		// A single event shows its FULL on-sale lifetime (start->end), not a
+		// rolling window - so pull wide and let the event's days define the span.
+		const effectiveDays = scopeSale !== "all" ? 1825 : rangeDays;
 		const saleQs = scopeSale !== "all" ? `&sale=${scopeSale}` : "";
 		Promise.all([
 			get(`/analytics/segments?${scopeSale !== "all" ? `sale=${scopeSale}` : ""}`),
-			get(`/analytics/sales-daily?days=${rangeDays}${saleQs}`),
+			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
 		])
 			.then(([s, d]) => {
 				if (!alive) return;
@@ -244,7 +266,7 @@ const Analytics = () => {
 							</option>
 						))}
 					</select>
-					{tab === "sales" && (
+					{tab === "sales" && scopeSale === "all" && (
 						<div className="inline-flex overflow-hidden rounded-lg border border-slate-300">
 							{RANGES.map((r) => (
 								<button
@@ -269,9 +291,9 @@ const Analytics = () => {
 			{tab === "audience" ? (
 				<>
 					<div className="grid grid-cols-3 gap-3">
-						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} />
-						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" />
-						<Stat label="Win-back" value={`${winbackAgg.rate}%`} sub={`${winbackAgg.recovered}/${winbackAgg.churned}`} />
+						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
+						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={INFO.returning} />
+						<Stat label="Win-back" value={`${winbackAgg.rate}%`} sub={`${winbackAgg.recovered}/${winbackAgg.churned}`} info={INFO.winback} />
 					</div>
 
 					<div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -326,6 +348,7 @@ const Analytics = () => {
 											<span className="flex items-center gap-2">
 												<span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: SEGMENT_COLOR[r.segment] ?? "#94a3b8" }} />
 												<span className="font-medium text-slate-700">{r.label}</span>
+												<Info text={SEGMENT_INFO[r.segment]} />
 												<span className="text-slate-400">{r.buyers.toLocaleString()} · {pctOf(r.buyers, totalBuyers)}%</span>
 											</span>
 											<button
@@ -346,8 +369,8 @@ const Analytics = () => {
 			) : (
 				<>
 					<div className="grid grid-cols-3 gap-3">
-						<Stat label="Tickets sold" value={ticketsTotal.toLocaleString()} sub={scopeName} />
-						<Stat label="Sell-through" value={`${perf.sellThrough}%`} />
+						<Stat label="Tickets sold" value={ticketsTotal.toLocaleString()} sub={scopeName} info={INFO.tickets} />
+						<Stat label="Sell-through" value={`${perf.sellThrough}%`} info={INFO.sellThrough} />
 						<Stat label="No-show" value={`${perf.noShow}%`} tone={perf.noShow >= 20 ? "text-amber-600" : "text-slate-900"} info={NO_SHOW_INFO} />
 					</div>
 
@@ -418,7 +441,12 @@ const Analytics = () => {
 									<tbody>
 										{salesRows.slice(0, 50).map((r) => (
 											<tr key={r._id} className="border-b border-slate-100 last:border-0">
-												<td className="py-2 pr-4 font-medium text-slate-800">{r.name ?? "-"}</td>
+												<td className="py-2 pr-4 font-medium text-slate-800">
+													<span className="inline-flex items-center gap-2">
+														{r.name ?? "-"}
+														<ExpiryBadge date={r.endedAt} showDate={false} warnDays={14} />
+													</span>
+												</td>
 												<td className="py-2 pr-4 text-slate-700">{(r.sold ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{r.sellThroughPct ?? 0}%</td>
 												<td className="py-2 pr-4">

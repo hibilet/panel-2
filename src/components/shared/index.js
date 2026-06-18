@@ -8,3 +8,5 @@ export { default as PanelHeader } from "./PanelHeader";
 export { default as ImageUpload } from "./ImageUpload";
 export { default as SearchBar } from "./SearchBar";
 export { default as Markdown } from "./Markdown";
+export { default as Info } from "./Info";
+export { default as ExpiryBadge } from "./ExpiryBadge";

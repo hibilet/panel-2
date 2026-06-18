@@ -4,6 +4,7 @@ import {
 	getNotificationTypeLabel,
 } from "../../lib/notifications";
 import strings, { formatCurrency } from "../../localization";
+import ExpiryBadge from "../shared/ExpiryBadge";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
 const formatDateTime = (d) => (d ? dayjs(d).format("D MMM YYYY, HH:mm") : "—");
@@ -12,7 +13,14 @@ export const salesColumns = (extended, onDelete) => [
 	{
 		key: "startDate",
 		header: strings("table.sale.startDate"),
-		render: (r) => formatDate(r.startDate ?? r.start),
+		// Start date + an inline status flag from the event end (red Ended /
+		// amber Ending soon). Silent while the event is comfortably upcoming.
+		render: (r) => (
+			<span className="inline-flex items-center gap-2">
+				{formatDate(r.startDate ?? r.start)}
+				<ExpiryBadge date={r.end} showDate={false} />
+			</span>
+		),
 	},
 	{
 		key: "name",
