@@ -53,6 +53,12 @@ const RANGES = [
 
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
 const saleIdOf = (s) => s.id ?? s._id;
+const PAYMENT_LABEL = {
+	paypal: "PayPal", klarna: "Klarna", apple_pay: "Apple Pay", google_pay: "Google Pay",
+	card: "Card", ideal: "iDEAL", link: "Link", twint: "TWINT", bancontact: "Bancontact",
+	amazon_pay: "Amazon Pay", eps: "EPS", sofort: "Sofort", giropay: "giropay",
+};
+const paymentLabel = (k) => PAYMENT_LABEL[k] ?? (k ? k.replace(/_/g, " ") : "Unknown");
 
 const Card = ({ title, hint, action, children }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -141,6 +147,7 @@ const Analytics = () => {
 	const [pastSales, setPastSales] = useState([]);
 	const [segments, setSegments] = useState([]);
 	const [demo, setDemo] = useState(null);
+	const [payments, setPayments] = useState([]);
 	const [winback, setWinback] = useState([]);
 	const [daily, setDaily] = useState([]);
 	const [salesPerf, setSalesPerf] = useState([]);
@@ -211,12 +218,14 @@ const Analytics = () => {
 			get(`/analytics/segments?${saleParam}`),
 			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
 			get(`/analytics/demographics?${saleParam}`),
+			get(`/analytics/payments?${saleParam}`),
 		])
-			.then(([s, d, dm]) => {
+			.then(([s, d, dm, pm]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
 				setDemo(dm.data ?? null);
+				setPayments(pm.data ?? []);
 				setSelCountry(null);
 			})
 			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
@@ -430,20 +439,34 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Demographics" hint={`Who your buyers are - ${scopeName}`}>
+					<Card title="Demographics & payment" hint={`Who your buyers are - ${scopeName}`}>
 						{scopeLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
 						) : (
-							<div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-								<Dist title="Gender" info="From buyer billing profiles." rows={demo?.gender} />
-								<Dist title="Age" info="Derived from billing date of birth." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
-								<Dist
-									title="Device"
-									info="Parsed from the buyer's browser at purchase (User-Agent)."
-									rows={demo?.device}
-									empty="No device data yet."
-								/>
-							</div>
+							<>
+								<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+									<Dist title="Gender" info="From buyer billing profiles (your data)." rows={demo?.gender} />
+									<Dist title="Age" info="Derived from billing date of birth (your data)." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
+									<Dist
+										title="Device"
+										info="From the buyer's browser at purchase (User-Agent). Stripe does not expose device; this is from your own logs."
+										rows={demo?.device}
+										empty="No device data yet."
+									/>
+									<Dist
+										title="Payment method"
+										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the payment provider."
+										rows={payments}
+										labelFn={paymentLabel}
+										empty="No payment data yet."
+									/>
+								</div>
+								<p className="mt-4 text-[11px] text-slate-400">
+									Note: not every purchaser has billing or location info from the payment provider -
+									gender/age come from your own profiles, location + payment method from the provider
+									where available. Percentages are of buyers where the field exists.
+								</p>
+							</>
 						)}
 					</Card>
 
