@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import CompletionStepsWizard, {
 	shouldShowCompletionWizard,
 } from "../../../components/CompletionStepsWizard";
+import FactsBand from "../../../components/analytics/FactsBand";
 import SalesChart from "../../../components/charts/SalesChart";
 import { StatCard } from "../../../components/shared";
 import { transactionsColumns } from "../../../components/tables/columns";
@@ -348,6 +349,8 @@ const Dashboard = () => {
 					comparison={mtdProductsVsLastMonth}
 				/>
 			</div>
+
+			<FactsBand />
 
 			<SalesChart
 				data={chartData}

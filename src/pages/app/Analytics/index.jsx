@@ -55,6 +55,7 @@ const Analytics = () => {
 	const [segments, setSegments] = useState([]);
 	const [winback, setWinback] = useState([]);
 	const [daily, setDaily] = useState([]);
+	const [sales, setSales] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
 	const [exporting, setExporting] = useState(null);
@@ -85,15 +86,17 @@ const Analytics = () => {
 		let alive = true;
 		(async () => {
 			try {
-				const [s, w, d] = await Promise.all([
+				const [s, w, d, sa] = await Promise.all([
 					get("/analytics/segments"),
 					get("/analytics/winback"),
 					get("/analytics/sales-daily?days=365"),
+					get("/analytics/sales"),
 				]);
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setWinback(w.data ?? []);
 				setDaily(d.data ?? []);
+				setSales(sa.data ?? []);
 			} catch (err) {
 				if (alive) setError(err?.message ?? "Failed to load analytics");
 			} finally {
@@ -272,6 +275,47 @@ const Analytics = () => {
 											</span>
 										</td>
 										<td className="py-2 text-slate-700">{eur(r.recoveredRevenueCents)}</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
+				)}
+			</Card>
+
+			<Card title="Sales performance" hint="Sell-through, no-show and refund rate per event">
+				{sales.length === 0 ? (
+					<p className="text-sm text-slate-500">No sales yet.</p>
+				) : (
+					<div className="overflow-x-auto">
+						<table className="w-full text-sm">
+							<thead>
+								<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+									<th className="py-2 pr-4">Event</th>
+									<th className="py-2 pr-4">Sold</th>
+									<th className="py-2 pr-4">Capacity</th>
+									<th className="py-2 pr-4">Sell-through</th>
+									<th className="py-2 pr-4">No-show</th>
+									<th className="py-2">Refund</th>
+								</tr>
+							</thead>
+							<tbody>
+								{sales.slice(0, 50).map((r) => (
+									<tr key={r._id} className="border-b border-slate-100 last:border-0">
+										<td className="py-2 pr-4 font-medium text-slate-800">{r.name ?? "-"}</td>
+										<td className="py-2 pr-4 text-slate-700">{(r.sold ?? 0).toLocaleString()}</td>
+										<td className="py-2 pr-4 text-slate-500">{(r.capacity ?? 0).toLocaleString()}</td>
+										<td className="py-2 pr-4 text-slate-700">{r.sellThroughPct ?? 0}%</td>
+										<td className="py-2 pr-4">
+											<span className={r.noShowPct >= 20 ? "font-medium text-amber-600" : "text-slate-700"}>
+												{r.noShowPct ?? 0}%
+											</span>
+										</td>
+										<td className="py-2">
+											<span className={r.refundRatePct >= 10 ? "font-medium text-red-600" : "text-slate-700"}>
+												{r.refundRatePct ?? 0}%
+											</span>
+										</td>
 									</tr>
 								))}
 							</tbody>
