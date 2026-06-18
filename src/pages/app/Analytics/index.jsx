@@ -11,7 +11,8 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
-import { get } from "../../../lib/client";
+import { get, getText } from "../../../lib/client";
+import { showToast } from "../../../lib/toastStore";
 
 const SEGMENT_COLOR = {
 	whale: "#7c3aed",
@@ -56,6 +57,29 @@ const Analytics = () => {
 	const [daily, setDaily] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
+	const [exporting, setExporting] = useState(null);
+
+	// Pull a consent-gated audience CSV and trigger a browser download.
+	const exportAudience = async (segment) => {
+		setExporting(segment ?? "all");
+		try {
+			const qs = segment ? `?type=segment&segment=${segment}` : "?type=segment";
+			const { text } = await getText(`/audiences/export${qs}`);
+			const rows = Math.max(0, text.trim().split("\n").length - 1);
+			const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `audience-${segment ?? "all"}.csv`;
+			a.click();
+			URL.revokeObjectURL(url);
+			showToast("success", `Exported ${rows} consented contact${rows === 1 ? "" : "s"}`);
+		} catch (err) {
+			if (!err?.__sessionExpired) showToast("error", "Export failed");
+		} finally {
+			setExporting(null);
+		}
+	};
 
 	useEffect(() => {
 		let alive = true;
@@ -136,7 +160,27 @@ const Analytics = () => {
 				/>
 			</div>
 
-			<Card title="Client base by segment" hint="How your buyers behave - fans, hesitant, one-timers...">
+			<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+				<div className="mb-4 flex items-start justify-between gap-3">
+					<div>
+						<h2 className="text-sm font-semibold text-slate-900">Client base by segment</h2>
+						<p className="mt-0.5 text-xs text-slate-500">
+							How your buyers behave - fans, hesitant, one-timers. Export a segment to your
+							own email tool; only contacts who consented to marketing are included.
+						</p>
+					</div>
+					{segData.length > 0 && (
+						<button
+							type="button"
+							onClick={() => exportAudience(null)}
+							disabled={!!exporting}
+							className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+						>
+							<i className="fa-solid fa-download mr-1.5" aria-hidden />
+							{exporting === "all" ? "Exporting..." : "Export all"}
+						</button>
+					)}
+				</div>
 				{segData.length === 0 ? (
 					<p className="text-sm text-slate-500">No buyer data yet.</p>
 				) : (
@@ -156,20 +200,28 @@ const Analytics = () => {
 								</Bar>
 							</BarChart>
 						</ResponsiveContainer>
-						<div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
+						<div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
 							{segData.map((r) => (
 								<div key={r.segment} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-xs">
 									<span className="flex items-center gap-2">
 										<span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: SEGMENT_COLOR[r.segment] ?? "#64748b" }} />
 										{r.label}
+										<span className="text-slate-400">· {r.buyers.toLocaleString()} · avg {eur(r.avgLtvCents)}</span>
 									</span>
-									<span className="font-medium text-slate-700">avg {eur(r.avgLtvCents)}</span>
+									<button
+										type="button"
+										onClick={() => exportAudience(r.segment)}
+										disabled={!!exporting}
+										className="rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
+									>
+										{exporting === r.segment ? "..." : "Export"}
+									</button>
 								</div>
 							))}
 						</div>
 					</>
 				)}
-			</Card>
+			</div>
 
 			<Card title="Successful sales trend" hint="Net revenue per day (last 365 days)">
 				{dailyData.length === 0 ? (
