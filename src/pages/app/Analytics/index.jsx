@@ -13,8 +13,6 @@ import {
 } from "recharts";
 import { useApp } from "../../../context";
 import { ExpiryBadge, Info } from "../../../components/shared";
-import GeoMap from "../../../components/analytics/GeoMap";
-import ErrorBoundary from "../../../components/ErrorBoundary";
 import { countryName } from "../../../lib/countries";
 import { get, getText } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
@@ -243,8 +241,8 @@ const Analytics = () => {
 	const byKey = useMemo(() => Object.fromEntries(segData.map((r) => [r.segment, r.buyers])), [segData]);
 	const groupCount = (segs) => segs.reduce((s, k) => s + (byKey[k] ?? 0), 0);
 
-	const countsByCountry = useMemo(
-		() => Object.fromEntries((demo?.country ?? []).map((c) => [c.key, c.count])),
+	const totalCountryBuyers = useMemo(
+		() => (demo?.country ?? []).reduce((s, c) => s + c.count, 0),
 		[demo],
 	);
 	const activeCountry = selCountry ?? demo?.country?.[0]?.key ?? null;
@@ -451,19 +449,7 @@ const Analytics = () => {
 
 					<Card
 						title="Where your buyers are"
-						hint="From the billing address on the payment (country + city). Click a country to zoom into its cities."
-						action={
-							selCountry && (
-								<button
-									type="button"
-									onClick={() => setSelCountry(null)}
-									className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
-								>
-									<i className="fa-solid fa-arrow-left mr-1.5" aria-hidden />
-									All countries
-								</button>
-							)
-						}
+						hint="From the billing address on the payment (country + city). Select a country to see its cities."
 					>
 						{scopeLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
@@ -471,20 +457,28 @@ const Analytics = () => {
 							<p className="text-sm text-slate-500">No location data yet.</p>
 						) : (
 							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-								<div className="rounded-lg bg-slate-50 p-2">
-									<ErrorBoundary
-										fallback={
-											<Dist
-												title="By country"
-												info="From the billing address on the payment."
-												rows={demo?.country}
-												labelFn={(k) => countryName(k)}
-											/>
-										}
-									>
-										<GeoMap counts={countsByCountry} selected={selCountry} cities={citiesOfActive} onSelect={setSelCountry} />
-									</ErrorBoundary>
+								{/* Countries - clickable to filter cities */}
+								<div>
+									<p className="mb-2 text-xs font-semibold text-slate-700">Countries</p>
+									<div className="space-y-1">
+										{(demo.country ?? []).map((c) => {
+											const tot = totalCountryBuyers;
+											const isSel = c.key === activeCountry;
+											return (
+												<button
+													type="button"
+													key={c.key}
+													onClick={() => setSelCountry(c.key)}
+													className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs transition ${isSel ? "bg-blue-50 ring-1 ring-blue-200" : "hover:bg-slate-50"}`}
+												>
+													<span className="font-medium text-slate-700">{countryName(c.key)}</span>
+													<span className="shrink-0 tabular-nums text-slate-500">{c.count.toLocaleString()} · {pctOf(c.count, tot)}%</span>
+												</button>
+											);
+										})}
+									</div>
 								</div>
+								{/* Cities of the selected country */}
 								<div>
 									<p className="mb-2 flex items-center text-xs font-semibold text-slate-700">
 										Cities in {countryName(activeCountry)}
@@ -494,7 +488,7 @@ const Analytics = () => {
 										<p className="text-xs text-slate-400">No city detail for this country.</p>
 									) : (
 										<div className="space-y-1.5">
-											{citiesOfActive.slice(0, 12).map((c) => {
+											{citiesOfActive.slice(0, 15).map((c) => {
 												const tot = citiesOfActive.reduce((s, x) => s + x.count, 0);
 												return (
 													<div key={c.key}>

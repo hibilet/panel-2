@@ -15,7 +15,6 @@
 		"@ngneat/falso": "^8.0.2",
 		"@reactour/tour": "^3.8.0",
 		"@tailwindcss/vite": "^4.2.1",
-		"d3-geo": "^3.1.1",
 		"dayjs": "^1.11.19",
 		"ejs": "^5.0.1",
 		"firebase": "^12.10.0",
@@ -26,7 +25,6 @@
 		"react-markdown": "^10.1.0",
 		"recharts": "^3.7.0",
 		"tailwindcss": "^4.2.1",
-		"topojson-client": "^3.1.0",
 		"wouter": "^3.9.0",
 		"xlsx": "^0.18.5"
 	},
