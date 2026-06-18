@@ -451,7 +451,19 @@ const Analytics = () => {
 
 					<Card
 						title="Where your buyers are"
-						hint="From the billing address on the payment (country + city). Click a country to see its cities."
+						hint="From the billing address on the payment (country + city). Click a country to zoom into its cities."
+						action={
+							selCountry && (
+								<button
+									type="button"
+									onClick={() => setSelCountry(null)}
+									className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-50"
+								>
+									<i className="fa-solid fa-arrow-left mr-1.5" aria-hidden />
+									All countries
+								</button>
+							)
+						}
 					>
 						{scopeLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
@@ -470,7 +482,7 @@ const Analytics = () => {
 											/>
 										}
 									>
-										<GeoMap counts={countsByCountry} selected={activeCountry} onSelect={setSelCountry} />
+										<GeoMap counts={countsByCountry} selected={selCountry} cities={citiesOfActive} onSelect={setSelCountry} />
 									</ErrorBoundary>
 								</div>
 								<div>
