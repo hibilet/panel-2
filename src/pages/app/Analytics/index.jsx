@@ -151,6 +151,11 @@ const Analytics = () => {
 	const [winback, setWinback] = useState([]);
 	const [daily, setDaily] = useState([]);
 	const [salesPerf, setSalesPerf] = useState([]);
+	const [channels, setChannels] = useState([]);
+	const [coupons, setCoupons] = useState([]);
+	const [topBuyers, setTopBuyers] = useState([]);
+	const [timing, setTiming] = useState([]);
+	const [affinity, setAffinity] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [scopeLoading, setScopeLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -219,13 +224,23 @@ const Analytics = () => {
 			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
 			get(`/analytics/demographics?${saleParam}`),
 			get(`/analytics/payments?${saleParam}`),
+			get(`/analytics/channels?${saleParam}`),
+			get(`/analytics/coupons?${saleParam}`),
+			get(`/analytics/top-buyers?${saleParam}`),
+			get(`/analytics/timing?${saleParam}`),
+			scopeSale !== "all" ? get(`/analytics/affinity?${saleParam}`) : Promise.resolve({ data: [] }),
 		])
-			.then(([s, d, dm, pm]) => {
+			.then(([s, d, dm, pm, ch, co, tb, tm, af]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
 				setDemo(dm.data ?? null);
 				setPayments(pm.data ?? []);
+				setChannels(ch.data ?? []);
+				setCoupons(co.data ?? []);
+				setTopBuyers(tb.data ?? []);
+				setTiming(tm.data ?? []);
+				setAffinity(af.data ?? []);
 				setSelCountry(null);
 			})
 			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
@@ -260,6 +275,16 @@ const Analytics = () => {
 		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
 		[demo, activeCountry],
 	);
+
+	const timingMatrix = useMemo(() => {
+		const m = {};
+		let max = 1;
+		for (const t of timing) {
+			m[`${t.dow}-${t.hour}`] = t.count;
+			if (t.count > max) max = t.count;
+		}
+		return { m, max };
+	}, [timing]);
 
 	const dailyData = useMemo(() => (daily ?? []).map((r) => ({ day: r.day, tickets: r.tickets ?? 0 })), [daily]);
 	const ticketsTotal = useMemo(() => daily.reduce((s, r) => s + (r.tickets ?? 0), 0), [daily]);
@@ -360,9 +385,10 @@ const Analytics = () => {
 			<div className="flex gap-1 border-b border-slate-200 pb-px">
 				<TabBtn id="audience" label="Audience" />
 				<TabBtn id="sales" label="Sales" />
+				<TabBtn id="marketing" label="Marketing" />
 			</div>
 
-			{tab === "audience" ? (
+			{tab === "audience" && (
 				<>
 					<div className="grid grid-cols-3 gap-3">
 						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
@@ -540,8 +566,71 @@ const Analytics = () => {
 							</p>
 						)}
 					</Card>
+
+					<Card title="Top customers" hint="Your most engaged buyers - reward your VIPs. Ranked by tickets bought.">
+						{topBuyers.length === 0 ? (
+							<p className="text-sm text-slate-500">No buyers yet.</p>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+											<th className="py-2 pr-4">Customer</th>
+											<th className="py-2 pr-4">Tickets</th>
+											<th className="py-2 pr-4">Events</th>
+											<th className="py-2 pr-4">Segment</th>
+											<th className="py-2">Last purchase</th>
+										</tr>
+									</thead>
+									<tbody>
+										{topBuyers.map((b) => (
+											<tr key={b.owner} className="border-b border-slate-100 last:border-0">
+												<td className="py-2 pr-4">
+													<div className="font-medium text-slate-800">{b.name || "-"}</div>
+													<div className="text-[11px] text-slate-400">{b.email}</div>
+												</td>
+												<td className="py-2 pr-4 text-slate-700">{b.tickets.toLocaleString()}</td>
+												<td className="py-2 pr-4 text-slate-700">{b.events}</td>
+												<td className="py-2 pr-4">
+													<span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{b.segment ?? "-"}</span>
+												</td>
+												<td className="py-2 text-slate-500">{b.lastPurchaseAt ? new Date(b.lastPurchaseAt).toLocaleDateString() : "-"}</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Card>
+
+					<Card
+						title="Also bought"
+						hint={scopeSale === "all" ? "Pick an event above to see what its buyers also purchased (cross-sell)." : `Events that ${scopeName} buyers also bought - promote these to them.`}
+					>
+						{scopeSale === "all" ? (
+							<p className="text-sm text-slate-400">Select an event to see cross-sell affinity.</p>
+						) : affinity.length === 0 ? (
+							<p className="text-sm text-slate-500">No overlapping purchases found.</p>
+						) : (
+							<div className="space-y-1.5">
+								{affinity.map((a) => (
+									<div key={a.sale}>
+										<div className="flex justify-between text-xs text-slate-600">
+											<span className="truncate pr-2 font-medium">{a.name}</span>
+											<span className="shrink-0 tabular-nums">{a.buyers.toLocaleString()} · {a.sharePct}%</span>
+										</div>
+										<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+											<div className="h-1.5 rounded bg-violet-500" style={{ width: `${a.sharePct}%` }} />
+										</div>
+									</div>
+								))}
+							</div>
+						)}
+					</Card>
 				</>
-			) : (
+			)}
+
+			{tab === "sales" && (
 				<>
 					<div className="grid grid-cols-3 gap-3">
 						<Stat label="Tickets sold" value={ticketsTotal.toLocaleString()} sub={scopeName} info={INFO.tickets} />
@@ -668,6 +757,111 @@ const Analytics = () => {
 														{r.recoveryRatePct}%
 													</span>
 												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Card>
+
+					<Card title="Purchase timing" hint="When buyers check out (Berlin time). Darker = more baskets - use it to time announcements.">
+						{timing.length === 0 ? (
+							<p className="text-sm text-slate-500">No data yet.</p>
+						) : (
+							<div className="overflow-x-auto">
+								<div className="min-w-[560px]">
+									<div className="flex">
+										<div className="w-10 shrink-0" />
+										{Array.from({ length: 24 }, (_, h) => (
+											<div key={h} className="flex-1 text-center text-[9px] text-slate-400">
+												{h % 3 === 0 ? h : ""}
+											</div>
+										))}
+									</div>
+									{[2, 3, 4, 5, 6, 7, 1].map((dow) => (
+										<div key={dow} className="flex items-center">
+											<div className="w-10 shrink-0 text-[10px] font-medium text-slate-500">
+												{["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow]}
+											</div>
+											{Array.from({ length: 24 }, (_, h) => {
+												const c = timingMatrix.m[`${dow}-${h}`] ?? 0;
+												const t = c / timingMatrix.max;
+												return (
+													<div key={h} className="flex-1 px-px">
+														<div
+															className="h-4 rounded-sm"
+															title={`${["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow]} ${h}:00 - ${c} baskets`}
+															style={{ background: c ? `rgba(37,99,235,${0.12 + 0.88 * t})` : "#f1f5f9" }}
+														/>
+													</div>
+												);
+											})}
+										</div>
+									))}
+								</div>
+							</div>
+						)}
+					</Card>
+				</>
+			)}
+
+			{tab === "marketing" && (
+				<>
+					<Card title="Channels / traffic" hint="How each channel performs: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
+						{channels.length === 0 ? (
+							<p className="text-sm text-slate-500">No channels yet.</p>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+											<th className="py-2 pr-4">Channel</th>
+											<th className="py-2 pr-4">Views</th>
+											<th className="py-2 pr-4">Baskets</th>
+											<th className="py-2 pr-4">Sales</th>
+											<th className="py-2 pr-4">View→Basket</th>
+											<th className="py-2">Basket→Sale</th>
+										</tr>
+									</thead>
+									<tbody>
+										{channels.slice(0, 40).map((c) => (
+											<tr key={c._id} className="border-b border-slate-100 last:border-0">
+												<td className="py-2 pr-4 font-medium text-slate-800">{c.name ?? "-"}</td>
+												<td className="py-2 pr-4 text-slate-700">{(c.views ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-slate-700">{(c.baskets ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-slate-700">{(c.success ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-slate-500">{c.viewToBasketPct ?? 0}%</td>
+												<td className="py-2">
+													<span className={c.basketToSuccessPct >= 50 ? "font-medium text-emerald-600" : "text-slate-700"}>{c.basketToSuccessPct ?? 0}%</span>
+												</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Card>
+
+					<Card title="Coupons" hint="Redemptions and discount cost per code.">
+						{coupons.length === 0 ? (
+							<p className="text-sm text-slate-500">No coupons yet.</p>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full text-sm">
+									<thead>
+										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+											<th className="py-2 pr-4">Code</th>
+											<th className="py-2 pr-4">Redemptions</th>
+											<th className="py-2">Discount given</th>
+										</tr>
+									</thead>
+									<tbody>
+										{coupons.slice(0, 50).map((c) => (
+											<tr key={c._id} className="border-b border-slate-100 last:border-0">
+												<td className="py-2 pr-4 font-medium text-slate-800">{c.code ?? "-"}</td>
+												<td className="py-2 pr-4 text-slate-700">{(c.redemptions ?? 0).toLocaleString()}</td>
+												<td className="py-2 text-slate-700">{c.discountCents ? `€${(c.discountCents / 100).toLocaleString()}` : "—"}</td>
 											</tr>
 										))}
 									</tbody>
