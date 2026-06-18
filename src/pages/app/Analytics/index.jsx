@@ -13,6 +13,9 @@ import {
 } from "recharts";
 import { useApp } from "../../../context";
 import { ExpiryBadge, Info } from "../../../components/shared";
+import GeoMap from "../../../components/analytics/GeoMap";
+import ErrorBoundary from "../../../components/ErrorBoundary";
+import { countryName } from "../../../lib/countries";
 import { get, getText } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
 
@@ -135,6 +138,7 @@ const Analytics = () => {
 	const [tab, setTab] = useState("audience");
 	const [scopeSale, setScopeSale] = useState("all");
 	const [rangeDays, setRangeDays] = useState(365);
+	const [selCountry, setSelCountry] = useState(null);
 
 	const [pastSales, setPastSales] = useState([]);
 	const [segments, setSegments] = useState([]);
@@ -215,6 +219,7 @@ const Analytics = () => {
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
 				setDemo(dm.data ?? null);
+				setSelCountry(null);
 			})
 			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
 			.finally(() => alive && setScopeLoading(false));
@@ -237,6 +242,16 @@ const Analytics = () => {
 	const totalBuyers = useMemo(() => segData.reduce((s, r) => s + r.buyers, 0), [segData]);
 	const byKey = useMemo(() => Object.fromEntries(segData.map((r) => [r.segment, r.buyers])), [segData]);
 	const groupCount = (segs) => segs.reduce((s, k) => s + (byKey[k] ?? 0), 0);
+
+	const countsByCountry = useMemo(
+		() => Object.fromEntries((demo?.country ?? []).map((c) => [c.key, c.count])),
+		[demo],
+	);
+	const activeCountry = selCountry ?? demo?.country?.[0]?.key ?? null;
+	const citiesOfActive = useMemo(
+		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
+		[demo, activeCountry],
+	);
 
 	const dailyData = useMemo(() => (daily ?? []).map((r) => ({ day: r.day, tickets: r.tickets ?? 0 })), [daily]);
 	const ticketsTotal = useMemo(() => daily.reduce((s, r) => s + (r.tickets ?? 0), 0), [daily]);
@@ -417,11 +432,11 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Demographics & location" hint={`Who your buyers are - ${scopeName}`}>
+					<Card title="Demographics" hint={`Who your buyers are - ${scopeName}`}>
 						{scopeLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
 						) : (
-							<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+							<div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
 								<Dist title="Gender" info="From buyer billing profiles." rows={demo?.gender} />
 								<Dist title="Age" info="Derived from billing date of birth." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
 								<Dist
@@ -430,18 +445,60 @@ const Analytics = () => {
 									rows={demo?.device}
 									empty="No device data yet."
 								/>
-								<Dist
-									title="Top countries"
-									info="From the billing address on the payment (country-level). No precise location stored."
-									rows={demo?.country}
-									labelFn={(k) => k ?? "Unknown"}
-									empty="No location data yet."
-								/>
 							</div>
 						)}
-						{demo?.region?.length > 0 && (
-							<div className="mt-5 border-t border-slate-100 pt-4">
-								<Dist title="Top cities" info="From the billing address on the payment." rows={demo.region} labelFn={(k) => k ?? "Unknown"} />
+					</Card>
+
+					<Card
+						title="Where your buyers are"
+						hint="From the billing address on the payment (country + city). Click a country to see its cities."
+					>
+						{scopeLoading ? (
+							<p className="text-sm text-slate-500">Loading...</p>
+						) : (demo?.country ?? []).length === 0 ? (
+							<p className="text-sm text-slate-500">No location data yet.</p>
+						) : (
+							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+								<div className="rounded-lg bg-slate-50 p-2">
+									<ErrorBoundary
+										fallback={
+											<Dist
+												title="By country"
+												info="From the billing address on the payment."
+												rows={demo?.country}
+												labelFn={(k) => countryName(k)}
+											/>
+										}
+									>
+										<GeoMap counts={countsByCountry} selected={activeCountry} onSelect={setSelCountry} />
+									</ErrorBoundary>
+								</div>
+								<div>
+									<p className="mb-2 flex items-center text-xs font-semibold text-slate-700">
+										Cities in {countryName(activeCountry)}
+										<Info text="Buyer cities for the selected country, from the billing address." />
+									</p>
+									{citiesOfActive.length === 0 ? (
+										<p className="text-xs text-slate-400">No city detail for this country.</p>
+									) : (
+										<div className="space-y-1.5">
+											{citiesOfActive.slice(0, 12).map((c) => {
+												const tot = citiesOfActive.reduce((s, x) => s + x.count, 0);
+												return (
+													<div key={c.key}>
+														<div className="flex justify-between text-[11px] text-slate-600">
+															<span className="truncate pr-2">{c.key}</span>
+															<span className="shrink-0 tabular-nums">{c.count.toLocaleString()} · {pctOf(c.count, tot)}%</span>
+														</div>
+														<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+															<div className="h-1.5 rounded bg-blue-500" style={{ width: `${pctOf(c.count, tot)}%` }} />
+														</div>
+													</div>
+												);
+											})}
+										</div>
+									)}
+								</div>
 							</div>
 						)}
 					</Card>
