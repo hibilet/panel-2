@@ -66,6 +66,38 @@ const Card = ({ title, hint, action, children }) => (
 	</div>
 );
 
+const titleCase = (s) => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : "-");
+
+// Mobile-friendly horizontal distribution bars for a {key,count} list.
+const Dist = ({ title, info, rows, labelFn = titleCase, empty }) => {
+	const total = (rows ?? []).reduce((s, r) => s + r.count, 0);
+	return (
+		<div>
+			<p className="mb-2 flex items-center text-xs font-semibold text-slate-700">
+				{title}
+				<Info text={info} />
+			</p>
+			{!rows || rows.length === 0 ? (
+				<p className="text-xs text-slate-400">{empty ?? "No data"}</p>
+			) : (
+				<div className="space-y-1.5">
+					{rows.slice(0, 8).map((r) => (
+						<div key={r.key ?? "na"}>
+							<div className="flex justify-between text-[11px] text-slate-600">
+								<span className="truncate pr-2">{labelFn(r.key)}</span>
+								<span className="shrink-0 tabular-nums">{r.count.toLocaleString()} · {pctOf(r.count, total)}%</span>
+							</div>
+							<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+								<div className="h-1.5 rounded bg-blue-500" style={{ width: `${pctOf(r.count, total)}%` }} />
+							</div>
+						</div>
+					))}
+				</div>
+			)}
+		</div>
+	);
+};
+
 const Stat = ({ label, value, sub, tone, info }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 		<p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
@@ -104,7 +136,9 @@ const Analytics = () => {
 	const [scopeSale, setScopeSale] = useState("all");
 	const [rangeDays, setRangeDays] = useState(365);
 
+	const [pastSales, setPastSales] = useState([]);
 	const [segments, setSegments] = useState([]);
+	const [demo, setDemo] = useState(null);
 	const [winback, setWinback] = useState([]);
 	const [daily, setDaily] = useState([]);
 	const [salesPerf, setSalesPerf] = useState([]);
@@ -143,10 +177,15 @@ const Analytics = () => {
 		let alive = true;
 		(async () => {
 			try {
-				const [w, sa] = await Promise.all([get("/analytics/winback"), get("/analytics/sales")]);
+				const [w, sa, past] = await Promise.all([
+					get("/analytics/winback"),
+					get("/analytics/sales"),
+					get("/sales?past=true").catch(() => ({ data: [] })),
+				]);
 				if (!alive) return;
 				setWinback(w.data ?? []);
 				setSalesPerf(sa.data ?? []);
+				setPastSales(past.data ?? []);
 			} catch (err) {
 				if (alive) setError(err?.message ?? "Failed to load analytics");
 			} finally {
@@ -165,14 +204,17 @@ const Analytics = () => {
 		// rolling window - so pull wide and let the event's days define the span.
 		const effectiveDays = scopeSale !== "all" ? 1825 : rangeDays;
 		const saleQs = scopeSale !== "all" ? `&sale=${scopeSale}` : "";
+		const saleParam = scopeSale !== "all" ? `sale=${scopeSale}` : "";
 		Promise.all([
-			get(`/analytics/segments?${scopeSale !== "all" ? `sale=${scopeSale}` : ""}`),
+			get(`/analytics/segments?${saleParam}`),
 			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
+			get(`/analytics/demographics?${saleParam}`),
 		])
-			.then(([s, d]) => {
+			.then(([s, d, dm]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
+				setDemo(dm.data ?? null);
 			})
 			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
 			.finally(() => alive && setScopeLoading(false));
@@ -182,8 +224,8 @@ const Analytics = () => {
 	}, [scopeSale, rangeDays]);
 
 	const saleName = useMemo(
-		() => Object.fromEntries((allSales ?? []).map((s) => [String(saleIdOf(s)), s.name])),
-		[allSales],
+		() => Object.fromEntries([...(allSales ?? []), ...(pastSales ?? [])].map((s) => [String(saleIdOf(s)), s.name])),
+		[allSales, pastSales],
 	);
 	const segData = useMemo(
 		() =>
@@ -228,7 +270,7 @@ const Analytics = () => {
 		const cap = salesRows.reduce((s, r) => s + (r.capacity ?? 0), 0);
 		const elig = salesRows.reduce((s, r) => s + (r.noShowEligible ?? 0), 0);
 		const ns = salesRows.reduce((s, r) => s + (r.noShows ?? 0), 0);
-		return { sellThrough: pctOf(sold, cap), noShow: pctOf(ns, elig) };
+		return { sellThrough: pctOf(sold, cap), noShow: pctOf(ns, elig), eligible: elig };
 	}, [salesRows]);
 
 	if (loading) return <p className="text-sm text-slate-500">Loading analytics...</p>;
@@ -256,11 +298,24 @@ const Analytics = () => {
 						className="max-w-[200px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400"
 					>
 						<option value="all">All events</option>
-						{(allSales ?? []).map((s) => (
-							<option key={saleIdOf(s)} value={saleIdOf(s)}>
-								{s.name}
-							</option>
-						))}
+						{(allSales ?? []).length > 0 && (
+							<optgroup label="Live & upcoming">
+								{(allSales ?? []).map((s) => (
+									<option key={saleIdOf(s)} value={saleIdOf(s)}>
+										{s.name}
+									</option>
+								))}
+							</optgroup>
+						)}
+						{(pastSales ?? []).length > 0 && (
+							<optgroup label="Past events">
+								{(pastSales ?? []).map((s) => (
+									<option key={saleIdOf(s)} value={saleIdOf(s)}>
+										{s.name}
+									</option>
+								))}
+							</optgroup>
+						)}
 					</select>
 					{tab === "sales" && scopeSale === "all" && (
 						<div className="inline-flex overflow-hidden rounded-lg border border-slate-300">
@@ -361,13 +416,47 @@ const Analytics = () => {
 							</div>
 						)}
 					</Card>
+
+					<Card title="Demographics & location" hint={`Who your buyers are - ${scopeName}`}>
+						{scopeLoading ? (
+							<p className="text-sm text-slate-500">Loading...</p>
+						) : (
+							<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+								<Dist title="Gender" info="From buyer billing profiles." rows={demo?.gender} />
+								<Dist title="Age" info="Derived from billing date of birth." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
+								<Dist
+									title="Device"
+									info="Parsed from the buyer's browser at purchase (User-Agent)."
+									rows={demo?.device}
+									empty="No device data yet."
+								/>
+								<Dist
+									title="Top countries"
+									info="Approximate, from buyer IP at purchase (no precise location stored). Populates once IP enrichment runs."
+									rows={demo?.country}
+									labelFn={(k) => k ?? "Unknown"}
+									empty="No location data yet - needs IP geo enrichment."
+								/>
+							</div>
+						)}
+						{demo?.region?.length > 0 && (
+							<div className="mt-5 border-t border-slate-100 pt-4">
+								<Dist title="Top regions" info="Approximate region from buyer IP." rows={demo.region} labelFn={(k) => k ?? "Unknown"} />
+							</div>
+						)}
+					</Card>
 				</>
 			) : (
 				<>
 					<div className="grid grid-cols-3 gap-3">
 						<Stat label="Tickets sold" value={ticketsTotal.toLocaleString()} sub={scopeName} info={INFO.tickets} />
 						<Stat label="Sell-through" value={`${perf.sellThrough}%`} info={INFO.sellThrough} />
-						<Stat label="No-show" value={`${perf.noShow}%`} tone={perf.noShow >= 20 ? "text-amber-600" : "text-slate-900"} info={NO_SHOW_INFO} />
+						<Stat
+							label="No-show"
+							value={perf.eligible ? `${perf.noShow}%` : "—"}
+							tone={perf.eligible && perf.noShow >= 20 ? "text-amber-600" : "text-slate-900"}
+							info={perf.eligible ? NO_SHOW_INFO : `${NO_SHOW_INFO} No ended events in scope yet - pick a past event to see no-show.`}
+						/>
 					</div>
 
 					<Card title="Sales trend" hint={`Tickets per day - ${scopeName}`}>
