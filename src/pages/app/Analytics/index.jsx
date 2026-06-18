@@ -255,6 +255,7 @@ const Analytics = () => {
 		[demo],
 	);
 	const activeCountry = selCountry ?? demo?.country?.[0]?.key ?? null;
+	const hasDeviceData = (demo?.device ?? []).some((d) => d.key && d.key !== "unknown");
 	const citiesOfActive = useMemo(
 		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
 		[demo, activeCountry],
@@ -447,12 +448,13 @@ const Analytics = () => {
 								<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
 									<Dist title="Gender" info="From buyer billing profiles (your data)." rows={demo?.gender} />
 									<Dist title="Age" info="Derived from billing date of birth (your data)." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
-									<Dist
-										title="Device"
-										info="From the buyer's browser at purchase (User-Agent). Stripe does not expose device; this is from your own logs."
-										rows={demo?.device}
-										empty="No device data yet."
-									/>
+									{hasDeviceData && (
+										<Dist
+											title="Device"
+											info="From the buyer's browser at purchase (User-Agent). Stripe does not expose device; this is from your own logs."
+											rows={demo?.device}
+										/>
+									)}
 									<Dist
 										title="Payment method"
 										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the payment provider."
@@ -529,6 +531,13 @@ const Analytics = () => {
 									)}
 								</div>
 							</div>
+						)}
+						{(demo?.country ?? []).length > 0 && (
+							<p className="mt-4 text-[11px] text-slate-400">
+								Note: not every purchaser has billing or location info from the payment provider.
+								Location is shown only for buyers where the provider supplied a billing address;
+								percentages are of those buyers.
+							</p>
 						)}
 					</Card>
 				</>
