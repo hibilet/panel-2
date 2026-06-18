@@ -76,8 +76,10 @@ const Card = ({ title, hint, action, children }) => (
 const titleCase = (s) => (s ? String(s).charAt(0).toUpperCase() + String(s).slice(1) : "-");
 
 // Mobile-friendly horizontal distribution bars for a {key,count} list.
-const Dist = ({ title, info, rows, labelFn = titleCase, empty }) => {
+// When onPick is given, rows are clickable (cross-filter); activeKey highlights.
+const Dist = ({ title, info, rows, labelFn = titleCase, empty, onPick, activeKey, max }) => {
 	const total = (rows ?? []).reduce((s, r) => s + r.count, 0);
+	const Row = onPick ? "button" : "div";
 	return (
 		<div>
 			<p className="mb-2 flex items-center text-xs font-semibold text-slate-700">
@@ -88,17 +90,25 @@ const Dist = ({ title, info, rows, labelFn = titleCase, empty }) => {
 				<p className="text-xs text-slate-400">{empty ?? "No data"}</p>
 			) : (
 				<div className="space-y-1.5">
-					{rows.slice(0, 8).map((r) => (
-						<div key={r.key ?? "na"}>
-							<div className="flex justify-between text-[11px] text-slate-600">
-								<span className="truncate pr-2">{labelFn(r.key)}</span>
-								<span className="shrink-0 tabular-nums">{r.count.toLocaleString()} · {pctOf(r.count, total)}%</span>
-							</div>
-							<div className="mt-0.5 h-1.5 rounded bg-slate-100">
-								<div className="h-1.5 rounded bg-blue-500" style={{ width: `${pctOf(r.count, total)}%` }} />
-							</div>
-						</div>
-					))}
+					{rows.slice(0, max ?? 8).map((r) => {
+						const active = onPick && activeKey === r.key;
+						return (
+							<Row
+								key={r.key ?? "na"}
+								type={onPick ? "button" : undefined}
+								onClick={onPick ? () => onPick(r.key) : undefined}
+								className={`block w-full text-left ${onPick ? "cursor-pointer rounded-md px-1 py-0.5 transition hover:bg-slate-50" : ""} ${active ? "bg-blue-50 ring-1 ring-blue-200" : ""}`}
+							>
+								<div className="flex justify-between text-[11px] text-slate-600">
+									<span className="truncate pr-2">{labelFn(r.key)}</span>
+									<span className="shrink-0 tabular-nums">{r.count.toLocaleString()} · {pctOf(r.count, total)}%</span>
+								</div>
+								<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+									<div className={`h-1.5 rounded ${active ? "bg-blue-700" : "bg-blue-500"}`} style={{ width: `${pctOf(r.count, total)}%` }} />
+								</div>
+							</Row>
+						);
+					})}
 				</div>
 			)}
 		</div>
@@ -153,9 +163,9 @@ const Analytics = () => {
 	const [salesPerf, setSalesPerf] = useState([]);
 	const [channels, setChannels] = useState([]);
 	const [coupons, setCoupons] = useState([]);
-	const [topBuyers, setTopBuyers] = useState([]);
 	const [timing, setTiming] = useState([]);
-	const [affinity, setAffinity] = useState([]);
+	const [affinity, setAffinity] = useState({ pairs: [], related: [] });
+	const [demoFilter, setDemoFilter] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [scopeLoading, setScopeLoading] = useState(false);
 	const [error, setError] = useState(null);
@@ -222,26 +232,23 @@ const Analytics = () => {
 		Promise.all([
 			get(`/analytics/segments?${saleParam}`),
 			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
-			get(`/analytics/demographics?${saleParam}`),
 			get(`/analytics/payments?${saleParam}`),
 			get(`/analytics/channels?${saleParam}`),
 			get(`/analytics/coupons?${saleParam}`),
-			get(`/analytics/top-buyers?${saleParam}`),
 			get(`/analytics/timing?${saleParam}`),
-			scopeSale !== "all" ? get(`/analytics/affinity?${saleParam}`) : Promise.resolve({ data: [] }),
+			get(`/analytics/affinity?${saleParam}`),
 		])
-			.then(([s, d, dm, pm, ch, co, tb, tm, af]) => {
+			.then(([s, d, pm, ch, co, tm, af]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
-				setDemo(dm.data ?? null);
 				setPayments(pm.data ?? []);
 				setChannels(ch.data ?? []);
 				setCoupons(co.data ?? []);
-				setTopBuyers(tb.data ?? []);
 				setTiming(tm.data ?? []);
-				setAffinity(af.data ?? []);
+				setAffinity(af.data ?? { pairs: [], related: [] });
 				setSelCountry(null);
+				setDemoFilter({});
 			})
 			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
 			.finally(() => alive && setScopeLoading(false));
@@ -249,6 +256,21 @@ const Analytics = () => {
 			alive = false;
 		};
 	}, [scopeSale, rangeDays]);
+
+	// Demographics is its own fetch so cross-filtering (gender/age/country/
+	// device) re-queries just this block, not the whole page.
+	useEffect(() => {
+		let alive = true;
+		const p = new URLSearchParams();
+		if (scopeSale !== "all") p.set("sale", scopeSale);
+		for (const [k, v] of Object.entries(demoFilter)) if (v) p.set(k, v);
+		get(`/analytics/demographics?${p}`)
+			.then((dm) => alive && setDemo(dm.data ?? null))
+			.catch(() => {});
+		return () => {
+			alive = false;
+		};
+	}, [scopeSale, demoFilter]);
 
 	const saleName = useMemo(
 		() => Object.fromEntries([...(allSales ?? []), ...(pastSales ?? [])].map((s) => [String(saleIdOf(s)), s.name])),
@@ -271,6 +293,9 @@ const Analytics = () => {
 	);
 	const activeCountry = selCountry ?? demo?.country?.[0]?.key ?? null;
 	const hasDeviceData = (demo?.device ?? []).some((d) => d.key && d.key !== "unknown");
+	const pick = (dim) => (key) => setDemoFilter((f) => ({ ...f, [dim]: f[dim] === key ? undefined : key }));
+	const activeFilters = Object.entries(demoFilter).filter(([, v]) => v);
+	const FILTER_LABEL = { gender: "Gender", age: "Age", device: "Device" };
 	const citiesOfActive = useMemo(
 		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
 		[demo, activeCountry],
@@ -336,7 +361,7 @@ const Analytics = () => {
 	);
 
 	return (
-		<div className="space-y-6">
+		<div className="mx-auto max-w-5xl space-y-6">
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
 				<div className="flex flex-wrap items-center gap-2">
@@ -466,24 +491,55 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Demographics & payment" hint={`Who your buyers are - ${scopeName}`}>
+					<Card
+						title="Demographics & payment"
+						hint={`Who your buyers are - ${scopeName}. Click a gender / age / device to filter the rest.`}
+						action={
+							activeFilters.length > 0 && (
+								<button
+									type="button"
+									onClick={() => setDemoFilter({})}
+									className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+								>
+									Clear filters
+								</button>
+							)
+						}
+					>
 						{scopeLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
 						) : (
 							<>
-								<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-									<Dist title="Gender" info="From buyer billing profiles (your data)." rows={demo?.gender} />
-									<Dist title="Age" info="Derived from billing date of birth (your data)." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} />
+								{activeFilters.length > 0 && (
+									<div className="mb-3 flex flex-wrap gap-2">
+										{activeFilters.map(([dim, val]) => (
+											<button
+												type="button"
+												key={dim}
+												onClick={() => pick(dim)(val)}
+												className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-medium text-blue-800"
+											>
+												{FILTER_LABEL[dim] ?? dim}: {dim === "age" ? val : titleCase(val)}
+												<i className="fa-solid fa-xmark" aria-hidden />
+											</button>
+										))}
+									</div>
+								)}
+								<div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+									<Dist title="Gender" info="From buyer billing profiles (your data). Click to filter." rows={demo?.gender} onPick={pick("gender")} activeKey={demoFilter.gender} />
+									<Dist title="Age" info="Derived from billing date of birth (your data). Click to filter." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} onPick={pick("age")} activeKey={demoFilter.age} />
 									{hasDeviceData && (
 										<Dist
 											title="Device"
 											info="From the buyer's browser at purchase (User-Agent). Stripe does not expose device; this is from your own logs."
 											rows={demo?.device}
+											onPick={pick("device")}
+											activeKey={demoFilter.device}
 										/>
 									)}
 									<Dist
 										title="Payment method"
-										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the payment provider."
+										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the provider."
 										rows={payments}
 										labelFn={paymentLabel}
 										empty="No payment data yet."
@@ -511,7 +567,7 @@ const Analytics = () => {
 								{/* Countries - clickable to filter cities */}
 								<div>
 									<p className="mb-2 text-xs font-semibold text-slate-700">Countries</p>
-									<div className="space-y-1">
+									<div className="max-h-72 space-y-1 overflow-y-auto pr-1">
 										{(demo.country ?? []).map((c) => {
 											const tot = totalCountryBuyers;
 											const isSel = c.key === activeCountry;
@@ -567,61 +623,46 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Top customers" hint="Your most engaged buyers - reward your VIPs. Ranked by tickets bought.">
-						{topBuyers.length === 0 ? (
-							<p className="text-sm text-slate-500">No buyers yet.</p>
-						) : (
-							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
-									<thead>
-										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Customer</th>
-											<th className="py-2 pr-4">Tickets</th>
-											<th className="py-2 pr-4">Events</th>
-											<th className="py-2 pr-4">Segment</th>
-											<th className="py-2">Last purchase</th>
-										</tr>
-									</thead>
-									<tbody>
-										{topBuyers.map((b) => (
-											<tr key={b.owner} className="border-b border-slate-100 last:border-0">
-												<td className="py-2 pr-4">
-													<div className="font-medium text-slate-800">{b.name || "-"}</div>
-													<div className="text-[11px] text-slate-400">{b.email}</div>
-												</td>
-												<td className="py-2 pr-4 text-slate-700">{b.tickets.toLocaleString()}</td>
-												<td className="py-2 pr-4 text-slate-700">{b.events}</td>
-												<td className="py-2 pr-4">
-													<span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">{b.segment ?? "-"}</span>
-												</td>
-												<td className="py-2 text-slate-500">{b.lastPurchaseAt ? new Date(b.lastPurchaseAt).toLocaleDateString() : "-"}</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
-					</Card>
-
 					<Card
-						title="Also bought"
-						hint={scopeSale === "all" ? "Pick an event above to see what its buyers also purchased (cross-sell)." : `Events that ${scopeName} buyers also bought - promote these to them.`}
+						title="Also bought (cross-sell)"
+						hint={
+							scopeSale === "all"
+								? "Event pairs bought by the same customers - co-purchase across all events. Market one to the other's buyers."
+								: `Events that ${scopeName} buyers also bought - promote these to them.`
+						}
 					>
-						{scopeSale === "all" ? (
-							<p className="text-sm text-slate-400">Select an event to see cross-sell affinity.</p>
-						) : affinity.length === 0 ? (
-							<p className="text-sm text-slate-500">No overlapping purchases found.</p>
+						{scopeSale !== "all" ? (
+							(affinity.related ?? []).length === 0 ? (
+								<p className="text-sm text-slate-500">No overlapping purchases found.</p>
+							) : (
+								<div className="space-y-1.5">
+									{affinity.related.map((a) => (
+										<div key={a.sale}>
+											<div className="flex justify-between text-xs text-slate-600">
+												<span className="truncate pr-2 font-medium">{a.name}</span>
+												<span className="shrink-0 tabular-nums">{a.buyers.toLocaleString()} · {a.sharePct}%</span>
+											</div>
+											<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+												<div className="h-1.5 rounded bg-violet-500" style={{ width: `${a.sharePct}%` }} />
+											</div>
+										</div>
+									))}
+								</div>
+							)
+						) : (affinity.pairs ?? []).length === 0 ? (
+							<p className="text-sm text-slate-500">No repeat cross-event buyers yet.</p>
 						) : (
-							<div className="space-y-1.5">
-								{affinity.map((a) => (
-									<div key={a.sale}>
-										<div className="flex justify-between text-xs text-slate-600">
-											<span className="truncate pr-2 font-medium">{a.name}</span>
-											<span className="shrink-0 tabular-nums">{a.buyers.toLocaleString()} · {a.sharePct}%</span>
-										</div>
-										<div className="mt-0.5 h-1.5 rounded bg-slate-100">
-											<div className="h-1.5 rounded bg-violet-500" style={{ width: `${a.sharePct}%` }} />
-										</div>
+							<div className="space-y-2">
+								{affinity.pairs.map((p, i) => (
+									<div key={`${p.a}-${p.b}-${i}`} className="flex items-center gap-2 text-xs">
+										<span className="flex min-w-0 flex-1 items-center gap-1.5">
+											<span className="truncate font-medium text-slate-700">{p.a}</span>
+											<i className="fa-solid fa-arrows-left-right shrink-0 text-slate-400" aria-hidden />
+											<span className="truncate font-medium text-slate-700">{p.b}</span>
+										</span>
+										<span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 font-medium text-violet-700">
+											{p.buyers.toLocaleString()} shared
+										</span>
 									</div>
 								))}
 							</div>
