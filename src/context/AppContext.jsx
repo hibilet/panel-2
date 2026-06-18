@@ -84,6 +84,22 @@ export const AppProvider = ({ children }) => {
 		}
 	}, [fetchInitial]);
 
+	// Apply realm whitelabel to the document chrome once the realm loads. The
+	// static configs.json title/favicon (set in index.jsx by hostname) is just
+	// the pre-login default; the realm's own branding overrides it for the
+	// authenticated session. primaryColor is intentionally not applied - the
+	// panel palette is fixed and doesn't read it.
+	useEffect(() => {
+		if (typeof document === "undefined" || !realm) return;
+		const branding = realm.branding ?? {};
+		const appName = branding.appName || realm.name;
+		if (appName) document.title = appName;
+		if (branding.favicon) {
+			const link = document.querySelector('link[rel="icon"]');
+			if (link) link.href = branding.favicon;
+		}
+	}, [realm]);
+
 	const getVenuePlans = useCallback(async (venueId) => {
 		if (!venueId) return [];
 		if (venuePlansRef.current[venueId]) return venuePlansRef.current[venueId];

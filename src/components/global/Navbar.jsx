@@ -364,6 +364,13 @@ const Navbar = () => {
 							{strings("nav.backToAdmin")}
 						</button>
 					)}
+					{(account?.realm?.branding?.logo || account?.realm?.logo) && (
+						<img
+							src={account.realm.branding?.logo || account.realm.logo}
+							alt={account.realm.branding?.appName || account.realm.name || ""}
+							className="h-7 max-w-[120px] object-contain"
+						/>
+					)}
 					<h1 className="text-xl font-semibold text-slate-900">
 						{account?.name
 							? strings("app.welcome", [account.name])
