@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { get } from "../../lib/client";
+import Info from "../shared/Info";
 
 const SEGMENT_LABEL = {
 	whale: "Whales",
@@ -15,11 +16,7 @@ const Fact = ({ label, value, tone, info }) => (
 	<div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
 		<p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
 			{label}
-			{info && (
-				<span className="cursor-help text-slate-400" title={info}>
-					<i className="fa-solid fa-circle-info" aria-hidden />
-				</span>
-			)}
+			<Info text={info} />
 		</p>
 		<p className={`mt-0.5 text-lg font-semibold ${tone ?? "text-slate-900"}`}>{value}</p>
 	</div>

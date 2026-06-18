@@ -70,11 +70,7 @@ const Stat = ({ label, value, sub, tone, info }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 		<p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
 			{label}
-			{info && (
-				<span className="cursor-help text-slate-400" title={info}>
-					<i className="fa-solid fa-circle-info" aria-hidden />
-				</span>
-			)}
+			<Info text={info} />
 		</p>
 		<p className={`mt-0.5 text-xl font-semibold ${tone ?? "text-slate-900"}`}>{value}</p>
 		{sub && <p className="mt-0.5 text-xs text-slate-500">{sub}</p>}
@@ -433,7 +429,7 @@ const Analytics = () => {
 											<th className="py-2 pr-4">Sold</th>
 											<th className="py-2 pr-4">Sell-through</th>
 											<th className="py-2 pr-4">
-												No-show <span className="cursor-help text-slate-400" title={NO_SHOW_INFO}><i className="fa-solid fa-circle-info" aria-hidden /></span>
+												No-show <Info text={NO_SHOW_INFO} />
 											</th>
 											<th className="py-2">Refund</th>
 										</tr>
