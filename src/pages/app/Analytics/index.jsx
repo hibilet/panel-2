@@ -432,16 +432,16 @@ const Analytics = () => {
 								/>
 								<Dist
 									title="Top countries"
-									info="Approximate, from buyer IP at purchase (no precise location stored). Populates once IP enrichment runs."
+									info="From the billing address on the payment (country-level). No precise location stored."
 									rows={demo?.country}
 									labelFn={(k) => k ?? "Unknown"}
-									empty="No location data yet - needs IP geo enrichment."
+									empty="No location data yet."
 								/>
 							</div>
 						)}
 						{demo?.region?.length > 0 && (
 							<div className="mt-5 border-t border-slate-100 pt-4">
-								<Dist title="Top regions" info="Approximate region from buyer IP." rows={demo.region} labelFn={(k) => k ?? "Unknown"} />
+								<Dist title="Top cities" info="From the billing address on the payment." rows={demo.region} labelFn={(k) => k ?? "Unknown"} />
 							</div>
 						)}
 					</Card>
