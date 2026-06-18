@@ -59,6 +59,8 @@ const PAYMENT_LABEL = {
 	amazon_pay: "Amazon Pay", eps: "EPS", sofort: "Sofort", giropay: "giropay",
 };
 const paymentLabel = (k) => PAYMENT_LABEL[k] ?? (k ? k.replace(/_/g, " ") : "Unknown");
+// "base-sale" is the auto-created default channel = direct / organizer website.
+const channelLabel = (name) => (name === "base-sale" ? "Direct / website" : name ?? "-");
 
 const Card = ({ title, hint, action, children }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -350,6 +352,48 @@ const Analytics = () => {
 	if (error) return <p className="text-sm text-red-600">{error}</p>;
 
 	const scopeName = scopeSale === "all" ? "all events" : saleName[scopeSale] ?? "event";
+	const hasAffinity = (affinity.pairs?.length ?? 0) > 0 || (affinity.related?.length ?? 0) > 0;
+	const crossSellCard = (
+		<Card
+			title="Also bought (cross-sell)"
+			hint={
+				scopeSale === "all"
+					? "Event pairs bought by the same customers - co-purchase across all events. Market one to the other's buyers."
+					: `Events that ${scopeName} buyers also bought - promote these to them.`
+			}
+		>
+			{scopeSale !== "all" ? (
+				<div className="space-y-1.5">
+					{(affinity.related ?? []).map((a) => (
+						<div key={a.sale}>
+							<div className="flex justify-between text-xs text-slate-600">
+								<span className="truncate pr-2 font-medium">{a.name}</span>
+								<span className="shrink-0 tabular-nums">{a.buyers.toLocaleString()} · {a.sharePct}%</span>
+							</div>
+							<div className="mt-0.5 h-1.5 rounded bg-slate-100">
+								<div className="h-1.5 rounded bg-violet-500" style={{ width: `${a.sharePct}%` }} />
+							</div>
+						</div>
+					))}
+				</div>
+			) : (
+				<div className="space-y-2">
+					{(affinity.pairs ?? []).map((p, i) => (
+						<div key={`${p.a}-${p.b}-${i}`} className="flex items-center gap-2 text-xs">
+							<span className="flex min-w-0 flex-1 items-center gap-1.5">
+								<span className="truncate font-medium text-slate-700">{p.a}</span>
+								<i className="fa-solid fa-arrows-left-right shrink-0 text-slate-400" aria-hidden />
+								<span className="truncate font-medium text-slate-700">{p.b}</span>
+							</span>
+							<span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 font-medium text-violet-700">
+								{p.buyers.toLocaleString()} shared
+							</span>
+						</div>
+					))}
+				</div>
+			)}
+		</Card>
+	);
 	const TabBtn = ({ id, label }) => (
 		<button
 			type="button"
@@ -415,6 +459,7 @@ const Analytics = () => {
 
 			{tab === "audience" && (
 				<>
+					{hasAffinity && crossSellCard}
 					<div className="grid grid-cols-3 gap-3">
 						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
 						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={INFO.returning} />
@@ -622,52 +667,6 @@ const Analytics = () => {
 							</p>
 						)}
 					</Card>
-
-					<Card
-						title="Also bought (cross-sell)"
-						hint={
-							scopeSale === "all"
-								? "Event pairs bought by the same customers - co-purchase across all events. Market one to the other's buyers."
-								: `Events that ${scopeName} buyers also bought - promote these to them.`
-						}
-					>
-						{scopeSale !== "all" ? (
-							(affinity.related ?? []).length === 0 ? (
-								<p className="text-sm text-slate-500">No overlapping purchases found.</p>
-							) : (
-								<div className="space-y-1.5">
-									{affinity.related.map((a) => (
-										<div key={a.sale}>
-											<div className="flex justify-between text-xs text-slate-600">
-												<span className="truncate pr-2 font-medium">{a.name}</span>
-												<span className="shrink-0 tabular-nums">{a.buyers.toLocaleString()} · {a.sharePct}%</span>
-											</div>
-											<div className="mt-0.5 h-1.5 rounded bg-slate-100">
-												<div className="h-1.5 rounded bg-violet-500" style={{ width: `${a.sharePct}%` }} />
-											</div>
-										</div>
-									))}
-								</div>
-							)
-						) : (affinity.pairs ?? []).length === 0 ? (
-							<p className="text-sm text-slate-500">No repeat cross-event buyers yet.</p>
-						) : (
-							<div className="space-y-2">
-								{affinity.pairs.map((p, i) => (
-									<div key={`${p.a}-${p.b}-${i}`} className="flex items-center gap-2 text-xs">
-										<span className="flex min-w-0 flex-1 items-center gap-1.5">
-											<span className="truncate font-medium text-slate-700">{p.a}</span>
-											<i className="fa-solid fa-arrows-left-right shrink-0 text-slate-400" aria-hidden />
-											<span className="truncate font-medium text-slate-700">{p.b}</span>
-										</span>
-										<span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 font-medium text-violet-700">
-											{p.buyers.toLocaleString()} shared
-										</span>
-									</div>
-								))}
-							</div>
-						)}
-					</Card>
 				</>
 			)}
 
@@ -849,7 +848,7 @@ const Analytics = () => {
 
 			{tab === "marketing" && (
 				<>
-					<Card title="Channels / traffic" hint="How each channel performs: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
+					<Card title="Channels / traffic" hint="Each channel consolidated across your events: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
 						{channels.length === 0 ? (
 							<p className="text-sm text-slate-500">No channels yet.</p>
 						) : (
@@ -858,6 +857,7 @@ const Analytics = () => {
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Channel</th>
+											<th className="py-2 pr-4">Events</th>
 											<th className="py-2 pr-4">Views</th>
 											<th className="py-2 pr-4">Baskets</th>
 											<th className="py-2 pr-4">Sales</th>
@@ -867,8 +867,9 @@ const Analytics = () => {
 									</thead>
 									<tbody>
 										{channels.slice(0, 40).map((c) => (
-											<tr key={c._id} className="border-b border-slate-100 last:border-0">
-												<td className="py-2 pr-4 font-medium text-slate-800">{c.name ?? "-"}</td>
+											<tr key={c.name} className="border-b border-slate-100 last:border-0">
+												<td className="py-2 pr-4 font-medium text-slate-800">{channelLabel(c.name)}</td>
+												<td className="py-2 pr-4 text-slate-500">{(c.sales ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.views ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.baskets ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.success ?? 0).toLocaleString()}</td>
