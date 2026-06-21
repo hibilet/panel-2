@@ -168,6 +168,7 @@ const Analytics = () => {
 	const [timing, setTiming] = useState([]);
 	const [affinity, setAffinity] = useState({ pairs: [], related: [] });
 	const [friction, setFriction] = useState(null);
+	const [engagement, setEngagement] = useState(null);
 	const [demoFilter, setDemoFilter] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [scopeLoading, setScopeLoading] = useState(false);
@@ -241,8 +242,9 @@ const Analytics = () => {
 			get(`/analytics/timing?${saleParam}`),
 			get(`/analytics/affinity?${saleParam}`),
 			get(`/analytics/friction?${saleParam}`),
+			get(`/analytics/engagement?${saleParam}`),
 		])
-			.then(([s, d, pm, ch, co, tm, af, fr]) => {
+			.then(([s, d, pm, ch, co, tm, af, fr, en]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
@@ -252,6 +254,7 @@ const Analytics = () => {
 				setTiming(tm.data ?? []);
 				setAffinity(af.data ?? { pairs: [], related: [] });
 				setFriction(fr.data ?? null);
+				setEngagement(en.data ?? null);
 				setSelCountry(null);
 				setDemoFilter({});
 			})
@@ -463,6 +466,42 @@ const Analytics = () => {
 			{tab === "audience" && (
 				<>
 					{hasAffinity && crossSellCard}
+					{engagement && engagement.visitors > 0 && (
+						<Card
+							title="Audience engagement"
+							hint="Widget visitors recognised across events - the basis for cross-sell and win-back"
+						>
+							<div className="grid grid-cols-3 gap-3">
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+									<div className="text-xl font-semibold text-slate-900">{engagement.visitors.toLocaleString()}</div>
+									<div className="text-xs text-slate-500">Visitors</div>
+								</div>
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+									<div className="text-xl font-semibold text-emerald-700">{engagement.returningRatePct}%</div>
+									<div className="text-xs text-slate-500">Browsed multiple events</div>
+								</div>
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+									<div className="text-xl font-semibold text-slate-900">{engagement.identified.toLocaleString()}</div>
+									<div className="text-xs text-slate-500">Identified (bought)</div>
+								</div>
+							</div>
+							{engagement.crossSell?.length > 0 && (
+								<div className="mt-4">
+									<div className="mb-1 text-xs font-medium text-slate-500">
+										Your buyers also browsed
+									</div>
+									<ul className="divide-y divide-slate-100">
+										{engagement.crossSell.slice(0, 6).map((c) => (
+											<li key={c._id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+												<span className="min-w-0 truncate text-slate-700">{c.sale || "—"}</span>
+												<span className="shrink-0 font-semibold text-slate-900">{c.visitors}</span>
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
+						</Card>
+					)}
 					<div className="grid grid-cols-3 gap-3">
 						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
 						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={INFO.returning} />
