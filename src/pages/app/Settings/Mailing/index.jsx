@@ -2,6 +2,7 @@ import { Link, useLocation } from "wouter";
 import { useApp } from "../../../../context";
 import strings from "../../../../localization";
 import MailingForm from "./MailingForm";
+import MailHealth from "./MailHealth";
 
 const Mailing = () => {
 	const [, setLocation] = useLocation();
@@ -31,7 +32,9 @@ const Mailing = () => {
 					{strings("page.settings.mailingSetup")}
 				</h1>
 				<MailingForm onSaved={handleSaved} />
-			</div>	
+			</div>
+
+			<MailHealth />
 		</div>
 	);
 };
