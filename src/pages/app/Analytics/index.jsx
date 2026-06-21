@@ -167,6 +167,7 @@ const Analytics = () => {
 	const [coupons, setCoupons] = useState([]);
 	const [timing, setTiming] = useState([]);
 	const [affinity, setAffinity] = useState({ pairs: [], related: [] });
+	const [friction, setFriction] = useState(null);
 	const [demoFilter, setDemoFilter] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [scopeLoading, setScopeLoading] = useState(false);
@@ -239,8 +240,9 @@ const Analytics = () => {
 			get(`/analytics/coupons?${saleParam}`),
 			get(`/analytics/timing?${saleParam}`),
 			get(`/analytics/affinity?${saleParam}`),
+			get(`/analytics/friction?${saleParam}`),
 		])
-			.then(([s, d, pm, ch, co, tm, af]) => {
+			.then(([s, d, pm, ch, co, tm, af, fr]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
@@ -249,6 +251,7 @@ const Analytics = () => {
 				setCoupons(co.data ?? []);
 				setTiming(tm.data ?? []);
 				setAffinity(af.data ?? { pairs: [], related: [] });
+				setFriction(fr.data ?? null);
 				setSelCountry(null);
 				setDemoFilter({});
 			})
@@ -682,6 +685,50 @@ const Analytics = () => {
 							info={perf.eligible ? NO_SHOW_INFO : `${NO_SHOW_INFO} No ended events in scope yet - pick a past event to see no-show.`}
 						/>
 					</div>
+
+					{friction && friction.multiAttemptBaskets > 0 && (
+						<Card
+							title="Checkout friction"
+							hint="Buyers who needed more than one payment attempt - a high rate means a payment-UX problem"
+						>
+							<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+									<div className="text-xl font-semibold text-slate-900">{friction.frictionRatePct}%</div>
+									<div className="text-xs text-slate-500">Retry rate ({friction.multiAttemptBaskets} of {friction.totalBaskets})</div>
+								</div>
+								<div className="rounded-lg border border-red-200 bg-red-50 p-3">
+									<div className="text-xl font-semibold text-red-600">{friction.lostToFrictionBaskets}</div>
+									<div className="text-xs text-slate-500">Lost after retries</div>
+								</div>
+								<div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+									<div className="text-xl font-semibold text-emerald-700">{friction.recoveredBaskets}</div>
+									<div className="text-xs text-slate-500">Recovered (bought anyway)</div>
+								</div>
+								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+									<div className="text-xl font-semibold text-slate-900">{friction.avgAttemptsToConvert}</div>
+									<div className="text-xs text-slate-500">Avg attempts to convert</div>
+								</div>
+							</div>
+							{friction.top?.length > 0 && (
+								<div className="mt-4">
+									<div className="mb-1 text-xs font-medium text-slate-500">Most-retried checkouts</div>
+									<ul className="divide-y divide-slate-100">
+										{friction.top.slice(0, 8).map((r) => (
+											<li key={r._id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+												<span className="min-w-0 truncate text-slate-700">{r.email || "—"}</span>
+												<span className="flex shrink-0 items-center gap-2">
+													<span className="font-semibold text-slate-900">{r.attempts}×</span>
+													<span className={`rounded px-1.5 py-0.5 text-xs ${r.converted ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
+														{r.converted ? "bought" : "lost"}
+													</span>
+												</span>
+											</li>
+										))}
+									</ul>
+								</div>
+							)}
+						</Card>
+					)}
 
 					<Card title="Sales trend" hint={`Tickets per day - ${scopeName}`}>
 						{scopeLoading ? (
