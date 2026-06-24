@@ -94,6 +94,12 @@ const navItems = [
 	// 	acl: ["admin"],
 	// },
 	{
+		path: "/jobs",
+		labelKey: "nav.jobs",
+		icon: "fa-clock-rotate-left",
+		acl: ["admin"],
+	},
+	{
 		path: "/settings",
 		labelKey: "nav.settings",
 		icon: "fa-gear",

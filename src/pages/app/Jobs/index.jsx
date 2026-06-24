@@ -9,6 +9,7 @@ import strings from "../../../localization";
 import { matchesQuery } from "../../../utils/search";
 import JobDetail from "./JobDetail";
 import JobForm from "./JobForm";
+import JobsMonitor from "./JobsMonitor";
 
 const Jobs = () => {
 	const [jobs, setJobs] = useState([]);
@@ -126,6 +127,8 @@ const Jobs = () => {
 				</h1>
 				<div className="flex flex-wrap items-center justify-end gap-2" />
 			</div>
+
+			<JobsMonitor />
 
 			{error && (
 				<div
