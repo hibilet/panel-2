@@ -252,6 +252,8 @@
 	"page.sale.tab.coupons": "Coupons",
 	"page.sale.title": "Sale",
 	"page.sale.new": "New",
+	"page.sale.report.button": "Up To Date Report",
+	"page.sale.report.failed": "Could not generate the report",
 	"page.sale.guided.title": "Create event with AI",
 	"page.sale.guided.subtitle": "Describe your event and we'll help you set it up.",
 	"page.sale.guided.textareaLabel": "Event description",

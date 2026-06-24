@@ -250,6 +250,8 @@
 	"page.sale.tab.coupons": "Gutscheine",
 	"page.sale.title": "Verkauf",
 	"page.sale.new": "Neu",
+	"page.sale.report.button": "Aktueller Bericht",
+	"page.sale.report.failed": "Bericht konnte nicht erstellt werden",
 	"page.sale.guided.title": "Veranstaltung mit KI erstellen",
 	"page.sale.guided.subtitle": "Beschreiben Sie Ihre Veranstaltung und wir helfen Ihnen bei der Einrichtung.",
 	"page.sale.guided.textareaLabel": "Veranstaltungsbeschreibung",

@@ -250,6 +250,8 @@
 	"page.sale.tab.coupons": "Kortingscodes",
 	"page.sale.title": "Verkoop",
 	"page.sale.new": "Nieuw",
+	"page.sale.report.button": "Actueel rapport",
+	"page.sale.report.failed": "Kan het rapport niet genereren",
 	"page.sale.guided.title": "Evenement maken met AI",
 	"page.sale.guided.subtitle": "Beschrijf uw evenement en we helpen u met de instelling.",
 	"page.sale.guided.textareaLabel": "Evenementbeschrijving",

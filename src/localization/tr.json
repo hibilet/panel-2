@@ -249,6 +249,8 @@
 	"page.sale.tab.coupons": "Kuponlar",
 	"page.sale.title": "Satış",
 	"page.sale.new": "Yeni",
+	"page.sale.report.button": "Güncel Rapor",
+	"page.sale.report.failed": "Rapor oluşturulamadı",
 	"page.sale.guided.title": "AI ile etkinlik oluştur",
 	"page.sale.guided.subtitle": "Etkinliğinizi tanımlayın, kurulumda size yardımcı olacağız.",
 	"page.sale.guided.textareaLabel": "Etkinlik açıklaması",

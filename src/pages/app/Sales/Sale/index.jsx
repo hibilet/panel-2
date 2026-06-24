@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 
 import { useApp } from "../../../../context";
-import { get } from "../../../../lib/client";
+import { API_BASE_URL, get } from "../../../../lib/client";
+import { getToken } from "../../../../lib/storage";
+import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 import SaleAttendees from "./SaleAttendees";
 import SaleBasic from "./SaleBasic";
@@ -80,6 +82,32 @@ const Sale = () => {
 	const basePath = `/sales/${id}`;
 	const isNew = id === "new";
 	const isGuided = new URLSearchParams(search || "").get("guided") === "true";
+	const [reporting, setReporting] = useState(false);
+
+	// Live settlement PDF. Authed binary stream, so fetch as a blob and trigger
+	// a browser download rather than going through the JSON client.
+	const downloadReport = async () => {
+		setReporting(true);
+		try {
+			const res = await fetch(`${API_BASE_URL}/sales/${id}/report.pdf`, {
+				headers: { authorization: getToken() },
+			});
+			if (!res.ok) throw new Error("report-failed");
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `report-${(sale?.name || "event").replace(/[^\w.-]+/g, "_")}.pdf`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		} catch {
+			showToast("error", strings("page.sale.report.failed"));
+		} finally {
+			setReporting(false);
+		}
+	};
 
 	// Sales are merchant-owned. Admins reviewing existing sales is fine,
 	// but creating new ones is out of scope - bounce them back to the list.
@@ -123,6 +151,17 @@ const Sale = () => {
 			{isNew && isGuided && <SaleGuidedForm onClose={handleCloseGuided} />}
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+				{!isNew && sale && (
+					<button
+						type="button"
+						onClick={downloadReport}
+						disabled={reporting}
+						className="inline-flex items-center gap-2 self-start rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+					>
+						<i className={`fa-solid ${reporting ? "fa-spinner fa-spin" : "fa-file-pdf"}`} aria-hidden />
+						{strings("page.sale.report.button")}
+					</button>
+				)}
 			</div>
 
 			<nav aria-label="Sale sections" className="mt-4">

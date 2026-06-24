@@ -250,6 +250,8 @@
 	"page.sale.tab.coupons": "Coupons",
 	"page.sale.title": "Vente",
 	"page.sale.new": "Nouveau",
+	"page.sale.report.button": "Rapport à jour",
+	"page.sale.report.failed": "Impossible de générer le rapport",
 	"page.sale.guided.title": "Créer un événement avec l'IA",
 	"page.sale.guided.subtitle": "Décrivez votre événement et nous vous aiderons à le configurer.",
 	"page.sale.guided.textareaLabel": "Description de l'événement",
