@@ -14,6 +14,7 @@ import SaleGuests from "./SaleGuests";
 import SaleGuidedForm from "./SaleGuidedForm";
 import SaleQuestions from "./SaleQuestions";
 import SaleReaders from "./SaleReaders";
+import SaleReport from "./SaleReport";
 import SaleTickets from "./SaleTickets";
 
 const tabItems = [
@@ -29,6 +30,7 @@ const tabItems = [
 		icon: "fa-tablet-screen-button",
 	},
 	{ path: "coupons", labelKey: "page.sale.tab.coupons", icon: "fa-tag" },
+	{ path: "report", labelKey: "page.sale.tab.report", icon: "fa-chart-pie" },
 ];
 
 const TabLink = ({ path, labelKey, icon, isActive, basePath, disabled }) => {
@@ -215,6 +217,7 @@ const Sale = () => {
 					<Route path="/sales/:id/guests" component={SaleGuests} />
 					<Route path="/sales/:id/readers" component={SaleReaders} />
 					<Route path="/sales/:id/coupons" component={SaleCoupons} />
+					<Route path="/sales/:id/report" component={SaleReport} />
 				</Switch>
 			</main>
 		</div>
