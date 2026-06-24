@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "wouter";
 import { Input } from "../../../../components/inputs";
 import { Modal, StatCard } from "../../../../components/shared";
-import { del, get, post, put } from "../../../../lib/client";
+import { API_BASE_URL, del, get, post, put } from "../../../../lib/client";
+import { getToken } from "../../../../lib/storage";
+import { showToast } from "../../../../lib/toastStore";
 import strings, { formatCurrency } from "../../../../localization";
 import SalesReportView from "./SalesReportView";
 import AbandonmentInsights from "./shared/AbandonmentInsights";
@@ -252,6 +254,35 @@ const Report = () => {
 		window.open(`/reports/${id}/print`, "_blank", "noopener");
 	};
 
+	const [pdfBusy, setPdfBusy] = useState(false);
+	const [emailBusy, setEmailBusy] = useState(false);
+
+	// Server-generated PDF (authed binary -> blob download).
+	const downloadPdf = async () => {
+		setPdfBusy(true);
+		try {
+			const res = await fetch(`${API_BASE_URL}/reports/${id}/pdf`, { headers: { authorization: getToken() } });
+			if (!res.ok) throw new Error("failed");
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `${(report?.name || "report").replace(/[^\w.-]+/g, "_")}.pdf`;
+			document.body.appendChild(a); a.click(); a.remove();
+			URL.revokeObjectURL(url);
+		} catch {
+			showToast("error", strings("page.reports.pdfFailed"));
+		} finally { setPdfBusy(false); }
+	};
+
+	const emailReportPdf = () => {
+		setEmailBusy(true);
+		post(`/reports/${id}/email`)
+			.then((res) => showToast("success", strings("page.reports.emailed").replace("$1", res.data?.to || "")))
+			.catch(() => showToast("error", strings("page.reports.pdfFailed")))
+			.finally(() => setEmailBusy(false));
+	};
+
 	// Rename modal
 	const [renameOpen, setRenameOpen] = useState(false);
 	const [renameName, setRenameName] = useState("");
@@ -450,6 +481,24 @@ const Report = () => {
 					>
 						<i className="fa-solid fa-print" aria-hidden />
 						{strings("page.reports.print") || "Print"}
+					</button>
+					<button
+						type="button"
+						onClick={downloadPdf}
+						disabled={pdfBusy}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<i className={`fa-solid ${pdfBusy ? "fa-spinner fa-spin" : "fa-file-pdf"}`} aria-hidden />
+						{strings("page.reports.downloadPdf")}
+					</button>
+					<button
+						type="button"
+						onClick={emailReportPdf}
+						disabled={emailBusy}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						<i className={`fa-solid ${emailBusy ? "fa-spinner fa-spin" : "fa-envelope"}`} aria-hidden />
+						{strings("page.reports.emailReport")}
 					</button>
 					<button
 						type="button"
