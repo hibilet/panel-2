@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocation, useParams } from "wouter";
 import { Modal, PanelHeader, SearchBar } from "../../../components/shared";
 import EmptyState from "../../../components/shared/EmptyState";
 import { jobsColumns } from "../../../components/tables/columns";
@@ -12,6 +13,8 @@ import JobForm from "./JobForm";
 import JobsMonitor from "./JobsMonitor";
 
 const Jobs = () => {
+	const { id: routeId } = useParams();
+	const [, setLocation] = useLocation();
 	const [jobs, setJobs] = useState([]);
 	const [definitions, setDefinitions] = useState([]);
 	const [loading, setLoading] = useState(true);
@@ -42,6 +45,14 @@ const Jobs = () => {
 			.finally(() => setLoading(false));
 	}, []);
 
+	// Deep link (/jobs/:id) - job notifications point here. The URL is the
+	// source of truth for the detail panel, so it is derived, not stored.
+	const routeJob = useMemo(
+		() => (routeId ? jobs.find((j) => (j.id ?? j._id) === routeId) : null),
+		[routeId, jobs],
+	);
+	const notFound = !!routeId && !loading && !routeJob;
+
 	const definitionMap = useMemo(() => {
 		const map = {};
 		for (const d of definitions) map[d.type] = d;
@@ -64,10 +75,7 @@ const Jobs = () => {
 		[jobs, query, getTypeLabel],
 	);
 
-	const handleRowClick = (row) => {
-		setActiveJob(row);
-		setPanelMode("detail");
-	};
+	const handleRowClick = (row) => setLocation(`/jobs/${row.id ?? row._id}`);
 
 	const handleEdit = (row) => {
 		setActiveJob(row);
@@ -96,6 +104,7 @@ const Jobs = () => {
 				setPanelMode(null);
 				setActiveJob(null);
 			}
+			if (routeId === id) setLocation("/jobs");
 		} catch {
 			/* toast handled */
 		}
@@ -104,6 +113,7 @@ const Jobs = () => {
 	const closePanel = () => {
 		setPanelMode(null);
 		setActiveJob(null);
+		if (routeId) setLocation("/jobs");
 	};
 
 	const onSaved = (saved) => {
@@ -136,6 +146,15 @@ const Jobs = () => {
 					role="alert"
 				>
 					{error}
+				</div>
+			)}
+
+			{notFound && (
+				<div
+					className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700"
+					role="alert"
+				>
+					{strings("page.jobs.notFound")}
 				</div>
 			)}
 
@@ -195,27 +214,26 @@ const Jobs = () => {
 			</SlidePanel>
 
 			<SlidePanel
-				isOpen={panelMode === "detail"}
+				isOpen={!!routeJob && panelMode !== "form"}
 				onClose={closePanel}
 				title={strings("page.jobs.detailTitle")}
 			>
 				<PanelHeader
-					title={activeJob?.name ?? strings("page.jobs.detailTitle")}
+					title={routeJob?.name ?? strings("page.jobs.detailTitle")}
 					onClose={closePanel}
 				/>
 				<div className="px-6 py-6">
-					{activeJob && (
+					{routeJob && (
 						<JobDetail
-							job={activeJob}
+							job={routeJob}
 							getTypeLabel={getTypeLabel}
 							onChanged={(updated) => {
-								setActiveJob(updated);
 								setJobs((prev) =>
 									prev.map((j) => (j.id === updated.id ? updated : j)),
 								);
 							}}
-							onEdit={() => handleEdit(activeJob)}
-							onDelete={() => setDeleteTarget(activeJob)}
+							onEdit={() => handleEdit(routeJob)}
+							onDelete={() => setDeleteTarget(routeJob)}
 						/>
 					)}
 				</div>

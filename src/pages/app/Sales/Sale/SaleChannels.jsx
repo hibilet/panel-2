@@ -20,6 +20,7 @@ import DataTable from "../../../../components/tables/DataTable";
 import { useApp } from "../../../../context";
 import { getWidgetChannelLink } from "../../../../lib/appUrl";
 import { del, get, post, put } from "../../../../lib/client";
+import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 
 const CHART_COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8"];
@@ -277,6 +278,12 @@ const ChannelReportDialog = ({ channel, data, loading, onClose }) => {
 		if (!printRef.current) return;
 		const printContent = printRef.current.innerHTML;
 		const printWindow = window.open("", "_blank");
+		// Pop-up blockers return null here; writing to it throws and the
+		// print silently does nothing.
+		if (!printWindow) {
+			showToast("error", strings("error.popupBlocked"));
+			return;
+		}
 		printWindow.document.write(`
       <!DOCTYPE html>
       <html>

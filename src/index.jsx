@@ -14,6 +14,7 @@ if (typeof document !== "undefined") {
 import { TourProvider } from "@reactour/tour";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
+import ErrorBoundary from "./components/ErrorBoundary";
 import { dashboardTourSteps } from "./components/tours/DashboardTour";
 import { AppProvider, NotificationsProvider, ToastProvider } from "./context";
 import { getToken } from "./lib/storage";
@@ -37,7 +38,9 @@ createRoot(document.body).render(
 		<AppProvider>
 			<NotificationsProvider>
 				<TourProvider steps={dashboardTourSteps}>
-					{isOAuthCallback ? <Auth /> : (getToken() ? <App /> : <Auth />)}
+					<ErrorBoundary>
+						{isOAuthCallback ? <Auth /> : (getToken() ? <App /> : <Auth />)}
+					</ErrorBoundary>
 				</TourProvider>
 			</NotificationsProvider>
 		</AppProvider>

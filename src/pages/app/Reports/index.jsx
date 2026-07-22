@@ -205,7 +205,11 @@ const Reports = () => {
 
 	const handleArchive = async (report) => {
 		const next = report.status === "inactive" ? "active" : "inactive";
-		await put(`/reports/${report.id}`, { status: next });
+		try {
+			await put(`/reports/${report.id}`, { status: next });
+		} catch {
+			return; // toast handled by client; leave the row as-is
+		}
 		fetchReports();
 	};
 

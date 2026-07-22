@@ -1,7 +1,5 @@
 import strings from "../localization";
 
-const SALE_LINK_RE = /\/sales\/([^/?#]+)/;
-
 export const getNotificationTypeLabel = (type) => {
 	if (!type) return "—";
 	const key = `notification.type.${type}`;
@@ -16,29 +14,56 @@ export const getNotificationSeverityLabel = (severity) => {
 	return translated === key ? severity : translated;
 };
 
-const extractSaleId = (n) => {
-	if (!n) return null;
-	if (n.data?.sale) return n.data.sale;
-	if (n.sale) return n.sale;
-	if (n.params?.sale) return n.params.sale;
-	if (typeof n.link === "string") {
-		const m = n.link.match(SALE_LINK_RE);
-		if (m) return m[1];
-	}
-	return null;
+// The API stores extra ids under `meta`; older payloads used `data`/`params`.
+const metaOf = (n) => n?.meta ?? n?.data ?? n?.params ?? {};
+
+const idOf = (v) => {
+	if (!v) return null;
+	if (typeof v === "string") return v;
+	if (typeof v === "object") return v.id ?? v._id ?? null;
+	return String(v);
 };
 
+// The API prefixes some links with /dashboard (the panel is mounted at root).
 const stripDashboardPrefix = (link) => {
 	if (typeof link !== "string") return link;
 	if (link.startsWith("http")) return link;
 	return link.replace(/^\/dashboard(?=\/|$)/, "") || "/";
 };
 
+// Derived from the notification type + meta. Used when the API sent no link
+// (sweep/rollup notifications) and to give sale notifications a deeper target.
+const linkFromType = (n) => {
+	const type = n?.type ?? "";
+	const meta = metaOf(n);
+	const reportId = idOf(meta.reportId ?? meta.report ?? n.report);
+	const invoiceId = idOf(meta.invoiceId ?? meta.invoice ?? n.invoice);
+	const jobId = idOf(meta.jobId ?? meta.job ?? n.job);
+	const saleId = idOf(meta.saleId ?? meta.sale ?? n.sale);
+
+	if (type === "sale.first" || type === "sale.firstEvent") {
+		return saleId ? `/sales/${saleId}/attendees` : "/sales";
+	}
+	if (type.startsWith("report.")) {
+		return reportId ? `/reports/${reportId}` : "/reports";
+	}
+	if (type.startsWith("invoice.")) {
+		return invoiceId ? `/invoices/${invoiceId}` : "/invoices";
+	}
+	if (type === "job.invoice.errors") return "/invoices";
+	if (type.startsWith("job.")) {
+		return jobId ? `/jobs/${jobId}` : "/jobs";
+	}
+	if (type.startsWith("mail.")) return "/settings/mailing";
+	if (saleId) return `/sales/${saleId}`;
+	return null;
+};
+
 export const resolveNotificationLink = (n) => {
 	if (!n) return null;
-	if (n.type === "sale.first" || n.type === "sale.firstEvent") {
-		const id = extractSaleId(n);
-		if (id) return `/sales/${id}/attendees`;
-	}
-	return n.link ? stripDashboardPrefix(n.link) : null;
+	const derived = linkFromType(n);
+	// A derived deep link beats the stored one only when the stored link is
+	// missing or is a bare list route the derived link refines.
+	if (derived?.includes("/", 1)) return derived;
+	return n.link ? stripDashboardPrefix(n.link) : derived;
 };

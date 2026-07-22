@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import Can from "../../../components/Can";
 import AiDraftModal from "../../../components/sales/AiDraftModal";
-import { Modal, SearchBar } from "../../../components/shared";
+import { EmptyState, Modal, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
@@ -138,13 +138,33 @@ const Sales = () => {
 				/>
 			)}
 
-			<DataTable
-				data={filteredSales}
-				columns={salesColumns(showMore, showMore ? handleDelete : undefined)}
-				getRowKey={(r) => r.id ?? r.name}
-				onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
-				loading={loading}
-			/>
+			{!loading && (sales?.length ?? 0) === 0 ? (
+				<EmptyState
+					icon="fa-calendar-plus"
+					title={strings("page.sales.empty")}
+					description={strings("page.sales.emptyDesc")}
+					action={
+						account?.type === "account.merchant" && (
+							<Link
+								href="/sales/new"
+								className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800"
+							>
+								<i className="fa-solid fa-plus" aria-hidden />
+								{strings("page.sales.createNew")}
+							</Link>
+						)
+					}
+				/>
+			) : (
+				<DataTable
+					data={filteredSales}
+					columns={salesColumns(showMore, showMore ? handleDelete : undefined)}
+					getRowKey={(r) => r.id ?? r.name}
+					onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
+					loading={loading}
+					emptyMessage={strings("common.noResults")}
+				/>
+			)}
 
 			<div className="flex flex-col gap-4">
 				<button

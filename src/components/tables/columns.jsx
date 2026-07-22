@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import {
 	getNotificationSeverityLabel,
 	getNotificationTypeLabel,
+	resolveNotificationLink,
 } from "../../lib/notifications";
 import strings, { formatCurrency } from "../../localization";
 import ExpiryBadge from "../shared/ExpiryBadge";
@@ -986,12 +987,22 @@ export const notificationsColumns = [
 		key: "severity",
 		header: strings("table.notification.severity"),
 		render: (r) => (
-			<span
-				className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
-					severityStyles[r.severity] ?? "bg-slate-100 text-slate-600"
-				}`}
-			>
-				{getNotificationSeverityLabel(r.severity)}
+			<span className="inline-flex items-center gap-2">
+				<span
+					className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${
+						severityStyles[r.severity] ?? "bg-slate-100 text-slate-600"
+					}`}
+				>
+					{getNotificationSeverityLabel(r.severity)}
+				</span>
+				{/* Signals the row opens a detail page rather than just marking read. */}
+				{resolveNotificationLink(r) && (
+					<i
+						className="fa-solid fa-arrow-right text-xs text-slate-300"
+						title={strings("page.notifications.opensDetail")}
+						aria-hidden
+					/>
+				)}
 			</span>
 		),
 	},

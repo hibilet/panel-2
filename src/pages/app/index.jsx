@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { Redirect, Route, Switch, useLocation } from "wouter";
+import { Link, Redirect, Route, Switch, useLocation } from "wouter";
 
+import ErrorBoundary from "../../components/ErrorBoundary";
 import Navbar from "../../components/global/Navbar";
 import SellerSetupBanner from "../../components/global/SellerSetupBanner";
 import { useApp } from "../../context";
+import strings from "../../localization";
 import Accounts from "./Accounts";
 import Analytics from "./Analytics";
 import Dashboard from "./Dashboard";
@@ -35,14 +36,30 @@ import Venues from "./Venues";
 
 const NotFound = () => {
 	return (
-		<div className="mx-auto max-w-5xl">
-			<h1 className="text-2xl font-semibold text-slate-900">404 Not Found</h1>
+		<div className="mx-auto max-w-lg py-12 text-center">
+			<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+				<i className="fa-solid fa-compass text-2xl" aria-hidden />
+			</div>
+			<h1 className="text-2xl font-semibold text-slate-900">
+				{strings("error.notFoundTitle")}
+			</h1>
+			<p className="mt-2 text-sm text-slate-500">
+				{strings("error.notFoundDesc")}
+			</p>
+			<Link
+				href="/"
+				className="mt-6 inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800"
+			>
+				<i className="fa-solid fa-arrow-left" aria-hidden />
+				{strings("error.backToDashboard")}
+			</Link>
 		</div>
 	);
 };
 
 const App = () => {
 	const { account } = useApp();
+	const [location] = useLocation();
 
 	// Top-level Switch lets the print route match and own the document
 	// (no Navbar, no banner, no Tailwind container) while still going
@@ -54,6 +71,9 @@ const App = () => {
 				<Navbar />
 				<SellerSetupBanner />
 				<main className="mx-auto max-w-7xl px-4 py-6 md:py-8">
+					{/* Keyed on location so navigating away clears a crashed page
+					    instead of leaving the fallback stuck on every route. */}
+					<ErrorBoundary key={location}>
 					<Switch>
 					<Route path="/live" component={Live} />
 					<Route path="/" component={Dashboard} />
@@ -87,6 +107,7 @@ const App = () => {
 					)}
 					<Route path="/invoices/:id" component={Invoice} />
 					<Route path="/invoices" component={Invoices} />
+					<Route path="/jobs/:id" component={Jobs} />
 					<Route path="/jobs" component={Jobs} />
 					<Route path="/notifications" component={Notifications} />
 					<Route path="/settings" component={Settings} />
@@ -114,6 +135,7 @@ const App = () => {
 						<NotFound />
 					</Route>
 				</Switch>
+					</ErrorBoundary>
 				</main>
 			</Route>
 		</Switch>

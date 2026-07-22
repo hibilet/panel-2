@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
 import VatBadge from "../../../../components/invoices/VatBadge";
+import { Modal } from "../../../../components/shared";
 import { useApp } from "../../../../context";
 import { API_BASE_URL, del, get, patch, post } from "../../../../lib/client";
 import { getToken } from "../../../../lib/storage";
@@ -72,6 +73,8 @@ const Invoice = () => {
 	const [fetchedId, setFetchedId] = useState(null);
 	const [error, setError] = useState(null);
 	const [syncing, setSyncing] = useState(false);
+	const [finalizing, setFinalizing] = useState(false);
+	const [confirmFinalize, setConfirmFinalize] = useState(false);
 	const [adding, setAdding] = useState(false);
 	const [addForm, setAddForm] = useState({ description: "", qty: 1, unitAmount: 0 });
 	const loading = fetchedId !== id;
@@ -111,12 +114,19 @@ const Invoice = () => {
 			setError(err?.message ?? strings("error.failedSave"));
 		}
 	};
+	// Finalizing pushes the invoice to Stripe and cannot be undone, so it is
+	// gated behind a confirm and a pending flag (a double-click issued two).
 	const onFinalize = async () => {
+		if (finalizing) return;
+		setFinalizing(true);
+		setConfirmFinalize(false);
 		try {
 			const res = await post(`/invoices/${id}/finalize`, {});
 			if (res?.data) setInvoice(res.data);
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setFinalizing(false);
 		}
 	};
 
@@ -436,10 +446,14 @@ const Invoice = () => {
 							{isAdmin && invoice.status === "draft" && (
 								<button
 									type="button"
-									onClick={onFinalize}
-									className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700"
+									onClick={() => setConfirmFinalize(true)}
+									disabled={finalizing}
+									className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
 								>
-									<i className="fa-solid fa-paper-plane" aria-hidden />
+									<i
+										className={`fa-solid ${finalizing ? "fa-spinner fa-spin" : "fa-paper-plane"}`}
+										aria-hidden
+									/>
 									{strings("page.invoices.finalize")}
 								</button>
 							)}
@@ -518,6 +532,35 @@ const Invoice = () => {
 					</div>
 				</div>
 			)}
+
+			<Modal
+				isOpen={confirmFinalize}
+				onClose={() => setConfirmFinalize(false)}
+				title={strings("confirm.finalizeInvoice")}
+				footer={
+					<div className="flex justify-end gap-2">
+						<button
+							type="button"
+							onClick={() => setConfirmFinalize(false)}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+						>
+							{strings("common.cancel")}
+						</button>
+						<button
+							type="button"
+							onClick={onFinalize}
+							disabled={finalizing}
+							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+						>
+							{strings("page.invoices.finalize")}
+						</button>
+					</div>
+				}
+			>
+				<p className="text-sm text-slate-600">
+					{strings("confirm.finalizeInvoiceBody")}
+				</p>
+			</Modal>
 		</div>
 	);
 };

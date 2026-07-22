@@ -6,6 +6,7 @@ import { attendeeColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
 import { get } from "../../../../lib/client";
+import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 import { matchesQuery } from "../../../../utils/search";
 
@@ -197,6 +198,12 @@ const SaleAttendees = ({ sale }) => {
 			if (!printRef.current) return;
 			const printContent = printRef.current.innerHTML;
 			const printWindow = window.open("", "_blank");
+			// Pop-up blockers return null here; writing to it throws and the
+			// print silently does nothing.
+			if (!printWindow) {
+				showToast("error", strings("error.popupBlocked"));
+				return;
+			}
 			printWindow.document.write(`
       <!DOCTYPE html>
       <html>

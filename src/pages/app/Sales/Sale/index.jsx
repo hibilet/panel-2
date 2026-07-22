@@ -79,7 +79,8 @@ const Sale = () => {
 	const [location, setLocation] = useLocation();
 	const search = useSearch();
 	const { account } = useApp();
-	const [sale, setSale] = useState(undefined); // undefined=loading, null=new/error, object=loaded
+	const [sale, setSale] = useState(undefined); // undefined=loading, null=new, object=loaded
+	const [loadError, setLoadError] = useState(null);
 
 	const basePath = `/sales/${id}`;
 	const isNew = id === "new";
@@ -123,7 +124,11 @@ const Sale = () => {
 		setLocation("/sales/new", true);
 	};
 
+	// A failed load must NOT fall through to `null` - that is the "new sale"
+	// sentinel, and rendering the blank create form over an existing event
+	// invites the user to overwrite it with empty values.
 	const fetchSale = useCallback(() => {
+		setLoadError(null);
 		if (isNew) {
 			setSale(null); // null = new form
 			return;
@@ -131,7 +136,7 @@ const Sale = () => {
 		setSale(undefined); // loading
 		get(`/sales/${id}`)
 			.then((r) => setSale(r.data ?? null))
-			.catch(() => setSale(null));
+			.catch((err) => setLoadError(err?.message ?? "load-failed"));
 	}, [id, isNew]);
 
 	useEffect(() => {
@@ -151,6 +156,13 @@ const Sale = () => {
 	return (
 		<div className="mx-auto max-w-5xl">
 			{isNew && isGuided && <SaleGuidedForm onClose={handleCloseGuided} />}
+			<Link
+				href="/sales"
+				className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"
+			>
+				<i className="fa-solid fa-arrow-left" aria-hidden />
+				{strings("back.sales")}
+			</Link>
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
 				{!isNew && sale && (
@@ -166,7 +178,25 @@ const Sale = () => {
 				)}
 			</div>
 
-			<nav aria-label="Sale sections" className="mt-4">
+			{loadError && (
+				<div
+					className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+					role="alert"
+				>
+					<span>{strings("page.sale.loadFailed")}</span>
+					<button
+						type="button"
+						onClick={fetchSale}
+						className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
+					>
+						{strings("error.reload")}
+					</button>
+				</div>
+			)}
+
+			{!loadError && (
+			<>
+			<nav aria-label={strings("page.sale.sections")} className="mt-4">
 				<div className="flex flex-wrap gap-2" role="tablist">
 					{tabItems.map(({ path, labelKey, icon }) => (
 						<TabLink
@@ -220,6 +250,8 @@ const Sale = () => {
 					<Route path="/sales/:id/report" component={SaleReport} />
 				</Switch>
 			</main>
+			</>
+			)}
 		</div>
 	);
 };

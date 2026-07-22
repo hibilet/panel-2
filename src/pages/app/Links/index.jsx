@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "wouter";
-import { SearchBar } from "../../../components/shared";
+import { EmptyState, SearchBar } from "../../../components/shared";
 import SlidePanel from "../../../components/shared/SlidePanel";
 import { linksColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -142,20 +142,29 @@ const Links = () => {
 				/>
 			)}
 
-			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-				<DataTable
-					data={query
-						? data.filter((l) => matchesQuery(l.name, query) || matchesQuery(l.slug, query))
-						: data}
-					columns={linksColumns((slug) => getWidgetLinkUrl(slug, realm), CopyButton)}
-					getRowKey={(r) => r._id ?? r.slug}
-					onRowClick={(row) => {
-						const id = row._id ?? row.slug;
-						id && setLocation(`/links/${id}`);
-					}}
-					loading={loading}
+			{!loading && (data?.length ?? 0) === 0 ? (
+				<EmptyState
+					icon="fa-link"
+					title={strings("page.links.empty")}
+					description={strings("page.links.emptyDesc")}
 				/>
-			</div>
+			) : (
+				<div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+					<DataTable
+						data={query
+							? data.filter((l) => matchesQuery(l.name, query) || matchesQuery(l.slug, query))
+							: data}
+						columns={linksColumns((slug) => getWidgetLinkUrl(slug, realm), CopyButton)}
+						getRowKey={(r) => r._id ?? r.slug}
+						onRowClick={(row) => {
+							const id = row._id ?? row.slug;
+							id && setLocation(`/links/${id}`);
+						}}
+						loading={loading}
+						emptyMessage={strings("common.noResults")}
+					/>
+				</div>
+			)}
 
 			<div className="flex flex-col gap-4">
 				<button

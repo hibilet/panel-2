@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { useEffect, useMemo, useState } from "react";
 import {
 	Area,
@@ -11,11 +12,13 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { Link, useLocation } from "wouter";
 import { useApp } from "../../../context";
 import { ExpiryBadge, Info } from "../../../components/shared";
 import { countryName } from "../../../lib/countries";
 import { get, getText } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
+import { formatCurrency } from "../../../localization";
 
 const SEGMENT_COLOR = {
 	whale: "#7c3aed",
@@ -117,14 +120,52 @@ const Dist = ({ title, info, rows, labelFn = titleCase, empty, onPick, activeKey
 	);
 };
 
-const Stat = ({ label, value, sub, tone, info }) => (
+// Axis labels only: "1.2k" beats "€1,234.00" in a 56px gutter.
+const compactAmount = (v) =>
+	Math.abs(v) >= 1000 ? `${Math.round(v / 100) / 10}k` : String(Math.round(v));
+
+const aggregate = (rows) =>
+	(rows ?? []).reduce(
+		(a, r) => ({
+			tickets: a.tickets + (r.tickets ?? 0),
+			gross: a.gross + (r.grossCents ?? 0),
+			net: a.net + (r.netCents ?? 0),
+			refunded: a.refunded + (r.refundedCents ?? 0),
+			refundedCount: a.refundedCount + (r.refundedCount ?? 0),
+		}),
+		{ tickets: 0, gross: 0, net: 0, refunded: 0, refundedCount: 0 },
+	);
+
+// Period-over-period chip. Hidden when there is no comparable prior period.
+// `invert` marks metrics where a rise is bad (refunds).
+const Delta = ({ current, previous, invert }) => {
+	if (previous == null || previous === 0) return null;
+	const pct = Math.round(((current - previous) / previous) * 100);
+	if (pct === 0) return <span className="text-[11px] text-slate-400">no change</span>;
+	const up = pct > 0;
+	const good = invert ? !up : up;
+	return (
+		<span
+			className={`inline-flex items-center gap-1 text-[11px] font-medium ${good ? "text-emerald-600" : "text-red-600"}`}
+			title="vs the preceding period of the same length"
+		>
+			<i className={`fa-solid ${up ? "fa-arrow-up" : "fa-arrow-down"}`} aria-hidden />
+			{Math.abs(pct)}%
+		</span>
+	);
+};
+
+const Stat = ({ label, value, sub, tone, info, delta }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 		<p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">
 			{label}
 			<Info text={info} />
 		</p>
 		<p className={`mt-0.5 text-xl font-semibold ${tone ?? "text-slate-900"}`}>{value}</p>
-		{sub && <p className="mt-0.5 text-xs text-slate-500">{sub}</p>}
+		<div className="mt-0.5 flex flex-wrap items-center gap-2">
+			{sub && <p className="text-xs text-slate-500">{sub}</p>}
+			{delta}
+		</div>
 	</div>
 );
 
@@ -146,15 +187,57 @@ const INFO = {
 	sellThrough: "Tickets sold vs total capacity across the events in scope.",
 	refund: "Share of an event's reservations that were refunded.",
 	trend: "Tickets confirmed per day. For a single event this spans its full on-sale lifetime.",
+	net: "Gross sales minus discounts, as settled by the payment provider. Refunds are shown separately.",
+	avgTicket: "Net revenue divided by tickets sold in scope.",
+	refunded: "Money returned to buyers in scope.",
 	segment: "Behavioral group derived from purchase history and checkout journey.",
 };
 
+const TABS = ["audience", "sales", "marketing"];
+const TAB_LABEL = { audience: "Audience", sales: "Sales", marketing: "Marketing" };
+
+const TabBtn = ({ id, active, onSelect }) => (
+	<button
+		type="button"
+		role="tab"
+		aria-selected={active}
+		aria-controls={`analytics-panel-${id}`}
+		onClick={() => onSelect(id)}
+		className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
+	>
+		{TAB_LABEL[id]}
+	</button>
+);
+
 const Analytics = () => {
 	const { sales: allSales } = useApp();
-	const [tab, setTab] = useState("audience");
-	const [scopeSale, setScopeSale] = useState("all");
-	const [rangeDays, setRangeDays] = useState(365);
+	const [, setLocation] = useLocation();
+	// Tab / scope / range live in the URL so a view can be bookmarked, shared
+	// and survives a refresh.
+	const initial = useMemo(() => {
+		const q = new URLSearchParams(window.location.search);
+		const t = q.get("tab");
+		const d = Number(q.get("days"));
+		return {
+			tab: TABS.includes(t) ? t : "audience",
+			scope: q.get("sale") ?? "all",
+			days: RANGES.some((r) => r.days === d) ? d : 365,
+		};
+	}, []);
+	const [tab, setTab] = useState(initial.tab);
+	const [scopeSale, setScopeSale] = useState(initial.scope);
+	const [rangeDays, setRangeDays] = useState(initial.days);
+	const [trendMetric, setTrendMetric] = useState("tickets");
 	const [selCountry, setSelCountry] = useState(null);
+
+	useEffect(() => {
+		const q = new URLSearchParams();
+		if (tab !== "audience") q.set("tab", tab);
+		if (scopeSale !== "all") q.set("sale", scopeSale);
+		if (rangeDays !== 365) q.set("days", String(rangeDays));
+		const qs = q.toString();
+		setLocation(`/analytics${qs ? `?${qs}` : ""}`, { replace: true });
+	}, [tab, scopeSale, rangeDays, setLocation]);
 
 	const [pastSales, setPastSales] = useState([]);
 	const [segments, setSegments] = useState([]);
@@ -172,8 +255,10 @@ const Analytics = () => {
 	const [demoFilter, setDemoFilter] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [scopeLoading, setScopeLoading] = useState(false);
+	const [demoLoading, setDemoLoading] = useState(false);
 	const [error, setError] = useState(null);
 	const [exporting, setExporting] = useState(null);
+	const [reloadKey, setReloadKey] = useState(0);
 
 	// segs: array (group) or string (single). name: download/toast label.
 	const exportAudience = async (segs, name) => {
@@ -214,6 +299,7 @@ const Analytics = () => {
 				setWinback(w.data ?? []);
 				setSalesPerf(sa.data ?? []);
 				setPastSales(past.data ?? []);
+				setError(null);
 			} catch (err) {
 				if (alive) setError(err?.message ?? "Failed to load analytics");
 			} finally {
@@ -223,20 +309,22 @@ const Analytics = () => {
 		return () => {
 			alive = false;
 		};
-	}, []);
+	}, [reloadKey]);
 
 	useEffect(() => {
 		let alive = true;
 		setScopeLoading(true);
 		// A single event shows its FULL on-sale lifetime (start->end), not a
 		// rolling window - so pull wide and let the event's days define the span.
-		const effectiveDays = scopeSale !== "all" ? 1825 : rangeDays;
+		// For all-events we pull double the range so the preceding period is
+		// available for the period-over-period deltas.
+		const effectiveDays =
+			scopeSale !== "all" ? 1825 : Math.min(rangeDays * 2, 1825);
 		const saleQs = scopeSale !== "all" ? `&sale=${scopeSale}` : "";
 		const saleParam = scopeSale !== "all" ? `sale=${scopeSale}` : "";
 		Promise.all([
 			get(`/analytics/segments?${saleParam}`),
 			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
-			get(`/analytics/payments?${saleParam}`),
 			get(`/analytics/channels?${saleParam}`),
 			get(`/analytics/coupons?${saleParam}`),
 			get(`/analytics/timing?${saleParam}`),
@@ -244,11 +332,10 @@ const Analytics = () => {
 			get(`/analytics/friction?${saleParam}`),
 			get(`/analytics/engagement?${saleParam}`),
 		])
-			.then(([s, d, pm, ch, co, tm, af, fr, en]) => {
+			.then(([s, d, ch, co, tm, af, fr, en]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
-				setPayments(pm.data ?? []);
 				setChannels(ch.data ?? []);
 				setCoupons(co.data ?? []);
 				setTiming(tm.data ?? []);
@@ -263,18 +350,32 @@ const Analytics = () => {
 		return () => {
 			alive = false;
 		};
-	}, [scopeSale, rangeDays]);
+	}, [scopeSale, rangeDays, reloadKey]);
 
-	// Demographics is its own fetch so cross-filtering (gender/age/country/
-	// device) re-queries just this block, not the whole page.
+	// Demographics + payment method share one fetch so cross-filtering
+	// (gender/age/device/payment) re-queries just this block, not the whole
+	// page. Payment method lives on transactions rather than the buyer fact,
+	// so it is a separate endpoint that takes the same filter params.
 	useEffect(() => {
 		let alive = true;
+		setDemoLoading(true);
 		const p = new URLSearchParams();
 		if (scopeSale !== "all") p.set("sale", scopeSale);
 		for (const [k, v] of Object.entries(demoFilter)) if (v) p.set(k, v);
-		get(`/analytics/demographics?${p}`)
-			.then((dm) => alive && setDemo(dm.data ?? null))
-			.catch(() => {});
+		// The payment breakdown must not filter itself out of existence.
+		const pp = new URLSearchParams(p);
+		pp.delete("payment");
+		Promise.all([
+			get(`/analytics/demographics?${p}`),
+			get(`/analytics/payments?${pp}`),
+		])
+			.then(([dm, pm]) => {
+				if (!alive) return;
+				setDemo(dm.data ?? null);
+				setPayments(pm.data ?? []);
+			})
+			.catch(() => {})
+			.finally(() => alive && setDemoLoading(false));
 		return () => {
 			alive = false;
 		};
@@ -284,13 +385,25 @@ const Analytics = () => {
 		() => Object.fromEntries([...(allSales ?? []), ...(pastSales ?? [])].map((s) => [String(saleIdOf(s)), s.name])),
 		[allSales, pastSales],
 	);
-	const segData = useMemo(
-		() =>
-			(segments ?? [])
-				.map((r) => ({ segment: r.segment, label: SEGMENT_LABEL[r.segment] ?? r.segment, buyers: r.buyers ?? 0 }))
-				.sort((a, b) => b.buyers - a.buyers),
-		[segments],
-	);
+	// /analytics/segments returns one row per merchant per segment (the fact
+	// is keyed `${merchant}:${segment}`), so an admin scoped to a realm gets
+	// the same segment back once per merchant. Fold them before rendering -
+	// otherwise the list repeats and byKey below silently keeps only the last
+	// row of each segment, undercounting the group percentages.
+	const segData = useMemo(() => {
+		const m = new Map();
+		for (const r of segments ?? []) {
+			if (!r?.segment) continue;
+			m.set(r.segment, (m.get(r.segment) ?? 0) + (r.buyers ?? 0));
+		}
+		return [...m.entries()]
+			.map(([segment, buyers]) => ({
+				segment,
+				label: SEGMENT_LABEL[segment] ?? segment,
+				buyers,
+			}))
+			.sort((a, b) => b.buyers - a.buyers);
+	}, [segments]);
 	const totalBuyers = useMemo(() => segData.reduce((s, r) => s + r.buyers, 0), [segData]);
 	const byKey = useMemo(() => Object.fromEntries(segData.map((r) => [r.segment, r.buyers])), [segData]);
 	const groupCount = (segs) => segs.reduce((s, k) => s + (byKey[k] ?? 0), 0);
@@ -303,7 +416,7 @@ const Analytics = () => {
 	const hasDeviceData = (demo?.device ?? []).some((d) => d.key && d.key !== "unknown");
 	const pick = (dim) => (key) => setDemoFilter((f) => ({ ...f, [dim]: f[dim] === key ? undefined : key }));
 	const activeFilters = Object.entries(demoFilter).filter(([, v]) => v);
-	const FILTER_LABEL = { gender: "Gender", age: "Age", device: "Device" };
+	const FILTER_LABEL = { gender: "Gender", age: "Age", device: "Device", payment: "Payment" };
 	const citiesOfActive = useMemo(
 		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
 		[demo, activeCountry],
@@ -319,19 +432,54 @@ const Analytics = () => {
 		return { m, max };
 	}, [timing]);
 
-	const dailyData = useMemo(() => (daily ?? []).map((r) => ({ day: r.day, tickets: r.tickets ?? 0 })), [daily]);
-	const ticketsTotal = useMemo(() => daily.reduce((s, r) => s + (r.tickets ?? 0), 0), [daily]);
-	// Consolidated per-event tickets within the range (all-events view only).
+	// A single event is always shown over its full lifetime, so there is no
+	// preceding period to compare against; all-events splits the pulled window
+	// in half at `today - rangeDays`.
+	const isScoped = scopeSale !== "all";
+	const { curRows, prevRows } = useMemo(() => {
+		const rows = daily ?? [];
+		if (isScoped) return { curRows: rows, prevRows: [] };
+		const cutoff = dayjs().subtract(rangeDays, "day").format("YYYY-MM-DD");
+		return {
+			curRows: rows.filter((r) => r.day >= cutoff),
+			prevRows: rows.filter((r) => r.day < cutoff),
+		};
+	}, [daily, rangeDays, isScoped]);
+
+	const currency = useMemo(
+		() => (daily ?? []).find((r) => r.currency)?.currency ?? "eur",
+		[daily],
+	);
+	const cur = useMemo(() => aggregate(curRows), [curRows]);
+	const prev = useMemo(() => aggregate(prevRows), [prevRows]);
+	const hasPrev = !isScoped && prevRows.length > 0;
+
+	const dailyData = useMemo(
+		() =>
+			curRows.map((r) => ({
+				day: r.day,
+				tickets: r.tickets ?? 0,
+				revenue: (r.netCents ?? 0) / 100,
+			})),
+		[curRows],
+	);
+	const ticketsTotal = cur.tickets;
+	const isRevenue = trendMetric === "revenue";
+	// Consolidated per-event tickets + revenue within the range (all-events view).
 	const byEvent = useMemo(() => {
 		const m = new Map();
-		for (const r of daily) {
+		for (const r of curRows) {
 			const k = String(r.sale);
-			m.set(k, (m.get(k) ?? 0) + (r.tickets ?? 0));
+			const e = m.get(k) ?? { tickets: 0, net: 0, refunded: 0 };
+			e.tickets += r.tickets ?? 0;
+			e.net += r.netCents ?? 0;
+			e.refunded += r.refundedCents ?? 0;
+			m.set(k, e);
 		}
 		return [...m.entries()]
-			.map(([id, tickets]) => ({ id, name: saleName[id] ?? "-", tickets }))
-			.sort((a, b) => b.tickets - a.tickets);
-	}, [daily, saleName]);
+			.map(([id, v]) => ({ id, name: saleName[id] ?? "-", ...v }))
+			.sort((a, b) => b.net - a.net || b.tickets - a.tickets);
+	}, [curRows, saleName]);
 
 	const winbackRows = useMemo(
 		() => (scopeSale === "all" ? winback : winback.filter((r) => String(r.sale) === scopeSale)),
@@ -354,8 +502,20 @@ const Analytics = () => {
 		return { sellThrough: pctOf(sold, cap), noShow: pctOf(ns, elig), eligible: elig };
 	}, [salesRows]);
 
-	if (loading) return <p className="text-sm text-slate-500">Loading analytics...</p>;
-	if (error) return <p className="text-sm text-red-600">{error}</p>;
+	if (loading) {
+		return (
+			<div className="mx-auto max-w-5xl space-y-6">
+				<div className="h-8 w-40 animate-shimmer rounded" />
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+					{[0, 1, 2].map((i) => (
+						<div key={i} className="h-20 animate-shimmer rounded-xl" />
+					))}
+				</div>
+				<div className="h-64 animate-shimmer rounded-xl" />
+				<div className="h-64 animate-shimmer rounded-xl" />
+			</div>
+		);
+	}
 
 	const scopeName = scopeSale === "all" ? "all events" : saleName[scopeSale] ?? "event";
 	const hasAffinity = (affinity.pairs?.length ?? 0) > 0 || (affinity.related?.length ?? 0) > 0;
@@ -400,16 +560,6 @@ const Analytics = () => {
 			)}
 		</Card>
 	);
-	const TabBtn = ({ id, label }) => (
-		<button
-			type="button"
-			onClick={() => setTab(id)}
-			className={`rounded-lg px-3 py-1.5 text-sm font-medium ${tab === id ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
-		>
-			{label}
-		</button>
-	);
-
 	return (
 		<div className="mx-auto max-w-5xl space-y-6">
 			<div className="flex flex-wrap items-center justify-between gap-3">
@@ -457,21 +607,37 @@ const Analytics = () => {
 				</div>
 			</div>
 
-			<div className="flex gap-1 border-b border-slate-200 pb-px">
-				<TabBtn id="audience" label="Audience" />
-				<TabBtn id="sales" label="Sales" />
-				<TabBtn id="marketing" label="Marketing" />
+			{error && (
+				<div
+					className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+					role="alert"
+				>
+					<span>{error}</span>
+					<button
+						type="button"
+						onClick={() => setReloadKey((k) => k + 1)}
+						className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
+					>
+						Retry
+					</button>
+				</div>
+			)}
+
+			<div role="tablist" aria-label="Analytics sections" className="flex gap-1 border-b border-slate-200 pb-px">
+				{TABS.map((id) => (
+					<TabBtn key={id} id={id} active={tab === id} onSelect={setTab} />
+				))}
 			</div>
 
 			{tab === "audience" && (
-				<>
+				<div id="analytics-panel-audience" role="tabpanel" className="space-y-6">
 					{hasAffinity && crossSellCard}
 					{engagement && engagement.visitors > 0 && (
 						<Card
 							title="Audience engagement"
 							hint="Widget visitors recognised across events - the basis for cross-sell and win-back"
 						>
-							<div className="grid grid-cols-3 gap-3">
+							<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-slate-900">{engagement.visitors.toLocaleString()}</div>
 									<div className="text-xs text-slate-500">Visitors</div>
@@ -502,7 +668,7 @@ const Analytics = () => {
 							)}
 						</Card>
 					)}
-					<div className="grid grid-cols-3 gap-3">
+					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
 						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={INFO.returning} />
 						<Stat label="Win-back" value={`${winbackAgg.rate}%`} sub={`${winbackAgg.recovered}/${winbackAgg.churned}`} info={INFO.winback} />
@@ -580,7 +746,7 @@ const Analytics = () => {
 
 					<Card
 						title="Demographics & payment"
-						hint={`Who your buyers are - ${scopeName}. Click a gender / age / device to filter the rest.`}
+						hint={`Who your buyers are - ${scopeName}. Click a gender / age / device / payment method to filter the rest.`}
 						action={
 							activeFilters.length > 0 && (
 								<button
@@ -593,7 +759,7 @@ const Analytics = () => {
 							)
 						}
 					>
-						{scopeLoading ? (
+						{scopeLoading || demoLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
 						) : (
 							<>
@@ -606,7 +772,8 @@ const Analytics = () => {
 												onClick={() => pick(dim)(val)}
 												className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-medium text-blue-800"
 											>
-												{FILTER_LABEL[dim] ?? dim}: {dim === "age" ? val : titleCase(val)}
+												{FILTER_LABEL[dim] ?? dim}:{" "}
+												{dim === "age" ? val : dim === "payment" ? paymentLabel(val) : titleCase(val)}
 												<i className="fa-solid fa-xmark" aria-hidden />
 											</button>
 										))}
@@ -626,10 +793,12 @@ const Analytics = () => {
 									)}
 									<Dist
 										title="Payment method"
-										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the provider."
+										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the provider. Click to filter."
 										rows={payments}
 										labelFn={paymentLabel}
 										empty="No payment data yet."
+										onPick={pick("payment")}
+										activeKey={demoFilter.payment}
 									/>
 								</div>
 								<p className="mt-4 text-[11px] text-slate-400">
@@ -645,7 +814,7 @@ const Analytics = () => {
 						title="Where your buyers are"
 						hint="From the billing address on the payment (country + city). Select a country to see its cities."
 					>
-						{scopeLoading ? (
+						{scopeLoading || demoLoading ? (
 							<p className="text-sm text-slate-500">Loading...</p>
 						) : (demo?.country ?? []).length === 0 ? (
 							<p className="text-sm text-slate-500">No location data yet.</p>
@@ -709,13 +878,38 @@ const Analytics = () => {
 							</p>
 						)}
 					</Card>
-				</>
+				</div>
 			)}
 
 			{tab === "sales" && (
-				<>
-					<div className="grid grid-cols-3 gap-3">
-						<Stat label="Tickets sold" value={ticketsTotal.toLocaleString()} sub={scopeName} info={INFO.tickets} />
+				<div id="analytics-panel-sales" role="tabpanel" className="space-y-6">
+					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+						<Stat
+							label="Tickets sold"
+							value={ticketsTotal.toLocaleString()}
+							sub={scopeName}
+							info={INFO.tickets}
+							delta={hasPrev && <Delta current={cur.tickets} previous={prev.tickets} />}
+						/>
+						<Stat
+							label="Net revenue"
+							value={formatCurrency(cur.net / 100, currency)}
+							info={INFO.net}
+							delta={hasPrev && <Delta current={cur.net} previous={prev.net} />}
+						/>
+						<Stat
+							label="Avg ticket"
+							value={cur.tickets ? formatCurrency(cur.net / 100 / cur.tickets, currency) : "—"}
+							info={INFO.avgTicket}
+						/>
+						<Stat
+							label="Refunded"
+							value={formatCurrency(cur.refunded / 100, currency)}
+							tone={cur.refunded > 0 ? "text-red-600" : "text-slate-900"}
+							sub={cur.refundedCount ? `${cur.refundedCount.toLocaleString()} tickets` : undefined}
+							info={INFO.refunded}
+							delta={hasPrev && <Delta current={cur.refunded} previous={prev.refunded} invert />}
+						/>
 						<Stat label="Sell-through" value={`${perf.sellThrough}%`} info={INFO.sellThrough} />
 						<Stat
 							label="No-show"
@@ -724,6 +918,11 @@ const Analytics = () => {
 							info={perf.eligible ? NO_SHOW_INFO : `${NO_SHOW_INFO} No ended events in scope yet - pick a past event to see no-show.`}
 						/>
 					</div>
+					{hasPrev && (
+						<p className="-mt-3 text-[11px] text-slate-400">
+							Arrows compare the last {rangeDays} days with the {rangeDays} days before them.
+						</p>
+					)}
 
 					{friction && friction.multiAttemptBaskets > 0 && (
 						<Card
@@ -769,9 +968,30 @@ const Analytics = () => {
 						</Card>
 					)}
 
-					<Card title="Sales trend" hint={`Tickets per day - ${scopeName}`}>
+					<Card
+						title="Sales trend"
+						hint={`${isRevenue ? "Net revenue" : "Tickets"} per day - ${scopeName}`}
+						action={
+							<div className="inline-flex shrink-0 overflow-hidden rounded-lg border border-slate-300">
+								{[
+									{ id: "tickets", label: "Tickets" },
+									{ id: "revenue", label: "Revenue" },
+								].map((m) => (
+									<button
+										key={m.id}
+										type="button"
+										onClick={() => setTrendMetric(m.id)}
+										aria-pressed={trendMetric === m.id}
+										className={`px-2.5 py-1.5 text-xs font-medium ${trendMetric === m.id ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
+									>
+										{m.label}
+									</button>
+								))}
+							</div>
+						}
+					>
 						{scopeLoading ? (
-							<p className="text-sm text-slate-500">Loading...</p>
+							<div className="h-[260px] animate-shimmer rounded-lg" />
 						) : dailyData.length === 0 ? (
 							<p className="text-sm text-slate-500">No sales in range.</p>
 						) : (
@@ -782,37 +1002,77 @@ const Analytics = () => {
 											<stop offset="0%" stopColor="#2563eb" stopOpacity={0.35} />
 											<stop offset="100%" stopColor="#2563eb" stopOpacity={0} />
 										</linearGradient>
+										<linearGradient id="rv" x1="0" y1="0" x2="0" y2="1">
+											<stop offset="0%" stopColor="#059669" stopOpacity={0.35} />
+											<stop offset="100%" stopColor="#059669" stopOpacity={0} />
+										</linearGradient>
 									</defs>
 									<CartesianGrid strokeDasharray="3 3" />
 									<XAxis dataKey="day" tick={{ fontSize: 11 }} minTickGap={32} />
-									<YAxis tick={{ fontSize: 11 }} width={40} allowDecimals={false} />
-									<Tooltip formatter={(v) => [Number(v).toLocaleString(), "Tickets"]} />
-									<Area type="monotone" dataKey="tickets" stroke="#2563eb" fill="url(#tk)" strokeWidth={2} />
+									<YAxis
+										tick={{ fontSize: 11 }}
+										width={isRevenue ? 56 : 40}
+										allowDecimals={false}
+										tickFormatter={(v) => (isRevenue ? compactAmount(v) : v)}
+									/>
+									<Tooltip
+										formatter={(v) => [
+											isRevenue ? formatCurrency(Number(v), currency) : Number(v).toLocaleString(),
+											isRevenue ? "Net revenue" : "Tickets",
+										]}
+									/>
+									<Area
+										type="monotone"
+										dataKey={isRevenue ? "revenue" : "tickets"}
+										stroke={isRevenue ? "#059669" : "#2563eb"}
+										fill={isRevenue ? "url(#rv)" : "url(#tk)"}
+										strokeWidth={2}
+									/>
 								</AreaChart>
 							</ResponsiveContainer>
 						)}
 					</Card>
 
 					{scopeSale === "all" && byEvent.length > 0 && (
-						<Card title="By event" hint={`Tickets per event in the selected range`}>
+						<Card
+							title="By event"
+							hint="Tickets and net revenue per event in the selected range. Click an event to open it."
+						>
 							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
+								<table className="w-full min-w-[420px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Event</th>
-											<th className="py-2 text-right">Tickets</th>
+											<th className="py-2 pr-4 text-right">Tickets</th>
+											<th className="py-2 pr-4 text-right">Net revenue</th>
+											<th className="py-2 text-right">Refunded</th>
 										</tr>
 									</thead>
 									<tbody>
 										{byEvent.slice(0, 30).map((r) => (
 											<tr key={r.id} className="border-b border-slate-100 last:border-0">
-												<td className="py-2 pr-4 font-medium text-slate-800">{r.name}</td>
-												<td className="py-2 text-right text-slate-700">{r.tickets.toLocaleString()}</td>
+												<td className="py-2 pr-4 font-medium text-slate-800">
+													<Link href={`/sales/${r.id}`} className="hover:text-blue-700 hover:underline">
+														{r.name}
+													</Link>
+												</td>
+												<td className="py-2 pr-4 text-right tabular-nums text-slate-700">{r.tickets.toLocaleString()}</td>
+												<td className="py-2 pr-4 text-right tabular-nums font-medium text-slate-800">
+													{formatCurrency(r.net / 100, currency)}
+												</td>
+												<td className="py-2 text-right tabular-nums text-slate-500">
+													{r.refunded ? formatCurrency(r.refunded / 100, currency) : "—"}
+												</td>
 											</tr>
 										))}
 									</tbody>
 								</table>
 							</div>
+							{byEvent.length > 30 && (
+								<p className="mt-2 text-[11px] text-slate-400">
+									Showing the top 30 of {byEvent.length} events by revenue.
+								</p>
+							)}
 						</Card>
 					)}
 
@@ -821,7 +1081,7 @@ const Analytics = () => {
 							<p className="text-sm text-slate-500">No sales yet.</p>
 						) : (
 							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
+								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Event</th>
@@ -838,7 +1098,9 @@ const Analytics = () => {
 											<tr key={r._id} className="border-b border-slate-100 last:border-0">
 												<td className="py-2 pr-4 font-medium text-slate-800">
 													<span className="inline-flex items-center gap-2">
-														{r.name ?? "-"}
+														<Link href={`/sales/${r._id}`} className="hover:text-blue-700 hover:underline">
+															{r.name ?? "-"}
+														</Link>
 														<ExpiryBadge date={r.endedAt} showDate={false} warnDays={14} />
 													</span>
 												</td>
@@ -863,7 +1125,7 @@ const Analytics = () => {
 							<p className="text-sm text-slate-500">No churn reports for {scopeName}.</p>
 						) : (
 							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
+								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Report end</th>
@@ -929,17 +1191,17 @@ const Analytics = () => {
 							</div>
 						)}
 					</Card>
-				</>
+				</div>
 			)}
 
 			{tab === "marketing" && (
-				<>
+				<div id="analytics-panel-marketing" role="tabpanel" className="space-y-6">
 					<Card title="Channels / traffic" hint="Each channel consolidated across your events: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
 						{channels.length === 0 ? (
 							<p className="text-sm text-slate-500">No channels yet.</p>
 						) : (
 							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
+								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Channel</th>
@@ -976,7 +1238,7 @@ const Analytics = () => {
 							<p className="text-sm text-slate-500">No coupons yet.</p>
 						) : (
 							<div className="overflow-x-auto">
-								<table className="w-full text-sm">
+								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
 											<th className="py-2 pr-4">Code</th>
@@ -997,7 +1259,7 @@ const Analytics = () => {
 							</div>
 						)}
 					</Card>
-				</>
+				</div>
 			)}
 		</div>
 	);

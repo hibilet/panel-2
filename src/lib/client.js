@@ -49,14 +49,26 @@ const handler = async (res) => {
 	return res.json();
 };
 
+// The API answers errors as { log, message } where message is a kebab slug
+// (eg "cant-mark-read"). Prefer a translated string for it, then the raw slug,
+// then a generic fallback - anything beats a blanket "An Error Occurred".
+const errorMessage = (err) => {
+	const slug = typeof err?.message === "string" ? err.message : null;
+	if (!slug) return strings("common.errorOccurred");
+	const key = `error.${slug}`;
+	const translated = strings(key);
+	if (translated !== key) return translated;
+	return slug.includes(" ") ? slug : strings("common.errorOccurred");
+};
+
 const withToast = (promise) =>
 	promise
 		.then((data) => {
-			showToast("success", "Success");
+			showToast("success", strings("common.success"));
 			return data;
 		})
 		.catch((err) => {
-			if (!err?.__sessionExpired) showToast("error", "An Error Occurred");
+			if (!err?.__sessionExpired) showToast("error", errorMessage(err));
 			throw err;
 		});
 

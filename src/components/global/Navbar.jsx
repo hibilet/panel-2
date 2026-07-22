@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useApp, useNotifications } from "../../context";
 import { can, familyEnabled, quota } from "../../lib/capabilities";
@@ -251,6 +251,63 @@ const NotificationsBell = () => {
 	);
 };
 
+// Module scope on purpose: defined inside Navbar it was a fresh component type
+// on every render, so React remounted every nav item (and dropped focus) each
+// time the menu opened or the route changed.
+const NavLink = ({
+	path,
+	label,
+	icon,
+	isActive,
+	tourId,
+	hasBeating,
+	disabled,
+	onNavigate,
+}) => {
+	const baseClass = `
+      flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium
+      transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
+      ${
+				disabled
+					? "cursor-not-allowed opacity-50 text-slate-400"
+					: isActive
+						? "bg-slate-900 text-white"
+						: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+			}
+    `;
+	if (disabled) {
+		return (
+			<span
+				aria-disabled="true"
+				tabIndex={-1}
+				data-tour={tourId}
+				className={baseClass}
+			>
+				<i
+					className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
+					aria-hidden
+				/>
+				<span>{label}</span>
+			</span>
+		);
+	}
+	return (
+		<Link
+			href={path}
+			aria-current={isActive ? "page" : undefined}
+			data-tour={tourId}
+			onClick={onNavigate}
+			className={baseClass}
+		>
+			<i
+				className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
+				aria-hidden
+			/>
+			<span>{label}</span>
+		</Link>
+	);
+};
+
 const Navbar = () => {
 	const [location] = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -299,62 +356,7 @@ const Navbar = () => {
 		path === "/" ? location === path : location.startsWith(path),
 	);
 
-	const NavLink = ({
-		path,
-		label,
-		icon,
-		isActive,
-		tourId,
-		hasBeating,
-		disabled,
-	}) => {
-		const baseClass = `
-        flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium
-        transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2
-        ${
-					disabled
-						? "cursor-not-allowed opacity-50 text-slate-400"
-						: isActive
-							? "bg-slate-900 text-white"
-							: "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-				}
-      `;
-		if (disabled) {
-			return (
-				<span
-					role="tab"
-					aria-disabled="true"
-					aria-selected={isActive}
-					tabIndex={-1}
-					data-tour={tourId}
-					className={baseClass}
-				>
-					<i
-						className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
-						aria-hidden
-					/>
-					<span>{label}</span>
-				</span>
-			);
-		}
-		return (
-			<Link
-				href={path}
-				role="tab"
-				aria-selected={isActive}
-				aria-current={isActive ? "page" : undefined}
-				data-tour={tourId}
-				onClick={() => setMenuOpen(false)}
-				className={baseClass}
-			>
-				<i
-					className={`fa-solid ${icon} ${hasBeating ? "animate-heartbeat inline-block" : ""}`}
-					aria-hidden
-				/>
-				<span>{label}</span>
-			</Link>
-		);
-	};
+	const closeMenu = useCallback(() => setMenuOpen(false), []);
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
@@ -392,7 +394,7 @@ const Navbar = () => {
 					</div>
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
-					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2" role="tablist">
+					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2">
 						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap }) => {
 							if (liveOnly && !hasEventsToday) return null;
 							if (!passesCapGate(cap)) return null;
@@ -443,7 +445,8 @@ const Navbar = () => {
 							id="nav-menu"
 							role="menu"
 							aria-labelledby="nav-trigger"
-							className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0 border-0"}`}
+							aria-hidden={!menuOpen}
+						className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "invisible max-h-0 border-0 opacity-0"}`}
 						>
 							<div className="px-4 py-4">
 								{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap }) => {
@@ -465,6 +468,7 @@ const Navbar = () => {
 												tourId={tourId}
 												hasBeating={liveOnly && hasEventsToday}
 												disabled={disabled}
+												onNavigate={closeMenu}
 											/>
 										</div>
 									);
