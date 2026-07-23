@@ -30,6 +30,7 @@ import SettingsMailTemplate from "./Settings/Mailing/MailTemplate";
 import SettingsProviders from "./Settings/Providers";
 import SettingsRealm from "./Settings/Realm";
 import SettingsSubscription from "./Settings/Subscription";
+import SettingsTeam from "./Settings/Team";
 import Tiers from "./Tiers";
 import Transactions from "./Transactions";
 import Venues from "./Venues";
@@ -78,18 +79,40 @@ const App = () => {
 					<Switch>
 					<Route path="/live" component={Live} />
 					<Route path="/" component={Dashboard} />
-					<Route path="/sales" component={Sales} />
-					<Route path="/sales/:id" component={Sale} />
-					<Route path="/sales/:id/:tab" component={Sale} />
-					<Route path="/transactions" component={Transactions} />
-					<Route path="/transactions/:id" component={Transactions} />
-					<Route path="/links/:id" component={Links} />
-					<Route path="/links" component={Links} />
-					<Route path="/analytics" component={Analytics} />
-					<Route path="/reports" component={Reports} />
-					<Route path="/reports/:id" component={Report} />
-					<Route path="/venues/:id" component={Venues} />
-					<Route path="/venues" component={Venues} />
+					{canSee(account, "sales") && (
+						<>
+							<Route path="/sales" component={Sales} />
+							<Route path="/sales/:id" component={Sale} />
+							<Route path="/sales/:id/:tab" component={Sale} />
+						</>
+					)}
+					{canSee(account, "transactions") && (
+						<>
+							<Route path="/transactions" component={Transactions} />
+							<Route path="/transactions/:id" component={Transactions} />
+						</>
+					)}
+					{canSee(account, "links") && (
+						<>
+							<Route path="/links/:id" component={Links} />
+							<Route path="/links" component={Links} />
+						</>
+					)}
+					{canSee(account, "analytics") && (
+						<Route path="/analytics" component={Analytics} />
+					)}
+					{canSee(account, "reports") && (
+						<>
+							<Route path="/reports" component={Reports} />
+							<Route path="/reports/:id" component={Report} />
+						</>
+					)}
+					{canSee(account, "venues") && (
+						<>
+							<Route path="/venues/:id" component={Venues} />
+							<Route path="/venues" component={Venues} />
+						</>
+					)}
 					{/* Routes must be gated too, not just the nav. Hiding a link while
 					    leaving its route reachable means a staff member who may not
 					    see an area can still open it by typing the URL. */}
@@ -113,8 +136,12 @@ const App = () => {
 							<Route path="/events" component={Events} />
 						</>
 					)}
-					<Route path="/invoices/:id" component={Invoice} />
-					<Route path="/invoices" component={Invoices} />
+					{canSee(account, "invoices") && (
+						<>
+							<Route path="/invoices/:id" component={Invoice} />
+							<Route path="/invoices" component={Invoices} />
+						</>
+					)}
 					<Route path="/jobs/:id" component={Jobs} />
 					<Route path="/jobs" component={Jobs} />
 					<Route path="/notifications" component={Notifications} />
@@ -136,6 +163,11 @@ const App = () => {
 						path="/settings/subscription"
 						component={SettingsSubscription}
 					/>
+					{/* Team management is the merchant's own; staff are refused by the
+					    API and see an explanatory panel instead. */}
+					{canSee(account, "settings") && (
+						<Route path="/settings/team" component={SettingsTeam} />
+					)}
 					{account?.type === "account.admin" && canSee(account, "settings") && (
 						<Route path="/settings/realm" component={SettingsRealm} />
 					)}

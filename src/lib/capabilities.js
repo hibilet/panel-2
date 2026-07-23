@@ -54,6 +54,9 @@ export const CAPABILITIES = {
 	"panel.reports": { type: "bool", default: true, label: "Reports" },
 	"panel.accounts": { type: "bool", default: true, label: "Accounts" },
 	"panel.settings": { type: "bool", default: true, label: "Settings" },
+	"panel.venues": { type: "bool", default: true, label: "Venues" },
+	"panel.links": { type: "bool", default: true, label: "Links" },
+	"panel.analytics": { type: "bool", default: true, label: "Analytics" },
 };
 
 export const FAMILIES = [

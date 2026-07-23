@@ -219,6 +219,19 @@ const Settings = () => {
 						</Link>
 					)}
 
+					{account?.type === "account.merchant" && !account?.staff && (
+						<Link
+							href="/settings/team"
+							className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+						>
+							<i
+								className="fa-solid fa-user-group text-xl text-slate-600"
+								aria-hidden
+							/>
+							<span className="font-medium text-slate-900">Team</span>
+						</Link>
+					)}
+
 					{account?.type === "account.merchant" && (
 						<Link
 							href="/settings/subscription"

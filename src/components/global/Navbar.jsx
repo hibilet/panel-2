@@ -45,6 +45,7 @@ const navItems = [
 		labelKey: "nav.venues",
 		icon: "fa-building",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.venues",
 	},
 	{
 		path: "/sales",
@@ -60,6 +61,7 @@ const navItems = [
 		icon: "fa-link",
 		tourId: "nav-links",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.links",
 		cap: { key: "links", min: 1 },
 	},
 	{
@@ -84,6 +86,7 @@ const navItems = [
 		labelKey: "nav.analytics",
 		icon: "fa-chart-pie",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.analytics",
 	},
 	{
 		path: "/tiers",
