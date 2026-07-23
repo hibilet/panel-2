@@ -1,3 +1,4 @@
+import { viewerSeesMoney } from "../lib/viewer";
 import dayjs from "dayjs";
 import { getLang, setLang } from "../lib/storage";
 
@@ -41,8 +42,22 @@ const strings = (key, variables) => {
 	}
 };
 
+// Masked when the viewer lacks panel.money (an event manager, say). This is
+// the one place every monetary figure in the panel is formatted - dashboard
+// tiles, charts, tables, reports - so the permission is applied here rather
+// than at ~62 call sites where it would inevitably be missed.
+//
+// Product PRICES do not come through here (ticket prices use their own
+// formatter), which is deliberate: someone configuring an event needs to see
+// what a ticket costs without seeing what the event earned.
+//
+// Display only. The API decides what data is sent; this stops figures being
+// shown, it does not keep them out of the response.
+const MONEY_MASK = "•••";
+
 const formatCurrency = (value, currency = DEFAULT_CURRENCY) => {
 	if (value == null) return "—";
+	if (!viewerSeesMoney()) return MONEY_MASK;
 	const curr = typeof currency === "string" ? currency : DEFAULT_CURRENCY;
 	return new Intl.NumberFormat("en", {
 		style: "currency",

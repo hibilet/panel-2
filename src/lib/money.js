@@ -1,22 +1,10 @@
 import { formatCurrency } from "../localization";
 import { canSeeMoney } from "./capabilities";
+import { getViewer, viewerSeesMoney } from "./viewer";
 
-/**
- * The signed-in account, as a module value.
- *
- * Money is rendered inside table column factories (components/tables/columns)
- * that are plain data and have no React context. Threading the account through
- * every factory and every call site would be a large mechanical change for a
- * display concern, so AppContext publishes the viewer here once on load and the
- * formatters below read it.
- */
-let viewer = null;
-
-export const setViewer = (account) => {
-	viewer = account ?? null;
-};
-
-export const getViewer = () => viewer;
+// The viewer lives in lib/viewer so the shared currency formatter can read it
+// without importing this module. Re-exported here for existing callers.
+export { setViewer, getViewer } from "./viewer";
 
 /**
  * Money display, gated on the panel.money permission.
@@ -58,10 +46,10 @@ export const money = (account, value, currency = "eur") => {
  */
 export const maskedCurrency = (value, currency) => {
 	if (value == null) return "—";
-	if (!canSeeMoney(viewer)) return MASK;
+	if (!viewerSeesMoney()) return MASK;
 	return formatCurrency(value, currency);
 };
 
 /** Same gate for money-adjacent values that are already rendered. */
-export const maskIfHidden = (rendered, account = viewer) =>
+export const maskIfHidden = (rendered, account = getViewer()) =>
 	canSeeMoney(account) ? rendered : MASK;
