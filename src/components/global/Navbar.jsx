@@ -2,7 +2,12 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useApp, useNotifications } from "../../context";
-import { can, familyEnabled, quota } from "../../lib/capabilities";
+import {
+	can,
+	familyEnabled,
+	isSuperadmin,
+	quota,
+} from "../../lib/capabilities";
 import { resolveNotificationLink } from "../../lib/notifications";
 import {
 	deleteHotSwapToken,
@@ -26,12 +31,14 @@ const navItems = [
 		icon: "fa-gauge-high",
 		tourId: "nav-dashboard",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.dashboard",
 	},
 	{
 		path: "/accounts",
 		labelKey: "nav.accounts",
 		icon: "fa-users",
 		acl: ["admin"],
+		panelCap: "panel.accounts",
 	},
 	{
 		path: "/venues",
@@ -45,6 +52,7 @@ const navItems = [
 		icon: "fa-cart-shopping",
 		tourId: "nav-sales",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.sales",
 	},
 	{
 		path: "/links",
@@ -60,6 +68,7 @@ const navItems = [
 		icon: "fa-receipt",
 		tourId: "nav-transactions",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.transactions",
 	},
 	{
 		path: "/reports",
@@ -67,6 +76,7 @@ const navItems = [
 		icon: "fa-chart-line",
 		tourId: "nav-reports",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.reports",
 		cap: { family: "reporting" },
 	},
 	{
@@ -86,6 +96,7 @@ const navItems = [
 		labelKey: "nav.invoices",
 		icon: "fa-file-invoice-dollar",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.invoices",
 	},
 	// {
 	// 	path: "/events",
@@ -105,6 +116,7 @@ const navItems = [
 		icon: "fa-gear",
 		tourId: "nav-settings",
 		acl: ["merchant", "admin"],
+		panelCap: "panel.settings",
 	},
 ];
 
@@ -325,10 +337,20 @@ const Navbar = () => {
 	const isNavItemEnabled = (path) =>
 		isSetupComplete || path === "/" || path === "/settings";
 
-	// Capability gate: only applies to non-admin accounts. Admins see all nav.
+	// Capability gate.
+	//
+	// Only SUPERADMINS bypass it. This used to exempt every admin, which no
+	// longer works: realm staff (finance, sales) are admins too, so a blanket
+	// admin bypass would defeat every panel.* restriction placed on them.
+	//
+	// Plan capabilities (links, reporting, ...) still don't apply to admins -
+	// those describe what a merchant bought, not what an operator may see - so
+	// admins skip that half while remaining subject to panel.* gates.
 	const passesCapGate = (cap) => {
 		if (!cap) return true;
-		if (account?.type === "account.admin") return true;
+		if (isSuperadmin(account)) return true;
+		const isPanelGate = cap.key?.startsWith("panel.") || cap.family === "panel";
+		if (!isPanelGate && account?.type === "account.admin") return true;
 		if (cap.family) return familyEnabled(account, cap.family);
 		if (cap.key && typeof cap.min === "number") return quota(account, cap.key) >= cap.min;
 		if (cap.key) return can(account, cap.key);
@@ -395,9 +417,11 @@ const Navbar = () => {
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
 					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2">
-						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap }) => {
+						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap, panelCap }) => {
 							if (liveOnly && !hasEventsToday) return null;
 							if (!passesCapGate(cap)) return null;
+							if (panelCap && !can(account, panelCap) && !isSuperadmin(account))
+								return null;
 							const isActive =
 								path === "/" ? location === path : location.startsWith(path);
 							const disabled = !isNavItemEnabled(path);
@@ -449,10 +473,12 @@ const Navbar = () => {
 						className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "invisible max-h-0 border-0 opacity-0"}`}
 						>
 							<div className="px-4 py-4">
-								{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap }) => {
+								{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap, panelCap }) => {
 									if (liveOnly && !hasEventsToday) return null;
 									if (!acl.includes(account?.type?.split(".")[1])) return null;
 									if (!passesCapGate(cap)) return null;
+							if (panelCap && !can(account, panelCap) && !isSuperadmin(account))
+								return null;
 									const isActive =
 										path === "/"
 											? location === path

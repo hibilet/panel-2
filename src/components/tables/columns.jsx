@@ -4,7 +4,10 @@ import {
 	getNotificationTypeLabel,
 	resolveNotificationLink,
 } from "../../lib/notifications";
-import strings, { formatCurrency } from "../../localization";
+import strings from "../../localization";
+// Money cells go through maskedCurrency so panel.money can hide takings
+// from staff who may not see them (lib/money.js).
+import { maskedCurrency } from "../../lib/money";
 import ExpiryBadge from "../shared/ExpiryBadge";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
@@ -52,7 +55,7 @@ export const salesColumns = (extended, onDelete) => [
 		align: "right",
 		render: (r) =>
 			(r.revenue ?? r.sales) != null
-				? formatCurrency(r.revenue ?? r.sales)
+				? maskedCurrency(r.revenue ?? r.sales)
 				: "—",
 	},
 	...(extended && onDelete
@@ -114,7 +117,7 @@ export const transactionsColumns = [
 		align: "right",
 		render: (r) =>
 			(r.paid ?? r.subtotal) != null
-				? formatCurrency(r.paid ?? r.subtotal)
+				? maskedCurrency(r.paid ?? r.subtotal)
 				: "—",
 	},
 	{
@@ -188,7 +191,7 @@ export const merchantsColumns = [
 			const due = Number(r.amountDue) || 0;
 			return (
 				<span className={due > 0 ? "font-medium text-slate-900" : "text-slate-400"}>
-					{formatCurrency(due)}
+					{maskedCurrency(due)}
 				</span>
 			);
 		},

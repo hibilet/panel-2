@@ -8,6 +8,7 @@ import {
 } from "react";
 import { get } from "../lib/client";
 import { getToken } from "../lib/storage";
+import { setViewer } from "../lib/money";
 
 const AppContext = createContext(null);
 
@@ -66,6 +67,7 @@ export const AppProvider = ({ children }) => {
 				]);
 			const accountData = accountRes?.data ?? null;
 			setAccount(accountData);
+			setViewer(accountData);
 			setSales(mapSalesRows(salesRes.data ?? []));
 			setProviders(providersRes.data ?? []);
 			setAgreements(agreementsRes.data ?? []);
@@ -128,7 +130,9 @@ export const AppProvider = ({ children }) => {
 	const refreshAccount = useCallback(async () => {
 		try {
 			const r = await get("/accounts/me");
-			setAccount(r?.data ?? null);
+			const refreshed = r?.data ?? null;
+			setAccount(refreshed);
+			setViewer(refreshed);
 			return r?.data ?? null;
 		} catch {
 			return null;
@@ -142,7 +146,11 @@ export const AppProvider = ({ children }) => {
 	}, [account, fetchRealmFor]);
 
 	const updateAccount = useCallback((updates) => {
-		setAccount((prev) => (prev ? { ...prev, ...updates } : updates));
+		setAccount((prev) => {
+			const next = prev ? { ...prev, ...updates } : updates;
+			setViewer(next);
+			return next;
+		});
 	}, []);
 
 	const addVenue = useCallback((venue) => {
