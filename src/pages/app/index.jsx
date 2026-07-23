@@ -33,6 +33,7 @@ import SettingsSubscription from "./Settings/Subscription";
 import Tiers from "./Tiers";
 import Transactions from "./Transactions";
 import Venues from "./Venues";
+import { canSee, isSuperadmin } from "../../lib/capabilities";
 
 const NotFound = () => {
 	return (
@@ -89,7 +90,10 @@ const App = () => {
 					<Route path="/reports/:id" component={Report} />
 					<Route path="/venues/:id" component={Venues} />
 					<Route path="/venues" component={Venues} />
-					{account?.type === "account.admin" && (
+					{/* Routes must be gated too, not just the nav. Hiding a link while
+					    leaving its route reachable means a staff member who may not
+					    see an area can still open it by typing the URL. */}
+					{account?.type === "account.admin" && canSee(account, "accounts") && (
 						<>
 							<Route path="/accounts/merchants/:id" component={Accounts} />
 							<Route path="/accounts/customers/:id" component={Accounts} />
@@ -100,6 +104,10 @@ const App = () => {
 							</Route>
 							<Route path="/tiers/:id" component={Tiers} />
 							<Route path="/tiers" component={Tiers} />
+						</>
+					)}
+					{isSuperadmin(account) && (
+						<>
 							<Route path="/realms/:id" component={Realms} />
 							<Route path="/realms" component={Realms} />
 							<Route path="/events" component={Events} />
@@ -128,7 +136,7 @@ const App = () => {
 						path="/settings/subscription"
 						component={SettingsSubscription}
 					/>
-					{account?.type === "account.admin" && (
+					{account?.type === "account.admin" && canSee(account, "settings") && (
 						<Route path="/settings/realm" component={SettingsRealm} />
 					)}
 					<Route path="*">

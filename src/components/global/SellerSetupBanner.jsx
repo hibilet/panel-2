@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { canSee } from "../../lib/capabilities";
 import { useApp } from "../../context";
 import strings from "../../localization";
 
@@ -6,6 +7,8 @@ const SellerSetupBanner = () => {
 	const { account, realm } = useApp();
 	const [location] = useLocation();
 	if (account?.type !== "account.admin") return null;
+	// Prompts an area the viewer may not be allowed to open.
+	if (!canSee(account, "settings")) return null;
 	if (!realm) return null;
 
 	const seller = realm.seller ?? {};

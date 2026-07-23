@@ -53,6 +53,9 @@ const defaultValues = {
 const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 	const isNew = id === "new";
 	const [data, setData] = useState(null);
+	// The API redacts credentials and returns only <field>Set booleans, so
+	// the form can show whether a key is configured without ever holding it.
+	const [secretsSet, setSecretsSet] = useState({});
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
 	const [deleting, setDeleting] = useState(false);
@@ -111,14 +114,17 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							host: d.smtp?.host ?? "",
 							port: d.smtp?.port ?? "",
 							user: d.smtp?.user ?? "",
-							pass: d.smtp?.pass ?? "",
+							pass: "",
 							from: d.smtp?.from ?? "",
 						},
 						stripe: {
 							connectClientId: d.stripe?.connectClientId ?? "",
-							connectSecret: d.stripe?.connectSecret ?? "",
-							connectWebhookSecret: d.stripe?.connectWebhookSecret ?? "",
-							transactionWebhookSecret: d.stripe?.transactionWebhookSecret ?? "",
+							// Secrets are never sent to the client. Left blank; an
+							// untouched field submits undefined and the API keeps
+							// whatever is stored.
+							connectSecret: "",
+							connectWebhookSecret: "",
+							transactionWebhookSecret: "",
 						},
 						features: FAMILIES.reduce((acc, f) => {
 							acc[f] = d.features?.[f] !== false;
@@ -147,6 +153,16 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							invoiceNumberPrefix: d.seller?.invoiceNumberPrefix ?? "",
 							invoiceFooter: d.seller?.invoiceFooter ?? "",
 						},
+					});
+					// Which credentials exist server-side. Values are redacted by
+					// the API; these booleans only drive the "configured" hint.
+					setSecretsSet({
+						connectSecret: Boolean(d.stripe?.connectSecretSet),
+						connectWebhookSecret: Boolean(d.stripe?.connectWebhookSecretSet),
+						transactionWebhookSecret: Boolean(
+							d.stripe?.transactionWebhookSecretSet,
+						),
+						smtpPass: Boolean(d.smtp?.passSet),
 					});
 				}
 			})
@@ -499,21 +515,21 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 											label="Platform Secret Key"
 											type="password"
 											{...register("stripe.connectSecret")}
-											placeholder="sk_live_..."
+											placeholder={secretsSet.connectSecret ? "configured - leave blank to keep" : "sk_live_..."}
 											autoComplete="off"
 										/>
 										<Input
 											label="Connect Webhook Signing Secret"
 											type="password"
 											{...register("stripe.connectWebhookSecret")}
-											placeholder="whsec_..."
+											placeholder={secretsSet.connectWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
 											autoComplete="off"
 										/>
 										<Input
 											label="Transaction Webhook Signing Secret"
 											type="password"
 											{...register("stripe.transactionWebhookSecret")}
-											placeholder="whsec_..."
+											placeholder={secretsSet.transactionWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
 											autoComplete="off"
 										/>
 									</div>
