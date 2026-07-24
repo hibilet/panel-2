@@ -46,7 +46,18 @@ const handler = async (res) => {
 	if (!res.ok) {
 		throw await res.json();
 	}
-	return res.json();
+	const body = await res.json();
+	// Session slide: the API returns a fresh token (envelope `token`) once a
+	// session is in the second half of its 7-day life. Persist it silently -
+	// NOT via setToken, which reloads the page (that is login only).
+	if (body && typeof body === "object" && body.token) {
+		try {
+			localStorage.setItem("token", body.token);
+		} catch {
+			/* storage unavailable - keep using the current token */
+		}
+	}
+	return body;
 };
 
 // The API answers errors as { log, message } where message is a kebab slug
