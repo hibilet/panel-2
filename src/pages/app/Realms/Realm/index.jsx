@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { Input, Select } from "../../../../components/inputs";
 import SellerBlock from "../../../../components/invoices/SellerBlock";
+import PlatformBilling from "./PlatformBilling";
 import { Modal } from "../../../../components/shared";
 import { FAMILIES } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
@@ -573,6 +574,10 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							(!data.seller?.country || data.seller?.defaultRate == null)
 						}
 					/>
+
+						{!isNew && id && (
+							<PlatformBilling realmId={id} platform={data?.platform} />
+						)}
 					</div>
 				</div>
 
