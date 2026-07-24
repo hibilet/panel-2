@@ -14,6 +14,7 @@ import DataTable from "../../../components/tables/DataTable";
 import WeeklyEventSaleMatrix from "../../../components/tables/WeeklyEventSaleMatrix";
 import { useApp } from "../../../context";
 import { get } from "../../../lib/client";
+import { viewerSeesMoney } from "../../../lib/viewer";
 import strings, { formatCurrency } from "../../../localization";
 
 const buildChartDataFromApi = (apiData = [], year, month) => {
@@ -28,7 +29,14 @@ const buildChartDataFromApi = (apiData = [], year, month) => {
 			.date(day)
 			.format("YYYY-MM-DD");
 		const dayData = byDate[dateStr];
-		const daily = dayData ? dayData.total : 0;
+		// Revenue for a viewer who may see money; tickets sold for one who may
+		// not (the API nulls `total` for them, so plotting it would draw an
+		// empty chart - the count is not money and stays visible).
+		const daily = dayData
+			? viewerSeesMoney()
+				? (dayData.total ?? 0)
+				: (dayData.count ?? 0)
+			: 0;
 		data.push({
 			date: `${day}`,
 			label: `${day} ${monthName}`,

@@ -12,6 +12,7 @@ import {
 } from "recharts";
 import { SearchableDropdown } from "../inputs";
 import strings, { formatCurrency } from "../../localization";
+import { viewerSeesMoney } from "../../lib/viewer";
 
 const mergeWithCompareData = (data = [], compareData = []) => {
 	if (!compareData?.length) return data;
@@ -95,6 +96,18 @@ const SalesChart = ({
 	const monthName = chartMonth.format("MMMM");
 	const year = chartMonth.year();
 
+	// A viewer without panel.money sees tickets sold, not revenue (the API
+	// nulls the takings, and the Dashboard builder swaps `daily` to the count).
+	// Format the axis as plain integers, not masked currency, and label the
+	// series accordingly.
+	const seesMoney = viewerSeesMoney();
+	const axisFormat = seesMoney
+		? (v) => formatCurrency(v)
+		: (v) => `${Math.round(v ?? 0)}`;
+	const seriesName = seesMoney
+		? strings("dashboard.salesChartSelectedMonth")
+		: strings("page.reports.sales.col.ticketsSold");
+
 	const hasData = !loading && data?.length > 0;
 	const dropdownsDisabled = !hasData;
 
@@ -159,13 +172,13 @@ const SalesChart = ({
 									axisLine={{ stroke: colors.grid }}
 								/>
 								<YAxis
-									tickFormatter={(v) => formatCurrency(v)}
+									tickFormatter={axisFormat}
 									tick={{ fontSize: 12, fill: colors.tick }}
 									tickLine={{ stroke: colors.grid }}
 									axisLine={{ stroke: colors.grid }}
 								/>
 								<Tooltip
-									formatter={(value, name) => [formatCurrency(value), name]}
+									formatter={(value, name) => [axisFormat(value), name]}
 									labelFormatter={(label, payload) =>
 										payload?.[0]?.payload?.label ?? label
 									}
@@ -186,7 +199,7 @@ const SalesChart = ({
 								<Line
 									type="monotone"
 									dataKey="daily"
-									name={strings("dashboard.salesChartSelectedMonth")}
+									name={seriesName}
 									stroke={colors.line}
 									strokeWidth={2}
 									dot={{ fill: colors.line, strokeWidth: 0, r: 3 }}
