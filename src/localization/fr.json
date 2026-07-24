@@ -12,6 +12,8 @@
 	"nav.analytics": "Analytique",
 	"nav.settings": "Paramètres",
 	"nav.jobs": "Jobs",
+	"nav.administration": "Administration",
+	"nav.realms": "Realms",
 	"page.jobs.monitor.title": "Scheduled tasks",
 	"page.jobs.monitor.subtitle": "When each background job runs next. Times update live.",
 	"page.jobs.monitor.recurring": "Recurring (cron)",

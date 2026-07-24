@@ -12,6 +12,8 @@
 	"nav.analytics": "Analysen",
 	"nav.settings": "Einstellungen",
 	"nav.jobs": "Aufgaben",
+	"nav.administration": "Verwaltung",
+	"nav.realms": "Realms",
 	"page.jobs.monitor.title": "Geplante Aufgaben",
 	"page.jobs.monitor.subtitle": "Wann jeder Hintergrund-Job das n\u00e4chste Mal l\u00e4uft. Zeiten aktualisieren live.",
 	"page.jobs.monitor.recurring": "Wiederkehrend (Cron)",

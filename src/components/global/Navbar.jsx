@@ -39,6 +39,7 @@ const navItems = [
 		icon: "fa-users",
 		acl: ["admin"],
 		panelCap: "panel.accounts",
+		group: "admin",
 	},
 	{
 		path: "/venues",
@@ -93,6 +94,7 @@ const navItems = [
 		labelKey: "nav.tiers",
 		icon: "fa-layer-group",
 		acl: ["admin"],
+		group: "admin",
 	},
 	{
 		path: "/invoices",
@@ -112,6 +114,15 @@ const navItems = [
 		labelKey: "nav.jobs",
 		icon: "fa-clock-rotate-left",
 		acl: ["admin"],
+		group: "admin",
+	},
+	{
+		path: "/realms",
+		labelKey: "nav.realms",
+		icon: "fa-layer-group",
+		acl: ["admin"],
+		group: "admin",
+		superadminOnly: true,
 	},
 	{
 		path: "/settings",
@@ -326,6 +337,21 @@ const NavLink = ({
 const Navbar = () => {
 	const [location] = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [adminOpen, setAdminOpen] = useState(false);
+	const adminMenuRef = useRef(null);
+
+	// Close the administration menu on an outside click, so it does not sit open
+	// over the page after navigating.
+	useEffect(() => {
+		if (!adminOpen) return undefined;
+		const onDown = (e) => {
+			if (adminMenuRef.current && !adminMenuRef.current.contains(e.target)) {
+				setAdminOpen(false);
+			}
+		};
+		document.addEventListener("mousedown", onDown);
+		return () => document.removeEventListener("mousedown", onDown);
+	}, [adminOpen]);
 	const { account, sales } = useApp();
 	const hotSwapToken = getHotSwapToken();
 
@@ -368,6 +394,25 @@ const Navbar = () => {
 			}),
 		[sales, today],
 	);
+
+	// One visibility rule for every rendering of the nav. The bar, the
+	// administration menu and the mobile list all ask this, so they cannot
+	// drift apart.
+	const navVisible = (item) => {
+		if (item.liveOnly && !hasEventsToday) return false;
+		if (item.superadminOnly && !isSuperadmin(account)) return false;
+		if (!passesCapGate(item.cap)) return false;
+		if (item.panelCap && !can(account, item.panelCap) && !isSuperadmin(account))
+			return false;
+		return item.acl.includes(account?.type?.split(".")[1]);
+	};
+
+	// Platform administration is a different job from running events. Kept out
+	// of the bar so the two stop competing for the same row - an admin was
+	// looking at 13 items, a superadmin 14.
+	const adminItems = navItems.filter((i) => i.group === "admin" && navVisible(i));
+	const barItems = navItems.filter((i) => i.group !== "admin" && navVisible(i));
+
 
 	const handleBackToAdmin = () => {
 		const adminToken = getHotSwapToken();
@@ -420,15 +465,10 @@ const Navbar = () => {
 				</div>
 				<nav aria-label="Main navigation" className="relative mt-4">
 					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2">
-						{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap, panelCap }) => {
-							if (liveOnly && !hasEventsToday) return null;
-							if (!passesCapGate(cap)) return null;
-							if (panelCap && !can(account, panelCap) && !isSuperadmin(account))
-								return null;
+						{barItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
 							const isActive =
 								path === "/" ? location === path : location.startsWith(path);
-							const disabled = !isNavItemEnabled(path);
-							return acl.includes(account?.type?.split(".")[1]) ? (
+							return (
 								<NavLink
 									key={path}
 									path={path}
@@ -437,10 +477,51 @@ const Navbar = () => {
 									isActive={isActive}
 									tourId={tourId}
 									hasBeating={liveOnly && hasEventsToday}
-									disabled={disabled}
+									disabled={!isNavItemEnabled(path)}
 								/>
-							) : null;
+							);
 						})}
+						{adminItems.length > 0 && (
+							<div className="relative" ref={adminMenuRef}>
+								<button
+									type="button"
+									onClick={() => setAdminOpen((v) => !v)}
+									aria-expanded={adminOpen}
+									aria-haspopup="true"
+									className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+										adminItems.some((i) => location.startsWith(i.path))
+											? "bg-slate-900 text-white"
+											: "text-slate-600 hover:bg-slate-100"
+									}`}
+								>
+									<i className="fa-solid fa-shield-halved" aria-hidden />
+									{strings("nav.administration")}
+									<i
+										className={`fa-solid fa-chevron-down text-xs transition-transform ${adminOpen ? "rotate-180" : ""}`}
+										aria-hidden
+									/>
+								</button>
+								{adminOpen && (
+									<div className="absolute right-0 z-20 mt-1 min-w-48 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
+										{adminItems.map(({ path, labelKey, icon }) => (
+											<Link
+												key={path}
+												href={path}
+												onClick={() => setAdminOpen(false)}
+												className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
+													location.startsWith(path)
+														? "bg-slate-100 font-medium text-slate-900"
+														: "text-slate-700 hover:bg-slate-50"
+												}`}
+											>
+												<i className={`fa-solid ${icon} w-4 text-slate-500`} aria-hidden />
+												{strings(labelKey)}
+											</Link>
+										))}
+									</div>
+								)}
+							</div>
+						)}
 					</div>
 
 					{/* Mobile: dropdown */}
@@ -476,12 +557,9 @@ const Navbar = () => {
 						className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "invisible max-h-0 border-0 opacity-0"}`}
 						>
 							<div className="px-4 py-4">
-								{navItems.map(({ path, labelKey, icon, tourId, acl, liveOnly, cap, panelCap }) => {
-									if (liveOnly && !hasEventsToday) return null;
-									if (!acl.includes(account?.type?.split(".")[1])) return null;
-									if (!passesCapGate(cap)) return null;
-							if (panelCap && !can(account, panelCap) && !isSuperadmin(account))
-								return null;
+								{/* Mobile keeps one flat list - a dropdown inside a dropdown is
+								    worse than a long list on a phone. Same visibility rule. */}
+								{[...barItems, ...adminItems].map(({ path, labelKey, icon, tourId, liveOnly }) => {
 									const isActive =
 										path === "/"
 											? location === path
