@@ -35,8 +35,10 @@ export const formatMoney = (value, currency = "eur") =>
  * visually distinct.
  */
 export const money = (account, value, currency = "eur") => {
-	if (value == null) return "—";
+	// Permission before null: the API nulls takings for a hidden viewer, so
+	// checking null first would render "—" (no data) instead of "•••" (masked).
 	if (!canSeeMoney(account)) return MASK;
+	if (value == null) return "—";
 	return formatMoney(value, currency);
 };
 
@@ -45,8 +47,8 @@ export const money = (account, value, currency = "eur") => {
  * permission. Same signature, so money cells only need their import changed.
  */
 export const maskedCurrency = (value, currency) => {
-	if (value == null) return "—";
 	if (!viewerSeesMoney()) return MASK;
+	if (value == null) return "—";
 	return formatCurrency(value, currency);
 };
 

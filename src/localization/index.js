@@ -51,13 +51,15 @@ const strings = (key, variables) => {
 // formatter), which is deliberate: someone configuring an event needs to see
 // what a ticket costs without seeing what the event earned.
 //
-// Display only. The API decides what data is sent; this stops figures being
-// shown, it does not keep them out of the response.
+// Display gate. The API is the authority - it now nulls takings for a viewer
+// without panel.money - but a hidden viewer must read "•••" (withheld), not
+// "—" (no data), so the permission is checked BEFORE the null. Otherwise an
+// API-nulled figure looks like an empty cell instead of a masked one.
 const MONEY_MASK = "•••";
 
 const formatCurrency = (value, currency = DEFAULT_CURRENCY) => {
-	if (value == null) return "—";
 	if (!viewerSeesMoney()) return MONEY_MASK;
+	if (value == null) return "—";
 	const curr = typeof currency === "string" ? currency : DEFAULT_CURRENCY;
 	return new Intl.NumberFormat("en", {
 		style: "currency",
