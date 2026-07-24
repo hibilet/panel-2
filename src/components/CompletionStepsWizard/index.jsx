@@ -40,6 +40,11 @@ const TIER_STEP = {
 
 export const shouldShowCompletionWizard = (account) => {
 	if (!account || account.type !== "account.merchant") return false;
+	// Staff resolve to their merchant, so this reads as a merchant account.
+	// Setting up the business is the owner's job, and these steps link to
+	// settings pages staff cannot open - finance and event managers were being
+	// told to pick a subscription tier they have no access to choose.
+	if (account.staff) return false;
 	return STEPS.some(
 		(step) =>
 			account[step.key] === false || account[step.key] === undefined,
@@ -51,7 +56,7 @@ const CompletionStepsWizard = () => {
 	const [hasSubscription, setHasSubscription] = useState(null);
 
 	useEffect(() => {
-		if (!account || account.type !== "account.merchant") return;
+		if (!account || account.type !== "account.merchant" || account.staff) return;
 		let cancelled = false;
 		get("/tiers/subscription")
 			.then((res) => {
@@ -65,7 +70,7 @@ const CompletionStepsWizard = () => {
 		};
 	}, [account]);
 
-	if (!account || account.type !== "account.merchant") return null;
+	if (!account || account.type !== "account.merchant" || account.staff) return null;
 
 	const incompleteSteps = STEPS.filter((step) => {
 		const value = account[step.key];
