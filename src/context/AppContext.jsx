@@ -55,15 +55,16 @@ export const AppProvider = ({ children }) => {
 		setLoading(true);
 		setError(null);
 		try {
+			// Each secondary fetch has its own catch: one of them failing (a 500,
+			// or a 403 for a restricted role) must NOT blank the whole session -
+			// account/viewer/permissions still resolve from /accounts/me.
 			const [accountRes, salesRes, providersRes, agreementsRes, venuesRes] =
 				await Promise.all([
-					get("/accounts/me")
-						.then((r) => r)
-						.catch(() => ({ data: null })),
-					get("/sales"),
-					get("/providers"),
-					get("/agreements"),
-					get("/venues"),
+					get("/accounts/me").catch(() => ({ data: null })),
+					get("/sales").catch(() => ({ data: [] })),
+					get("/providers").catch(() => ({ data: [] })),
+					get("/agreements").catch(() => ({ data: [] })),
+					get("/venues").catch(() => ({ data: [] })),
 				]);
 			const accountData = accountRes?.data ?? null;
 			setAccount(accountData);

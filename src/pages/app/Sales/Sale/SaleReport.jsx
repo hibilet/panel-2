@@ -5,14 +5,11 @@ import { API_BASE_URL, get, post } from "../../../../lib/client";
 import { getToken } from "../../../../lib/storage";
 import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
+import { maskedCurrency } from "../../../../lib/money";
 
-const fmtMoney = (cents, currency) => {
-	try {
-		return new Intl.NumberFormat("de-DE", { style: "currency", currency: currency || "EUR" }).format((cents || 0) / 100);
-	} catch {
-		return `${((cents || 0) / 100).toFixed(2)} ${currency || ""}`;
-	}
-};
+// Respects panel.money: a viewer without it sees ••• here too, not raw revenue.
+// The report values are in cents.
+const fmtMoney = (cents, currency) => maskedCurrency((cents || 0) / 100, currency || "EUR");
 
 const PAY_LABEL = {
 	klarna: "Klarna", paypal: "PayPal", apple_pay: "Apple Pay", google_pay: "Google Pay",

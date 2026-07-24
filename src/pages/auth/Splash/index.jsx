@@ -82,6 +82,9 @@ const Splash = () => {
 			else setError("No dev token received");
 		} catch (err) {
 			setError(err?.message ?? "Dev login failed");
+		} finally {
+			// On the no-token branch the spinner used to stay forever (both
+			// buttons disabled) until reload.
 			setLoading(false);
 		}
 	};

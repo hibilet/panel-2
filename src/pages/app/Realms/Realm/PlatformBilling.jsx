@@ -185,7 +185,7 @@ const PlatformBilling = ({ realmId, platform }) => {
 									<tr key={inv._id} className="border-t border-slate-100">
 										<td className="py-1.5 pr-3 font-mono text-xs">{inv.number ?? "—"}</td>
 										<td className="py-1.5 pr-3 text-xs text-slate-600">
-											{inv.period?.start
+											{inv.period?.start && inv.period?.end
 												? `${new Date(inv.period.start).toLocaleDateString()} – ${new Date(inv.period.end).toLocaleDateString()}`
 												: "—"}
 										</td>

@@ -576,7 +576,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 					/>
 
 						{!isNew && id && (
-							<PlatformBilling realmId={id} platform={data?.platform} />
+							<PlatformBilling key={id} realmId={id} platform={data?.platform} />
 						)}
 					</div>
 				</div>
