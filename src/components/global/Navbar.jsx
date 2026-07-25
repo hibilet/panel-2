@@ -34,6 +34,13 @@ const navItems = [
 		panelCap: "panel.dashboard",
 	},
 	{
+		path: "/dashboard",
+		labelKey: "nav.dashboard",
+		icon: "fa-gauge-high",
+		acl: ["admin"],
+		superadminOnly: true,
+	},
+	{
 		path: "/accounts",
 		labelKey: "nav.accounts",
 		icon: "fa-users",
@@ -347,21 +354,6 @@ const NavLink = ({
 const Navbar = () => {
 	const [location] = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
-	const [adminOpen, setAdminOpen] = useState(false);
-	const adminMenuRef = useRef(null);
-
-	// Close the administration menu on an outside click, so it does not sit open
-	// over the page after navigating.
-	useEffect(() => {
-		if (!adminOpen) return undefined;
-		const onDown = (e) => {
-			if (adminMenuRef.current && !adminMenuRef.current.contains(e.target)) {
-				setAdminOpen(false);
-			}
-		};
-		document.addEventListener("mousedown", onDown);
-		return () => document.removeEventListener("mousedown", onDown);
-	}, [adminOpen]);
 	const { account, sales } = useApp();
 	const hotSwapToken = getHotSwapToken();
 
@@ -391,7 +383,8 @@ const Navbar = () => {
 		const isPanelGate = cap.key?.startsWith("panel.") || cap.family === "panel";
 		if (!isPanelGate && account?.type === "account.admin") return true;
 		if (cap.family) return familyEnabled(account, cap.family);
-		if (cap.key && typeof cap.min === "number") return quota(account, cap.key) >= cap.min;
+		if (cap.key && typeof cap.min === "number")
+			return quota(account, cap.key) >= cap.min;
 		if (cap.key) return can(account, cap.key);
 		return true;
 	};
@@ -417,19 +410,19 @@ const Navbar = () => {
 		return item.acl.includes(account?.type?.split(".")[1]);
 	};
 
-	// Platform administration is a different job from running events. Kept out
-	// of the bar so the two stop competing for the same row - an admin was
-	// looking at 13 items, a superadmin 14.
-	//
-	// The superadmin-only items are the exception: platform ops IS the job for
-	// that role, so burying them one click deep made the whole surface look
-	// missing. They sit in the bar; the shared admin items stay in the menu.
-	const platformItems = navItems.filter((i) => i.superadminOnly && navVisible(i));
-	const adminItems = navItems.filter(
-		(i) => i.group === "admin" && !i.superadminOnly && navVisible(i),
-	);
-	const barItems = navItems.filter((i) => i.group !== "admin" && navVisible(i));
-
+	// One flat bar. Admin items used to live behind an "Administration"
+	// dropdown, which hid the platform surface well enough that it read as not
+	// existing at all. A superadmin gets the launcher at / for the full map, so
+	// the bar no longer has to carry that weight.
+	// "/" is the launcher for a superadmin and the dashboard for everyone else,
+	// so the first item is relabelled rather than duplicated.
+	const barItems = navItems
+		.filter(navVisible)
+		.map((i) =>
+			i.path === "/" && isSuperadmin(account)
+				? { ...i, labelKey: "home.nav", icon: "fa-shield-halved" }
+				: i,
+		);
 
 	const handleBackToAdmin = () => {
 		const adminToken = getHotSwapToken();
@@ -520,56 +513,6 @@ const Navbar = () => {
 								/>
 							);
 						})}
-						{platformItems.map(({ path, labelKey, icon }) => (
-							<NavLink
-								key={path}
-								path={path}
-								label={strings(labelKey)}
-								icon={icon}
-								isActive={location.startsWith(path)}
-							/>
-						))}
-						{adminItems.length > 0 && (
-							<div className="relative" ref={adminMenuRef}>
-								<button
-									type="button"
-									onClick={() => setAdminOpen((v) => !v)}
-									aria-expanded={adminOpen}
-									aria-haspopup="true"
-									className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-										adminItems.some((i) => location.startsWith(i.path))
-											? "bg-slate-900 text-white"
-											: "text-slate-600 hover:bg-slate-100"
-									}`}
-								>
-									<i className="fa-solid fa-shield-halved" aria-hidden />
-									{strings("nav.administration")}
-									<i
-										className={`fa-solid fa-chevron-down text-xs transition-transform ${adminOpen ? "rotate-180" : ""}`}
-										aria-hidden
-									/>
-								</button>
-								{adminOpen && (
-									<div className="absolute right-0 z-20 mt-1 min-w-48 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 shadow-lg">
-										{adminItems.map(({ path, labelKey, icon }) => (
-											<Link
-												key={path}
-												href={path}
-												onClick={() => setAdminOpen(false)}
-												className={`flex items-center gap-3 px-4 py-2 text-sm transition-colors ${
-													location.startsWith(path)
-														? "bg-slate-100 font-medium text-slate-900"
-														: "text-slate-700 hover:bg-slate-50"
-												}`}
-											>
-												<i className={`fa-solid ${icon} w-4 text-slate-500`} aria-hidden />
-												{strings(labelKey)}
-											</Link>
-										))}
-									</div>
-								)}
-							</div>
-						)}
 					</div>
 
 					{/* Mobile: dropdown */}
@@ -602,12 +545,12 @@ const Navbar = () => {
 							role="menu"
 							aria-labelledby="nav-trigger"
 							aria-hidden={!menuOpen}
-						className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "invisible max-h-0 border-0 opacity-0"}`}
+							className={`mt-2 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg transition-[max-height,opacity] duration-200 ${menuOpen ? "max-h-96 opacity-100" : "invisible max-h-0 border-0 opacity-0"}`}
 						>
 							<div className="px-4 py-4">
 								{/* Mobile keeps one flat list - a dropdown inside a dropdown is
 								    worse than a long list on a phone. Same visibility rule. */}
-								{[...barItems, ...platformItems, ...adminItems].map(({ path, labelKey, icon, tourId, liveOnly }) => {
+								{barItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
 									const isActive =
 										path === "/"
 											? location === path
