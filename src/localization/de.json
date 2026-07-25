@@ -1475,6 +1475,8 @@
 	"nav.events": "Ereignisprotokoll",
 	"nav.platform": "Plattform",
 	"nav.superadmin": "Superadmin",
+	"nav.allRealms": "Alle Realms",
+	"nav.homeRealm": "Heimat-Realm: $0",
 	"page.platform.title": "Plattform",
 	"page.platform.realms": "Realms",
 	"page.platform.billing": "Abrechnung",

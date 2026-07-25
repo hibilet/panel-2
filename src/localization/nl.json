@@ -1475,6 +1475,8 @@
 	"nav.events": "Auditlog",
 	"nav.platform": "Platform",
 	"nav.superadmin": "Superadmin",
+	"nav.allRealms": "Alle realms",
+	"nav.homeRealm": "Eigen realm: $0",
 	"page.platform.title": "Platform",
 	"page.platform.realms": "Realms",
 	"page.platform.billing": "Facturatie",

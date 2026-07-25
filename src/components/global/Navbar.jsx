@@ -420,7 +420,14 @@ const Navbar = () => {
 	// Platform administration is a different job from running events. Kept out
 	// of the bar so the two stop competing for the same row - an admin was
 	// looking at 13 items, a superadmin 14.
-	const adminItems = navItems.filter((i) => i.group === "admin" && navVisible(i));
+	//
+	// The superadmin-only items are the exception: platform ops IS the job for
+	// that role, so burying them one click deep made the whole surface look
+	// missing. They sit in the bar; the shared admin items stay in the menu.
+	const platformItems = navItems.filter((i) => i.superadminOnly && navVisible(i));
+	const adminItems = navItems.filter(
+		(i) => i.group === "admin" && !i.superadminOnly && navVisible(i),
+	);
 	const barItems = navItems.filter((i) => i.group !== "admin" && navVisible(i));
 
 
@@ -473,13 +480,23 @@ const Navbar = () => {
 						{account?.realm?.name && (
 							<span
 								className="flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"
-								title={account.realm.name}
+								// A superadmin still CARRIES a home realm (the API requires
+								// one) but is never scoped to it, so naming it here read as
+								// "you are inside HIBilet EU" when the session is in fact
+								// cross-realm. The home realm moves to the tooltip.
+								title={
+									isSuperadmin(account)
+										? strings("nav.homeRealm", [account.realm.name])
+										: account.realm.name
+								}
 							>
 								<span className="relative inline-flex">
 									<span className="inline-flex h-2 w-2 rounded-full bg-emerald-500" />
 									<span className="absolute inline-flex h-2 w-2 animate-ping rounded-full bg-emerald-500 opacity-75" />
 								</span>
-								{account.realm.name}
+								{isSuperadmin(account)
+									? strings("nav.allRealms")
+									: account.realm.name}
 							</span>
 						)}
 						<NotificationsBell />
@@ -503,6 +520,15 @@ const Navbar = () => {
 								/>
 							);
 						})}
+						{platformItems.map(({ path, labelKey, icon }) => (
+							<NavLink
+								key={path}
+								path={path}
+								label={strings(labelKey)}
+								icon={icon}
+								isActive={location.startsWith(path)}
+							/>
+						))}
 						{adminItems.length > 0 && (
 							<div className="relative" ref={adminMenuRef}>
 								<button
@@ -581,7 +607,7 @@ const Navbar = () => {
 							<div className="px-4 py-4">
 								{/* Mobile keeps one flat list - a dropdown inside a dropdown is
 								    worse than a long list on a phone. Same visibility rule. */}
-								{[...barItems, ...adminItems].map(({ path, labelKey, icon, tourId, liveOnly }) => {
+								{[...barItems, ...platformItems, ...adminItems].map(({ path, labelKey, icon, tourId, liveOnly }) => {
 									const isActive =
 										path === "/"
 											? location === path

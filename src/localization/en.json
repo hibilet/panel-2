@@ -1475,6 +1475,8 @@
 	"nav.events": "Audit log",
 	"nav.platform": "Platform",
 	"nav.superadmin": "Superadmin",
+	"nav.allRealms": "All realms",
+	"nav.homeRealm": "Home realm: $0",
 	"page.platform.title": "Platform",
 	"page.platform.realms": "Realms",
 	"page.platform.billing": "Billing",

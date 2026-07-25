@@ -1475,6 +1475,8 @@
 	"nav.events": "Journal d'audit",
 	"nav.platform": "Plateforme",
 	"nav.superadmin": "Superadmin",
+	"nav.allRealms": "Tous les realms",
+	"nav.homeRealm": "Realm d'origine : $0",
 	"page.platform.title": "Plateforme",
 	"page.platform.realms": "Realms",
 	"page.platform.billing": "Facturation",

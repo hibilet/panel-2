@@ -1475,6 +1475,8 @@
 	"nav.events": "Olay günlüğü",
 	"nav.platform": "Platform",
 	"nav.superadmin": "Süper yönetici",
+	"nav.allRealms": "Tüm realmler",
+	"nav.homeRealm": "Ana realm: $0",
 	"page.platform.title": "Platform",
 	"page.platform.realms": "Realmler",
 	"page.platform.billing": "Faturalama",
