@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import Can from "../../../components/Can";
 import AiDraftModal from "../../../components/sales/AiDraftModal";
+import SalesCalendar from "../../../components/sales/SalesCalendar";
 import { EmptyState, Modal, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
@@ -30,6 +31,7 @@ const Sales = () => {
 	const [deleteTarget, setDeleteTarget] = useState(null);
 	const [aiDraftOpen, setAiDraftOpen] = useState(false);
 	const [query, setQuery] = useState("");
+	const [view, setView] = useState("list");
 
 	const filteredSales = useMemo(
 		() => (sales ?? []).filter((s) => matchesQuery(s.name, query)),
@@ -38,6 +40,16 @@ const Sales = () => {
 	const filteredPastSales = useMemo(
 		() => pastSales.filter((s) => matchesQuery(s.name, query)),
 		[pastSales, query],
+	);
+
+	// Past events are a separate fetch, so the calendar only shows them once the
+	// user has pulled them in - otherwise past months would look empty.
+	const calendarSales = useMemo(
+		() =>
+			showPastEvents
+				? [...filteredSales, ...filteredPastSales]
+				: filteredSales,
+		[showPastEvents, filteredSales, filteredPastSales],
 	);
 
 	useEffect(() => {
@@ -90,6 +102,35 @@ const Sales = () => {
 					{strings("page.sales.title")}
 				</h1>
 				<div className="flex flex-wrap items-center justify-end gap-2">
+					<div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5 shadow-sm">
+						{[
+							{
+								id: "list",
+								icon: "fa-list",
+								label: strings("page.sales.viewList"),
+							},
+							{
+								id: "calendar",
+								icon: "fa-calendar-days",
+								label: strings("page.sales.viewCalendar"),
+							},
+						].map((opt) => (
+							<button
+								key={opt.id}
+								type="button"
+								onClick={() => setView(opt.id)}
+								aria-pressed={view === opt.id}
+								className={`inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 ${
+									view === opt.id
+										? "bg-slate-900 text-white"
+										: "text-slate-600 hover:bg-slate-50"
+								}`}
+							>
+								<i className={`fa-solid ${opt.icon}`} aria-hidden />
+								{opt.label}
+							</button>
+						))}
+					</div>
 					<button
 						type="button"
 						onClick={() => setShowMore((v) => !v)}
@@ -155,6 +196,12 @@ const Sales = () => {
 						)
 					}
 				/>
+			) : view === "calendar" ? (
+				<SalesCalendar
+					sales={calendarSales}
+					loading={loading}
+					onSelect={(sale) => setLocation(`/sales/${sale.id}`)}
+				/>
 			) : (
 				<DataTable
 					data={filteredSales}
@@ -182,7 +229,7 @@ const Sales = () => {
 							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{pastError}
 							</div>
-						) : (
+						) : view === "calendar" ? null : (
 							<DataTable
 								data={filteredPastSales}
 								columns={salesColumns(false)}
