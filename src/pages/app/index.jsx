@@ -16,6 +16,7 @@ import Links from "./Links";
 import Live from "./Live";
 import Notifications from "./Notifications";
 import Onboarding from "./Onboarding";
+import Platform from "./Platform";
 import Realms from "./Realms";
 import Reports from "./Reports";
 import Report from "./Reports/Report";
@@ -131,6 +132,7 @@ const App = () => {
 					)}
 					{isSuperadmin(account) && (
 						<>
+							<Route path="/platform" component={Platform} />
 							<Route path="/realms/:id" component={Realms} />
 							<Route path="/realms" component={Realms} />
 							<Route path="/events" component={Events} />

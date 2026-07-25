@@ -103,12 +103,14 @@ const navItems = [
 		acl: ["merchant", "admin"],
 		panelCap: "panel.invoices",
 	},
-	// {
-	// 	path: "/events",
-	// 	labelKey: "nav.events",
-	// 	icon: "fa-clipboard-list",
-	// 	acl: ["admin"],
-	// },
+	{
+		path: "/events",
+		labelKey: "nav.events",
+		icon: "fa-clipboard-list",
+		acl: ["admin"],
+		group: "admin",
+		superadminOnly: true,
+	},
 	{
 		path: "/jobs",
 		labelKey: "nav.jobs",
@@ -120,6 +122,14 @@ const navItems = [
 		path: "/realms",
 		labelKey: "nav.realms",
 		icon: "fa-layer-group",
+		acl: ["admin"],
+		group: "admin",
+		superadminOnly: true,
+	},
+	{
+		path: "/platform",
+		labelKey: "nav.platform",
+		icon: "fa-tower-broadcast",
 		acl: ["admin"],
 		group: "admin",
 		superadminOnly: true,
@@ -448,6 +458,18 @@ const Navbar = () => {
 							: strings("app.name")}
 					</h1>
 					<div className="ml-auto flex items-center gap-3">
+						{/* The operator badge doubles as the answer to "am I actually a
+						    superadmin?" - every superadmin-only surface hangs off the same
+						    flag, so its absence means the session is a plain realm admin. */}
+						{isSuperadmin(account) && (
+							<Link
+								href="/platform"
+								className="flex items-center gap-1.5 rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-700 transition-colors hover:bg-violet-200"
+							>
+								<i className="fa-solid fa-shield-halved" aria-hidden />
+								{strings("nav.superadmin")}
+							</Link>
+						)}
 						{account?.realm?.name && (
 							<span
 								className="flex items-center gap-2 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600"

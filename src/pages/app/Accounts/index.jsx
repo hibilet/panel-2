@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useParams } from "wouter";
 import { Modal, SearchBar, SlidePanel } from "../../../components/shared";
@@ -8,6 +8,8 @@ import {
 } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import Pagination from "../../../components/tables/Pagination";
+import { useApp } from "../../../context";
+import { isSuperadmin } from "../../../lib/capabilities";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import AccountPanel from "./Account";
@@ -67,6 +69,26 @@ const Accounts = () => {
 	const [inviteOpen, setInviteOpen] = useState(false);
 	const [query, setQuery] = useState("");
 
+	// Cross-realm browsing is superadmin-only: every other admin is pinned to
+	// their own realm by the API, so the picker would be a one-option no-op.
+	const { account } = useApp();
+	const superadmin = isSuperadmin(account);
+	const [realms, setRealms] = useState([]);
+	const [realmFilter, setRealmFilter] = useState("");
+
+	useEffect(() => {
+		if (!superadmin) return;
+		get("/realms")
+			.then((res) => setRealms(res.data ?? []))
+			.catch(() => setRealms([]));
+	}, [superadmin]);
+
+	const realmNames = useMemo(() => {
+		const map = {};
+		for (const r of realms) map[String(r.id ?? r._id)] = r.name;
+		return map;
+	}, [realms]);
+
 	// Debounce the search-bar input into the server-side email filter.
 	// Drives the same filter the dialog uses, so they stay in sync.
 	useEffect(() => {
@@ -99,6 +121,7 @@ const Accounts = () => {
 			type: activeTab === "merchants" ? "account.merchant" : "account.customer",
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
+		if (realmFilter) params.set("realm", realmFilter);
 		queueMicrotask(() => setError(null));
 		get(`/accounts/search?${params}&status=active`)
 			.then((res) => {
@@ -111,7 +134,7 @@ const Accounts = () => {
 				setError(err?.message ?? strings("error.failedLoadAccounts"));
 				setFetchedPage(page);
 			});
-	}, [page, filterEmail, activeTab]);
+	}, [page, filterEmail, activeTab, realmFilter]);
 
 	useEffect(() => {
 		fetchAccounts();
@@ -138,8 +161,19 @@ const Accounts = () => {
 	const isTabActive = (path) => location.startsWith(`/accounts/${path}`);
 	const tabPath = `/accounts/${activeTab}`;
 
-	const columns =
+	const baseColumns =
 		activeTab === "merchants" ? merchantsColumns : customersColumns;
+	// The realm only means something to an operator who can see more than one.
+	const columns = superadmin
+		? [
+				...baseColumns,
+				{
+					key: "realm",
+					header: strings("table.account.realm"),
+					render: (r) => realmNames[String(r.realm ?? "")] ?? "—",
+				},
+			]
+		: baseColumns;
 	const emptyMessage =
 		activeTab === "merchants"
 			? strings("table.account.noMerchants")
@@ -152,6 +186,24 @@ const Accounts = () => {
 					{strings("page.accounts.title")}
 				</h1>
 				<div className="flex items-center gap-2">
+					{superadmin && realms.length > 1 && (
+						<select
+							value={realmFilter}
+							onChange={(e) => {
+								setRealmFilter(e.target.value);
+								setPage(1);
+							}}
+							aria-label={strings("page.accounts.realmFilter")}
+							className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+						>
+							<option value="">{strings("page.accounts.allRealms")}</option>
+							{realms.map((r) => (
+								<option key={r.id ?? r._id} value={r.id ?? r._id}>
+									{r.name}
+								</option>
+							))}
+						</select>
+					)}
 					{activeTab === "merchants" && (
 						<button
 							type="button"
