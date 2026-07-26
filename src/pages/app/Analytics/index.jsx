@@ -47,9 +47,16 @@ const TONE = {
 	slate: { text: "text-slate-700", btn: "border-slate-300 bg-white text-slate-700 hover:bg-slate-50" },
 	amber: { text: "text-amber-600", btn: "border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100" },
 };
+// Rolling windows back from today, in days. YTD is days since Jan 1. Custom
+// ranges need start/end support in the analytics endpoints (not yet).
+const ytdDays = () => dayjs().diff(dayjs().startOf("year"), "day") + 1;
 const RANGES = [
-	{ label: "30d", days: 30 },
-	{ label: "90d", days: 90 },
+	{ label: "1d", days: 1 },
+	{ label: "1w", days: 7 },
+	{ label: "1m", days: 30 },
+	{ label: "3m", days: 90 },
+	{ label: "6m", days: 180 },
+	{ label: "YTD", days: ytdDays() },
 	{ label: "1y", days: 365 },
 	{ label: "All", days: 1825 },
 ];
@@ -623,7 +630,7 @@ const Analytics = () => {
 				</div>
 			)}
 
-			<div role="tablist" aria-label="Analytics sections" className="flex gap-1 border-b border-slate-200 pb-px">
+			<div role="tablist" aria-label="Analytics sections" className="flex gap-1">
 				{TABS.map((id) => (
 					<TabBtn key={id} id={id} active={tab === id} onSelect={setTab} />
 				))}
