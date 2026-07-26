@@ -225,26 +225,45 @@ const Analytics = () => {
 		const q = new URLSearchParams(window.location.search);
 		const t = q.get("tab");
 		const d = Number(q.get("days"));
+		const saleParam = q.get("sale");
 		return {
 			tab: TABS.includes(t) ? t : "audience",
-			scope: q.get("sale") ?? "all",
+			// Comma-separated ids; empty array = all events.
+			scope: saleParam ? saleParam.split(",").filter(Boolean) : [],
 			days: RANGES.some((r) => r.days === d) ? d : 365,
+			start: q.get("start") ?? "",
+			end: q.get("end") ?? "",
 		};
 	}, []);
 	const [tab, setTab] = useState(initial.tab);
-	const [scopeSale, setScopeSale] = useState(initial.scope);
+	const [scopeSales, setScopeSales] = useState(initial.scope);
 	const [rangeDays, setRangeDays] = useState(initial.days);
+	// When both are set, a custom date range overrides the rolling `days`.
+	const [customStart, setCustomStart] = useState(initial.start);
+	const [customEnd, setCustomEnd] = useState(initial.end);
+	const [saleSearch, setSaleSearch] = useState("");
+	const [salePickerOpen, setSalePickerOpen] = useState(false);
+	const [customOpen, setCustomOpen] = useState(Boolean(initial.start && initial.end));
 	const [trendMetric, setTrendMetric] = useState("tickets");
 	const [selCountry, setSelCountry] = useState(null);
+
+	const isCustomRange = Boolean(customStart && customEnd);
+	// Serialised sale scope for query strings + effect deps.
+	const saleCsv = scopeSales.join(",");
 
 	useEffect(() => {
 		const q = new URLSearchParams();
 		if (tab !== "audience") q.set("tab", tab);
-		if (scopeSale !== "all") q.set("sale", scopeSale);
-		if (rangeDays !== 365) q.set("days", String(rangeDays));
+		if (saleCsv) q.set("sale", saleCsv);
+		if (isCustomRange) {
+			q.set("start", customStart);
+			q.set("end", customEnd);
+		} else if (rangeDays !== 365) {
+			q.set("days", String(rangeDays));
+		}
 		const qs = q.toString();
 		setLocation(`/analytics${qs ? `?${qs}` : ""}`, { replace: true });
-	}, [tab, scopeSale, rangeDays, setLocation]);
+	}, [tab, saleCsv, rangeDays, isCustomRange, customStart, customEnd, setLocation]);
 
 	const [pastSales, setPastSales] = useState([]);
 	const [segments, setSegments] = useState([]);
@@ -276,7 +295,7 @@ const Analytics = () => {
 			const params = new URLSearchParams({ type: "segment" });
 			if (Array.isArray(segs)) params.set("segments", segs.join(","));
 			else if (segs) params.set("segment", segs);
-			if (scopeSale !== "all") params.set("sale", scopeSale);
+			if (saleCsv) params.set("sale", saleCsv);
 			const { text } = await getText(`/audiences/export?${params}`);
 			const rows = Math.max(0, text.trim().split("\n").length - 1);
 			const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
@@ -326,13 +345,17 @@ const Analytics = () => {
 		// rolling window - so pull wide and let the event's days define the span.
 		// For all-events we pull double the range so the preceding period is
 		// available for the period-over-period deltas.
-		const effectiveDays =
-			scopeSale !== "all" ? 1825 : Math.min(rangeDays * 2, 1825);
-		const saleQs = scopeSale !== "all" ? `&sale=${scopeSale}` : "";
-		const saleParam = scopeSale !== "all" ? `sale=${scopeSale}` : "";
+		const scoped = scopeSales.length > 0;
+		const effectiveDays = scoped ? 1825 : Math.min(rangeDays * 2, 1825);
+		const saleParam = scoped ? `sale=${saleCsv}` : "";
+		// Custom range wins on the daily trend; otherwise a rolling window.
+		const dailyRange = isCustomRange
+			? `start=${customStart}&end=${customEnd}`
+			: `days=${effectiveDays}`;
+		const saleQs = scoped ? `&sale=${saleCsv}` : "";
 		Promise.all([
 			get(`/analytics/segments?${saleParam}`),
-			get(`/analytics/sales-daily?days=${effectiveDays}${saleQs}`),
+			get(`/analytics/sales-daily?${dailyRange}${saleQs}`),
 			get(`/analytics/channels?${saleParam}`),
 			get(`/analytics/coupons?${saleParam}`),
 			get(`/analytics/timing?${saleParam}`),
@@ -360,7 +383,7 @@ const Analytics = () => {
 		return () => {
 			alive = false;
 		};
-	}, [scopeSale, rangeDays, reloadKey]);
+	}, [saleCsv, rangeDays, isCustomRange, customStart, customEnd, reloadKey]);
 
 	// Demographics + payment method share one fetch so cross-filtering
 	// (gender/age/device/payment) re-queries just this block, not the whole
@@ -370,7 +393,7 @@ const Analytics = () => {
 		let alive = true;
 		setDemoLoading(true);
 		const p = new URLSearchParams();
-		if (scopeSale !== "all") p.set("sale", scopeSale);
+		if (saleCsv) p.set("sale", saleCsv);
 		for (const [k, v] of Object.entries(demoFilter)) if (v) p.set(k, v);
 		// The payment breakdown must not filter itself out of existence.
 		const pp = new URLSearchParams(p);
@@ -389,7 +412,7 @@ const Analytics = () => {
 		return () => {
 			alive = false;
 		};
-	}, [scopeSale, demoFilter]);
+	}, [saleCsv, demoFilter]);
 
 	const saleName = useMemo(
 		() => Object.fromEntries([...(allSales ?? []), ...(pastSales ?? [])].map((s) => [String(saleIdOf(s)), s.name])),
@@ -445,7 +468,7 @@ const Analytics = () => {
 	// A single event is always shown over its full lifetime, so there is no
 	// preceding period to compare against; all-events splits the pulled window
 	// in half at `today - rangeDays`.
-	const isScoped = scopeSale !== "all";
+	const isScoped = scopeSales.length > 0;
 	const { curRows, prevRows } = useMemo(() => {
 		const rows = daily ?? [];
 		if (isScoped) return { curRows: rows, prevRows: [] };
@@ -492,12 +515,18 @@ const Analytics = () => {
 	}, [curRows, saleName]);
 
 	const winbackRows = useMemo(
-		() => (scopeSale === "all" ? winback : winback.filter((r) => String(r.sale) === scopeSale)),
-		[winback, scopeSale],
+		() =>
+			scopeSales.length === 0
+				? winback
+				: winback.filter((r) => scopeSales.includes(String(r.sale))),
+		[winback, scopeSales],
 	);
 	const salesRows = useMemo(
-		() => (scopeSale === "all" ? salesPerf : salesPerf.filter((r) => String(r._id) === scopeSale)),
-		[salesPerf, scopeSale],
+		() =>
+			scopeSales.length === 0
+				? salesPerf
+				: salesPerf.filter((r) => scopeSales.includes(String(r._id))),
+		[salesPerf, scopeSales],
 	);
 	const winbackAgg = useMemo(() => {
 		const churned = winbackRows.reduce((s, r) => s + (r.churnedCount ?? 0), 0);
@@ -527,18 +556,23 @@ const Analytics = () => {
 		);
 	}
 
-	const scopeName = scopeSale === "all" ? "all events" : saleName[scopeSale] ?? "event";
+	const scopeName =
+		scopeSales.length === 0
+			? "all events"
+			: scopeSales.length === 1
+				? saleName[scopeSales[0]] ?? "event"
+				: `${scopeSales.length} events`;
 	const hasAffinity = (affinity.pairs?.length ?? 0) > 0 || (affinity.related?.length ?? 0) > 0;
 	const crossSellCard = (
 		<Card
 			title="Also bought (cross-sell)"
 			hint={
-				scopeSale === "all"
+				scopeSales.length === 0
 					? "Event pairs bought by the same customers - co-purchase across all events. Market one to the other's buyers."
 					: `Events that ${scopeName} buyers also bought - promote these to them.`
 			}
 		>
-			{scopeSale !== "all" ? (
+			{scopeSales.length > 0 ? (
 				<div className="space-y-1.5">
 					{(affinity.related ?? []).map((a) => (
 						<div key={a.sale}>
@@ -575,44 +609,107 @@ const Analytics = () => {
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
 				<div className="flex flex-wrap items-center gap-2">
-					<select
-						value={scopeSale}
-						onChange={(e) => setScopeSale(e.target.value)}
-						className="max-w-[200px] rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400"
-					>
-						<option value="all">All events</option>
-						{(allSales ?? []).length > 0 && (
-							<optgroup label="Live & upcoming">
-								{(allSales ?? []).map((s) => (
-									<option key={saleIdOf(s)} value={saleIdOf(s)}>
-										{s.name}
-									</option>
-								))}
-							</optgroup>
+					{/* Multi-select event scope: search + tick several events; the
+					    analytics rebuild as the selection changes. */}
+					<div className="relative">
+						<button
+							type="button"
+							onClick={() => setSalePickerOpen((o) => !o)}
+							className="inline-flex max-w-[240px] items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
+						>
+							<i className="fa-solid fa-filter text-slate-400" aria-hidden />
+							<span className="truncate">{scopeName}</span>
+							<i className="fa-solid fa-chevron-down text-xs text-slate-400" aria-hidden />
+						</button>
+						{salePickerOpen && (
+							<div className="absolute right-0 z-20 mt-1 w-72 rounded-lg border border-slate-200 bg-white shadow-lg">
+								<div className="border-b border-slate-100 p-2">
+									<input
+										type="text"
+										value={saleSearch}
+										onChange={(e) => setSaleSearch(e.target.value)}
+										placeholder="Search events…"
+										className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+									/>
+								</div>
+								<div className="flex items-center justify-between px-3 py-1.5 text-xs text-slate-500">
+									<span>{scopeSales.length ? `${scopeSales.length} selected` : "All events"}</span>
+									{scopeSales.length > 0 && (
+										<button type="button" onClick={() => setScopeSales([])} className="font-medium text-slate-600 hover:text-slate-900">
+											Clear
+										</button>
+									)}
+								</div>
+								<div className="max-h-64 overflow-y-auto pb-1">
+									{[...(allSales ?? []), ...(pastSales ?? [])]
+										.filter((s) => !saleSearch || (s.name ?? "").toLowerCase().includes(saleSearch.toLowerCase()))
+										.map((s) => {
+											const id = String(saleIdOf(s));
+											const on = scopeSales.includes(id);
+											return (
+												<label key={id} className="flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-50">
+													<input
+														type="checkbox"
+														checked={on}
+														onChange={() =>
+															setScopeSales((prev) =>
+																on ? prev.filter((x) => x !== id) : [...prev, id],
+															)
+														}
+														className="h-4 w-4 rounded border-slate-300"
+													/>
+													<span className="truncate">{s.name}</span>
+												</label>
+											);
+										})}
+								</div>
+							</div>
 						)}
-						{(pastSales ?? []).length > 0 && (
-							<optgroup label="Past events">
-								{(pastSales ?? []).map((s) => (
-									<option key={saleIdOf(s)} value={saleIdOf(s)}>
-										{s.name}
-									</option>
-								))}
-							</optgroup>
-						)}
-					</select>
-					{tab === "sales" && scopeSale === "all" && (
-						<div className="inline-flex overflow-hidden rounded-lg border border-slate-300">
-							{RANGES.map((r) => (
-								<button
-									key={r.days}
-									type="button"
-									onClick={() => setRangeDays(r.days)}
-									className={`px-2.5 py-1.5 text-xs font-medium ${rangeDays === r.days ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
-								>
-									{r.label}
-								</button>
-							))}
-						</div>
+					</div>
+
+					{/* Timeframe: rolling presets on every tab, plus a custom range. */}
+					<div className="inline-flex overflow-hidden rounded-lg border border-slate-300">
+						{RANGES.map((r) => (
+							<button
+								key={r.days}
+								type="button"
+								onClick={() => {
+									setCustomOpen(false);
+									setCustomStart("");
+									setCustomEnd("");
+									setRangeDays(r.days);
+								}}
+								className={`px-2.5 py-1.5 text-xs font-medium ${rangeDays === r.days && !isCustomRange ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
+							>
+								{r.label}
+							</button>
+						))}
+						<button
+							type="button"
+							onClick={() => setCustomOpen((o) => !o)}
+							className={`px-2.5 py-1.5 text-xs font-medium ${isCustomRange || customOpen ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
+						>
+							Custom
+						</button>
+					</div>
+					{customOpen && (
+						<span className="inline-flex items-center gap-1 text-sm">
+							<input
+								type="date"
+								value={customStart}
+								max={customEnd || undefined}
+								onChange={(e) => setCustomStart(e.target.value)}
+								className="rounded-md border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+							/>
+							<span className="text-slate-400">→</span>
+							<input
+								type="date"
+								value={customEnd}
+								min={customStart || undefined}
+								onChange={(e) => setCustomEnd(e.target.value)}
+								className="rounded-md border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+							/>
+						</span>
 					)}
 				</div>
 			</div>
@@ -1043,7 +1140,7 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					{scopeSale === "all" && byEvent.length > 0 && (
+					{scopeSales.length === 0 && byEvent.length > 0 && (
 						<Card
 							title="By event"
 							hint="Tickets and net revenue per event in the selected range. Click an event to open it."
