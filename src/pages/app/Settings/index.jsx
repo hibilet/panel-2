@@ -4,6 +4,7 @@ import CompletionStepsWizard from "../../../components/CompletionStepsWizard";
 import { ImageUpload } from "../../../components/shared";
 import { useApp } from "../../../context";
 import { put } from "../../../lib/client";
+import { isSuperadmin } from "../../../lib/capabilities";
 import { deleteToken, getLang, setLang } from "../../../lib/storage";
 import { getStoredTheme, setTheme } from "../../../lib/theme";
 import strings, { locales } from "../../../localization";
@@ -144,7 +145,7 @@ const Settings = () => {
 					{strings("page.settings.preferences")}
 				</h2>
 				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{account?.type === "account.admin" && (
+					{account?.type === "account.admin" && !isSuperadmin(account) && (
 						<Link
 							href="/settings/realm"
 							className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:bg-slate-50 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"

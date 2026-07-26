@@ -6,6 +6,8 @@ import SellerBlock from "../../../../components/invoices/SellerBlock";
 import { useApp } from "../../../../context";
 import { put } from "../../../../lib/client";
 import { urlsFromDomains } from "../../../../lib/realm";
+import ImageUpload from "../../../../components/shared/ImageUpload";
+import { isSuperadmin } from "../../../../lib/capabilities";
 import strings from "../../../../localization";
 
 const SERVICE_OPTIONS = [
@@ -55,11 +57,19 @@ const SettingsRealm = () => {
 	const isAdmin = account?.type === "account.admin";
 	const realmId = realm?._id ?? realm?.id ?? null;
 
+	// A superadmin manages every realm from the Realms page; their own
+	// "home realm" settings here would be misleading, so send them there.
+	useEffect(() => {
+		if (isSuperadmin(account)) setLocation("/realms");
+	}, [account, setLocation]);
+
 	const {
 		register,
 		handleSubmit,
 		control,
 		reset,
+		setValue,
+		watch,
 		formState: { errors },
 	} = useForm({ defaultValues });
 
@@ -310,11 +320,20 @@ const SettingsRealm = () => {
 						</p>
 
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<Input
-								label={strings("form.realm.brandingLogo")}
-								{...register("branding.logo")}
-								placeholder="https://..."
-							/>
+							<div>
+								<span className="mb-1 block text-sm font-medium text-slate-700">
+									{strings("form.realm.brandingLogo")}
+								</span>
+								<ImageUpload
+									value={watch("branding.logo")}
+									onChange={(url) =>
+										setValue("branding.logo", url, { shouldDirty: true })
+									}
+									onRemove={() =>
+										setValue("branding.logo", "", { shouldDirty: true })
+									}
+								/>
+							</div>
 							<Input
 								label={strings("form.realm.brandingColor")}
 								{...register("branding.primaryColor")}

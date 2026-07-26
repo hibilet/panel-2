@@ -1,5 +1,9 @@
 import { useRef, useState } from "react";
-import { uploadImage } from "../../lib/imgbb";
+import {
+	ALLOWED_IMAGE_TYPES,
+	MAX_IMAGE_BYTES,
+	uploadImage,
+} from "../../lib/imgbb";
 import { showToast } from "../../lib/toastStore";
 import strings from "../../localization";
 
@@ -11,7 +15,7 @@ const ImageUpload = ({
 	aspectClass = "aspect-[6/1] max-h-32",
 	showPreview = true,
 	disabled = false,
-	accept = "image/*",
+	accept = ALLOWED_IMAGE_TYPES.join(","),
 	uploadLabel,
 	removeLabel,
 	extraActions,
@@ -24,8 +28,18 @@ const ImageUpload = ({
 
 	const handleFile = async (file) => {
 		if (!file) return;
-		if (!file.type?.startsWith("image/")) {
-			showToast("error", strings("imageUpload.invalidType"));
+		if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+			showToast(
+				"error",
+				strings("imageUpload.invalidType", "Use a JPG, PNG or WebP image."),
+			);
+			return;
+		}
+		if (file.size > MAX_IMAGE_BYTES) {
+			showToast(
+				"error",
+				strings("imageUpload.tooLarge", "Image must be 1 MB or smaller."),
+			);
 			return;
 		}
 		setUploading(true);

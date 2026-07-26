@@ -20,8 +20,14 @@ export const uploadImage = async (file) => {
 	}
 
 	const json = await res.json();
-	return json.data.display_url;
+	// The media pipeline returns { url (original), variants: {original, md, sm} }.
+	return json.data?.url ?? json.data?.variants?.original;
 };
+
+// jpg/png/webp, 1 MB - mirrors the server cap so the user gets an instant
+// error instead of a round-trip rejection.
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+export const MAX_IMAGE_BYTES = 1024 * 1024;
 
 export const enhanceImage = async (linkId) => {
 	const res = await fetch(`${api}/media/enhance/${linkId}`, {
@@ -37,7 +43,7 @@ export const enhanceImage = async (linkId) => {
 	}
 
 	const json = await res.json();
-	return json.data?.display_url ?? json.data?.url;
+	return json.data?.url ?? json.data?.variants?.original;
 };
 
 export const base64ToBlob = (base64) => {

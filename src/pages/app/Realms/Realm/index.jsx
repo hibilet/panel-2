@@ -7,6 +7,7 @@ import { Modal } from "../../../../components/shared";
 import { FAMILIES } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
 import { urlsFromDomains } from "../../../../lib/realm";
+import ImageUpload from "../../../../components/shared/ImageUpload";
 import strings from "../../../../localization";
 
 const SERVICE_OPTIONS = [
@@ -71,6 +72,8 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 		handleSubmit,
 		control,
 		reset,
+		setValue,
+		watch,
 		formState: { errors },
 	} = useForm({ defaultValues });
 
@@ -392,11 +395,20 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						</p>
 
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<Input
-								label={strings("form.realm.brandingLogo")}
-								{...register("branding.logo")}
-								placeholder="https://..."
-							/>
+							<div>
+								<span className="mb-1 block text-sm font-medium text-slate-700">
+									{strings("form.realm.brandingLogo")}
+								</span>
+								<ImageUpload
+									value={watch("branding.logo")}
+									onChange={(url) =>
+										setValue("branding.logo", url, { shouldDirty: true })
+									}
+									onRemove={() =>
+										setValue("branding.logo", "", { shouldDirty: true })
+									}
+								/>
+							</div>
 							<Input
 								label={strings("form.realm.brandingColor")}
 								{...register("branding.primaryColor")}
