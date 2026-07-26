@@ -16,6 +16,11 @@ const withScheme = (host) => {
 	return `${isLocalHost(host) ? "http" : "https"}://${host}`;
 };
 
+// The realm is addressed by five hosts: panel (the dashboard app), api, widget,
+// reader and cdn. Public URLs derive from them - `dashboard` from the panel
+// host, `tickets` from the widget host (same buyer surface).
+export const DOMAIN_SERVICES = ["panel", "api", "widget", "reader", "cdn"];
+
 export const urlsFromDomains = (domains = []) => {
 	const byService = {};
 	for (const d of domains) {
@@ -23,8 +28,9 @@ export const urlsFromDomains = (domains = []) => {
 	}
 	return {
 		api: byService.api,
-		dashboard: byService.dashboard,
+		dashboard: byService.panel || byService.dashboard,
 		widget: byService.widget || byService.tickets,
 		tickets: byService.tickets || byService.widget,
+		cdn: byService.cdn,
 	};
 };

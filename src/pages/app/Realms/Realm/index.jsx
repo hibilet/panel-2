@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
-import { Input, Select } from "../../../../components/inputs";
+import { useForm } from "react-hook-form";
+import { Input } from "../../../../components/inputs";
 import SellerBlock from "../../../../components/invoices/SellerBlock";
 import PlatformBilling from "./PlatformBilling";
 import { Modal } from "../../../../components/shared";
 import { FAMILIES } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
-import { urlsFromDomains } from "../../../../lib/realm";
+import { DOMAIN_SERVICES, urlsFromDomains } from "../../../../lib/realm";
 import ImageUpload from "../../../../components/shared/ImageUpload";
 import strings from "../../../../localization";
 
-const SERVICE_OPTIONS = [
-	{ value: "dashboard", label: "dashboard" },
-	{ value: "widget", label: "widget" },
-	{ value: "api", label: "api" },
-];
-
+// One host per service. panel is the dashboard app; old realms stored it under
+// the "dashboard" service, so read that as a fallback when loading.
+const emptyDomainHosts = DOMAIN_SERVICES.reduce((acc, svc) => {
+	acc[svc] = "";
+	return acc;
+}, {});
 
 const emptySeller = {
 	legalName: "",
@@ -40,9 +40,11 @@ const defaultFeatures = FAMILIES.reduce((acc, f) => {
 
 const defaultValues = {
 	name: "",
-	domains: [{ hostname: "", service: "dashboard" }],
-	branding: { logo: "", primaryColor: "" },
+	domainHosts: emptyDomainHosts,
+	branding: { logo: "" },
+	enableSmtp: false,
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
+	enableStripe: false,
 	stripe: {
 		connectClientId: "",
 		connectSecret: "",
@@ -50,6 +52,7 @@ const defaultValues = {
 		transactionWebhookSecret: "",
 	},
 	features: defaultFeatures,
+	ai: { openrouterKey: "", grokImageKey: "" },
 	seller: emptySeller,
 };
 
@@ -63,24 +66,16 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 	const [saving, setSaving] = useState(false);
 	const [deleting, setDeleting] = useState(false);
 	const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-	const [smtpOpen, setSmtpOpen] = useState(false);
-	const [stripeOpen, setStripeOpen] = useState(false);
 	const [error, setError] = useState(null);
 
 	const {
 		register,
 		handleSubmit,
-		control,
 		reset,
 		setValue,
 		watch,
 		formState: { errors },
 	} = useForm({ defaultValues });
-
-	const { fields, append, remove } = useFieldArray({
-		control,
-		name: "domains",
-	});
 
 	useEffect(() => {
 		if (isNew) {
@@ -96,19 +91,24 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				const d = res.data ?? null;
 				setData(d);
 				if (d) {
+					// Map stored domains -> one host per service (panel absorbs a
+					// legacy "dashboard" entry).
+					const hosts = { ...emptyDomainHosts };
+					for (const dom of d.domains ?? []) {
+						const svc = dom.service === "dashboard" ? "panel" : dom.service;
+						if (svc in hosts && dom.hostname) hosts[svc] = dom.hostname;
+					}
+					const stripeConfigured = Boolean(
+						d.stripe?.connectClientId ||
+							d.stripe?.connectSecretSet ||
+							d.stripe?.connectWebhookSecretSet ||
+							d.stripe?.transactionWebhookSecretSet,
+					);
 					reset({
 						name: d.name ?? "",
-						domains:
-							Array.isArray(d.domains) && d.domains.length > 0
-								? d.domains.map((dom) => ({
-										hostname: dom.hostname ?? "",
-										service: dom.service ?? "dashboard",
-									}))
-								: [{ hostname: "", service: "dashboard" }],
-						branding: {
-							logo: d.branding?.logo ?? "",
-							primaryColor: d.branding?.primaryColor ?? "",
-						},
+						domainHosts: hosts,
+						branding: { logo: d.branding?.logo ?? "" },
+						enableSmtp: Boolean(d.smtp?.host || d.smtp?.passSet),
 						smtp: {
 							host: d.smtp?.host ?? "",
 							port: d.smtp?.port ?? "",
@@ -116,6 +116,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							pass: "",
 							from: d.smtp?.from ?? "",
 						},
+						enableStripe: stripeConfigured,
 						stripe: {
 							connectClientId: d.stripe?.connectClientId ?? "",
 							// Secrets are never sent to the client. Left blank; an
@@ -129,6 +130,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							acc[f] = d.features?.[f] !== false;
 							return acc;
 						}, {}),
+						ai: { openrouterKey: "", grokImageKey: "" },
 						seller: {
 							legalName: d.seller?.legalName ?? "",
 							tradeName: d.seller?.tradeName ?? "",
@@ -162,6 +164,8 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							d.stripe?.transactionWebhookSecretSet,
 						),
 						smtpPass: Boolean(d.smtp?.passSet),
+						openrouterKey: Boolean(d.ai?.openrouterKeySet),
+						grokImageKey: Boolean(d.ai?.grokImageKeySet),
 					});
 				}
 			})
@@ -173,12 +177,10 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 		setSaving(true);
 		setError(null);
 		try {
-			const cleanDomains = (formData.domains ?? [])
-				.filter((d) => d.hostname?.trim())
-				.map((d) => ({
-					hostname: d.hostname.trim(),
-					service: d.service || "dashboard",
-				}));
+			const cleanDomains = DOMAIN_SERVICES.map((svc) => ({
+				service: svc,
+				hostname: (formData.domainHosts?.[svc] ?? "").trim(),
+			})).filter((d) => d.hostname);
 			const s = formData.seller ?? {};
 			const sAddr = s.address ?? {};
 			const sellerHasContent = Object.entries(s).some(([key, value]) => {
@@ -219,7 +221,6 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				urls: urlsFromDomains(cleanDomains),
 				branding: {
 					logo: formData.branding?.logo?.trim() || undefined,
-					primaryColor: formData.branding?.primaryColor?.trim() || undefined,
 				},
 				smtp: {
 					host: formData.smtp?.host?.trim() || undefined,
@@ -241,6 +242,12 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 					acc[f] = Boolean(formData.features?.[f]);
 					return acc;
 				}, {}),
+				// AI keys are secrets: only send when the field was filled, so an
+				// untouched field keeps whatever is stored.
+				ai: {
+					openrouterKey: formData.ai?.openrouterKey?.trim() || undefined,
+					grokImageKey: formData.ai?.grokImageKey?.trim() || undefined,
+				},
 				seller: sellerPayload,
 			};
 			if (isNew) {
@@ -346,183 +353,47 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						/>
 
 						<div>
-							<div className="mb-2 flex items-center justify-between">
-								<span className="text-sm font-medium text-slate-700">
-									{strings("form.realm.domains")}
-								</span>
-								<button
-									type="button"
-									onClick={() => append({ hostname: "", service: "dashboard" })}
-									className="inline-flex items-center gap-1 text-sm text-slate-600 hover:text-slate-900"
-								>
-									<i className="fa-solid fa-plus" aria-hidden />
-									{strings("form.realm.addDomain")}
-								</button>
-							</div>
+							<span className="mb-2 block text-sm font-medium text-slate-700">
+								{strings("form.realm.domains")}
+							</span>
 							<div className="space-y-2">
-								{fields.map((field, index) => (
-									<div key={field.id} className="flex items-start gap-2">
+								{DOMAIN_SERVICES.map((svc) => (
+									<div key={svc} className="flex items-center gap-2">
+										<span className="w-20 shrink-0 text-right text-xs font-medium uppercase text-slate-500">
+											{svc}
+										</span>
 										<div className="flex-1">
 											<Input
-												{...register(`domains.${index}.hostname`)}
-												placeholder={strings("form.realm.hostnamePlaceholder")}
+												{...register(`domainHosts.${svc}`)}
+												placeholder={`${svc}.example.com`}
 											/>
 										</div>
-										<div className="w-40">
-											<Select
-												{...register(`domains.${index}.service`)}
-												options={SERVICE_OPTIONS}
-											/>
-										</div>
-										<button
-											type="button"
-											onClick={() => remove(index)}
-											className="mt-1 rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-red-600"
-											aria-label={strings("common.delete")}
-										>
-											<i className="fa-solid fa-trash" aria-hidden />
-										</button>
 									</div>
 								))}
 							</div>
+							<p className="mt-1 text-xs text-slate-500">
+								{strings(
+									"form.realm.urlsDerivedHint",
+									"Public URLs are derived from these hosts (https, or http for localhost).",
+								)}
+							</p>
 						</div>
 
-						<p className="-mt-1 text-xs text-slate-500">
-							{strings(
-								"form.realm.urlsDerivedHint",
-								"Public URLs (API, dashboard, widget, tickets) are taken from the domains above.",
-							)}
-						</p>
-
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<div>
-								<span className="mb-1 block text-sm font-medium text-slate-700">
-									{strings("form.realm.brandingLogo")}
-								</span>
-								<ImageUpload
-									value={watch("branding.logo")}
-									onChange={(url) =>
-										setValue("branding.logo", url, { shouldDirty: true })
-									}
-									onRemove={() =>
-										setValue("branding.logo", "", { shouldDirty: true })
-									}
-								/>
-							</div>
-							<Input
-								label={strings("form.realm.brandingColor")}
-								{...register("branding.primaryColor")}
-								placeholder="#1e293b"
+						<div>
+							<span className="mb-1 block text-sm font-medium text-slate-700">
+								{strings("form.realm.brandingLogo")}
+							</span>
+							<ImageUpload
+								variant="dropzone"
+								aspectClass="aspect-[4/1] max-h-40"
+								value={watch("branding.logo")}
+								onChange={(url) =>
+									setValue("branding.logo", url, { shouldDirty: true })
+								}
+								onRemove={() =>
+									setValue("branding.logo", "", { shouldDirty: true })
+								}
 							/>
-						</div>
-
-						<div className="rounded-lg border border-slate-200">
-							<button
-								type="button"
-								onClick={() => setSmtpOpen((v) => !v)}
-								className="flex w-full items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-							>
-								<span className="inline-flex items-center gap-2">
-									<i
-										className="fa-solid fa-envelope text-slate-500"
-										aria-hidden
-									/>
-									{strings("form.realm.smtp")}
-								</span>
-								<i
-									className={`fa-solid ${smtpOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
-									aria-hidden
-								/>
-							</button>
-							{smtpOpen && (
-								<div className="space-y-4 border-t border-slate-200 px-4 py-4">
-									<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-										<Input
-											label={strings("form.realm.smtpHost")}
-											{...register("smtp.host")}
-										/>
-										<Input
-											label={strings("form.realm.smtpPort")}
-											type="number"
-											{...register("smtp.port")}
-										/>
-										<Input
-											label={strings("form.realm.smtpUser")}
-											{...register("smtp.user")}
-											autoComplete="off"
-										/>
-										<Input
-											label={strings("form.realm.smtpPass")}
-											type="password"
-											{...register("smtp.pass")}
-											autoComplete="off"
-										/>
-										<Input
-											label={strings("form.realm.smtpFrom")}
-											{...register("smtp.from")}
-											placeholder="no-reply@example.com"
-										/>
-									</div>
-								</div>
-							)}
-						</div>
-
-						<div className="rounded-lg border border-slate-200">
-							<button
-								type="button"
-								onClick={() => setStripeOpen((v) => !v)}
-								className="flex w-full items-center justify-between gap-2 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
-							>
-								<span className="inline-flex items-center gap-2">
-									<i
-										className="fa-brands fa-stripe-s text-slate-500"
-										aria-hidden
-									/>
-									Stripe Connect (whitelabel)
-								</span>
-								<i
-									className={`fa-solid ${stripeOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
-									aria-hidden
-								/>
-							</button>
-							{stripeOpen && (
-								<div className="space-y-4 border-t border-slate-200 px-4 py-4">
-									<p className="text-xs text-slate-500">
-										Optional. When set, this realm runs its merchant Connect
-										flow against its own Stripe platform. Empty fields fall
-										back to the default platform credentials.
-									</p>
-									<div className="grid grid-cols-1 gap-4">
-										<Input
-											label="Connect Client ID"
-											{...register("stripe.connectClientId")}
-											placeholder="ca_..."
-											autoComplete="off"
-										/>
-										<Input
-											label="Platform Secret Key"
-											type="password"
-											{...register("stripe.connectSecret")}
-											placeholder={secretsSet.connectSecret ? "configured - leave blank to keep" : "sk_live_..."}
-											autoComplete="off"
-										/>
-										<Input
-											label="Connect Webhook Signing Secret"
-											type="password"
-											{...register("stripe.connectWebhookSecret")}
-											placeholder={secretsSet.connectWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
-											autoComplete="off"
-										/>
-										<Input
-											label="Transaction Webhook Signing Secret"
-											type="password"
-											{...register("stripe.transactionWebhookSecret")}
-											placeholder={secretsSet.transactionWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
-											autoComplete="off"
-										/>
-									</div>
-								</div>
-							)}
 						</div>
 
 						<div className="rounded-lg border border-slate-200 p-4">
@@ -551,6 +422,117 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								))}
 							</div>
 						</div>
+
+						{/* SMTP - checkbox reveals the fields */}
+						<div className="rounded-lg border border-slate-200 p-4">
+							<label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+								<input
+									type="checkbox"
+									{...register("enableSmtp")}
+									className="h-4 w-4 rounded border-slate-300"
+								/>
+								<i className="fa-solid fa-envelope text-slate-500" aria-hidden />
+								{strings("form.realm.smtp")}
+							</label>
+							{watch("enableSmtp") && (
+								<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+									<Input label={strings("form.realm.smtpHost")} {...register("smtp.host")} />
+									<Input label={strings("form.realm.smtpPort")} type="number" {...register("smtp.port")} />
+									<Input label={strings("form.realm.smtpUser")} {...register("smtp.user")} autoComplete="off" />
+									<Input
+										label={strings("form.realm.smtpPass")}
+										type="password"
+										{...register("smtp.pass")}
+										placeholder={secretsSet.smtpPass ? "configured - leave blank to keep" : ""}
+										autoComplete="off"
+									/>
+									<Input
+										label={strings("form.realm.smtpFrom")}
+										{...register("smtp.from")}
+										placeholder="no-reply@example.com"
+									/>
+								</div>
+							)}
+						</div>
+
+						{/* Stripe Connect - checkbox reveals the fields */}
+						<div className="rounded-lg border border-slate-200 p-4">
+							<label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+								<input
+									type="checkbox"
+									{...register("enableStripe")}
+									className="h-4 w-4 rounded border-slate-300"
+								/>
+								<i className="fa-brands fa-stripe-s text-slate-500" aria-hidden />
+								Stripe Connect (whitelabel)
+							</label>
+							{watch("enableStripe") && (
+								<div className="mt-4 grid grid-cols-1 gap-4">
+									<p className="text-xs text-slate-500">
+										This realm runs its merchant Connect flow against its own
+										Stripe platform. Empty fields fall back to the default
+										platform credentials.
+									</p>
+									<Input
+										label="Connect Client ID"
+										{...register("stripe.connectClientId")}
+										placeholder="ca_..."
+										autoComplete="off"
+									/>
+									<Input
+										label="Platform Secret Key"
+										type="password"
+										{...register("stripe.connectSecret")}
+										placeholder={secretsSet.connectSecret ? "configured - leave blank to keep" : "sk_live_..."}
+										autoComplete="off"
+									/>
+									<Input
+										label="Connect Webhook Signing Secret"
+										type="password"
+										{...register("stripe.connectWebhookSecret")}
+										placeholder={secretsSet.connectWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
+										autoComplete="off"
+									/>
+									<Input
+										label="Transaction Webhook Signing Secret"
+										type="password"
+										{...register("stripe.transactionWebhookSecret")}
+										placeholder={secretsSet.transactionWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
+										autoComplete="off"
+									/>
+								</div>
+							)}
+						</div>
+
+						{/* AI keys - shown when the AI feature is enabled */}
+						{watch("features.ai") && (
+							<div className="rounded-lg border border-slate-200 p-4">
+								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+									<i className="fa-solid fa-wand-magic-sparkles text-slate-500" aria-hidden />
+									AI keys
+								</div>
+								<p className="mb-3 text-xs text-slate-500">
+									Optional. This realm's own keys for AI insights and image
+									generation; empty falls back to the platform keys.
+								</p>
+								<div className="grid grid-cols-1 gap-4">
+									<Input
+										label="OpenRouter API key"
+										type="password"
+										{...register("ai.openrouterKey")}
+										placeholder={secretsSet.openrouterKey ? "configured - leave blank to keep" : "sk-or-..."}
+										autoComplete="off"
+									/>
+									<Input
+										label="Grok (xAI) image key"
+										type="password"
+										{...register("ai.grokImageKey")}
+										placeholder={secretsSet.grokImageKey ? "configured - leave blank to keep" : "xai-..."}
+										autoComplete="off"
+									/>
+								</div>
+							</div>
+						)}
 
 						<SellerBlock
 						register={register}

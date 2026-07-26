@@ -17,7 +17,6 @@ const PlatformBilling = ({ realmId, platform }) => {
 		commissionPct: toPercent(platform?.pricing?.commissionRate ?? 0),
 		currency: platform?.pricing?.currency ?? "eur",
 	});
-	const [anchorDay, setAnchorDay] = useState(platform?.billingAnchorDay ?? 1);
 	const [active, setActive] = useState(platform?.status === "active");
 	const [saving, setSaving] = useState(false);
 	const [issuing, setIssuing] = useState(false);
@@ -46,7 +45,6 @@ const PlatformBilling = ({ realmId, platform }) => {
 					commissionRate: toRate(pricing.commissionPct),
 					currency: pricing.currency || "eur",
 				},
-				billingAnchorDay: Number(anchorDay) || 1,
 				status: active ? "active" : "inactive",
 			});
 		} catch (err) {
@@ -117,17 +115,6 @@ const PlatformBilling = ({ realmId, platform }) => {
 						className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
 					/>
 				</label>
-				<label className="text-xs font-medium text-slate-600">
-					Anchor day (1-28)
-					<input
-						type="number"
-						min="1"
-						max="28"
-						value={anchorDay}
-						onChange={(e) => setAnchorDay(e.target.value)}
-						className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-					/>
-				</label>
 			</div>
 
 			<div className="mt-3 flex items-center justify-between gap-3">
@@ -138,7 +125,7 @@ const PlatformBilling = ({ realmId, platform }) => {
 						onChange={(e) => setActive(e.target.checked)}
 						className="h-4 w-4 rounded border-slate-300"
 					/>
-					Billing active (issue invoices on the anchor day)
+					Billing active (invoices issue on the 1st of each month)
 				</label>
 				<button
 					type="button"
