@@ -6,6 +6,7 @@ import PlatformBilling from "./PlatformBilling";
 import { Modal } from "../../../../components/shared";
 import { FAMILIES } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
+import { urlsFromDomains } from "../../../../lib/realm";
 import strings from "../../../../localization";
 
 const SERVICE_OPTIONS = [
@@ -13,6 +14,7 @@ const SERVICE_OPTIONS = [
 	{ value: "widget", label: "widget" },
 	{ value: "api", label: "api" },
 ];
+
 
 const emptySeller = {
 	legalName: "",
@@ -38,7 +40,6 @@ const defaultFeatures = FAMILIES.reduce((acc, f) => {
 const defaultValues = {
 	name: "",
 	domains: [{ hostname: "", service: "dashboard" }],
-	urls: { api: "", dashboard: "", widget: "", tickets: "" },
 	branding: { logo: "", primaryColor: "" },
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
 	stripe: {
@@ -101,12 +102,6 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										service: dom.service ?? "dashboard",
 									}))
 								: [{ hostname: "", service: "dashboard" }],
-						urls: {
-							api: d.urls?.api ?? "",
-							dashboard: d.urls?.dashboard ?? "",
-							widget: d.urls?.widget ?? "",
-							tickets: d.urls?.tickets ?? "",
-						},
 						branding: {
 							logo: d.branding?.logo ?? "",
 							primaryColor: d.branding?.primaryColor ?? "",
@@ -217,12 +212,8 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 			const payload = {
 				name: formData.name?.trim() || undefined,
 				domains: cleanDomains,
-				urls: {
-					api: formData.urls?.api?.trim() || undefined,
-					dashboard: formData.urls?.dashboard?.trim() || undefined,
-					widget: formData.urls?.widget?.trim() || undefined,
-					tickets: formData.urls?.tickets?.trim() || undefined,
-				},
+				// Derived from domains - no separate URL fields to keep in sync.
+				urls: urlsFromDomains(cleanDomains),
 				branding: {
 					logo: formData.branding?.logo?.trim() || undefined,
 					primaryColor: formData.branding?.primaryColor?.trim() || undefined,
@@ -393,28 +384,12 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							</div>
 						</div>
 
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-							<Input
-								label="API URL"
-								{...register("urls.api")}
-								placeholder="https://api.example.com"
-							/>
-							<Input
-								label={strings("form.realm.dashboardUrl")}
-								{...register("urls.dashboard")}
-								placeholder="https://panel.example.com"
-							/>
-							<Input
-								label={strings("form.realm.widgetUrl")}
-								{...register("urls.widget")}
-								placeholder="https://app.example.com"
-							/>
-							<Input
-								label="Tickets URL"
-								{...register("urls.tickets")}
-								placeholder="https://app.example.com"
-							/>
-						</div>
+						<p className="-mt-1 text-xs text-slate-500">
+							{strings(
+								"form.realm.urlsDerivedHint",
+								"Public URLs (API, dashboard, widget, tickets) are taken from the domains above.",
+							)}
+						</p>
 
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<Input
