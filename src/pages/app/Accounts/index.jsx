@@ -75,6 +75,9 @@ const Accounts = () => {
 	const superadmin = isSuperadmin(account);
 	const [realms, setRealms] = useState([]);
 	const [realmFilter, setRealmFilter] = useState("");
+	// Superadmin can browse any account type, not just the merchants/customers
+	// tabs. Empty => fall back to the tab-derived type.
+	const [typeFilter, setTypeFilter] = useState("");
 
 	useEffect(() => {
 		if (!superadmin) return;
@@ -115,10 +118,12 @@ const Accounts = () => {
 
 	const fetchAccounts = useCallback(() => {
 		const skip = (page - 1) * LIMIT;
+		const tabType =
+			activeTab === "merchants" ? "account.merchant" : "account.customer";
 		const params = new URLSearchParams({
 			limit: String(LIMIT),
 			skip: String(skip),
-			type: activeTab === "merchants" ? "account.merchant" : "account.customer",
+			type: typeFilter || tabType,
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
 		if (realmFilter) params.set("realm", realmFilter);
@@ -134,7 +139,7 @@ const Accounts = () => {
 				setError(err?.message ?? strings("error.failedLoadAccounts"));
 				setFetchedPage(page);
 			});
-	}, [page, filterEmail, activeTab, realmFilter]);
+	}, [page, filterEmail, activeTab, realmFilter, typeFilter]);
 
 	useEffect(() => {
 		fetchAccounts();
@@ -186,6 +191,25 @@ const Accounts = () => {
 					{strings("page.accounts.title")}
 				</h1>
 				<div className="flex items-center gap-2">
+					{superadmin && (
+						<select
+							value={typeFilter}
+							onChange={(e) => {
+								setTypeFilter(e.target.value);
+								setPage(1);
+							}}
+							aria-label={strings("page.accounts.typeFilter", "Account type")}
+							className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
+						>
+							<option value="">{strings("page.accounts.byTab", "By tab")}</option>
+							<option value="account.admin">Admins</option>
+							<option value="account.merchant">Merchants</option>
+							<option value="account.customer">Customers</option>
+							<option value="account.staff">Staff</option>
+							<option value="account.reader">Readers</option>
+							<option value="account.3rdparty">3rd party</option>
+						</select>
+					)}
 					{superadmin && realms.length > 1 && (
 						<select
 							value={realmFilter}
@@ -204,7 +228,7 @@ const Accounts = () => {
 							))}
 						</select>
 					)}
-					{activeTab === "merchants" && (
+					{(activeTab === "merchants" || superadmin) && (
 						<button
 							type="button"
 							onClick={() => setLocation(`/accounts/merchants/new`)}

@@ -8,6 +8,7 @@ import { get, patch, post, put } from "../../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
 import { useApp } from "../../../../context";
+import { isSuperadmin } from "../../../../lib/capabilities";
 
 const STATUS_OPTIONS = [
 	{ value: "active", label: strings("common.active") },
@@ -163,13 +164,27 @@ const defaultValues = {
 	email: "",
 	phone: "",
 	status: "active",
+	type: "account.merchant",
+	realm: "",
 };
+
+const ACCOUNT_TYPE_OPTIONS = [
+	{ value: "account.merchant", label: "Merchant" },
+	{ value: "account.admin", label: "Admin" },
+	{ value: "account.customer", label: "Customer" },
+	{ value: "account.reader", label: "Reader" },
+	{ value: "account.3rdparty", label: "3rd party" },
+];
 
 const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const { account: currentUser } = useApp();
 	const isAdmin = currentUser?.type === "account.admin";
+	const superadmin = isSuperadmin(currentUser);
 	const isMerchant = accountType === "account.merchant";
 	const isNew = id === "new";
+	// Superadmin picks the type + realm when creating; others are pinned to the
+	// tab's type and their own realm by the API.
+	const [realms, setRealms] = useState([]);
 	const [data, setData] = useState(null);
 	const [loading, setLoading] = useState(!isNew);
 	const [saving, setSaving] = useState(false);
@@ -195,10 +210,18 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	}, [isMerchant, isNew]);
 
 	useEffect(() => {
+		if (superadmin && isNew) {
+			get("/realms")
+				.then((res) => setRealms(res.data ?? []))
+				.catch(() => setRealms([]));
+		}
+	}, [superadmin, isNew]);
+
+	useEffect(() => {
 		if (isNew) {
 			setLoading(false);
 			setData(null);
-			reset(defaultValues);
+			reset({ ...defaultValues, type: accountType ?? "account.merchant" });
 			return;
 		}
 		setLoading(true);
@@ -220,7 +243,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				setError(err?.message ?? strings("error.failedLoadAccounts")),
 			)
 			.finally(() => setLoading(false));
-	}, [id, isNew, reset]);
+	}, [id, isNew, reset, accountType]);
 
 	const onSave = async (formData) => {
 		setSaving(true);
@@ -232,7 +255,13 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				phone: formData.phone?.trim() || undefined,
 				status: formData.status || undefined,
 			};
-			payload.type = accountType ?? data?.type ?? "account.merchant";
+			payload.type =
+				superadmin && isNew
+					? formData.type || "account.merchant"
+					: (accountType ?? data?.type ?? "account.merchant");
+			// Superadmin can place a new account in any realm; the API pins
+			// everyone else to their own.
+			if (superadmin && isNew && formData.realm) payload.realm = formData.realm;
 			if (isNew) {
 				const res = await post("/accounts", payload);
 				const created = res.data ?? null;
@@ -358,6 +387,26 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600" role="alert">
 								{error}
 							</div>
+						)}
+						{superadmin && isNew && (
+							<>
+								<Select
+									label={strings("table.account.type", "Account type")}
+									{...register("type")}
+									options={ACCOUNT_TYPE_OPTIONS}
+								/>
+								<Select
+									label={strings("table.account.realm", "Realm")}
+									{...register("realm")}
+									options={[
+										{ value: "", label: strings("page.accounts.allRealms", "—") },
+										...realms.map((r) => ({
+											value: String(r.id ?? r._id),
+											label: r.name,
+										})),
+									]}
+								/>
+							</>
 						)}
 						<Input
 							label={strings("common.name")}
