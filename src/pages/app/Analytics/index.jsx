@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	Area,
 	AreaChart,
@@ -203,6 +203,56 @@ const INFO = {
 const TABS = ["audience", "sales", "marketing"];
 const TAB_LABEL = { audience: "Audience", sales: "Sales", marketing: "Marketing" };
 
+// Ongoing / passed pill for the funnel tables.
+const StatusPill = ({ ongoing }) => (
+	<span
+		className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${ongoing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
+	>
+		<span className={`h-1.5 w-1.5 rounded-full ${ongoing ? "bg-emerald-500" : "bg-slate-400"}`} />
+		{ongoing ? "Ongoing" : "Passed"}
+	</span>
+);
+
+// Per-event marketing funnel table. `rows` carry an `ongoing` flag.
+const FunnelTable = ({ rows }) => (
+	<div className="overflow-x-auto">
+		<table className="w-full min-w-[780px] text-sm">
+			<thead>
+				<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+					<th className="py-2 pr-4">Status</th>
+					<th className="py-2 pr-4">Event</th>
+					<th className="py-2 pr-4 text-right">Views</th>
+					<th className="py-2 pr-4 text-right">Baskets</th>
+					<th className="py-2 pr-4 text-right">Sales</th>
+					<th className="py-2 pr-4 text-right">Gross rev.</th>
+					<th className="py-2 pr-4 text-right">Lost sales</th>
+					<th className="py-2 pr-4 text-right">Lost rev.</th>
+					<th className="py-2 pr-4 text-right">View→Basket</th>
+					<th className="py-2 text-right">Basket→Sale</th>
+				</tr>
+			</thead>
+			<tbody>
+				{rows.map((r) => (
+					<tr key={r.sale} className="border-b border-slate-100 last:border-0">
+						<td className="py-2 pr-4"><StatusPill ongoing={r.ongoing} /></td>
+						<td className="max-w-[240px] truncate py-2 pr-4 font-medium text-slate-800" title={r.name}>
+							<Link href={`/sales/${r.sale}`} className="hover:text-blue-700 hover:underline">{r.name}</Link>
+						</td>
+						<td className="py-2 pr-4 text-right tabular-nums">{(r.views ?? 0).toLocaleString()}</td>
+						<td className="py-2 pr-4 text-right tabular-nums">{(r.baskets ?? 0).toLocaleString()}</td>
+						<td className="py-2 pr-4 text-right tabular-nums">{(r.sales ?? 0).toLocaleString()}</td>
+						<td className="py-2 pr-4 text-right tabular-nums">{formatCurrency(r.grossRev ?? 0, r.currency)}</td>
+						<td className="py-2 pr-4 text-right tabular-nums text-red-600">{(r.lostSales ?? 0).toLocaleString()}</td>
+						<td className="py-2 pr-4 text-right tabular-nums text-red-600">{formatCurrency(r.lostRev ?? 0, r.currency)}</td>
+						<td className="py-2 pr-4 text-right tabular-nums">{r.viewToBasketPct ?? 0}%</td>
+						<td className="py-2 text-right tabular-nums">{r.basketToSalePct ?? 0}%</td>
+					</tr>
+				))}
+			</tbody>
+		</table>
+	</div>
+);
+
 const TabBtn = ({ id, active, onSelect }) => (
 	<button
 		type="button"
@@ -250,6 +300,17 @@ const Analytics = () => {
 	const isCustomRange = Boolean(customStart && customEnd);
 	// Serialised sale scope for query strings + effect deps.
 	const saleCsv = scopeSales.join(",");
+
+	// Close the event picker when clicking outside it.
+	const salePickerRef = useRef(null);
+	useEffect(() => {
+		if (!salePickerOpen) return undefined;
+		const onDown = (e) => {
+			if (salePickerRef.current && !salePickerRef.current.contains(e.target)) setSalePickerOpen(false);
+		};
+		document.addEventListener("mousedown", onDown);
+		return () => document.removeEventListener("mousedown", onDown);
+	}, [salePickerOpen]);
 
 	useEffect(() => {
 		const q = new URLSearchParams();
@@ -541,6 +602,20 @@ const Analytics = () => {
 		return { sellThrough: pctOf(sold, cap), noShow: pctOf(ns, elig), eligible: elig };
 	}, [salesRows]);
 
+	// Split the funnel by lifecycle: an event with no end, or an end still in
+	// the future, is ongoing; anything ended is passed. Each row carries the flag
+	// so its pill renders without a second lookup.
+	const { eventsOngoing, eventsPast } = useMemo(() => {
+		const now = dayjs();
+		const on = [];
+		const past = [];
+		for (const e of events ?? []) {
+			const ongoing = !e.end || dayjs(e.end).isAfter(now);
+			(ongoing ? on : past).push({ ...e, ongoing });
+		}
+		return { eventsOngoing: on, eventsPast: past };
+	}, [events]);
+
 	if (loading) {
 		return (
 			<div className="mx-auto max-w-5xl space-y-6">
@@ -611,7 +686,7 @@ const Analytics = () => {
 				<div className="flex flex-wrap items-center gap-2">
 					{/* Multi-select event scope: search + tick several events; the
 					    analytics rebuild as the selection changes. */}
-					<div className="relative">
+					<div className="relative" ref={salePickerRef}>
 						<button
 							type="button"
 							onClick={() => setSalePickerOpen((o) => !o)}
@@ -1075,6 +1150,22 @@ const Analytics = () => {
 						</Card>
 					)}
 
+					<Card title="Events funnel - ongoing" hint="On-sale events: views → baskets → sales (distinct customers, retries consolidated), converted revenue, and both conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of their retries). Anonymous browse-carts are excluded from lost.">
+						{eventsOngoing.length === 0 ? (
+							<p className="text-sm text-slate-500">No ongoing events in range.</p>
+						) : (
+							<FunnelTable rows={eventsOngoing} />
+						)}
+					</Card>
+
+					<Card title="Events funnel - passed" hint="Events that have ended - final funnel numbers. Lost sales / revenue are identified checkout drop-offs (still recoverable via win-back), each at their largest basket.">
+						{eventsPast.length === 0 ? (
+							<p className="text-sm text-slate-500">No passed events in range.</p>
+						) : (
+							<FunnelTable rows={eventsPast} />
+						)}
+					</Card>
+
 					<Card
 						title="Sales trend"
 						hint={`${isRevenue ? "Net revenue" : "Tickets"} per day - ${scopeName}`}
@@ -1303,45 +1394,6 @@ const Analytics = () => {
 
 			{tab === "marketing" && (
 				<div id="analytics-panel-marketing" role="tabpanel" className="space-y-6">
-					<Card title="Events funnel" hint="Per event: views → baskets → sales (distinct customers, retries consolidated), the revenue that converted, and the two conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of their retries). Anonymous browse-carts are excluded from lost.">
-						{events.length === 0 ? (
-							<p className="text-sm text-slate-500">No events in range.</p>
-						) : (
-							<div className="overflow-x-auto">
-								<table className="w-full min-w-[720px] text-sm">
-									<thead>
-										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Event</th>
-											<th className="py-2 pr-4 text-right">Views</th>
-											<th className="py-2 pr-4 text-right">Baskets</th>
-											<th className="py-2 pr-4 text-right">Sales</th>
-											<th className="py-2 pr-4 text-right">Gross rev.</th>
-											<th className="py-2 pr-4 text-right">Lost sales</th>
-											<th className="py-2 pr-4 text-right">Lost rev.</th>
-											<th className="py-2 pr-4 text-right">View→Basket</th>
-											<th className="py-2 text-right">Basket→Sale</th>
-										</tr>
-									</thead>
-									<tbody>
-										{events.map((r) => (
-											<tr key={r.sale} className="border-b border-slate-100 last:border-0">
-												<td className="max-w-[240px] truncate py-2 pr-4 font-medium text-slate-800" title={r.name}>{r.name}</td>
-												<td className="py-2 pr-4 text-right tabular-nums">{(r.views ?? 0).toLocaleString()}</td>
-												<td className="py-2 pr-4 text-right tabular-nums">{(r.baskets ?? 0).toLocaleString()}</td>
-												<td className="py-2 pr-4 text-right tabular-nums">{(r.sales ?? 0).toLocaleString()}</td>
-												<td className="py-2 pr-4 text-right tabular-nums">{formatCurrency(r.grossRev ?? 0, r.currency)}</td>
-												<td className="py-2 pr-4 text-right tabular-nums text-red-600">{(r.lostSales ?? 0).toLocaleString()}</td>
-												<td className="py-2 pr-4 text-right tabular-nums text-red-600">{formatCurrency(r.lostRev ?? 0, r.currency)}</td>
-												<td className="py-2 pr-4 text-right tabular-nums">{r.viewToBasketPct ?? 0}%</td>
-												<td className="py-2 text-right tabular-nums">{r.basketToSalePct ?? 0}%</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
-					</Card>
-
 					<Card title="Channels / traffic" hint="Each channel consolidated across your events: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
 						{channels.length === 0 ? (
 							<p className="text-sm text-slate-500">No channels yet.</p>
