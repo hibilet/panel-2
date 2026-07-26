@@ -420,22 +420,35 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										<span className="capitalize">{f}</span>
 									</label>
 								))}
+								{/* Config toggles, same box: checking one reveals its fields
+								    below (like AI keys). Not capability families. */}
+								<label className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+									<input
+										type="checkbox"
+										{...register("enableSmtp")}
+										className="h-4 w-4 rounded border-slate-300"
+									/>
+									<span>SMTP</span>
+								</label>
+								<label className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
+									<input
+										type="checkbox"
+										{...register("enableStripe")}
+										className="h-4 w-4 rounded border-slate-300"
+									/>
+									<span>Stripe</span>
+								</label>
 							</div>
 						</div>
 
-						{/* SMTP - checkbox reveals the fields */}
-						<div className="rounded-lg border border-slate-200 p-4">
-							<label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-								<input
-									type="checkbox"
-									{...register("enableSmtp")}
-									className="h-4 w-4 rounded border-slate-300"
-								/>
-								<i className="fa-solid fa-envelope text-slate-500" aria-hidden />
-								{strings("form.realm.smtp")}
-							</label>
-							{watch("enableSmtp") && (
-								<div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+						{/* SMTP fields - shown when the SMTP toggle above is checked */}
+						{watch("enableSmtp") && (
+							<div className="rounded-lg border border-slate-200 p-4">
+								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+									<i className="fa-solid fa-envelope text-slate-500" aria-hidden />
+									{strings("form.realm.smtp")}
+								</div>
+								<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 									<Input label={strings("form.realm.smtpHost")} {...register("smtp.host")} />
 									<Input label={strings("form.realm.smtpPort")} type="number" {...register("smtp.port")} />
 									<Input label={strings("form.realm.smtpUser")} {...register("smtp.user")} autoComplete="off" />
@@ -452,27 +465,22 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										placeholder="no-reply@example.com"
 									/>
 								</div>
-							)}
-						</div>
+							</div>
+						)}
 
-						{/* Stripe Connect - checkbox reveals the fields */}
-						<div className="rounded-lg border border-slate-200 p-4">
-							<label className="flex items-center gap-2 text-sm font-medium text-slate-700">
-								<input
-									type="checkbox"
-									{...register("enableStripe")}
-									className="h-4 w-4 rounded border-slate-300"
-								/>
-								<i className="fa-brands fa-stripe-s text-slate-500" aria-hidden />
-								Stripe Connect (whitelabel)
-							</label>
-							{watch("enableStripe") && (
-								<div className="mt-4 grid grid-cols-1 gap-4">
-									<p className="text-xs text-slate-500">
-										This realm runs its merchant Connect flow against its own
-										Stripe platform. Empty fields fall back to the default
-										platform credentials.
-									</p>
+						{/* Stripe fields - shown when the Stripe toggle above is checked */}
+						{watch("enableStripe") && (
+							<div className="rounded-lg border border-slate-200 p-4">
+								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+									<i className="fa-brands fa-stripe-s text-slate-500" aria-hidden />
+									Stripe Connect (whitelabel)
+								</div>
+								<p className="mb-3 text-xs text-slate-500">
+									This realm runs its merchant Connect flow against its own
+									Stripe platform. Empty fields fall back to the default
+									platform credentials.
+								</p>
+								<div className="grid grid-cols-1 gap-4">
 									<Input
 										label="Connect Client ID"
 										{...register("stripe.connectClientId")}
@@ -501,8 +509,8 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										autoComplete="off"
 									/>
 								</div>
-							)}
-						</div>
+							</div>
+						)}
 
 						{/* AI keys - shown when the AI feature is enabled */}
 						{watch("features.ai") && (
