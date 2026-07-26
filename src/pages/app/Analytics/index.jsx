@@ -16,7 +16,7 @@ import { Link, useLocation } from "wouter";
 import { useApp } from "../../../context";
 import { ExpiryBadge, Info } from "../../../components/shared";
 import { countryName } from "../../../lib/countries";
-import { get, getText } from "../../../lib/client";
+import { get, getText, post } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
 import { formatCurrency } from "../../../localization";
 
@@ -203,39 +203,29 @@ const INFO = {
 const TABS = ["audience", "sales", "marketing"];
 const TAB_LABEL = { audience: "Audience", sales: "Sales", marketing: "Marketing" };
 
-// Ongoing / passed pill for the funnel tables.
-const StatusPill = ({ ongoing }) => (
-	<span
-		className={`inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium ${ongoing ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}`}
-	>
-		<span className={`h-1.5 w-1.5 rounded-full ${ongoing ? "bg-emerald-500" : "bg-slate-400"}`} />
-		{ongoing ? "Ongoing" : "Passed"}
-	</span>
-);
-
-// Per-event marketing funnel table. `rows` carry an `ongoing` flag.
+// Per-event marketing funnel table. Scrolls after ~10 rows with a sticky
+// header; lifecycle is conveyed by the surrounding Ongoing/Past tabs, so no
+// per-row status column by default.
 const FunnelTable = ({ rows }) => (
-	<div className="overflow-x-auto">
-		<table className="w-full min-w-[780px] text-sm">
-			<thead>
+	<div className="max-h-[400px] overflow-auto rounded-lg border border-slate-100">
+		<table className="w-full min-w-[720px] text-sm">
+			<thead className="sticky top-0 z-10 bg-white">
 				<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-					<th className="py-2 pr-4">Status</th>
-					<th className="py-2 pr-4">Event</th>
-					<th className="py-2 pr-4 text-right">Views</th>
-					<th className="py-2 pr-4 text-right">Baskets</th>
-					<th className="py-2 pr-4 text-right">Sales</th>
-					<th className="py-2 pr-4 text-right">Gross rev.</th>
-					<th className="py-2 pr-4 text-right">Lost sales</th>
-					<th className="py-2 pr-4 text-right">Lost rev.</th>
-					<th className="py-2 pr-4 text-right">View→Basket</th>
-					<th className="py-2 text-right">Basket→Sale</th>
+					<th className="bg-white py-2 pl-3 pr-4">Event</th>
+					<th className="bg-white py-2 pr-4 text-right">Views</th>
+					<th className="bg-white py-2 pr-4 text-right">Baskets</th>
+					<th className="bg-white py-2 pr-4 text-right">Sales</th>
+					<th className="bg-white py-2 pr-4 text-right">Gross rev.</th>
+					<th className="bg-white py-2 pr-4 text-right">Lost sales</th>
+					<th className="bg-white py-2 pr-4 text-right">Lost rev.</th>
+					<th className="bg-white py-2 pr-4 text-right">View→Basket</th>
+					<th className="bg-white py-2 pr-3 text-right">Basket→Sale</th>
 				</tr>
 			</thead>
 			<tbody>
 				{rows.map((r) => (
 					<tr key={r.sale} className="border-b border-slate-100 last:border-0">
-						<td className="py-2 pr-4"><StatusPill ongoing={r.ongoing} /></td>
-						<td className="max-w-[240px] truncate py-2 pr-4 font-medium text-slate-800" title={r.name}>
+						<td className="max-w-[240px] truncate py-2 pl-3 pr-4 font-medium text-slate-800" title={r.name}>
 							<Link href={`/sales/${r.sale}`} className="hover:text-blue-700 hover:underline">{r.name}</Link>
 						</td>
 						<td className="py-2 pr-4 text-right tabular-nums">{(r.views ?? 0).toLocaleString()}</td>
@@ -245,13 +235,199 @@ const FunnelTable = ({ rows }) => (
 						<td className="py-2 pr-4 text-right tabular-nums text-red-600">{(r.lostSales ?? 0).toLocaleString()}</td>
 						<td className="py-2 pr-4 text-right tabular-nums text-red-600">{formatCurrency(r.lostRev ?? 0, r.currency)}</td>
 						<td className="py-2 pr-4 text-right tabular-nums">{r.viewToBasketPct ?? 0}%</td>
-						<td className="py-2 text-right tabular-nums">{r.basketToSalePct ?? 0}%</td>
+						<td className="py-2 pr-3 text-right tabular-nums">{r.basketToSalePct ?? 0}%</td>
 					</tr>
 				))}
 			</tbody>
 		</table>
 	</div>
 );
+
+const ymd = (d) => (d ? dayjs(d).format("YYYY-MM-DD") : "");
+const CHURN_FREQ = [
+	{ id: "monthly", label: "Monthly" },
+	{ id: "weekly", label: "Weekly" },
+	{ id: "daily", label: "Daily" },
+];
+
+// Churn reports for a single selected event: lists what exists and, inline,
+// quotes + creates a new one. Creation is BILLED (an invoice line item), so
+// the estimated cost is always shown before the confirm button.
+const ChurnReports = ({ sale, currency }) => {
+	const saleId = String(sale.sale);
+	const [rows, setRows] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [open, setOpen] = useState(false);
+	const [freq, setFreq] = useState("monthly");
+	const [start, setStart] = useState(() => ymd(sale.start) || ymd(dayjs().subtract(30, "day")));
+	const [end, setEnd] = useState(() => ymd(sale.end) || ymd(dayjs()));
+	const [quote, setQuote] = useState(null);
+	const [quoting, setQuoting] = useState(false);
+	const [busy, setBusy] = useState(false);
+	const [err, setErr] = useState(null);
+
+	const load = () => {
+		setLoading(true);
+		get("/reports?type=churn&limit=200")
+			.then((res) => setRows((res.data ?? []).filter((r) => String(r.sale?.id ?? r.sale) === saleId)))
+			.catch(() => setRows([]))
+			.finally(() => setLoading(false));
+	};
+	useEffect(load, [saleId]);
+
+	// Reset the inline form to the event's window whenever the event changes.
+	useEffect(() => {
+		setOpen(false);
+		setStart(ymd(sale.start) || ymd(dayjs().subtract(30, "day")));
+		setEnd(ymd(sale.end) || ymd(dayjs()));
+		setErr(null);
+	}, [saleId, sale.start, sale.end]);
+
+	useEffect(() => {
+		if (!open || !start || !end) {
+			setQuote(null);
+			return undefined;
+		}
+		let alive = true;
+		setQuoting(true);
+		get(`/sales/${saleId}/reports/range/quote?type=churn&frequency=${freq}&start=${start}&end=${end}`)
+			.then((res) => alive && setQuote(res?.data ?? null))
+			.catch(() => alive && setQuote(null))
+			.finally(() => alive && setQuoting(false));
+		return () => {
+			alive = false;
+		};
+	}, [open, saleId, freq, start, end]);
+
+	const create = async () => {
+		if (!start || !end) return;
+		setBusy(true);
+		setErr(null);
+		try {
+			await post(`/sales/${saleId}/reports/range`, { type: "churn", frequency: freq, start, end });
+			setOpen(false);
+			load();
+		} catch (e) {
+			setErr(e?.message ?? "Failed to create report");
+		} finally {
+			setBusy(false);
+		}
+	};
+
+	const cost = quote ? (quote.total ?? 0) / 100 : null;
+
+	return (
+		<div className="mt-5 border-t border-slate-100 pt-4">
+			<div className="mb-2 flex items-center justify-between">
+				<p className="text-xs font-semibold text-slate-700">
+					Churn reports <span className="font-normal text-slate-400">({loading ? "…" : rows.length})</span>
+				</p>
+				{!open && !loading && (
+					<button
+						type="button"
+						onClick={() => setOpen(true)}
+						className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
+					>
+						<i className="fa-solid fa-plus mr-1.5" aria-hidden />
+						{rows.length === 0 ? "Create now" : "New report"}
+					</button>
+				)}
+			</div>
+
+			{loading ? (
+				<p className="text-sm text-slate-500">Loading…</p>
+			) : rows.length === 0 && !open ? (
+				<p className="text-sm text-slate-500">No churn reports for this event yet.</p>
+			) : rows.length > 0 ? (
+				<ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
+					{rows.map((r) => (
+						<li key={r.id ?? r._id}>
+							<Link
+								href={`/reports/${r.id ?? r._id}`}
+								className="flex items-center justify-between gap-3 px-3 py-2 text-sm hover:bg-slate-50"
+							>
+								<span className="min-w-0 truncate font-medium text-slate-800">{r.name}</span>
+								<span className="shrink-0 text-xs text-slate-500">
+									{r.start ? dayjs(r.start).format("D MMM YY") : "—"} → {r.end ? dayjs(r.end).format("D MMM YY") : "—"}
+								</span>
+							</Link>
+						</li>
+					))}
+				</ul>
+			) : null}
+
+			{open && (
+				<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+					<div className="flex flex-wrap items-end gap-3">
+						<label className="text-xs text-slate-600">
+							Frequency
+							<select
+								value={freq}
+								onChange={(e) => setFreq(e.target.value)}
+								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+							>
+								{CHURN_FREQ.map((f) => (
+									<option key={f.id} value={f.id}>{f.label}</option>
+								))}
+							</select>
+						</label>
+						<label className="text-xs text-slate-600">
+							From
+							<input
+								type="date"
+								value={start}
+								max={end || undefined}
+								onChange={(e) => setStart(e.target.value)}
+								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+							/>
+						</label>
+						<label className="text-xs text-slate-600">
+							To
+							<input
+								type="date"
+								value={end}
+								min={start || undefined}
+								onChange={(e) => setEnd(e.target.value)}
+								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+							/>
+						</label>
+					</div>
+					<div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+						<p className="text-xs text-slate-500">
+							{quoting
+								? "Estimating cost…"
+								: cost == null
+									? "Set a range to see the cost."
+									: cost > 0
+										? `Estimated cost: ${formatCurrency(cost, currency)} (${quote.units} × ${formatCurrency((quote.unitAmount ?? 0) / 100, currency)})`
+										: "No charge on your plan."}
+						</p>
+						<div className="flex gap-2">
+							<button
+								type="button"
+								onClick={() => setOpen(false)}
+								disabled={busy}
+								className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+							>
+								Cancel
+							</button>
+							<button
+								type="button"
+								onClick={create}
+								disabled={busy || !start || !end}
+								className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+							>
+								{busy && <i className="fa-solid fa-spinner fa-spin mr-1.5" aria-hidden />}
+								{cost > 0 ? `Generate - ${formatCurrency(cost, currency)}` : "Generate"}
+							</button>
+						</div>
+					</div>
+					{err && <p className="mt-2 text-xs text-red-600">{err}</p>}
+				</div>
+			)}
+		</div>
+	);
+};
 
 const TabBtn = ({ id, active, onSelect }) => (
 	<button
@@ -295,6 +471,7 @@ const Analytics = () => {
 	const [salePickerOpen, setSalePickerOpen] = useState(false);
 	const [customOpen, setCustomOpen] = useState(Boolean(initial.start && initial.end));
 	const [trendMetric, setTrendMetric] = useState("tickets");
+	const [funnelTab, setFunnelTab] = useState("ongoing");
 	const [selCountry, setSelCountry] = useState(null);
 
 	const isCustomRange = Boolean(customStart && customEnd);
@@ -615,6 +792,12 @@ const Analytics = () => {
 		}
 		return { eventsOngoing: on, eventsPast: past };
 	}, [events]);
+
+	// Exactly one event in scope -> surface its churn reports under the funnel.
+	const selectedEvent = useMemo(
+		() => (scopeSales.length === 1 ? (events ?? []).find((e) => String(e.sale) === scopeSales[0]) ?? null : null),
+		[scopeSales, events],
+	);
 
 	if (loading) {
 		return (
@@ -1065,6 +1248,38 @@ const Analytics = () => {
 
 			{tab === "sales" && (
 				<div id="analytics-panel-sales" role="tabpanel" className="space-y-6">
+					<Card
+						title="Events funnel"
+						hint="Per event: views → baskets → sales (distinct customers, retries consolidated), converted revenue, and both conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of retries). Anonymous browse-carts are excluded."
+						action={
+							<div className="inline-flex shrink-0 overflow-hidden rounded-lg border border-slate-300">
+								{[
+									{ id: "ongoing", label: `Ongoing (${eventsOngoing.length})` },
+									{ id: "past", label: `Past (${eventsPast.length})` },
+								].map((t) => (
+									<button
+										key={t.id}
+										type="button"
+										onClick={() => setFunnelTab(t.id)}
+										aria-pressed={funnelTab === t.id}
+										className={`px-2.5 py-1.5 text-xs font-medium ${funnelTab === t.id ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
+									>
+										{t.label}
+									</button>
+								))}
+							</div>
+						}
+					>
+						{(funnelTab === "ongoing" ? eventsOngoing : eventsPast).length === 0 ? (
+							<p className="text-sm text-slate-500">No {funnelTab === "ongoing" ? "ongoing" : "past"} events in range.</p>
+						) : (
+							<FunnelTable rows={funnelTab === "ongoing" ? eventsOngoing : eventsPast} />
+						)}
+						{selectedEvent && (
+							<ChurnReports sale={selectedEvent} currency={selectedEvent.currency || currency} />
+						)}
+					</Card>
+
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 						<Stat
 							label="Tickets sold"
@@ -1149,22 +1364,6 @@ const Analytics = () => {
 							)}
 						</Card>
 					)}
-
-					<Card title="Events funnel - ongoing" hint="On-sale events: views → baskets → sales (distinct customers, retries consolidated), converted revenue, and both conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of their retries). Anonymous browse-carts are excluded from lost.">
-						{eventsOngoing.length === 0 ? (
-							<p className="text-sm text-slate-500">No ongoing events in range.</p>
-						) : (
-							<FunnelTable rows={eventsOngoing} />
-						)}
-					</Card>
-
-					<Card title="Events funnel - passed" hint="Events that have ended - final funnel numbers. Lost sales / revenue are identified checkout drop-offs (still recoverable via win-back), each at their largest basket.">
-						{eventsPast.length === 0 ? (
-							<p className="text-sm text-slate-500">No passed events in range.</p>
-						) : (
-							<FunnelTable rows={eventsPast} />
-						)}
-					</Card>
 
 					<Card
 						title="Sales trend"
