@@ -246,8 +246,10 @@ const FunnelTable = ({ rows }) => (
 const ymd = (d) => (d ? dayjs(d).format("YYYY-MM-DD") : "");
 
 // Churn reports for a single selected event: lists what exists and creates a
-// new one in one click, over the event's window (start -> now). Free on the
-// current plan, so no cost prompt.
+// new one in one click, over the on-sale window (createdAt -> now). Note
+// `sale.start` is the EVENT date, which is in the future for upcoming events
+// and would make an invalid range - so the report keys off createdAt. Free on
+// the current plan, so no cost prompt.
 const ChurnReports = ({ sale }) => {
 	const saleId = String(sale.sale);
 	const [rows, setRows] = useState([]);
@@ -268,9 +270,15 @@ const ChurnReports = ({ sale }) => {
 		setBusy(true);
 		setErr(null);
 		try {
-			const start = ymd(sale.start) || ymd(dayjs().subtract(30, "day"));
-			const end = ymd(dayjs());
-			await post(`/sales/${saleId}/reports/range`, { type: "churn", frequency: "monthly", start, end });
+			const today = dayjs();
+			// On-sale window: from when the event was created up to today. Guard
+			// against a bad/absent createdAt so the range is always start < end.
+			const from = sale.createdAt && dayjs(sale.createdAt).isBefore(today)
+				? dayjs(sale.createdAt)
+				: today.subtract(1, "year");
+			await post(`/sales/${saleId}/reports/range`, {
+				type: "churn", frequency: "monthly", start: ymd(from), end: ymd(today),
+			});
 			load();
 		} catch (e) {
 			setErr(e?.message ?? "Failed to create report");
