@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Input, Select } from "../../../../components/inputs";
 import { useApp } from "../../../../context";
 import { get, post, put } from "../../../../lib/client";
-import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
+import { getToken, pushToken, setToken } from "../../../../lib/storage";
 import strings from "../../../../localization";
 
 /**
@@ -115,8 +115,7 @@ const Team = () => {
 			const token = res?.data?.token ?? res?.token;
 			if (!token) throw new Error(strings("error.failedSave"));
 			// Keep the current session so the navbar can offer a way back.
-			const current = getToken();
-			if (current) setHotSwapToken(current);
+			pushToken(getToken(), account?.name ?? account?.email ?? null);
 			setToken(token);
 		} catch (err) {
 			setError(err?.message ?? strings("error.failedSave"));

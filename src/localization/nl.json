@@ -29,6 +29,8 @@
 	"nav.live": "Live Evenementen",
 	"nav.menu": "Menu",
 	"nav.backToAdmin": "Terug naar Admin",
+	"nav.backTo": "Terug naar $0",
+	"nav.backToStart": "Terug naar de eerste sessie",
 	"tour.start": "Rondleiding starten",
 	"tour.step.dashboard": "Dashboard — Uw overzicht van het paneel. Bekijk de verkopen van vandaag, maandstatistieken, aantal actieve verkopen en recente activiteiten in één oogopslag.",
 	"tour.step.sales": "Verkopen — Maak en beheer uw verkoopevenementen. Stel tickets, kanalen, coupons, gasten en scanners in voor elk evenement.",

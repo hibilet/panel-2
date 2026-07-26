@@ -10,8 +10,9 @@ import {
 } from "../../lib/capabilities";
 import { resolveNotificationLink } from "../../lib/notifications";
 import {
-	deleteHotSwapToken,
-	getHotSwapToken,
+	clearTokenStack,
+	getTokenStack,
+	popToken,
 	setToken,
 } from "../../lib/storage";
 import strings from "../../localization";
@@ -355,7 +356,8 @@ const Navbar = () => {
 	const [location] = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
 	const { account, sales } = useApp();
-	const hotSwapToken = getHotSwapToken();
+	const tokenStack = getTokenStack();
+	const previous = tokenStack[tokenStack.length - 1];
 
 	const isMerchant = account?.type === "account.merchant";
 	const isSetupComplete =
@@ -424,12 +426,19 @@ const Navbar = () => {
 				: i,
 		);
 
-	const handleBackToAdmin = () => {
-		const adminToken = getHotSwapToken();
-		if (adminToken) {
-			deleteHotSwapToken();
-			setToken(adminToken);
-		}
+	// One step up the impersonation stack.
+	const handleBack = () => {
+		const entry = popToken();
+		if (entry) setToken(entry.token);
+	};
+
+	// Straight back to the session that started the chain - three hops deep,
+	// clicking back three times is busywork.
+	const handleBackToRoot = () => {
+		const root = tokenStack[0];
+		if (!root) return;
+		clearTokenStack();
+		setToken(root.token);
 	};
 
 	const activeItem = navItems.find(({ path }) =>
@@ -442,15 +451,31 @@ const Navbar = () => {
 		<header className="sticky top-0 z-50 w-full border-b border-slate-200 backdrop-blur supports-[backdrop-filter]:bg-white/80">
 			<div className="mx-auto max-w-5xl px-4 py-4 md:px-6 lg:px-0">
 				<div className="flex items-center gap-3">
-					{hotSwapToken && (
-						<button
-							type="button"
-							onClick={handleBackToAdmin}
-							className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
-						>
-							<i className="fa-solid fa-arrow-left" aria-hidden />
-							{strings("nav.backToAdmin")}
-						</button>
+					{previous && (
+						<div className="inline-flex items-center rounded-lg border border-slate-300 bg-white shadow-sm">
+							<button
+								type="button"
+								onClick={handleBack}
+								className="inline-flex items-center gap-1.5 rounded-l-lg px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+							>
+								<i className="fa-solid fa-arrow-left" aria-hidden />
+								{previous.label
+									? strings("nav.backTo", [previous.label])
+									: strings("nav.backToAdmin")}
+							</button>
+							{tokenStack.length > 1 && (
+								<button
+									type="button"
+									onClick={handleBackToRoot}
+									title={strings("nav.backToStart")}
+									aria-label={strings("nav.backToStart")}
+									className="inline-flex items-center gap-1 rounded-r-lg border-l border-slate-300 px-2 py-1.5 text-xs font-medium text-slate-500 hover:bg-slate-50"
+								>
+									<i className="fa-solid fa-angles-left" aria-hidden />
+									{tokenStack.length}
+								</button>
+							)}
+						</div>
 					)}
 					<h1 className="text-xl font-semibold text-slate-900">
 						{account?.name

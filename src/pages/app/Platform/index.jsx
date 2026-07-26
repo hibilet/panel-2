@@ -2,8 +2,9 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import DataTable from "../../../components/tables/DataTable";
+import { useApp } from "../../../context";
 import { get, post } from "../../../lib/client";
-import { getToken, setHotSwapToken, setToken } from "../../../lib/storage";
+import { getToken, pushToken, setToken } from "../../../lib/storage";
 import strings, { formatCurrency } from "../../../localization";
 import PlatformConfig from "./PlatformConfig";
 import PlatformSeller from "./PlatformSeller";
@@ -53,6 +54,7 @@ const HealthCard = ({ title, state, lines, loading }) => {
 
 const Platform = () => {
 	const [, setLocation] = useLocation();
+	const { account } = useApp();
 	const [health, setHealth] = useState(null);
 	const [healthLoading, setHealthLoading] = useState(true);
 	const [healthError, setHealthError] = useState(null);
@@ -144,8 +146,7 @@ const Platform = () => {
 				setError(strings("form.account.errorLoginAs"));
 				return;
 			}
-			const current = getToken();
-			if (current) setHotSwapToken(current);
+			pushToken(getToken(), account?.name ?? account?.email ?? null);
 			setToken(token);
 		} catch (err) {
 			setError(err?.message ?? strings("form.account.errorLoginAs"));

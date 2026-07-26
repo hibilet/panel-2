@@ -29,6 +29,8 @@
 	"nav.live": "Live-Veranstaltungen",
 	"nav.menu": "Menü",
 	"nav.backToAdmin": "Zurück zu Admin",
+	"nav.backTo": "Zurück zu $0",
+	"nav.backToStart": "Zurück zur ersten Sitzung",
 	"tour.start": "Geführte Tour starten",
 	"tour.step.dashboard": "Dashboard — Ihr Überblick über das Panel. Sehen Sie die heutigen Verkäufe, Monatsstatistiken, aktive Verkäufe und die letzten Aktivitäten auf einen Blick.",
 	"tour.step.sales": "Verkäufe — Erstellen und verwalten Sie Ihre Verkaufsveranstaltungen. Legen Sie Tickets, Kanäle, Gutscheine, Gäste und Leser für jede Veranstaltung fest.",

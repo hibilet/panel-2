@@ -5,7 +5,7 @@ import { FormSection, Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
 import { CAPABILITIES, UNLIMITED } from "../../../../lib/capabilities";
 import { get, patch, post, put } from "../../../../lib/client";
-import { getToken, setHotSwapToken, setToken } from "../../../../lib/storage";
+import { getToken, pushToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
 import { useApp } from "../../../../context";
 import { isSuperadmin } from "../../../../lib/capabilities";
@@ -311,8 +311,10 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 			const res = await post("/auth/token", { id, type: data.type });
 			const token = res?.data?.token ?? res?.token;
 			if (token) {
-				const currentToken = getToken();
-				if (currentToken) setHotSwapToken(currentToken);
+				pushToken(
+					getToken(),
+					currentUser?.name ?? currentUser?.email ?? null,
+				);
 				setToken(token);
 			} else {
 				setError(strings("form.account.errorLoginAs"));

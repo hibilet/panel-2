@@ -29,6 +29,8 @@
 	"nav.menu": "Menü",
 	"nav.live": "Anlık Etkinlikler",
 	"nav.backToAdmin": "Admin'e Dön",
+	"nav.backTo": "$0 hesabına dön",
+	"nav.backToStart": "İlk oturuma dön",
 	"tour.start": "Rehberli turu başlat",
 	"tour.step.dashboard": "Kontrol Paneli — Panelinizin genel görünümü. Bugünkü satışları, aylık istatistikleri, aktif satış sayısını ve son aktiviteleri bir bakışta görün.",
 	"tour.step.sales": "Satışlar — Satış etkinliklerinizi oluşturun ve yönetin. Her etkinlik için bilet, kanal, kupon, misafir ve okuyucu ayarlayın.",

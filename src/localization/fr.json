@@ -29,6 +29,8 @@
 	"nav.live": "Événements en direct",
 	"nav.menu": "Menu",
 	"nav.backToAdmin": "Retour à l'administration",
+	"nav.backTo": "Retour à $0",
+	"nav.backToStart": "Retour à la première session",
 	"tour.start": "Démarrer la visite guidée",
 	"tour.step.dashboard": "Tableau de bord — Votre vue d'ensemble du panneau. Consultez les ventes du jour, les statistiques mensuelles, le nombre de ventes actives et l'activité récente d'un coup d'œil.",
 	"tour.step.sales": "Ventes — Créez et gérez vos événements de vente. Paramétrez les billets, canaux, coupons, invités et lecteurs pour chaque événement.",
