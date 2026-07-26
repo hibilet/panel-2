@@ -1303,7 +1303,7 @@ const Analytics = () => {
 
 			{tab === "marketing" && (
 				<div id="analytics-panel-marketing" role="tabpanel" className="space-y-6">
-					<Card title="Events funnel" hint="Per event: views → baskets → sales, with the revenue that converted, the revenue lost to abandoned baskets, and the two conversion rates.">
+					<Card title="Events funnel" hint="Per event: views → baskets → sales (distinct customers, retries consolidated), the revenue that converted, and the two conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of their retries). Anonymous browse-carts are excluded from lost.">
 						{events.length === 0 ? (
 							<p className="text-sm text-slate-500">No events in range.</p>
 						) : (
