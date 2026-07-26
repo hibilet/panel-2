@@ -244,25 +244,14 @@ const FunnelTable = ({ rows }) => (
 );
 
 const ymd = (d) => (d ? dayjs(d).format("YYYY-MM-DD") : "");
-const CHURN_FREQ = [
-	{ id: "monthly", label: "Monthly" },
-	{ id: "weekly", label: "Weekly" },
-	{ id: "daily", label: "Daily" },
-];
 
-// Churn reports for a single selected event: lists what exists and, inline,
-// quotes + creates a new one. Creation is BILLED (an invoice line item), so
-// the estimated cost is always shown before the confirm button.
-const ChurnReports = ({ sale, currency }) => {
+// Churn reports for a single selected event: lists what exists and creates a
+// new one in one click, over the event's window (start -> now). Free on the
+// current plan, so no cost prompt.
+const ChurnReports = ({ sale }) => {
 	const saleId = String(sale.sale);
 	const [rows, setRows] = useState([]);
 	const [loading, setLoading] = useState(true);
-	const [open, setOpen] = useState(false);
-	const [freq, setFreq] = useState("monthly");
-	const [start, setStart] = useState(() => ymd(sale.start) || ymd(dayjs().subtract(30, "day")));
-	const [end, setEnd] = useState(() => ymd(sale.end) || ymd(dayjs()));
-	const [quote, setQuote] = useState(null);
-	const [quoting, setQuoting] = useState(false);
 	const [busy, setBusy] = useState(false);
 	const [err, setErr] = useState(null);
 
@@ -275,37 +264,13 @@ const ChurnReports = ({ sale, currency }) => {
 	};
 	useEffect(load, [saleId]);
 
-	// Reset the inline form to the event's window whenever the event changes.
-	useEffect(() => {
-		setOpen(false);
-		setStart(ymd(sale.start) || ymd(dayjs().subtract(30, "day")));
-		setEnd(ymd(sale.end) || ymd(dayjs()));
-		setErr(null);
-	}, [saleId, sale.start, sale.end]);
-
-	useEffect(() => {
-		if (!open || !start || !end) {
-			setQuote(null);
-			return undefined;
-		}
-		let alive = true;
-		setQuoting(true);
-		get(`/sales/${saleId}/reports/range/quote?type=churn&frequency=${freq}&start=${start}&end=${end}`)
-			.then((res) => alive && setQuote(res?.data ?? null))
-			.catch(() => alive && setQuote(null))
-			.finally(() => alive && setQuoting(false));
-		return () => {
-			alive = false;
-		};
-	}, [open, saleId, freq, start, end]);
-
 	const create = async () => {
-		if (!start || !end) return;
 		setBusy(true);
 		setErr(null);
 		try {
-			await post(`/sales/${saleId}/reports/range`, { type: "churn", frequency: freq, start, end });
-			setOpen(false);
+			const start = ymd(sale.start) || ymd(dayjs().subtract(30, "day"));
+			const end = ymd(dayjs());
+			await post(`/sales/${saleId}/reports/range`, { type: "churn", frequency: "monthly", start, end });
 			load();
 		} catch (e) {
 			setErr(e?.message ?? "Failed to create report");
@@ -314,31 +279,37 @@ const ChurnReports = ({ sale, currency }) => {
 		}
 	};
 
-	const cost = quote ? (quote.total ?? 0) / 100 : null;
-
 	return (
 		<div className="mt-5 border-t border-slate-100 pt-4">
-			<div className="mb-2 flex items-center justify-between">
+			<div className="mb-2 flex items-center justify-between gap-3">
 				<p className="text-xs font-semibold text-slate-700">
 					Churn reports <span className="font-normal text-slate-400">({loading ? "…" : rows.length})</span>
 				</p>
-				{!open && !loading && (
-					<button
-						type="button"
-						onClick={() => setOpen(true)}
-						className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-					>
-						<i className="fa-solid fa-plus mr-1.5" aria-hidden />
-						{rows.length === 0 ? "Create now" : "New report"}
-					</button>
+				{!loading && (
+					<span className="flex items-center gap-2">
+						<span className="text-[11px] text-slate-400">No charge on your plan</span>
+						<button
+							type="button"
+							onClick={create}
+							disabled={busy}
+							className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+						>
+							{busy ? (
+								<i className="fa-solid fa-spinner fa-spin mr-1.5" aria-hidden />
+							) : (
+								<i className="fa-solid fa-plus mr-1.5" aria-hidden />
+							)}
+							{rows.length === 0 ? "Create now" : "New report"}
+						</button>
+					</span>
 				)}
 			</div>
 
 			{loading ? (
 				<p className="text-sm text-slate-500">Loading…</p>
-			) : rows.length === 0 && !open ? (
+			) : rows.length === 0 ? (
 				<p className="text-sm text-slate-500">No churn reports for this event yet.</p>
-			) : rows.length > 0 ? (
+			) : (
 				<ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
 					{rows.map((r) => (
 						<li key={r.id ?? r._id}>
@@ -354,77 +325,8 @@ const ChurnReports = ({ sale, currency }) => {
 						</li>
 					))}
 				</ul>
-			) : null}
-
-			{open && (
-				<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-					<div className="flex flex-wrap items-end gap-3">
-						<label className="text-xs text-slate-600">
-							Frequency
-							<select
-								value={freq}
-								onChange={(e) => setFreq(e.target.value)}
-								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
-							>
-								{CHURN_FREQ.map((f) => (
-									<option key={f.id} value={f.id}>{f.label}</option>
-								))}
-							</select>
-						</label>
-						<label className="text-xs text-slate-600">
-							From
-							<input
-								type="date"
-								value={start}
-								max={end || undefined}
-								onChange={(e) => setStart(e.target.value)}
-								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
-							/>
-						</label>
-						<label className="text-xs text-slate-600">
-							To
-							<input
-								type="date"
-								value={end}
-								min={start || undefined}
-								onChange={(e) => setEnd(e.target.value)}
-								className="mt-1 block rounded-md border border-slate-300 bg-white px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
-							/>
-						</label>
-					</div>
-					<div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-						<p className="text-xs text-slate-500">
-							{quoting
-								? "Estimating cost…"
-								: cost == null
-									? "Set a range to see the cost."
-									: cost > 0
-										? `Estimated cost: ${formatCurrency(cost, currency)} (${quote.units} × ${formatCurrency((quote.unitAmount ?? 0) / 100, currency)})`
-										: "No charge on your plan."}
-						</p>
-						<div className="flex gap-2">
-							<button
-								type="button"
-								onClick={() => setOpen(false)}
-								disabled={busy}
-								className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-							>
-								Cancel
-							</button>
-							<button
-								type="button"
-								onClick={create}
-								disabled={busy || !start || !end}
-								className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-							>
-								{busy && <i className="fa-solid fa-spinner fa-spin mr-1.5" aria-hidden />}
-								{cost > 0 ? `Generate - ${formatCurrency(cost, currency)}` : "Generate"}
-							</button>
-						</div>
-					</div>
-					{err && <p className="mt-2 text-xs text-red-600">{err}</p>}
-				</div>
 			)}
+			{err && <p className="mt-2 text-xs text-red-600">{err}</p>}
 		</div>
 	);
 };
@@ -1275,9 +1177,7 @@ const Analytics = () => {
 						) : (
 							<FunnelTable rows={funnelTab === "ongoing" ? eventsOngoing : eventsPast} />
 						)}
-						{selectedEvent && (
-							<ChurnReports sale={selectedEvent} currency={selectedEvent.currency || currency} />
-						)}
+						{selectedEvent && <ChurnReports sale={selectedEvent} />}
 					</Card>
 
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
