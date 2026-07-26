@@ -6,6 +6,7 @@ import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import RealmPanel from "./Realm";
 import PlatformSeller from "./PlatformSeller";
+import PlatformConfig from "./PlatformConfig";
 
 const formatDateTime = (value) => {
 	if (!value) return "—";
@@ -99,6 +100,8 @@ const Realms = () => {
 			</div>
 
 			<PlatformSeller />
+
+			<PlatformConfig />
 
 			<DataTable
 				data={data}
