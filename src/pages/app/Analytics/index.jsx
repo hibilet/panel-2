@@ -258,6 +258,7 @@ const Analytics = () => {
 	const [timing, setTiming] = useState([]);
 	const [affinity, setAffinity] = useState({ pairs: [], related: [] });
 	const [friction, setFriction] = useState(null);
+	const [events, setEvents] = useState([]);
 	const [engagement, setEngagement] = useState(null);
 	const [demoFilter, setDemoFilter] = useState({});
 	const [loading, setLoading] = useState(true);
@@ -338,8 +339,9 @@ const Analytics = () => {
 			get(`/analytics/affinity?${saleParam}`),
 			get(`/analytics/friction?${saleParam}`),
 			get(`/analytics/engagement?${saleParam}`),
+			get(`/analytics/events?${saleParam}`),
 		])
-			.then(([s, d, ch, co, tm, af, fr, en]) => {
+			.then(([s, d, ch, co, tm, af, fr, en, ev]) => {
 				if (!alive) return;
 				setSegments(s.data ?? []);
 				setDaily(d.data ?? []);
@@ -349,6 +351,7 @@ const Analytics = () => {
 				setAffinity(af.data ?? { pairs: [], related: [] });
 				setFriction(fr.data ?? null);
 				setEngagement(en.data ?? null);
+				setEvents(ev.data ?? []);
 				setSelCountry(null);
 				setDemoFilter({});
 			})
@@ -1203,6 +1206,45 @@ const Analytics = () => {
 
 			{tab === "marketing" && (
 				<div id="analytics-panel-marketing" role="tabpanel" className="space-y-6">
+					<Card title="Events funnel" hint="Per event: views → baskets → sales, with the revenue that converted, the revenue lost to abandoned baskets, and the two conversion rates.">
+						{events.length === 0 ? (
+							<p className="text-sm text-slate-500">No events in range.</p>
+						) : (
+							<div className="overflow-x-auto">
+								<table className="w-full min-w-[720px] text-sm">
+									<thead>
+										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+											<th className="py-2 pr-4">Event</th>
+											<th className="py-2 pr-4 text-right">Views</th>
+											<th className="py-2 pr-4 text-right">Baskets</th>
+											<th className="py-2 pr-4 text-right">Sales</th>
+											<th className="py-2 pr-4 text-right">Gross rev.</th>
+											<th className="py-2 pr-4 text-right">Lost sales</th>
+											<th className="py-2 pr-4 text-right">Lost rev.</th>
+											<th className="py-2 pr-4 text-right">View→Basket</th>
+											<th className="py-2 text-right">Basket→Sale</th>
+										</tr>
+									</thead>
+									<tbody>
+										{events.map((r) => (
+											<tr key={r.sale} className="border-b border-slate-100 last:border-0">
+												<td className="max-w-[240px] truncate py-2 pr-4 font-medium text-slate-800" title={r.name}>{r.name}</td>
+												<td className="py-2 pr-4 text-right tabular-nums">{(r.views ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-right tabular-nums">{(r.baskets ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-right tabular-nums">{(r.sales ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-right tabular-nums">{formatCurrency(r.grossRev ?? 0, r.currency)}</td>
+												<td className="py-2 pr-4 text-right tabular-nums text-red-600">{(r.lostSales ?? 0).toLocaleString()}</td>
+												<td className="py-2 pr-4 text-right tabular-nums text-red-600">{formatCurrency(r.lostRev ?? 0, r.currency)}</td>
+												<td className="py-2 pr-4 text-right tabular-nums">{r.viewToBasketPct ?? 0}%</td>
+												<td className="py-2 text-right tabular-nums">{r.basketToSalePct ?? 0}%</td>
+											</tr>
+										))}
+									</tbody>
+								</table>
+							</div>
+						)}
+					</Card>
+
 					<Card title="Channels / traffic" hint="Each channel consolidated across your events: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
 						{channels.length === 0 ? (
 							<p className="text-sm text-slate-500">No channels yet.</p>
