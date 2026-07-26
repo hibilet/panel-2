@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 
 import { useApp } from "../../../../context";
-import { API_BASE_URL, get } from "../../../../lib/client";
+import { API_BASE_URL, del, get } from "../../../../lib/client";
+import DangerZone from "../../../../components/shared/DangerZone";
 import { getToken } from "../../../../lib/storage";
 import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
@@ -250,6 +251,22 @@ const Sale = () => {
 					<Route path="/sales/:id/report" component={SaleReport} />
 				</Switch>
 			</main>
+
+			{["account.admin", "account.merchant"].includes(account?.type) && (
+				<DangerZone
+					description={strings(
+						"page.sale.deleteDesc",
+						"Soft-delete this event. It is removed from listings and audit-logged.",
+					)}
+					confirmTitle={strings("confirm.deleteSale")}
+					confirmBody={strings("confirm.deleteSaleBody")}
+					onDelete={async () => {
+						await del(`/sales/${id}`);
+						setLocation("/sales", true);
+					}}
+				/>
+			)}
+
 			</>
 			)}
 		</div>

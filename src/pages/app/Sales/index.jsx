@@ -3,11 +3,11 @@ import { Link, useLocation } from "wouter";
 import Can from "../../../components/Can";
 import AiDraftModal from "../../../components/sales/AiDraftModal";
 import SalesCalendar from "../../../components/sales/SalesCalendar";
-import { EmptyState, Modal, SearchBar } from "../../../components/shared";
+import { EmptyState, SearchBar } from "../../../components/shared";
 import { salesColumns } from "../../../components/tables/columns";
 import DataTable from "../../../components/tables/DataTable";
 import { useApp } from "../../../context";
-import { del, get } from "../../../lib/client";
+import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import { matchesQuery } from "../../../utils/search";
 
@@ -26,9 +26,6 @@ const Sales = () => {
 	const [pastFetched, setPastFetched] = useState(false);
 	const [showPastEvents, setShowPastEvents] = useState(false);
 	const [pastError, setPastError] = useState(null);
-	const [showMore, setShowMore] = useState(false);
-	const [revenueMode, setRevenueMode] = useState(false);
-	const [deleteTarget, setDeleteTarget] = useState(null);
 	const [aiDraftOpen, setAiDraftOpen] = useState(false);
 	const [query, setQuery] = useState("");
 	const [view, setView] = useState("list");
@@ -52,9 +49,11 @@ const Sales = () => {
 		[showPastEvents, filteredSales, filteredPastSales],
 	);
 
+	// Revenue is materialized by the billing sweep into sale.stats, so it is a
+	// cheap read - always include it instead of gating behind a button.
 	useEffect(() => {
-		if (revenueMode) refreshSales({ revenue: true });
-	}, [revenueMode, refreshSales]);
+		refreshSales({ revenue: true });
+	}, [refreshSales]);
 
 	const handleViewPastEvents = () => {
 		const next = !showPastEvents;
@@ -69,20 +68,6 @@ const Sales = () => {
 				)
 				.finally(() => setPastLoading(false));
 		}
-	};
-
-	const handleCalculateRevenues = () => setRevenueMode(true);
-
-	const handleDelete = (id) => {
-		setDeleteTarget(id);
-	};
-
-	const confirmDelete = () => {
-		if (!deleteTarget) return;
-		del(`/sales/${deleteTarget}`)
-			.then(() => refreshSales({ revenue: revenueMode }))
-			.catch(() => {});
-		setDeleteTarget(null);
 	};
 
 	if (appError && sales.length === 0) {
@@ -131,23 +116,6 @@ const Sales = () => {
 							</button>
 						))}
 					</div>
-					<button
-						type="button"
-						onClick={() => setShowMore((v) => !v)}
-						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{showMore
-							? strings("page.sales.showLess")
-							: strings("page.sales.showMore")}
-					</button>
-					<button
-						type="button"
-						onClick={handleCalculateRevenues}
-						disabled={loading}
-						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
-					>
-						{strings("page.sales.calculateRevenues")}
-					</button>
 					{account?.type === "account.merchant" && (
 						<>
 							<Can family="ai">
@@ -205,7 +173,7 @@ const Sales = () => {
 			) : (
 				<DataTable
 					data={filteredSales}
-					columns={salesColumns(showMore, showMore ? handleDelete : undefined)}
+					columns={salesColumns()}
 					getRowKey={(r) => r.id ?? r.name}
 					onRowClick={(row) => row.id && setLocation(`/sales/${row.id}`)}
 					loading={loading}
@@ -245,36 +213,8 @@ const Sales = () => {
 			<AiDraftModal
 				isOpen={aiDraftOpen}
 				onClose={() => setAiDraftOpen(false)}
-				onCreated={() => refreshSales({ revenue: revenueMode })}
+				onCreated={() => refreshSales({ revenue: true })}
 			/>
-
-			<Modal
-				isOpen={!!deleteTarget}
-				onClose={() => setDeleteTarget(null)}
-				title={strings("confirm.deleteSale")}
-				footer={
-					<div className="flex justify-end gap-2">
-						<button
-							type="button"
-							onClick={() => setDeleteTarget(null)}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100"
-						>
-							{strings("common.cancel")}
-						</button>
-						<button
-							type="button"
-							onClick={confirmDelete}
-							className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-red-700 active:bg-red-700"
-						>
-							{strings("common.delete")}
-						</button>
-					</div>
-				}
-			>
-				<p className="text-sm text-slate-600">
-					{strings("confirm.deleteSaleBody")}
-				</p>
-			</Modal>
 		</div>
 	);
 };
