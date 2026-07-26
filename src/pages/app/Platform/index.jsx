@@ -5,6 +5,8 @@ import DataTable from "../../../components/tables/DataTable";
 import { get, post } from "../../../lib/client";
 import { getToken, setHotSwapToken, setToken } from "../../../lib/storage";
 import strings, { formatCurrency } from "../../../localization";
+import PlatformConfig from "./PlatformConfig";
+import PlatformSeller from "./PlatformSeller";
 
 const formatDate = (d) => (d ? dayjs(d).format("D MMM YYYY") : "—");
 
@@ -342,6 +344,11 @@ const Platform = () => {
 						],
 					]}
 				/>
+			</div>
+
+			<div className="space-y-3">
+				<PlatformSeller />
+				<PlatformConfig />
 			</div>
 
 			<div className="space-y-3">

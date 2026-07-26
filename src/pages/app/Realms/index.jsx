@@ -5,8 +5,6 @@ import DataTable from "../../../components/tables/DataTable";
 import { get } from "../../../lib/client";
 import strings from "../../../localization";
 import RealmPanel from "./Realm";
-import PlatformSeller from "./PlatformSeller";
-import PlatformConfig from "./PlatformConfig";
 
 const formatDateTime = (value) => {
 	if (!value) return "—";
@@ -98,10 +96,6 @@ const Realms = () => {
 					{strings("page.realms.create")}
 				</button>
 			</div>
-
-			<PlatformSeller />
-
-			<PlatformConfig />
 
 			<DataTable
 				data={data}
