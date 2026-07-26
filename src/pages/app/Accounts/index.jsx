@@ -120,13 +120,19 @@ const Accounts = () => {
 		const skip = (page - 1) * LIMIT;
 		const tabType =
 			activeTab === "merchants" ? "account.merchant" : "account.customer";
+		const effectiveType = typeFilter || tabType;
 		const params = new URLSearchParams({
 			limit: String(LIMIT),
 			skip: String(skip),
-			type: typeFilter || tabType,
+			type: effectiveType,
 		});
 		if (filterEmail?.trim()) params.set("email", filterEmail.trim());
-		if (realmFilter) params.set("realm", realmFilter);
+		// Only merchants and admins carry a realm; customers/readers/staff/
+		// 3rd-party are realmless, so a realm filter would return nothing.
+		const realmScoped = ["account.merchant", "account.admin"].includes(
+			effectiveType,
+		);
+		if (realmFilter && realmScoped) params.set("realm", realmFilter);
 		queueMicrotask(() => setError(null));
 		get(`/accounts/search?${params}&status=active`)
 			.then((res) => {

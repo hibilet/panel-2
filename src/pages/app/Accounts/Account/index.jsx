@@ -389,24 +389,11 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							</div>
 						)}
 						{superadmin && isNew && (
-							<>
-								<Select
-									label={strings("table.account.type", "Account type")}
-									{...register("type")}
-									options={ACCOUNT_TYPE_OPTIONS}
-								/>
-								<Select
-									label={strings("table.account.realm", "Realm")}
-									{...register("realm")}
-									options={[
-										{ value: "", label: strings("page.accounts.allRealms", "—") },
-										...realms.map((r) => ({
-											value: String(r.id ?? r._id),
-											label: r.name,
-										})),
-									]}
-								/>
-							</>
+							<Select
+								label={strings("table.account.type", "Account type")}
+								{...register("type")}
+								options={ACCOUNT_TYPE_OPTIONS}
+							/>
 						)}
 						<Input
 							label={strings("common.name")}
@@ -429,6 +416,19 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 							{...register("status")}
 							options={STATUS_OPTIONS}
 						/>
+						{superadmin && isNew && (
+							<Select
+								label={strings("table.account.realm", "Realm")}
+								{...register("realm")}
+								options={[
+									{ value: "", label: strings("page.accounts.allRealms", "—") },
+									...realms.map((r) => ({
+										value: String(r.id ?? r._id),
+										label: r.name,
+									})),
+								]}
+							/>
+						)}
 						{isMerchant && !isNew && (data?.subscription || isAdmin) && (
 							<FormSection title={strings("page.subscription.title")} gridClassName="space-y-3">
 								{data?.subscription && (
