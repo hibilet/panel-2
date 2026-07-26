@@ -7,8 +7,14 @@ export const getRealm = () => realm;
 // service, so derive them from the domains instead of maintaining a parallel
 // set of URL fields. `tickets` and `widget` are the same buyer-facing surface,
 // so each falls back to the other.
-const withScheme = (host) =>
-	/^https?:\/\//.test(host) ? host : `https://${host}`;
+// localhost / 127.0.0.1 (with any port) has no TLS in dev, so scheme it http;
+// everything else is https.
+const isLocalHost = (host) => /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/i.test(host);
+
+const withScheme = (host) => {
+	if (/^https?:\/\//.test(host)) return host;
+	return `${isLocalHost(host) ? "http" : "https"}://${host}`;
+};
 
 export const urlsFromDomains = (domains = []) => {
 	const byService = {};
