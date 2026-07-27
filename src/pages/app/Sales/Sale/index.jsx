@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
-
+import DangerZone from "../../../../components/shared/DangerZone";
 import { useApp } from "../../../../context";
 import { API_BASE_URL, del, get } from "../../../../lib/client";
-import DangerZone from "../../../../components/shared/DangerZone";
 import { getToken } from "../../../../lib/storage";
 import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
@@ -22,7 +21,11 @@ const tabItems = [
 	{ path: "basic", labelKey: "page.sale.tab.basic", icon: "fa-file-lines" },
 	{ path: "tickets", labelKey: "page.sale.tab.tickets", icon: "fa-ticket" },
 	{ path: "channels", labelKey: "page.sale.tab.channels", icon: "fa-bullhorn" },
-	{ path: "questions", labelKey: "page.sale.tab.questions", icon: "fa-question-circle" },
+	{
+		path: "questions",
+		labelKey: "page.sale.tab.questions",
+		icon: "fa-question-circle",
+	},
 	{ path: "attendees", labelKey: "page.sale.tab.attendees", icon: "fa-users" },
 	{ path: "guests", labelKey: "page.sale.tab.guests", icon: "fa-user-group" },
 	{
@@ -145,8 +148,14 @@ const Sale = () => {
 	}, [fetchSale]);
 
 	const isTabActive = (path) => {
+		// The basic tab links to the bare base path, but /basic still routes
+		// there - a direct link to it is the same tab and must read as active.
 		if (path === "basic")
-			return location === basePath || location === `${basePath}/`;
+			return (
+				location === basePath ||
+				location === `${basePath}/` ||
+				location.startsWith(`${basePath}/basic`)
+			);
 		return location.startsWith(`${basePath}/${path}`);
 	};
 
@@ -173,7 +182,10 @@ const Sale = () => {
 						disabled={reporting}
 						className="inline-flex items-center gap-2 self-start rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
 					>
-						<i className={`fa-solid ${reporting ? "fa-spinner fa-spin" : "fa-file-pdf"}`} aria-hidden />
+						<i
+							className={`fa-solid ${reporting ? "fa-spinner fa-spin" : "fa-file-pdf"}`}
+							aria-hidden
+						/>
 						{strings("page.sale.report.button")}
 					</button>
 				)}
@@ -196,78 +208,76 @@ const Sale = () => {
 			)}
 
 			{!loadError && (
-			<>
-			<nav aria-label={strings("page.sale.sections")} className="mt-4">
-				<div className="flex flex-wrap gap-2" role="tablist">
-					{tabItems.map(({ path, labelKey, icon }) => (
-						<TabLink
-							key={path}
-							path={path}
-							labelKey={labelKey}
-							icon={icon}
-							isActive={isTabActive(path)}
-							basePath={basePath}
-							disabled={isNew && path !== "basic"}
-						/>
-					))}
-				</div>
-			</nav>
-			<main className="mt-6">
-				<Switch>
-					<Route
-						path="/sales/:id/basic"
-						component={(props) => (
-							<SaleBasic {...props} sale={sale} setSale={setSale} />
-						)}
-					/>
-					<Route
-						path="/sales/:id"
-						component={(props) => (
-							<SaleBasic {...props} sale={sale} setSale={setSale} />
-						)}
-					/>
-					<Route
-						path="/sales/:id/tickets"
-						component={(props) => (
-							<SaleTickets {...props} sale={sale} setSale={setSale} />
-						)}
-					/>
-					<Route path="/sales/:id/channels" component={SaleChannels} />
-					<Route
-						path="/sales/:id/questions"
-						component={(props) => (
-							<SaleQuestions {...props} sale={sale} setSale={setSale} />
-						)}
-					/>
-					<Route
-						path="/sales/:id/attendees"
-						component={(props) => (
-							<SaleAttendees {...props} sale={sale} />
-						)}
-					/>
-					<Route path="/sales/:id/guests" component={SaleGuests} />
-					<Route path="/sales/:id/readers" component={SaleReaders} />
-					<Route path="/sales/:id/coupons" component={SaleCoupons} />
-					<Route path="/sales/:id/report" component={SaleReport} />
-				</Switch>
-			</main>
+				<>
+					<nav aria-label={strings("page.sale.sections")} className="mt-4">
+						<div className="flex flex-wrap gap-2" role="tablist">
+							{tabItems.map(({ path, labelKey, icon }) => (
+								<TabLink
+									key={path}
+									path={path}
+									labelKey={labelKey}
+									icon={icon}
+									isActive={isTabActive(path)}
+									basePath={basePath}
+									disabled={isNew && path !== "basic"}
+								/>
+							))}
+						</div>
+					</nav>
+					<main className="mt-6">
+						<Switch>
+							<Route
+								path="/sales/:id/basic"
+								component={(props) => (
+									<SaleBasic {...props} sale={sale} setSale={setSale} />
+								)}
+							/>
+							<Route
+								path="/sales/:id"
+								component={(props) => (
+									<SaleBasic {...props} sale={sale} setSale={setSale} />
+								)}
+							/>
+							<Route
+								path="/sales/:id/tickets"
+								component={(props) => (
+									<SaleTickets {...props} sale={sale} setSale={setSale} />
+								)}
+							/>
+							<Route path="/sales/:id/channels" component={SaleChannels} />
+							<Route
+								path="/sales/:id/questions"
+								component={(props) => (
+									<SaleQuestions {...props} sale={sale} setSale={setSale} />
+								)}
+							/>
+							<Route
+								path="/sales/:id/attendees"
+								component={(props) => <SaleAttendees {...props} sale={sale} />}
+							/>
+							<Route path="/sales/:id/guests" component={SaleGuests} />
+							<Route path="/sales/:id/readers" component={SaleReaders} />
+							<Route path="/sales/:id/coupons" component={SaleCoupons} />
+							<Route path="/sales/:id/report" component={SaleReport} />
+						</Switch>
+					</main>
 
-			{["account.admin", "account.merchant"].includes(account?.type) && (
-				<DangerZone
-					description={strings(
-						"page.sale.deleteDesc",
-						"Soft-delete this event. It is removed from listings and audit-logged.",
-					)}
-					confirmTitle={strings("confirm.deleteSale")}
-					confirmBody={strings("confirm.deleteSaleBody")}
-					onDelete={async () => {
-						await del(`/sales/${id}`);
-						setLocation("/sales", true);
-					}}
-				/>
-			)}
-
-			</>
+					{isTabActive("basic") &&
+						["account.admin", "account.merchant"].includes(account?.type) && (
+							<DangerZone
+								description={strings(
+									"page.sale.deleteDesc",
+									"Soft-delete this event. It is removed from listings and audit-logged.",
+								)}
+								confirmTitle={strings("confirm.deleteSale")}
+								confirmBody={strings("confirm.deleteSaleBody")}
+								onDelete={async () => {
+									await del(`/sales/${id}`);
+									setLocation("/sales", true);
+								}}
+							/>
+						)}
+				</>
 			)}
 		</div>
 	);
