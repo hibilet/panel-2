@@ -22,5 +22,15 @@
       "title": "HIBilet Panel",
       "favicon": "hibilet-favicon.svg"
     }
+  },
+  "realms": {
+    "tixcore": {
+      "title": "Tixcore Panel",
+      "favicon": "tixcore-favicon.svg"
+    },
+    "hibilet": {
+      "title": "HIBilet Panel",
+      "favicon": "hibilet-favicon.svg"
+    }
   }
 }

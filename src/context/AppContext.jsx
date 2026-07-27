@@ -9,8 +9,25 @@ import {
 import { get } from "../lib/client";
 import { getToken } from "../lib/storage";
 import { setViewer } from "../lib/money";
+import profiles from "../configs.json";
 
 const AppContext = createContext(null);
+
+// Stop-gap branding for realms that have not filled in branding.favicon yet:
+// match the realm by name, else by any hostname it is registered on. Delete a
+// realm's entry from configs.json once it carries its own branding.
+const brandFor = (realm) => {
+	const byName = profiles.realms?.[String(realm?.name ?? "").toLowerCase()];
+	if (byName) return byName;
+	const domains = Array.isArray(realm?.domains) ? realm.domains : [];
+	for (const { hostname } of domains) {
+		if (!hostname) continue;
+		for (const [suffix, brand] of Object.entries(profiles.domains ?? {})) {
+			if (hostname === suffix || hostname.endsWith(`.${suffix}`)) return brand;
+		}
+	}
+	return null;
+};
 
 const mapSalesRows = (rows) =>
 	(rows ?? []).map((row) => ({
@@ -95,11 +112,20 @@ export const AppProvider = ({ children }) => {
 	useEffect(() => {
 		if (typeof document === "undefined" || !realm) return;
 		const branding = realm.branding ?? {};
-		const appName = branding.appName || realm.name;
+		const brand = brandFor(realm);
+		// brand.title before realm.name: the realm name is a slug ("tixcore"),
+		// which reads worse in the tab than the pre-login title it would replace.
+		const appName = branding.appName || brand?.title || realm.name;
 		if (appName) document.title = appName;
-		if (branding.favicon) {
+		// branding.favicon is an absolute URL the realm uploaded; the configs
+		// fallback is a file shipped with the panel, so it needs the leading /.
+		const favicon = branding.favicon || (brand ? `/${brand.favicon}` : null);
+		if (favicon) {
 			const link = document.querySelector('link[rel="icon"]');
-			if (link) link.href = branding.favicon;
+			if (link) {
+				link.type = favicon.endsWith(".svg") ? "image/svg+xml" : "image/png";
+				link.href = favicon;
+			}
 		}
 	}, [realm]);
 
