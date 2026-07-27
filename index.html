@@ -2,9 +2,8 @@
 <html lang="en">
   <head>
     <script>
-      const t = localStorage.getItem('theme');
       document.documentElement.classList.toggle('dark',
-        t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)
+        localStorage.getItem('theme') === 'dark'
       );
     </script>
     <meta charset="UTF-8" />
