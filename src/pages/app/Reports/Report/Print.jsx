@@ -745,7 +745,7 @@ const ChurnPrint = ({ report, salesByDay }) => {
 				>
 					<div className="two-charts">
 						<div>
-							<div className="chart-subtitle">By weekday</div>
+							<div className="chart-subtitle">{strings("page.reports.sales.byWeekday")}</div>
 							<BarChart
 								width={PAGE_WIDTH / 2 - 10}
 								height={180}
@@ -769,7 +769,7 @@ const ChurnPrint = ({ report, salesByDay }) => {
 							</BarChart>
 						</div>
 						<div>
-							<div className="chart-subtitle">By hour</div>
+							<div className="chart-subtitle">{strings("page.reports.sales.byHour")}</div>
 							<BarChart
 								width={PAGE_WIDTH / 2 - 10}
 								height={180}
@@ -969,7 +969,7 @@ const ReportPrint = () => {
 		);
 	}
 	if (!report) {
-		return <div style={{ padding: 24 }}>Loading…</div>;
+		return <div style={{ padding: 24 }}>{strings("common.loading")}</div>;
 	}
 
 	return (

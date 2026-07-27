@@ -229,7 +229,7 @@ const Settings = () => {
 								className="fa-solid fa-user-group text-xl text-slate-600"
 								aria-hidden
 							/>
-							<span className="font-medium text-slate-900">Team</span>
+							<span className="font-medium text-slate-900">{strings("page.team.title")}</span>
 						</Link>
 					)}
 

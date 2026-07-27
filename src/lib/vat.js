@@ -1,3 +1,5 @@
+import { countryName, locale } from "../localization";
+
 export const EU = new Set([
 	"AT",
 	"BE",
@@ -28,40 +30,18 @@ export const EU = new Set([
 	"SK",
 ]);
 
-export const COUNTRIES = [
-	{ value: "AT", label: "Austria" },
-	{ value: "BE", label: "Belgium" },
-	{ value: "BG", label: "Bulgaria" },
-	{ value: "CH", label: "Switzerland" },
-	{ value: "CY", label: "Cyprus" },
-	{ value: "CZ", label: "Czechia" },
-	{ value: "DE", label: "Germany" },
-	{ value: "DK", label: "Denmark" },
-	{ value: "EE", label: "Estonia" },
-	{ value: "ES", label: "Spain" },
-	{ value: "FI", label: "Finland" },
-	{ value: "FR", label: "France" },
-	{ value: "GB", label: "United Kingdom" },
-	{ value: "GR", label: "Greece" },
-	{ value: "HR", label: "Croatia" },
-	{ value: "HU", label: "Hungary" },
-	{ value: "IE", label: "Ireland" },
-	{ value: "IT", label: "Italy" },
-	{ value: "LT", label: "Lithuania" },
-	{ value: "LU", label: "Luxembourg" },
-	{ value: "LV", label: "Latvia" },
-	{ value: "MT", label: "Malta" },
-	{ value: "NL", label: "Netherlands" },
-	{ value: "NO", label: "Norway" },
-	{ value: "PL", label: "Poland" },
-	{ value: "PT", label: "Portugal" },
-	{ value: "RO", label: "Romania" },
-	{ value: "SE", label: "Sweden" },
-	{ value: "SI", label: "Slovenia" },
-	{ value: "SK", label: "Slovakia" },
-	{ value: "TR", label: "Turkey" },
-	{ value: "US", label: "United States" },
+const COUNTRY_CODES = [
+	"AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR",
+	"GB", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "NO",
+	"PL", "PT", "RO", "SE", "SI", "SK", "TR", "US",
 ];
+
+// Names come from Intl, so the list reads in the panel's language and sorts
+// by that language rather than by the English name.
+export const COUNTRIES = COUNTRY_CODES.map((value) => ({
+	value,
+	label: countryName(value),
+})).sort((a, b) => a.label.localeCompare(b.label, locale));
 
 const round2 = (n) => Math.round(n * 100) / 100;
 

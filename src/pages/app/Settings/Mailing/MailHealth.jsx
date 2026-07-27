@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { get, post } from "../../../../lib/client";
+import strings from "../../../../localization";
 
 // Ticket-email deliverability. Surfaces buyers who paid but were not emailed
 // their tickets (undelivered), plus failed/exhausted SMTP attempts that would
@@ -49,7 +50,7 @@ const MailHealth = () => {
 	if (loading || !data) {
 		return (
 			<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-				<p className="text-sm text-slate-500">Loading mail health…</p>
+				<p className="text-sm text-slate-500">{strings("page.mailHealth.loading")}</p>
 			</div>
 		);
 	}
@@ -60,22 +61,21 @@ const MailHealth = () => {
 		<div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
 			<h2 className="mb-1 flex items-center gap-2 text-lg font-semibold text-slate-900">
 				<i className="fa-solid fa-heart-pulse text-slate-600" aria-hidden />
-				Ticket email delivery
+				{strings("page.mailHealth.title")}
 			</h2>
 			<p className="mb-4 text-sm text-slate-500">
-				Buyers who paid but have not been emailed their tickets, and SMTP
-				attempts that failed. Resend any that did not arrive.
+				{strings("page.mailHealth.subtitle")}
 			</p>
 
 			<div className="mb-4 grid grid-cols-3 gap-3">
-				<Tile label="Not emailed" value={data.undelivered ?? 0} danger />
-				<Tile label="Failed (retrying)" value={data.failed ?? 0} />
-				<Tile label="Gave up (exhausted)" value={data.exhausted ?? 0} danger />
+				<Tile label={strings("page.mailHealth.notEmailed")} value={data.undelivered ?? 0} danger />
+				<Tile label={strings("page.mailHealth.failed")} value={data.failed ?? 0} />
+				<Tile label={strings("page.mailHealth.exhausted")} value={data.exhausted ?? 0} danger />
 			</div>
 
 			{recent.length === 0 ? (
 				<p className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-700">
-					All paid buyers have received their ticket email.
+					{strings("page.mailHealth.allDelivered")}
 				</p>
 			) : (
 				<ul className="divide-y divide-slate-100">
@@ -98,7 +98,7 @@ const MailHealth = () => {
 								disabled={resending === r._id}
 								className="shrink-0 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-700 disabled:opacity-50"
 							>
-								{resending === r._id ? "Sending…" : "Resend"}
+								{strings(resending === r._id ? "page.mailHealth.sending" : "page.mailHealth.resend")}
 							</button>
 						</li>
 					))}

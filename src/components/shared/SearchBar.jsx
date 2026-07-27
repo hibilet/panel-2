@@ -1,3 +1,5 @@
+import strings from "../../localization";
+
 const SearchBar = ({ value, onChange, placeholder, className = "" }) => {
 	return (
 		<div className={`relative w-full ${className}`}>
@@ -16,7 +18,7 @@ const SearchBar = ({ value, onChange, placeholder, className = "" }) => {
 				<button
 					type="button"
 					onClick={() => onChange?.("")}
-					aria-label="Clear"
+					aria-label={strings("common.clearInput")}
 					className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
 				>
 					<i className="fa-solid fa-xmark text-sm" aria-hidden />

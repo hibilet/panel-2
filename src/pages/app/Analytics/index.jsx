@@ -18,7 +18,7 @@ import { ExpiryBadge, Info } from "../../../components/shared";
 import { countryName } from "../../../lib/countries";
 import { get, getText, post } from "../../../lib/client";
 import { showToast } from "../../../lib/toastStore";
-import { formatCurrency } from "../../../localization";
+import strings, { formatCurrency } from "../../../localization";
 
 const SEGMENT_COLOR = {
 	whale: "#7c3aed",
@@ -28,19 +28,16 @@ const SEGMENT_COLOR = {
 	direct: "#059669",
 	one_time: "#94a3b8",
 };
-const SEGMENT_LABEL = {
-	whale: "Whales",
-	fan: "Fans",
-	repeat: "Repeat",
-	hesitant: "Hesitant",
-	direct: "Direct",
-	one_time: "One-time",
-};
+const SEGMENT_KEYS = ["whale", "fan", "repeat", "hesitant", "direct", "one_time"];
+const segmentLabel = (key) =>
+	SEGMENT_KEYS.includes(key) ? strings(`page.analytics.segment.${key}`) : key;
+const segmentInfo = (key) =>
+	SEGMENT_KEYS.includes(key) ? strings(`page.analytics.segmentInfo.${key}`) : undefined;
 // Actionable groups: the segments, a benefit framing, and the CTA copy.
 const GROUPS = [
-	{ key: "returning", label: "Returning", segs: ["whale", "fan", "repeat"], tone: "emerald", desc: "Your core - they came back", cta: "Reward loyal customers" },
-	{ key: "single", label: "Single purchase", segs: ["direct", "one_time"], tone: "slate", desc: "Bought once - nudge them to a second event", cta: "Promote another event" },
-	{ key: "wavering", label: "Hesitant", segs: ["hesitant"], tone: "amber", desc: "Interested but dropped baskets", cta: "Win them back" },
+	{ key: "returning", segs: ["whale", "fan", "repeat"], tone: "emerald" },
+	{ key: "single", segs: ["direct", "one_time"], tone: "slate" },
+	{ key: "wavering", segs: ["hesitant"], tone: "amber" },
 ];
 const TONE = {
 	emerald: { text: "text-emerald-600", btn: "border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100" },
@@ -51,14 +48,14 @@ const TONE = {
 // ranges need start/end support in the analytics endpoints (not yet).
 const ytdDays = () => dayjs().diff(dayjs().startOf("year"), "day") + 1;
 const RANGES = [
-	{ label: "1d", days: 1 },
-	{ label: "1w", days: 7 },
-	{ label: "1m", days: 30 },
-	{ label: "3m", days: 90 },
-	{ label: "6m", days: 180 },
-	{ label: "YTD", days: ytdDays() },
-	{ label: "1y", days: 365 },
-	{ label: "All", days: 1825 },
+	{ key: "d1", days: 1 },
+	{ key: "w1", days: 7 },
+	{ key: "m1", days: 30 },
+	{ key: "m3", days: 90 },
+	{ key: "m6", days: 180 },
+	{ key: "ytd", days: ytdDays() },
+	{ key: "y1", days: 365 },
+	{ key: "all", days: 1825 },
 ];
 
 const pctOf = (n, d) => (d ? Math.round((n / d) * 100) : 0);
@@ -68,9 +65,15 @@ const PAYMENT_LABEL = {
 	card: "Card", ideal: "iDEAL", link: "Link", twint: "TWINT", bancontact: "Bancontact",
 	amazon_pay: "Amazon Pay", eps: "EPS", sofort: "Sofort", giropay: "giropay",
 };
-const paymentLabel = (k) => PAYMENT_LABEL[k] ?? (k ? k.replace(/_/g, " ") : "Unknown");
+// Provider brand names are not translated - "PayPal" is "PayPal" everywhere.
+// "card" is the one generic term in the list, so it does get a key.
+const paymentLabel = (k) => {
+	if (k === "card") return strings("page.analytics.payment.card");
+	return PAYMENT_LABEL[k] ?? (k ? k.replace(/_/g, " ") : strings("common.unknown"));
+};
 // "base-sale" is the auto-created default channel = direct / organizer website.
-const channelLabel = (name) => (name === "base-sale" ? "Direct / website" : name ?? "-");
+const channelLabel = (name) =>
+	name === "base-sale" ? strings("page.analytics.channel.direct") : (name ?? "-");
 
 const Card = ({ title, hint, action, children }) => (
 	<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -99,7 +102,7 @@ const Dist = ({ title, info, rows, labelFn = titleCase, empty, onPick, activeKey
 				<Info text={info} />
 			</p>
 			{!rows || rows.length === 0 ? (
-				<p className="text-xs text-slate-400">{empty ?? "No data"}</p>
+				<p className="text-xs text-slate-400">{empty ?? strings("page.analytics.noData")}</p>
 			) : (
 				<div className="space-y-1.5">
 					{rows.slice(0, max ?? 8).map((r) => {
@@ -148,13 +151,18 @@ const aggregate = (rows) =>
 const Delta = ({ current, previous, invert }) => {
 	if (previous == null || previous === 0) return null;
 	const pct = Math.round(((current - previous) / previous) * 100);
-	if (pct === 0) return <span className="text-[11px] text-slate-400">no change</span>;
+	if (pct === 0)
+		return (
+			<span className="text-[11px] text-slate-400">
+				{strings("page.analytics.delta.noChange")}
+			</span>
+		);
 	const up = pct > 0;
 	const good = invert ? !up : up;
 	return (
 		<span
 			className={`inline-flex items-center gap-1 text-[11px] font-medium ${good ? "text-emerald-600" : "text-red-600"}`}
-			title="vs the preceding period of the same length"
+			title={strings("page.analytics.delta.title")}
 		>
 			<i className={`fa-solid ${up ? "fa-arrow-up" : "fa-arrow-down"}`} aria-hidden />
 			{Math.abs(pct)}%
@@ -176,32 +184,15 @@ const Stat = ({ label, value, sub, tone, info, delta }) => (
 	</div>
 );
 
-const NO_SHOW_INFO =
-	"Tickets sold but never scanned at the gate, for events that have ended. Only meaningful if you scan tickets with the Reader - unscanned events read as 100% no-show.";
-const SEGMENT_INFO = {
-	whale: "Highest lifetime spend - your most valuable buyers.",
-	fan: "Bought tickets to 3+ different events - loyal followers.",
-	repeat: "Came back for a second event.",
-	hesitant: "Abandoned 2+ baskets - interested but wavering. Prime win-back targets.",
-	direct: "Bought quickly with no abandoned baskets - decisive first-timers.",
-	one_time: "Bought a single event, then stopped.",
-};
-const INFO = {
-	buyers: "Distinct customers with at least one successful purchase in scope.",
-	returning: "Buyers who came back - whales, fans and repeat customers combined.",
-	winback: "Share of previously-churned leads who later purchased. Your remarketing effectiveness.",
-	tickets: "Successful + scanned tickets, summed over the selected range.",
-	sellThrough: "Tickets sold vs total capacity across the events in scope.",
-	refund: "Share of an event's reservations that were refunded.",
-	trend: "Tickets confirmed per day. For a single event this spans its full on-sale lifetime.",
-	net: "Gross sales minus discounts, as settled by the payment provider. Refunds are shown separately.",
-	avgTicket: "Net revenue divided by tickets sold in scope.",
-	refunded: "Money returned to buyers in scope.",
-	segment: "Behavioral group derived from purchase history and checkout journey.",
-};
+const noShowInfo = () => strings("page.analytics.info.noShow");
+const INFO_KEYS = [
+	"buyers", "returning", "winback", "tickets", "sellThrough", "refund",
+	"trend", "net", "avgTicket", "refunded", "segment",
+];
+const infoText = (key) =>
+	INFO_KEYS.includes(key) ? strings(`page.analytics.info.${key}`) : undefined;
 
 const TABS = ["audience", "sales", "marketing"];
-const TAB_LABEL = { audience: "Audience", sales: "Sales", marketing: "Marketing" };
 
 // Per-event marketing funnel table. Scrolls after ~10 rows with a sticky
 // header; lifecycle is conveyed by the surrounding Ongoing/Past tabs, so no
@@ -211,15 +202,15 @@ const FunnelTable = ({ rows }) => (
 		<table className="w-full min-w-[720px] text-sm">
 			<thead className="sticky top-0 z-10 bg-white">
 				<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-					<th className="bg-white py-2 pl-3 pr-4">Event</th>
-					<th className="bg-white py-2 pr-4 text-right">Views</th>
-					<th className="bg-white py-2 pr-4 text-right">Baskets</th>
-					<th className="bg-white py-2 pr-4 text-right">Sales</th>
-					<th className="bg-white py-2 pr-4 text-right">Gross rev.</th>
-					<th className="bg-white py-2 pr-4 text-right">Lost sales</th>
-					<th className="bg-white py-2 pr-4 text-right">Lost rev.</th>
-					<th className="bg-white py-2 pr-4 text-right">View→Basket</th>
-					<th className="bg-white py-2 pr-3 text-right">Basket→Sale</th>
+					<th className="bg-white py-2 pl-3 pr-4">{strings("page.analytics.col.event")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.views")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.baskets")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.sales")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.grossRev")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.lostSales")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.lostRev")}</th>
+					<th className="bg-white py-2 pr-4 text-right">{strings("page.analytics.col.viewToBasket")}</th>
+					<th className="bg-white py-2 pr-3 text-right">{strings("page.analytics.col.basketToSale")}</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -244,6 +235,10 @@ const FunnelTable = ({ rows }) => (
 );
 
 const ymd = (d) => (d ? dayjs(d).format("YYYY-MM-DD") : "");
+
+// dow is 1=Sunday .. 7=Saturday (the aggregation's convention); dayjs day()
+// is 0=Sunday, and formats in the active locale.
+const weekdayShort = (dow) => dayjs().day(dow - 1).format("ddd");
 
 // Churn reports for a single selected event: lists what exists and creates a
 // new one in one click, over the on-sale window (createdAt -> now). Note
@@ -281,7 +276,7 @@ const ChurnReports = ({ sale }) => {
 			});
 			load();
 		} catch (e) {
-			setErr(e?.message ?? "Failed to create report");
+			setErr(e?.message ?? strings("page.analytics.churn.createFailed"));
 		} finally {
 			setBusy(false);
 		}
@@ -291,11 +286,14 @@ const ChurnReports = ({ sale }) => {
 		<div className="mt-5 border-t border-slate-100 pt-4">
 			<div className="mb-2 flex items-center justify-between gap-3">
 				<p className="text-xs font-semibold text-slate-700">
-					Churn reports <span className="font-normal text-slate-400">({loading ? "…" : rows.length})</span>
+					{strings("page.analytics.churn.title")}{" "}
+					<span className="font-normal text-slate-400">({loading ? "…" : rows.length})</span>
 				</p>
 				{!loading && (
 					<span className="flex items-center gap-2">
-						<span className="text-[11px] text-slate-400">No charge on your plan</span>
+						<span className="text-[11px] text-slate-400">
+							{strings("page.analytics.churn.noCharge")}
+						</span>
 						<button
 							type="button"
 							onClick={create}
@@ -307,16 +305,18 @@ const ChurnReports = ({ sale }) => {
 							) : (
 								<i className="fa-solid fa-plus mr-1.5" aria-hidden />
 							)}
-							{rows.length === 0 ? "Create now" : "New report"}
+							{rows.length === 0
+								? strings("page.analytics.churn.createNow")
+								: strings("page.analytics.churn.newReport")}
 						</button>
 					</span>
 				)}
 			</div>
 
 			{loading ? (
-				<p className="text-sm text-slate-500">Loading…</p>
+				<p className="text-sm text-slate-500">{strings("common.loading")}</p>
 			) : rows.length === 0 ? (
-				<p className="text-sm text-slate-500">No churn reports for this event yet.</p>
+				<p className="text-sm text-slate-500">{strings("page.analytics.churn.empty")}</p>
 			) : (
 				<ul className="divide-y divide-slate-100 rounded-lg border border-slate-100">
 					{rows.map((r) => (
@@ -348,7 +348,7 @@ const TabBtn = ({ id, active, onSelect }) => (
 		onClick={() => onSelect(id)}
 		className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 ${active ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}
 	>
-		{TAB_LABEL[id]}
+		{strings(`page.analytics.tab.${id}`)}
 	</button>
 );
 
@@ -453,9 +453,10 @@ const Analytics = () => {
 			a.download = `audience-${key}.csv`;
 			a.click();
 			URL.revokeObjectURL(url);
-			showToast("success", `Exported ${rows} consented contact${rows === 1 ? "" : "s"}`);
+			showToast("success", strings("page.analytics.exported", [rows]));
 		} catch (err) {
-			if (!err?.__sessionExpired) showToast("error", "Export failed");
+			if (!err?.__sessionExpired)
+				showToast("error", strings("page.analytics.exportFailed"));
 		} finally {
 			setExporting(null);
 		}
@@ -476,7 +477,7 @@ const Analytics = () => {
 				setPastSales(past.data ?? []);
 				setError(null);
 			} catch (err) {
-				if (alive) setError(err?.message ?? "Failed to load analytics");
+				if (alive) setError(err?.message ?? strings("page.analytics.loadFailed"));
 			} finally {
 				if (alive) setLoading(false);
 			}
@@ -526,7 +527,7 @@ const Analytics = () => {
 				setSelCountry(null);
 				setDemoFilter({});
 			})
-			.catch((err) => alive && setError(err?.message ?? "Failed to load analytics"))
+			.catch((err) => alive && setError(err?.message ?? strings("page.analytics.loadFailed")))
 			.finally(() => alive && setScopeLoading(false));
 		return () => {
 			alive = false;
@@ -580,7 +581,7 @@ const Analytics = () => {
 		return [...m.entries()]
 			.map(([segment, buyers]) => ({
 				segment,
-				label: SEGMENT_LABEL[segment] ?? segment,
+				label: segmentLabel(segment),
 				buyers,
 			}))
 			.sort((a, b) => b.buyers - a.buyers);
@@ -597,7 +598,7 @@ const Analytics = () => {
 	const hasDeviceData = (demo?.device ?? []).some((d) => d.key && d.key !== "unknown");
 	const pick = (dim) => (key) => setDemoFilter((f) => ({ ...f, [dim]: f[dim] === key ? undefined : key }));
 	const activeFilters = Object.entries(demoFilter).filter(([, v]) => v);
-	const FILTER_LABEL = { gender: "Gender", age: "Age", device: "Device", payment: "Payment" };
+	
 	const citiesOfActive = useMemo(
 		() => (demo?.cities ?? []).filter((c) => c.country === activeCountry),
 		[demo, activeCountry],
@@ -745,18 +746,18 @@ const Analytics = () => {
 
 	const scopeName =
 		scopeSales.length === 0
-			? "all events"
+			? strings("page.analytics.scope.all")
 			: scopeSales.length === 1
-				? saleName[scopeSales[0]] ?? "event"
-				: `${scopeSales.length} events`;
+				? (saleName[scopeSales[0]] ?? strings("page.analytics.scope.event"))
+				: strings("page.analytics.scope.count", [scopeSales.length]);
 	const hasAffinity = (affinity.pairs?.length ?? 0) > 0 || (affinity.related?.length ?? 0) > 0;
 	const crossSellCard = (
 		<Card
-			title="Also bought (cross-sell)"
+			title={strings("page.analytics.crossSell.title")}
 			hint={
 				scopeSales.length === 0
-					? "Event pairs bought by the same customers - co-purchase across all events. Market one to the other's buyers."
-					: `Events that ${scopeName} buyers also bought - promote these to them.`
+					? strings("page.analytics.crossSell.hintAll")
+					: strings("page.analytics.crossSell.hintScoped", [scopeName])
 			}
 		>
 			{scopeSales.length > 0 ? (
@@ -783,7 +784,9 @@ const Analytics = () => {
 								<span className="truncate font-medium text-slate-700">{p.b}</span>
 							</span>
 							<span className="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 font-medium text-violet-700">
-								{p.buyers.toLocaleString()} shared
+								{strings("page.analytics.crossSell.shared", [
+									p.buyers.toLocaleString(),
+								])}
 							</span>
 						</div>
 					))}
@@ -794,7 +797,9 @@ const Analytics = () => {
 	return (
 		<div className="mx-auto max-w-5xl space-y-6">
 			<div className="flex flex-wrap items-center justify-between gap-3">
-				<h1 className="text-2xl font-semibold text-slate-900">Analytics</h1>
+				<h1 className="text-2xl font-semibold text-slate-900">
+					{strings("page.analytics.title")}
+				</h1>
 				<div className="flex flex-wrap items-center gap-2">
 					{/* Multi-select event scope: search + tick several events; the
 					    analytics rebuild as the selection changes. */}
@@ -815,15 +820,19 @@ const Analytics = () => {
 										type="text"
 										value={saleSearch}
 										onChange={(e) => setSaleSearch(e.target.value)}
-										placeholder="Search events…"
+										placeholder={strings("page.analytics.searchEvents")}
 										className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
 									/>
 								</div>
 								<div className="flex items-center justify-between px-3 py-1.5 text-xs text-slate-500">
-									<span>{scopeSales.length ? `${scopeSales.length} selected` : "All events"}</span>
+									<span>
+										{scopeSales.length
+											? strings("page.analytics.scope.selected", [scopeSales.length])
+											: strings("page.analytics.scope.allEvents")}
+									</span>
 									{scopeSales.length > 0 && (
 										<button type="button" onClick={() => setScopeSales([])} className="font-medium text-slate-600 hover:text-slate-900">
-											Clear
+											{strings("page.analytics.scope.clear")}
 										</button>
 									)}
 								</div>
@@ -868,7 +877,7 @@ const Analytics = () => {
 								}}
 								className={`px-2.5 py-1.5 text-xs font-medium ${rangeDays === r.days && !isCustomRange ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
 							>
-								{r.label}
+								{strings(`page.analytics.range.${r.key}`)}
 							</button>
 						))}
 						<button
@@ -876,7 +885,7 @@ const Analytics = () => {
 							onClick={() => setCustomOpen((o) => !o)}
 							className={`px-2.5 py-1.5 text-xs font-medium ${isCustomRange || customOpen ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
 						>
-							Custom
+							{strings("page.analytics.range.custom")}
 						</button>
 					</div>
 					{customOpen && (
@@ -912,12 +921,12 @@ const Analytics = () => {
 						onClick={() => setReloadKey((k) => k + 1)}
 						className="rounded-lg border border-red-300 bg-white px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100"
 					>
-						Retry
+						{strings("common.retry")}
 					</button>
 				</div>
 			)}
 
-			<div role="tablist" aria-label="Analytics sections" className="flex gap-1">
+			<div role="tablist" aria-label={strings("page.analytics.sections")} className="flex gap-1">
 				{TABS.map((id) => (
 					<TabBtn key={id} id={id} active={tab === id} onSelect={setTab} />
 				))}
@@ -928,27 +937,27 @@ const Analytics = () => {
 					{hasAffinity && crossSellCard}
 					{engagement && engagement.visitors > 0 && (
 						<Card
-							title="Audience engagement"
-							hint="Widget visitors recognised across events - the basis for cross-sell and win-back"
+							title={strings("page.analytics.engagement.title")}
+							hint={strings("page.analytics.engagement.hint")}
 						>
 							<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-slate-900">{engagement.visitors.toLocaleString()}</div>
-									<div className="text-xs text-slate-500">Visitors</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.engagement.visitors")}</div>
 								</div>
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-emerald-700">{engagement.returningRatePct}%</div>
-									<div className="text-xs text-slate-500">Browsed multiple events</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.engagement.multiEvent")}</div>
 								</div>
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-slate-900">{engagement.identified.toLocaleString()}</div>
-									<div className="text-xs text-slate-500">Identified (bought)</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.engagement.identified")}</div>
 								</div>
 							</div>
 							{engagement.crossSell?.length > 0 && (
 								<div className="mt-4">
 									<div className="mb-1 text-xs font-medium text-slate-500">
-										Your buyers also browsed
+										{strings("page.analytics.engagement.alsoBrowsed")}
 									</div>
 									<ul className="divide-y divide-slate-100">
 										{engagement.crossSell.slice(0, 6).map((c) => (
@@ -963,9 +972,9 @@ const Analytics = () => {
 						</Card>
 					)}
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-						<Stat label="Buyers" value={totalBuyers.toLocaleString()} sub={scopeName} info={INFO.buyers} />
-						<Stat label="Returning" value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={INFO.returning} />
-						<Stat label="Win-back" value={`${winbackAgg.rate}%`} sub={`${winbackAgg.recovered}/${winbackAgg.churned}`} info={INFO.winback} />
+						<Stat label={strings("page.analytics.stat.buyers")} value={totalBuyers.toLocaleString()} sub={scopeName} info={infoText("buyers")} />
+						<Stat label={strings("page.analytics.stat.returning")} value={`${pctOf(groupCount(["whale", "fan", "repeat"]), totalBuyers)}%`} tone="text-emerald-600" info={infoText("returning")} />
+						<Stat label={strings("page.analytics.stat.winback")} value={`${winbackAgg.rate}%`} sub={`${winbackAgg.recovered}/${winbackAgg.churned}`} info={infoText("winback")} />
 					</div>
 
 					<div className="grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -975,11 +984,17 @@ const Analytics = () => {
 							return (
 								<div key={g.key} className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
 									<div className="flex items-baseline justify-between">
-										<p className="text-sm font-semibold text-slate-900">{g.label}</p>
+										<p className="text-sm font-semibold text-slate-900">
+											{strings(`page.analytics.group.${g.key}.label`)}
+										</p>
 										<p className={`text-lg font-bold ${t.text}`}>{pctOf(n, totalBuyers)}%</p>
 									</div>
-									<p className="mt-0.5 text-xs text-slate-500">{g.desc}</p>
-									<p className="mt-2 text-xs text-slate-400">{n.toLocaleString()} buyers</p>
+									<p className="mt-0.5 text-xs text-slate-500">
+										{strings(`page.analytics.group.${g.key}.desc`)}
+									</p>
+									<p className="mt-2 text-xs text-slate-400">
+										{strings("page.analytics.buyersCount", [n.toLocaleString()])}
+									</p>
 									<button
 										type="button"
 										onClick={() => exportAudience(g.segs, g.key)}
@@ -987,7 +1002,9 @@ const Analytics = () => {
 										className={`mt-3 rounded-lg border px-3 py-1.5 text-xs font-medium transition disabled:opacity-50 ${t.btn}`}
 									>
 										<i className="fa-solid fa-download mr-1.5" aria-hidden />
-										{exporting === g.key ? "Exporting..." : g.cta}
+										{exporting === g.key
+											? strings("page.analytics.exporting")
+											: strings(`page.analytics.group.${g.key}.cta`)}
 									</button>
 								</div>
 							);
@@ -995,13 +1012,15 @@ const Analytics = () => {
 					</div>
 
 					<Card
-						title="Segment breakdown"
-						hint={`Behavioral mix for ${scopeName}. Exports include only marketing-consented contacts.`}
+						title={strings("page.analytics.segments.title")}
+						hint={strings("page.analytics.segments.hint", [scopeName])}
 					>
 						{scopeLoading ? (
-							<p className="text-sm text-slate-500">Loading...</p>
+							<p className="text-sm text-slate-500">{strings("common.loading")}</p>
 						) : segData.length === 0 ? (
-							<p className="text-sm text-slate-500">No buyer data for {scopeName}.</p>
+							<p className="text-sm text-slate-500">
+									{strings("page.analytics.segments.empty", [scopeName])}
+								</p>
 						) : (
 							<div className="grid grid-cols-1 items-center gap-4 md:grid-cols-2">
 								<ResponsiveContainer width="100%" height={220}>
@@ -1020,7 +1039,7 @@ const Analytics = () => {
 											<span className="flex items-center gap-2">
 												<span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: SEGMENT_COLOR[r.segment] ?? "#94a3b8" }} />
 												<span className="font-medium text-slate-700">{r.label}</span>
-												<Info text={SEGMENT_INFO[r.segment]} />
+												<Info text={segmentInfo(r.segment)} />
 												<span className="text-slate-400">{r.buyers.toLocaleString()} · {pctOf(r.buyers, totalBuyers)}%</span>
 											</span>
 											<button
@@ -1029,7 +1048,7 @@ const Analytics = () => {
 												disabled={!!exporting}
 												className="rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-600 transition hover:bg-slate-100 disabled:opacity-50"
 											>
-												{exporting === r.segment ? "..." : "Export"}
+												{exporting === r.segment ? "..." : strings("page.analytics.export")}
 											</button>
 										</div>
 									))}
@@ -1039,8 +1058,8 @@ const Analytics = () => {
 					</Card>
 
 					<Card
-						title="Demographics & payment"
-						hint={`Who your buyers are - ${scopeName}. Click a gender / age / device / payment method to filter the rest.`}
+						title={strings("page.analytics.demo.title")}
+						hint={strings("page.analytics.demo.hint", [scopeName])}
 						action={
 							activeFilters.length > 0 && (
 								<button
@@ -1048,13 +1067,13 @@ const Analytics = () => {
 									onClick={() => setDemoFilter({})}
 									className="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
 								>
-									Clear filters
+									{strings("page.analytics.demo.clearFilters")}
 								</button>
 							)
 						}
 					>
 						{scopeLoading || demoLoading ? (
-							<p className="text-sm text-slate-500">Loading...</p>
+							<p className="text-sm text-slate-500">{strings("common.loading")}</p>
 						) : (
 							<>
 								{activeFilters.length > 0 && (
@@ -1066,7 +1085,7 @@ const Analytics = () => {
 												onClick={() => pick(dim)(val)}
 												className="inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-medium text-blue-800"
 											>
-												{FILTER_LABEL[dim] ?? dim}:{" "}
+												{strings(`page.analytics.demo.filter.${dim}`)}:{" "}
 												{dim === "age" ? val : dim === "payment" ? paymentLabel(val) : titleCase(val)}
 												<i className="fa-solid fa-xmark" aria-hidden />
 											</button>
@@ -1074,49 +1093,47 @@ const Analytics = () => {
 									</div>
 								)}
 								<div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-									<Dist title="Gender" info="From buyer billing profiles (your data). Click to filter." rows={demo?.gender} onPick={pick("gender")} activeKey={demoFilter.gender} />
-									<Dist title="Age" info="Derived from billing date of birth (your data). Click to filter." rows={demo?.age} labelFn={(k) => k ?? "Unknown"} onPick={pick("age")} activeKey={demoFilter.age} />
+									<Dist title={strings("page.analytics.demo.gender")} info={strings("page.analytics.demo.genderInfo")} rows={demo?.gender} onPick={pick("gender")} activeKey={demoFilter.gender} />
+									<Dist title={strings("page.analytics.demo.age")} info={strings("page.analytics.demo.ageInfo")} rows={demo?.age} labelFn={(k) => k ?? strings("common.unknown")} onPick={pick("age")} activeKey={demoFilter.age} />
 									{hasDeviceData && (
 										<Dist
-											title="Device"
-											info="From the buyer's browser at purchase (User-Agent). Stripe does not expose device; this is from your own logs."
+											title={strings("page.analytics.demo.device")}
+											info={strings("page.analytics.demo.deviceInfo")}
 											rows={demo?.device}
 											onPick={pick("device")}
 											activeKey={demoFilter.device}
 										/>
 									)}
 									<Dist
-										title="Payment method"
-										info="What buyers paid with - card, PayPal, Klarna, Apple/Google Pay... from the provider. Click to filter."
+										title={strings("page.analytics.demo.payment")}
+										info={strings("page.analytics.demo.paymentInfo")}
 										rows={payments}
 										labelFn={paymentLabel}
-										empty="No payment data yet."
+										empty={strings("page.analytics.demo.noPayment")}
 										onPick={pick("payment")}
 										activeKey={demoFilter.payment}
 									/>
 								</div>
 								<p className="mt-4 text-[11px] text-slate-400">
-									Note: not every purchaser has billing or location info from the payment provider -
-									gender/age come from your own profiles, location + payment method from the provider
-									where available. Percentages are of buyers where the field exists.
+									{strings("page.analytics.demo.note")}
 								</p>
 							</>
 						)}
 					</Card>
 
 					<Card
-						title="Where your buyers are"
-						hint="From the billing address on the payment (country + city). Select a country to see its cities."
+						title={strings("page.analytics.location.title")}
+						hint={strings("page.analytics.location.hint")}
 					>
 						{scopeLoading || demoLoading ? (
-							<p className="text-sm text-slate-500">Loading...</p>
+							<p className="text-sm text-slate-500">{strings("common.loading")}</p>
 						) : (demo?.country ?? []).length === 0 ? (
-							<p className="text-sm text-slate-500">No location data yet.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.location.empty")}</p>
 						) : (
 							<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 								{/* Countries - clickable to filter cities */}
 								<div>
-									<p className="mb-2 text-xs font-semibold text-slate-700">Countries</p>
+									<p className="mb-2 text-xs font-semibold text-slate-700">{strings("page.analytics.location.countries")}</p>
 									<div className="max-h-72 space-y-1 overflow-y-auto pr-1">
 										{(demo.country ?? []).map((c) => {
 											const tot = totalCountryBuyers;
@@ -1138,11 +1155,11 @@ const Analytics = () => {
 								{/* Cities of the selected country */}
 								<div>
 									<p className="mb-2 flex items-center text-xs font-semibold text-slate-700">
-										Cities in {countryName(activeCountry)}
-										<Info text="Buyer cities for the selected country, from the billing address." />
+										{strings("page.analytics.location.citiesIn", [countryName(activeCountry)])}
+										<Info text={strings("page.analytics.location.citiesInfo")} />
 									</p>
 									{citiesOfActive.length === 0 ? (
-										<p className="text-xs text-slate-400">No city detail for this country.</p>
+										<p className="text-xs text-slate-400">{strings("page.analytics.location.noCities")}</p>
 									) : (
 										<div className="space-y-1.5">
 											{citiesOfActive.slice(0, 15).map((c) => {
@@ -1166,9 +1183,7 @@ const Analytics = () => {
 						)}
 						{(demo?.country ?? []).length > 0 && (
 							<p className="mt-4 text-[11px] text-slate-400">
-								Note: not every purchaser has billing or location info from the payment provider.
-								Location is shown only for buyers where the provider supplied a billing address;
-								percentages are of those buyers.
+								{strings("page.analytics.location.note")}
 							</p>
 						)}
 					</Card>
@@ -1178,13 +1193,13 @@ const Analytics = () => {
 			{tab === "sales" && (
 				<div id="analytics-panel-sales" role="tabpanel" className="space-y-6">
 					<Card
-						title="Events funnel"
-						hint="Per event: views → baskets → sales (distinct customers, retries consolidated), converted revenue, and both conversion rates. Lost sales / revenue count identified customers who reached checkout but didn't pay - the recoverable opportunity, each at their largest basket (never the sum of retries). Anonymous browse-carts are excluded."
+						title={strings("page.analytics.funnel.title")}
+						hint={strings("page.analytics.funnel.hint")}
 						action={
 							<div className="inline-flex shrink-0 overflow-hidden rounded-lg border border-slate-300">
 								{[
-									{ id: "ongoing", label: `Ongoing (${eventsOngoing.length})` },
-									{ id: "past", label: `Past (${eventsPast.length})` },
+									{ id: "ongoing", label: strings("page.analytics.funnel.ongoing", [eventsOngoing.length]) },
+									{ id: "past", label: strings("page.analytics.funnel.past", [eventsPast.length]) },
 								].map((t) => (
 									<button
 										key={t.id}
@@ -1200,7 +1215,13 @@ const Analytics = () => {
 						}
 					>
 						{(funnelTab === "ongoing" ? eventsOngoing : eventsPast).length === 0 ? (
-							<p className="text-sm text-slate-500">No {funnelTab === "ongoing" ? "ongoing" : "past"} events in range.</p>
+							<p className="text-sm text-slate-500">
+								{strings(
+									funnelTab === "ongoing"
+										? "page.analytics.funnel.emptyOngoing"
+										: "page.analytics.funnel.emptyPast",
+								)}
+							</p>
 						) : (
 							<FunnelTable rows={funnelTab === "ongoing" ? eventsOngoing : eventsPast} />
 						)}
@@ -1209,71 +1230,73 @@ const Analytics = () => {
 
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 						<Stat
-							label="Tickets sold"
+							label={strings("page.analytics.stat.ticketsSold")}
 							value={ticketsTotal.toLocaleString()}
 							sub={scopeName}
-							info={INFO.tickets}
+							info={infoText("tickets")}
 							delta={hasPrev && <Delta current={cur.tickets} previous={prev.tickets} />}
 						/>
 						<Stat
-							label="Net revenue"
+							label={strings("page.analytics.stat.netRevenue")}
 							value={formatCurrency(cur.net / 100, currency)}
-							info={INFO.net}
+							info={infoText("net")}
 							delta={hasPrev && <Delta current={cur.net} previous={prev.net} />}
 						/>
 						<Stat
-							label="Avg ticket"
+							label={strings("page.analytics.stat.avgTicket")}
 							value={cur.tickets ? formatCurrency(cur.net / 100 / cur.tickets, currency) : "—"}
-							info={INFO.avgTicket}
+							info={infoText("avgTicket")}
 						/>
 						<Stat
-							label="Refunded"
+							label={strings("page.analytics.stat.refunded")}
 							value={formatCurrency(cur.refunded / 100, currency)}
 							tone={cur.refunded > 0 ? "text-red-600" : "text-slate-900"}
-							sub={cur.refundedCount ? `${cur.refundedCount.toLocaleString()} tickets` : undefined}
-							info={INFO.refunded}
+							sub={cur.refundedCount ? strings("page.analytics.stat.refundedTickets", [cur.refundedCount.toLocaleString()]) : undefined}
+							info={infoText("refunded")}
 							delta={hasPrev && <Delta current={cur.refunded} previous={prev.refunded} invert />}
 						/>
-						<Stat label="Sell-through" value={`${perf.sellThrough}%`} info={INFO.sellThrough} />
+						<Stat label={strings("page.analytics.stat.sellThrough")} value={`${perf.sellThrough}%`} info={infoText("sellThrough")} />
 						<Stat
-							label="No-show"
+							label={strings("page.analytics.stat.noShow")}
 							value={perf.eligible ? `${perf.noShow}%` : "—"}
 							tone={perf.eligible && perf.noShow >= 20 ? "text-amber-600" : "text-slate-900"}
-							info={perf.eligible ? NO_SHOW_INFO : `${NO_SHOW_INFO} No ended events in scope yet - pick a past event to see no-show.`}
+							info={perf.eligible ? noShowInfo() : `${noShowInfo()} ${strings("page.analytics.info.noShowNoEnded")}`}
 						/>
 					</div>
 					{hasPrev && (
 						<p className="-mt-3 text-[11px] text-slate-400">
-							Arrows compare the last {rangeDays} days with the {rangeDays} days before them.
+							{strings("page.analytics.deltaNote", [rangeDays])}
 						</p>
 					)}
 
 					{friction && friction.multiAttemptBaskets > 0 && (
 						<Card
-							title="Checkout friction"
-							hint="Buyers who needed more than one payment attempt - a high rate means a payment-UX problem"
+							title={strings("page.analytics.friction.title")}
+							hint={strings("page.analytics.friction.hint")}
 						>
 							<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-slate-900">{friction.frictionRatePct}%</div>
-									<div className="text-xs text-slate-500">Retry rate ({friction.multiAttemptBaskets} of {friction.totalBaskets})</div>
+									<div className="text-xs text-slate-500">
+										{strings("page.analytics.friction.retryRate", [friction.multiAttemptBaskets, friction.totalBaskets])}
+									</div>
 								</div>
 								<div className="rounded-lg border border-red-200 bg-red-50 p-3">
 									<div className="text-xl font-semibold text-red-600">{friction.lostToFrictionBaskets}</div>
-									<div className="text-xs text-slate-500">Lost after retries</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.friction.lost")}</div>
 								</div>
 								<div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
 									<div className="text-xl font-semibold text-emerald-700">{friction.recoveredBaskets}</div>
-									<div className="text-xs text-slate-500">Recovered (bought anyway)</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.friction.recovered")}</div>
 								</div>
 								<div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
 									<div className="text-xl font-semibold text-slate-900">{friction.avgAttemptsToConvert}</div>
-									<div className="text-xs text-slate-500">Avg attempts to convert</div>
+									<div className="text-xs text-slate-500">{strings("page.analytics.friction.avgAttempts")}</div>
 								</div>
 							</div>
 							{friction.top?.length > 0 && (
 								<div className="mt-4">
-									<div className="mb-1 text-xs font-medium text-slate-500">Most-retried checkouts</div>
+									<div className="mb-1 text-xs font-medium text-slate-500">{strings("page.analytics.friction.topTitle")}</div>
 									<ul className="divide-y divide-slate-100">
 										{friction.top.slice(0, 8).map((r) => (
 											<li key={r._id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
@@ -1281,7 +1304,7 @@ const Analytics = () => {
 												<span className="flex shrink-0 items-center gap-2">
 													<span className="font-semibold text-slate-900">{r.attempts}×</span>
 													<span className={`rounded px-1.5 py-0.5 text-xs ${r.converted ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-700"}`}>
-														{r.converted ? "bought" : "lost"}
+														{strings(r.converted ? "page.analytics.friction.bought" : "page.analytics.friction.lostShort")}
 													</span>
 												</span>
 											</li>
@@ -1293,13 +1316,16 @@ const Analytics = () => {
 					)}
 
 					<Card
-						title="Sales trend"
-						hint={`${isRevenue ? "Net revenue" : "Tickets"} per day - ${scopeName}`}
+						title={strings("page.analytics.trend.title")}
+						hint={strings("page.analytics.trend.hint", [
+							strings(isRevenue ? "page.analytics.trend.revenue" : "page.analytics.trend.tickets"),
+							scopeName,
+						])}
 						action={
 							<div className="inline-flex shrink-0 overflow-hidden rounded-lg border border-slate-300">
 								{[
-									{ id: "tickets", label: "Tickets" },
-									{ id: "revenue", label: "Revenue" },
+									{ id: "tickets", label: strings("page.analytics.trend.tickets") },
+									{ id: "revenue", label: strings("page.analytics.trend.revenue") },
 								].map((m) => (
 									<button
 										key={m.id}
@@ -1317,7 +1343,7 @@ const Analytics = () => {
 						{scopeLoading ? (
 							<div className="h-[260px] animate-shimmer rounded-lg" />
 						) : dailyData.length === 0 ? (
-							<p className="text-sm text-slate-500">No sales in range.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.trend.empty")}</p>
 						) : (
 							<ResponsiveContainer width="100%" height={260}>
 								<AreaChart data={dailyData} margin={{ left: 8, right: 8 }}>
@@ -1342,7 +1368,7 @@ const Analytics = () => {
 									<Tooltip
 										formatter={(v) => [
 											isRevenue ? formatCurrency(Number(v), currency) : Number(v).toLocaleString(),
-											isRevenue ? "Net revenue" : "Tickets",
+											strings(isRevenue ? "page.analytics.stat.netRevenue" : "page.analytics.trend.tickets"),
 										]}
 									/>
 									<Area
@@ -1359,17 +1385,17 @@ const Analytics = () => {
 
 					{scopeSales.length === 0 && byEvent.length > 0 && (
 						<Card
-							title="By event"
-							hint="Tickets and net revenue per event in the selected range. Click an event to open it."
+							title={strings("page.analytics.byEvent.title")}
+							hint={strings("page.analytics.byEvent.hint")}
 						>
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[420px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Event</th>
-											<th className="py-2 pr-4 text-right">Tickets</th>
-											<th className="py-2 pr-4 text-right">Net revenue</th>
-											<th className="py-2 text-right">Refunded</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.event")}</th>
+											<th className="py-2 pr-4 text-right">{strings("page.analytics.col.tickets")}</th>
+											<th className="py-2 pr-4 text-right">{strings("page.analytics.col.netRevenue")}</th>
+											<th className="py-2 text-right">{strings("page.analytics.col.refunded")}</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -1394,27 +1420,30 @@ const Analytics = () => {
 							</div>
 							{byEvent.length > 30 && (
 								<p className="mt-2 text-[11px] text-slate-400">
-									Showing the top 30 of {byEvent.length} events by revenue.
+									{strings("page.analytics.byEvent.showingTop", [30, byEvent.length])}
 								</p>
 							)}
 						</Card>
 					)}
 
-					<Card title="Sales performance" hint="Sell-through, no-show and refund rate per event">
+					<Card
+						title={strings("page.analytics.perf.title")}
+						hint={strings("page.analytics.perf.hint")}
+					>
 						{salesRows.length === 0 ? (
-							<p className="text-sm text-slate-500">No sales yet.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.perf.empty")}</p>
 						) : (
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Event</th>
-											<th className="py-2 pr-4">Sold</th>
-											<th className="py-2 pr-4">Sell-through</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.event")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.sold")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.sellThrough")}</th>
 											<th className="py-2 pr-4">
-												No-show <Info text={NO_SHOW_INFO} />
+												{strings("page.analytics.col.noShow")} <Info text={noShowInfo()} />
 											</th>
-											<th className="py-2">Refund</th>
+											<th className="py-2">{strings("page.analytics.col.refund")}</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -1444,18 +1473,23 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Win-back (remarketing)" hint="Churned leads who later purchased, per churn report">
+					<Card
+						title={strings("page.analytics.winback.title")}
+						hint={strings("page.analytics.winback.hint")}
+					>
 						{winbackRows.length === 0 ? (
-							<p className="text-sm text-slate-500">No churn reports for {scopeName}.</p>
+							<p className="text-sm text-slate-500">
+								{strings("page.analytics.winback.empty", [scopeName])}
+							</p>
 						) : (
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Report end</th>
-											<th className="py-2 pr-4">Churned</th>
-											<th className="py-2 pr-4">Recovered</th>
-											<th className="py-2">Rate</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.reportEnd")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.churned")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.recovered")}</th>
+											<th className="py-2">{strings("page.analytics.col.rate")}</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -1477,9 +1511,12 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Purchase timing" hint="When buyers check out (Berlin time). Darker = more baskets - use it to time announcements.">
+					<Card
+						title={strings("page.analytics.timing.title")}
+						hint={strings("page.analytics.timing.hint")}
+					>
 						{timing.length === 0 ? (
-							<p className="text-sm text-slate-500">No data yet.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.timing.empty")}</p>
 						) : (
 							<div className="overflow-x-auto">
 								<div className="min-w-[560px]">
@@ -1494,7 +1531,7 @@ const Analytics = () => {
 									{[2, 3, 4, 5, 6, 7, 1].map((dow) => (
 										<div key={dow} className="flex items-center">
 											<div className="w-10 shrink-0 text-[10px] font-medium text-slate-500">
-												{["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow]}
+												{weekdayShort(dow)}
 											</div>
 											{Array.from({ length: 24 }, (_, h) => {
 												const c = timingMatrix.m[`${dow}-${h}`] ?? 0;
@@ -1503,7 +1540,7 @@ const Analytics = () => {
 													<div key={h} className="flex-1 px-px">
 														<div
 															className="h-4 rounded-sm"
-															title={`${["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dow]} ${h}:00 - ${c} baskets`}
+															title={strings("page.analytics.timing.cell", [weekdayShort(dow), h, c])}
 															style={{ background: c ? `rgba(37,99,235,${0.12 + 0.88 * t})` : "#f1f5f9" }}
 														/>
 													</div>
@@ -1520,21 +1557,24 @@ const Analytics = () => {
 
 			{tab === "marketing" && (
 				<div id="analytics-panel-marketing" role="tabpanel" className="space-y-6">
-					<Card title="Channels / traffic" hint="Each channel consolidated across your events: views to baskets to sales. Use channel links to attribute Instagram, newsletters, etc.">
+					<Card
+						title={strings("page.analytics.channels.title")}
+						hint={strings("page.analytics.channels.hint")}
+					>
 						{channels.length === 0 ? (
-							<p className="text-sm text-slate-500">No channels yet.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.channels.empty")}</p>
 						) : (
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Channel</th>
-											<th className="py-2 pr-4">Events</th>
-											<th className="py-2 pr-4">Views</th>
-											<th className="py-2 pr-4">Baskets</th>
-											<th className="py-2 pr-4">Sales</th>
-											<th className="py-2 pr-4">View→Basket</th>
-											<th className="py-2">Basket→Sale</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.channel")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.events")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.views")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.baskets")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.sales")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.viewToBasket")}</th>
+											<th className="py-2">{strings("page.analytics.col.basketToSale")}</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -1557,17 +1597,20 @@ const Analytics = () => {
 						)}
 					</Card>
 
-					<Card title="Coupons" hint="Redemptions and discount cost per code.">
+					<Card
+						title={strings("page.analytics.coupons.title")}
+						hint={strings("page.analytics.coupons.hint")}
+					>
 						{coupons.length === 0 ? (
-							<p className="text-sm text-slate-500">No coupons yet.</p>
+							<p className="text-sm text-slate-500">{strings("page.analytics.coupons.empty")}</p>
 						) : (
 							<div className="overflow-x-auto">
 								<table className="w-full min-w-[480px] text-sm">
 									<thead>
 										<tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
-											<th className="py-2 pr-4">Code</th>
-											<th className="py-2 pr-4">Redemptions</th>
-											<th className="py-2">Discount given</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.code")}</th>
+											<th className="py-2 pr-4">{strings("page.analytics.col.redemptions")}</th>
+											<th className="py-2">{strings("page.analytics.col.discountGiven")}</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -1575,7 +1618,7 @@ const Analytics = () => {
 											<tr key={c._id} className="border-b border-slate-100 last:border-0">
 												<td className="py-2 pr-4 font-medium text-slate-800">{c.code ?? "-"}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.redemptions ?? 0).toLocaleString()}</td>
-												<td className="py-2 text-slate-700">{c.discountCents ? `€${(c.discountCents / 100).toLocaleString()}` : "—"}</td>
+												<td className="py-2 text-slate-700">{c.discountCents ? formatCurrency(c.discountCents / 100, currency) : "—"}</td>
 											</tr>
 										))}
 									</tbody>

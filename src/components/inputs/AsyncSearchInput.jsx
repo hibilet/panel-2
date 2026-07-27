@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import strings from "../../localization";
 
 const baseClass =
 	"mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500";
@@ -6,14 +7,14 @@ const labelClass = "block text-sm font-medium text-slate-700";
 
 const CONTEXT_CONFIG = {
 	events: {
-		placeholder: "Eg: Chillout Festival 2024",
-		searchPlaceholder: "Search events…",
-		emptyText: "No events found",
+		placeholder: strings("search.events.placeholder"),
+		searchPlaceholder: strings("search.events.search"),
+		emptyText: strings("search.events.empty"),
 	},
 	venues: {
-		placeholder: "Eg: Main Hall",
-		searchPlaceholder: "Search venues…",
-		emptyText: "No venues found",
+		placeholder: strings("search.venues.placeholder"),
+		searchPlaceholder: strings("search.venues.search"),
+		emptyText: strings("search.venues.empty"),
 	},
 };
 

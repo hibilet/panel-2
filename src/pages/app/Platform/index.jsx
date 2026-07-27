@@ -277,7 +277,7 @@ const Platform = () => {
 
 			<div className="grid gap-4 sm:grid-cols-3">
 				<HealthCard
-					title="Mongo"
+					title={strings("page.platform.mongo")}
 					loading={healthLoading}
 					state={{
 						tone: mongo?.up ? "up" : "down",
@@ -298,7 +298,7 @@ const Platform = () => {
 					]}
 				/>
 				<HealthCard
-					title="Redis"
+					title={strings("page.platform.redis")}
 					loading={healthLoading}
 					state={{
 						tone: redis?.up ? "up" : redis?.enabled === false ? "off" : "down",

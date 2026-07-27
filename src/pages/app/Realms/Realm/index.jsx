@@ -428,7 +428,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										{...register("enableSmtp")}
 										className="h-4 w-4 rounded border-slate-300"
 									/>
-									<span>SMTP</span>
+									<span>{strings("form.realm.smtp")}</span>
 								</label>
 								<label className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
 									<input
@@ -436,7 +436,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										{...register("enableStripe")}
 										className="h-4 w-4 rounded border-slate-300"
 									/>
-									<span>Stripe</span>
+									<span>{strings("form.realm.stripe")}</span>
 								</label>
 							</div>
 						</div>
@@ -456,7 +456,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										label={strings("form.realm.smtpPass")}
 										type="password"
 										{...register("smtp.pass")}
-										placeholder={secretsSet.smtpPass ? "configured - leave blank to keep" : ""}
+										placeholder={secretsSet.smtpPass ? strings("form.realm.secretConfigured") : ""}
 										autoComplete="off"
 									/>
 									<Input
@@ -473,39 +473,37 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							<div className="rounded-lg border border-slate-200 p-4">
 								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
 									<i className="fa-brands fa-stripe-s text-slate-500" aria-hidden />
-									Stripe Connect (whitelabel)
+									{strings("form.realm.stripeConnect")}
 								</div>
 								<p className="mb-3 text-xs text-slate-500">
-									This realm runs its merchant Connect flow against its own
-									Stripe platform. Empty fields fall back to the default
-									platform credentials.
+									{strings("form.realm.stripeConnectHint")}
 								</p>
 								<div className="grid grid-cols-1 gap-4">
 									<Input
-										label="Connect Client ID"
+										label={strings("form.realm.stripeClientId")}
 										{...register("stripe.connectClientId")}
 										placeholder="ca_..."
 										autoComplete="off"
 									/>
 									<Input
-										label="Platform Secret Key"
+										label={strings("form.realm.stripeSecretKey")}
 										type="password"
 										{...register("stripe.connectSecret")}
-										placeholder={secretsSet.connectSecret ? "configured - leave blank to keep" : "sk_live_..."}
+										placeholder={secretsSet.connectSecret ? strings("form.realm.secretConfigured") : "sk_live_..."}
 										autoComplete="off"
 									/>
 									<Input
-										label="Connect Webhook Signing Secret"
+										label={strings("form.realm.stripeConnectWebhook")}
 										type="password"
 										{...register("stripe.connectWebhookSecret")}
-										placeholder={secretsSet.connectWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
+										placeholder={secretsSet.connectWebhookSecret ? strings("form.realm.secretConfigured") : "whsec_..."}
 										autoComplete="off"
 									/>
 									<Input
-										label="Transaction Webhook Signing Secret"
+										label={strings("form.realm.stripeTransactionWebhook")}
 										type="password"
 										{...register("stripe.transactionWebhookSecret")}
-										placeholder={secretsSet.transactionWebhookSecret ? "configured - leave blank to keep" : "whsec_..."}
+										placeholder={secretsSet.transactionWebhookSecret ? strings("form.realm.secretConfigured") : "whsec_..."}
 										autoComplete="off"
 									/>
 								</div>
@@ -517,25 +515,24 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							<div className="rounded-lg border border-slate-200 p-4">
 								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
 									<i className="fa-solid fa-wand-magic-sparkles text-slate-500" aria-hidden />
-									AI keys
+									{strings("form.realm.aiKeys")}
 								</div>
 								<p className="mb-3 text-xs text-slate-500">
-									Optional. This realm's own keys for AI insights and image
-									generation; empty falls back to the platform keys.
+									{strings("form.realm.aiKeysHint")}
 								</p>
 								<div className="grid grid-cols-1 gap-4">
 									<Input
-										label="OpenRouter API key"
+										label={strings("form.realm.aiOpenrouterKey")}
 										type="password"
 										{...register("ai.openrouterKey")}
-										placeholder={secretsSet.openrouterKey ? "configured - leave blank to keep" : "sk-or-..."}
+										placeholder={secretsSet.openrouterKey ? strings("form.realm.secretConfigured") : "sk-or-..."}
 										autoComplete="off"
 									/>
 									<Input
-										label="Grok (xAI) image key"
+										label={strings("form.realm.aiGrokKey")}
 										type="password"
 										{...register("ai.grokImageKey")}
-										placeholder={secretsSet.grokImageKey ? "configured - leave blank to keep" : "xai-..."}
+										placeholder={secretsSet.grokImageKey ? strings("form.realm.secretConfigured") : "xai-..."}
 										autoComplete="off"
 									/>
 								</div>

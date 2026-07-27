@@ -163,7 +163,7 @@ const Transactions = () => {
 				isOpen={!!id}
 				onClose={() => setLocation("/transactions")}
 				title={strings("page.transactions.details")}
-				aria-label="Transaction details"
+				aria-label={strings("page.transactions.details")}
 			>
 				{id && (
 					<TransactionPanel

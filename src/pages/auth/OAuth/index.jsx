@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSearch } from "wouter";
 import { setToken } from "../../../lib/storage";
 import { showToast } from "../../../lib/toastStore";
+import strings from "../../../localization";
 
 // Keep this short list explicit so a malicious `?route=//evil.com` can't
 // redirect users off the panel. Maps tokenized names to in-app paths.
@@ -59,7 +60,7 @@ const OAuth = () => {
 	return (
 		<div className="flex min-h-screen flex-col items-center justify-center">
 			<i className="fa-solid fa-spinner fa-spin mb-4 text-2xl text-slate-500" aria-hidden />
-			<p className="text-slate-600">Logging In</p>
+			<p className="text-slate-600">{strings("auth.loggingIn")}</p>
 		</div>
 	);
 };

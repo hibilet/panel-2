@@ -227,7 +227,7 @@ const Events = () => {
 					}}
 					className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
 				>
-					<option value="">All categories</option>
+					<option value="">{strings("page.events.allCategories")}</option>
 					<option value="transaction">transaction</option>
 					<option value="mail">mail</option>
 					<option value="report">report</option>
@@ -243,7 +243,7 @@ const Events = () => {
 					}}
 					className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
 				>
-					<option value="">All levels</option>
+					<option value="">{strings("page.events.allLevels")}</option>
 					<option value="info">info</option>
 					<option value="warn">warn</option>
 					<option value="error">error</option>

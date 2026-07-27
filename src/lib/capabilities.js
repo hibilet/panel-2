@@ -1,62 +1,62 @@
 // Mirror of api/libs/capabilities.js. Keep in sync.
 // 9999 = unlimited (UI shows "Unlimited" label).
 
+import strings from "../localization";
+
 export const UNLIMITED = 9999;
 
+// Capability display names live in the dictionary (capability.<key>) rather
+// than on the spec, so the permission editors read in the panel's language.
+export const capabilityLabel = (key) => strings(`capability.${key}`);
+
 export const CAPABILITIES = {
-	"ai.tips": { type: "bool", default: false, label: "AI tips" },
+	"ai.tips": { type: "bool", default: false },
 	"ai.image.enhance": {
 		type: "bool",
 		default: false,
-		label: "AI image enhance",
 	},
 	"ai.report.summary": {
 		type: "bool",
 		default: false,
-		label: "AI report summary",
 	},
 
 	"reporting.sales": {
 		type: "bool",
 		default: false,
-		label: "Sales reporting",
 	},
 	"reporting.churn": {
 		type: "bool",
 		default: false,
-		label: "Churn reporting",
 	},
 
 	"branding.disable": {
 		type: "bool",
 		default: false,
-		label: "Hide platform branding",
 	},
 
-	channels: { type: "number", default: 0, label: "Channels" },
-	sales: { type: "number", default: 0, label: "Sales" },
-	reservations: { type: "number", default: 0, label: "Reservations" },
-	links: { type: "number", default: 0, label: "Links" },
-	giveaways: { type: "bool", default: false, label: "Giveaways" },
+	channels: { type: "number", default: 0 },
+	sales: { type: "number", default: 0 },
+	reservations: { type: "number", default: 0 },
+	links: { type: "number", default: 0 },
+	giveaways: { type: "bool", default: false },
 
 	// panel.*: what a person may SEE, rather than what their plan includes.
 	// Driven by realm staff roles and per-account overrides, never by tiers.
 	// All default true, so nobody loses access until a key is turned off.
-	"panel.dashboard": { type: "bool", default: true, label: "Dashboard" },
-	"panel.money": { type: "bool", default: true, label: "Revenue figures" },
-	"panel.sales": { type: "bool", default: true, label: "Sales" },
+	"panel.dashboard": { type: "bool", default: true },
+	"panel.money": { type: "bool", default: true },
+	"panel.sales": { type: "bool", default: true },
 	"panel.transactions": {
 		type: "bool",
 		default: true,
-		label: "Transactions",
 	},
-	"panel.invoices": { type: "bool", default: true, label: "Invoices" },
-	"panel.reports": { type: "bool", default: true, label: "Reports" },
-	"panel.accounts": { type: "bool", default: true, label: "Accounts" },
-	"panel.settings": { type: "bool", default: true, label: "Settings" },
-	"panel.venues": { type: "bool", default: true, label: "Venues" },
-	"panel.links": { type: "bool", default: true, label: "Links" },
-	"panel.analytics": { type: "bool", default: true, label: "Analytics" },
+	"panel.invoices": { type: "bool", default: true },
+	"panel.reports": { type: "bool", default: true },
+	"panel.accounts": { type: "bool", default: true },
+	"panel.settings": { type: "bool", default: true },
+	"panel.venues": { type: "bool", default: true },
+	"panel.links": { type: "bool", default: true },
+	"panel.analytics": { type: "bool", default: true },
 };
 
 export const FAMILIES = [

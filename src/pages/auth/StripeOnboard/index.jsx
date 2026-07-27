@@ -3,13 +3,12 @@ import { Link, useSearch } from "wouter";
 import { Select } from "../../../components/inputs";
 import Input from "../../../components/inputs/Input";
 import { post } from "../../../lib/client";
-import strings from "../../../localization";
+import strings, { countryName } from "../../../localization";
 
-const COUNTRY_OPTIONS = [
-	{ value: "DE", label: "Germany" },
-	{ value: "NL", label: "Netherlands" },
-	{ value: "TR", label: "Turkey" },
-];
+const COUNTRY_OPTIONS = ["DE", "NL", "TR"].map((value) => ({
+	value,
+	label: countryName(value),
+}));
 
 const StripeOnboard = () => {
 	const search = useSearch();

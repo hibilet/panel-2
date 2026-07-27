@@ -596,7 +596,7 @@ export const attendeeColumns = (CopyButton) => [
 	},
 	{
 		key: "gender",
-		header: "Gender",
+		header: strings("page.analytics.demo.gender"),
 		render: (r) =>
 			r.gender
 				? String(r.gender).charAt(0).toUpperCase() + String(r.gender).slice(1)
@@ -604,7 +604,7 @@ export const attendeeColumns = (CopyButton) => [
 	},
 	{
 		key: "age",
-		header: "Age",
+		header: strings("page.analytics.demo.age"),
 		render: (r) => r.age ?? getAge(r.birthday) ?? "—",
 		align: "right",
 	},

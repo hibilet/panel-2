@@ -10,11 +10,10 @@ import ImageUpload from "../../../../components/shared/ImageUpload";
 import { isSuperadmin } from "../../../../lib/capabilities";
 import strings from "../../../../localization";
 
-const SERVICE_OPTIONS = [
-	{ value: "dashboard", label: "dashboard" },
-	{ value: "widget", label: "widget" },
-	{ value: "api", label: "api" },
-];
+const SERVICE_OPTIONS = ["dashboard", "widget", "api"].map((value) => ({
+	value,
+	label: strings(`realmService.${value}`),
+}));
 
 const emptySeller = {
 	legalName: "",
@@ -403,7 +402,7 @@ const SettingsRealm = () => {
 										className="fa-brands fa-stripe-s text-slate-500"
 										aria-hidden
 									/>
-									Stripe Connect (whitelabel)
+									{strings("form.realm.stripeConnect")}
 								</span>
 								<i
 									className={`fa-solid ${stripeOpen ? "fa-chevron-up" : "fa-chevron-down"}`}
@@ -419,27 +418,27 @@ const SettingsRealm = () => {
 									</p>
 									<div className="grid grid-cols-1 gap-4">
 										<Input
-											label="Connect Client ID"
+											label={strings("form.realm.stripeClientId")}
 											{...register("stripe.connectClientId")}
 											placeholder="ca_..."
 											autoComplete="off"
 										/>
 										<Input
-											label="Platform Secret Key"
+											label={strings("form.realm.stripeSecretKey")}
 											type="password"
 											{...register("stripe.connectSecret")}
 											placeholder="sk_live_..."
 											autoComplete="off"
 										/>
 										<Input
-											label="Connect Webhook Signing Secret"
+											label={strings("form.realm.stripeConnectWebhook")}
 											type="password"
 											{...register("stripe.connectWebhookSecret")}
 											placeholder="whsec_..."
 											autoComplete="off"
 										/>
 										<Input
-											label="Transaction Webhook Signing Secret"
+											label={strings("form.realm.stripeTransactionWebhook")}
 											type="password"
 											{...register("stripe.transactionWebhookSecret")}
 											placeholder="whsec_..."

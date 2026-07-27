@@ -25,8 +25,8 @@ const STATUS_BADGE = {
 };
 
 const ALL_TYPE_OPTIONS = [
-	{ value: "churn", label: "Churn", caps: ["reporting.churn"] },
-	{ value: "sales", label: "Sales", caps: ["reporting.sales"] },
+	{ value: "churn", label: strings("page.reports.type.churn"), caps: ["reporting.churn"] },
+	{ value: "sales", label: strings("page.reports.type.sales"), caps: ["reporting.sales"] },
 ];
 
 const defaultStart = () => {
@@ -247,9 +247,9 @@ const Reports = () => {
 			header: strings("page.reports.col.type"),
 			render: (row) => (
 				<span
-					className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}
+					className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${TYPE_BADGE[row.type] ?? "bg-slate-100 text-slate-600"}`}
 				>
-					{row.type}
+					{strings(`page.reports.type.${row.type}`)}
 				</span>
 			),
 		},

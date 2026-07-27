@@ -181,7 +181,7 @@ const Invoices = () => {
 							title={`Stripe push failed: ${r.stripePushError}. Re-run generate to retry.`}
 						>
 							<i className="fa-solid fa-triangle-exclamation" aria-hidden />
-							<span className="sr-only">Stripe push failed</span>
+							<span className="sr-only">{strings("page.invoices.stripePushFailed")}</span>
 						</span>
 					)}
 				</div>

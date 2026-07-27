@@ -201,7 +201,7 @@ const Links = () => {
 				isOpen={!!id}
 				onClose={() => setLocation("/links")}
 				title={strings("page.links.details")}
-				aria-label="Link details"
+				aria-label={strings("page.links.details")}
 			>
 				{id && (
 					<LinkPanel

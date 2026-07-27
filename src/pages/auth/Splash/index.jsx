@@ -4,6 +4,7 @@ import Input from "../../../components/inputs/Input";
 import { get, post } from "../../../lib/client";
 import { getRealm } from "../../../lib/realm";
 import { setToken } from "../../../lib/storage";
+import strings from "../../../localization";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 const SHOW_STRIPE = (import.meta.env.VITE_AUTH_MODE ?? "").toLowerCase() !== "off";
@@ -34,7 +35,7 @@ const Splash = () => {
 			});
 			setStep("otp");
 		} catch (err) {
-			setError(err?.message ?? "Failed to send code");
+			setError(err?.message ?? strings("auth.sendFailed"));
 		} finally {
 			setLoading(false);
 		}
@@ -52,9 +53,9 @@ const Splash = () => {
 			});
 			const token = res?.data;
 			if (token) setToken(token);
-			else setError("No token received");
+			else setError(strings("auth.noToken"));
 		} catch (err) {
-			setError(err?.message ?? "Invalid code");
+			setError(err?.message ?? strings("auth.invalidCode"));
 		} finally {
 			setLoading(false);
 		}
@@ -79,9 +80,9 @@ const Splash = () => {
 			const res = await get(`/auth/dev/login?role=${role}`);
 			const token = res?.data?.token;
 			if (token) setToken(token);
-			else setError("No dev token received");
+			else setError(strings("auth.noToken"));
 		} catch (err) {
-			setError(err?.message ?? "Dev login failed");
+			setError(err?.message ?? strings("auth.devLoginFailed"));
 		} finally {
 			// On the no-token branch the spinner used to stay forever (both
 			// buttons disabled) until reload.
@@ -93,19 +94,19 @@ const Splash = () => {
 		<div className="flex min-h-screen items-center justify-center bg-slate-100 p-4">
 			<div className="w-full max-w-sm rounded-xl border border-slate-200 bg-white p-6 shadow-lg">
 				<h1 className="mb-6 text-center text-xl font-semibold text-slate-900">
-					{isAdmin ? "Admin Login" : "Login"}
+					{strings(isAdmin ? "auth.adminLogin" : "auth.login")}
 				</h1>
 
 				{step === "email" ? (
 					<>
 						<form onSubmit={handleEmailSubmit} className="space-y-4">
 							<Input
-								label="Email"
+								label={strings("page.accounts.email")}
 								name="email"
 								type="email"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
-								placeholder="you@example.com"
+								placeholder={strings("page.settings.emailPlaceholder")}
 								disabled={loading}
 								error={error}
 								required
@@ -115,7 +116,7 @@ const Splash = () => {
 								disabled={loading}
 								className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
 							>
-								{loading ? "Sending..." : "Continue"}
+								{loading ? strings("auth.sending") : strings("auth.continue")}
 							</button>
 						</form>
 
@@ -127,7 +128,7 @@ const Splash = () => {
 									disabled={loading}
 									className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 py-2.5 font-medium text-slate-800 transition hover:bg-slate-50 disabled:opacity-50"
 								>
-									<span>Continue with</span>
+									<span>{strings("auth.continueWith")}</span>
 									<img src="/stripe-logo.webp" alt="Stripe" className="h-6 w-auto translate-y-[1px]" />
 								</button>
 							</div>
@@ -136,13 +137,11 @@ const Splash = () => {
 				) : (
 					<form onSubmit={handleOtpSubmit} className="space-y-4">
 						<p className="text-sm text-slate-600">
-							We sent a code to{" "}
-							<strong className="text-slate-900">
-								{email}
-							</strong>
+							{strings("auth.codeSentTo")}{" "}
+							<strong className="text-slate-900">{email}</strong>
 						</p>
 						<Input
-							label="Verification code"
+							label={strings("auth.verificationCode")}
 							name="otp"
 							type="text"
 							inputMode="numeric"
@@ -151,7 +150,7 @@ const Splash = () => {
 							onChange={(e) =>
 								setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
 							}
-							placeholder="123456"
+							placeholder={strings("auth.codePlaceholder")}
 							disabled={loading}
 							error={error}
 							required
@@ -161,7 +160,7 @@ const Splash = () => {
 							disabled={loading || otp.length < 6}
 							className="w-full rounded-lg bg-slate-800 px-4 py-2.5 font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
 						>
-							{loading ? "Verifying..." : "Verify"}
+							{loading ? strings("auth.verifying") : strings("auth.verify")}
 						</button>
 						<button
 							type="button"
@@ -169,7 +168,7 @@ const Splash = () => {
 							disabled={loading}
 							className="w-full text-sm text-slate-500 hover:text-slate-700"
 						>
-							← Use different email
+							← {strings("auth.differentEmail")}
 						</button>
 					</form>
 				)}
@@ -177,7 +176,7 @@ const Splash = () => {
 				{DEV_LOGIN && (
 					<div className="mt-6 border-t border-dashed border-amber-300 pt-4">
 						<p className="mb-2 text-center text-xs font-medium text-amber-600">
-							Local dev login (no OTP)
+							{strings("auth.devLogin")}
 						</p>
 						<div className="flex gap-2">
 							<button
@@ -186,7 +185,7 @@ const Splash = () => {
 								disabled={loading}
 								className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
 							>
-								Admin
+								{strings("accountType.admin")}
 							</button>
 							<button
 								type="button"
@@ -194,7 +193,7 @@ const Splash = () => {
 								disabled={loading}
 								className="flex-1 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
 							>
-								Merchant
+								{strings("accountType.merchant")}
 							</button>
 						</div>
 					</div>

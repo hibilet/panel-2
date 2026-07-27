@@ -285,12 +285,12 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 									<Input
 										label={strings("form.link.title")}
 										{...register("title")}
-										placeholder="Eg: Summer Festival 2024"
+										placeholder={strings("page.link.namePlaceholder")}
 									/>
 									<Input
 										label={strings("form.link.slug")}
 										{...register("slug")}
-										placeholder="Eg: summer-festival-2024"
+										placeholder={strings("page.link.slugPlaceholder")}
 									/>
 								</fieldset>
 
@@ -338,7 +338,7 @@ const LinkPanel = ({ id, onClose, onSaved, onArchived, onDeleted }) => {
 									<Textarea
 										label={strings("form.link.description")}
 										{...register("description")}
-										placeholder="Eg: Join us for an amazing summer festival..."
+										placeholder={strings("page.link.descPlaceholder")}
 									/>
 								</fieldset>
 

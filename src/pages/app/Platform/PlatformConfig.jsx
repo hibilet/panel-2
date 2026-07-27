@@ -1,44 +1,46 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { get, put } from "../../../lib/client";
+import strings from "../../../localization";
 
 // Superadmin editor for the BASE platform config store (Stripe/SMTP/AI/URL
 // fallbacks behind per-realm overrides). Config values are editable text;
 // secrets show only set/unset and a field to REPLACE (their value never leaves
 // the server). A key also set in .env is pinned there (SSOT) and shown as such.
-const META = {
-	// URLs
-	API_URL: { group: "URLs", label: "API URL" },
-	DASHBOARD_URL: { group: "URLs", label: "Panel URL" },
-	TICKETS_URL: { group: "URLs", label: "Widget / tickets URL" },
-	// Stripe
-	STRIPE_CONNECT_CLIENT_ID: { group: "Stripe", label: "Connect client id" },
-	STRIPE_CONNECT_REDIRECT_URI: { group: "Stripe", label: "Connect redirect URI" },
-	STRIPE_CONNECT_SECRET: { group: "Stripe", label: "Connect secret" },
-	STRIPE_CONNECT_WEBHOOK_SECRET: { group: "Stripe", label: "Connect webhook secret" },
-	STRIPE_TRANSACTION_WEBHOOK_SECRET: { group: "Stripe", label: "Transaction webhook secret" },
-	STRIPE_BILLING_WEBHOOK_SECRET: { group: "Stripe", label: "Billing webhook secret" },
-	// Email
-	SMTP_HOST: { group: "Email", label: "SMTP host" },
-	SMTP_PORT: { group: "Email", label: "SMTP port" },
-	SMTP_USER: { group: "Email", label: "SMTP user" },
-	SMTP_NAME: { group: "Email", label: "SMTP from-name" },
-	SMTP_PASS: { group: "Email", label: "SMTP password" },
-	RESEND_API_KEY: { group: "Email", label: "Resend API key" },
-	RESEND_WEBHOOK_SECRET: { group: "Email", label: "Resend webhook secret" },
-	RESEND_REGION: { group: "Email", label: "Resend region" },
-	// AI / media
-	XAI_MODEL: { group: "AI / media", label: "xAI model" },
-	OPEN_ROUTER_API_KEY: { group: "AI / media", label: "OpenRouter API key" },
-	XAI_API_KEY: { group: "AI / media", label: "xAI API key" },
-	IMGBB_API_KEY: { group: "AI / media", label: "ImgBB API key" },
-	// Other
-	CLOUDFLARE_ZONE_ID: { group: "Other", label: "Cloudflare zone id" },
-	CLOUDFLARE_API_TOKEN: { group: "Other", label: "Cloudflare API token" },
-	IPGEO_URL: { group: "Other", label: "IP-geo URL" },
+// Group per env key; the display name for both the key and its group comes
+// from the dictionary (page.platform.config.field.<KEY> / .group.<group>) so
+// this screen reads in the operator's language like the rest of the panel.
+const GROUP_OF = {
+	API_URL: "urls",
+	DASHBOARD_URL: "urls",
+	TICKETS_URL: "urls",
+	STRIPE_CONNECT_CLIENT_ID: "stripe",
+	STRIPE_CONNECT_REDIRECT_URI: "stripe",
+	STRIPE_CONNECT_SECRET: "stripe",
+	STRIPE_CONNECT_WEBHOOK_SECRET: "stripe",
+	STRIPE_TRANSACTION_WEBHOOK_SECRET: "stripe",
+	STRIPE_BILLING_WEBHOOK_SECRET: "stripe",
+	SMTP_HOST: "email",
+	SMTP_PORT: "email",
+	SMTP_USER: "email",
+	SMTP_NAME: "email",
+	SMTP_PASS: "email",
+	RESEND_API_KEY: "email",
+	RESEND_WEBHOOK_SECRET: "email",
+	RESEND_REGION: "email",
+	XAI_MODEL: "ai",
+	OPEN_ROUTER_API_KEY: "ai",
+	XAI_API_KEY: "ai",
+	IMGBB_API_KEY: "ai",
+	CLOUDFLARE_ZONE_ID: "other",
+	CLOUDFLARE_API_TOKEN: "other",
+	IPGEO_URL: "other",
 };
-const GROUP_ORDER = ["URLs", "Stripe", "Email", "AI / media", "Other"];
-const metaOf = (k) => META[k] ?? { group: "Other", label: k };
+const GROUP_ORDER = ["urls", "stripe", "email", "ai", "other"];
+const groupOf = (k) => GROUP_OF[k] ?? "other";
+// An unknown key (added server-side, not yet listed here) falls back to the
+// raw env name rather than rendering a missing-translation placeholder.
+const fieldLabel = (k) => (GROUP_OF[k] ? strings(`page.platform.config.field.${k}`) : k);
 
 const PlatformConfig = () => {
 	const [open, setOpen] = useState(false);
@@ -54,7 +56,7 @@ const PlatformConfig = () => {
 			setCfg(res.data?.config ?? {});
 			setSec({});
 		})
-		.catch((e) => setStatus(e?.message ?? "Load failed"));
+		.catch((e) => setStatus(e?.message ?? strings("error.failedLoad")));
 	useEffect(() => { load(); }, []);
 
 	const configKeys = useMemo(() => data?.keys?.config ?? [], [data]);
@@ -65,8 +67,7 @@ const PlatformConfig = () => {
 	const groups = useMemo(() => {
 		const g = {};
 		for (const k of [...configKeys, ...secretKeys]) {
-			const { group } = metaOf(k);
-			(g[group] ??= []).push(k);
+			(g[groupOf(k)] ??= []).push(k);
 		}
 		return GROUP_ORDER.filter((name) => g[name]).map((name) => [name, g[name]]);
 	}, [configKeys, secretKeys]);
@@ -85,7 +86,7 @@ const PlatformConfig = () => {
 			setSec({});
 			setStatus("saved");
 		} catch (err) {
-			setStatus(err?.message ?? "Save failed");
+			setStatus(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setSaving(false);
 		}
@@ -102,7 +103,7 @@ const PlatformConfig = () => {
 			>
 				<span className="flex items-center gap-2">
 					<i className="fa-solid fa-sliders text-slate-500" aria-hidden />
-					Platform settings (Stripe / SMTP / AI - operator defaults)
+					{strings("page.platform.config.title")}
 				</span>
 				<i className={`fa-solid fa-chevron-${open ? "up" : "down"} text-slate-400`} aria-hidden />
 			</button>
@@ -110,30 +111,28 @@ const PlatformConfig = () => {
 			{open && (
 				<div className="border-t border-slate-200 px-4 py-4">
 					<p className="mb-3 text-xs text-slate-500">
-						Operator-wide fallbacks behind per-realm overrides, stored encrypted in
-						the database. Secrets show only whether they are set - enter a value to
-						replace. A key also present in <code>.env</code> is pinned there and wins
-						over this store.
+						{strings("page.platform.config.intro")}
 					</p>
 
 					{groups.map(([group, keys]) => (
 						<div key={group} className="mb-4">
-							<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">{group}</p>
+							<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+								{strings(`page.platform.config.group.${group}`)}
+							</p>
 							<div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 								{keys.map((k) => {
-									const { label } = metaOf(k);
 									const isPinned = pinned.has(k);
 									return (
 										<label key={k} className="text-xs font-medium text-slate-600">
 											<span className="flex items-center gap-2">
-												{label}
+												{fieldLabel(k)}
 												{isSecret(k) && (
 													<span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${data?.secretsSet?.[k] ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>
-														{data?.secretsSet?.[k] ? "set" : "not set"}
+														{strings(data?.secretsSet?.[k] ? "page.platform.config.set" : "page.platform.config.notSet")}
 													</span>
 												)}
 												{isPinned && (
-													<span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title="Set in .env - overrides this store">
+													<span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700" title={strings("page.platform.config.envPinned")}>
 														.env
 													</span>
 												)}
@@ -143,7 +142,7 @@ const PlatformConfig = () => {
 													type="password"
 													autoComplete="new-password"
 													value={sec[k] ?? ""}
-													placeholder={data?.secretsSet?.[k] ? "•••••• (enter to replace)" : "not set"}
+													placeholder={strings(data?.secretsSet?.[k] ? "page.platform.config.replaceHint" : "page.platform.config.notSet")}
 													onChange={(e) => setSec((s) => ({ ...s, [k]: e.target.value }))}
 													className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
 												/>
@@ -163,7 +162,7 @@ const PlatformConfig = () => {
 					))}
 
 					<div className="mt-2 flex items-center justify-end gap-3">
-						{status === "saved" && <span className="text-xs text-green-600">Saved</span>}
+						{status === "saved" && <span className="text-xs text-green-600">{strings("common.saved")}</span>}
 						{status && status !== "saved" && <span className="text-xs text-red-600">{status}</span>}
 						<button
 							type="button"
@@ -171,7 +170,7 @@ const PlatformConfig = () => {
 							disabled={saving || !data}
 							className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 						>
-							{saving ? "Saving…" : "Save settings"}
+							{saving ? strings("common.saving") : strings("page.platform.config.save")}
 						</button>
 					</div>
 				</div>

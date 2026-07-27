@@ -208,12 +208,12 @@ const Accounts = () => {
 							className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-medium text-slate-700 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-1 focus:ring-slate-500"
 						>
 							<option value="">{strings("page.accounts.byTab", "By tab")}</option>
-							<option value="account.admin">Admins</option>
-							<option value="account.merchant">Merchants</option>
-							<option value="account.customer">Customers</option>
-							<option value="account.staff">Staff</option>
-							<option value="account.reader">Readers</option>
-							<option value="account.3rdparty">3rd party</option>
+							<option value="account.admin">{strings("accountType.admin")}</option>
+							<option value="account.merchant">{strings("accountType.merchant")}</option>
+							<option value="account.customer">{strings("accountType.customer")}</option>
+							<option value="account.staff">{strings("accountType.staff")}</option>
+							<option value="account.reader">{strings("accountType.reader")}</option>
+							<option value="account.3rdparty">{strings("accountType.3rdparty")}</option>
 						</select>
 					)}
 					{superadmin && realms.length > 1 && (

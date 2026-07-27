@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
-import { CAPABILITIES, UNLIMITED } from "../../../../lib/capabilities";
+import { CAPABILITIES, UNLIMITED, capabilityLabel } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -494,7 +494,7 @@ const TierPanel = ({ id, onClose, onSaved, onDeleted }) => {
 										>
 											<div className="flex items-center gap-3">
 												<span className="flex-1 text-sm text-slate-700">
-													<span className="font-medium">{spec.label}</span>
+													<span className="font-medium">{capabilityLabel(key)}</span>
 													<span className="ml-2 text-xs text-slate-400">{key}</span>
 												</span>
 												{spec.type === "bool" ? (

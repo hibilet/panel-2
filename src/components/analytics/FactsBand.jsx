@@ -2,15 +2,11 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { get } from "../../lib/client";
 import Info from "../shared/Info";
+import strings from "../../localization";
 
-const SEGMENT_LABEL = {
-	whale: "Whales",
-	fan: "Fans",
-	repeat: "Repeat",
-	hesitant: "Hesitant",
-	direct: "Direct buyers",
-	one_time: "One-time",
-};
+const SEGMENT_KEYS = ["whale", "fan", "repeat", "hesitant", "direct", "one_time"];
+const segmentLabel = (key) =>
+	SEGMENT_KEYS.includes(key) ? strings(`page.analytics.segment.${key}`) : key;
 
 const Fact = ({ label, value, tone, info }) => (
 	<div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
@@ -44,33 +40,33 @@ const FactsBand = () => {
 
 	const top = s.topSegment;
 	return (
-		<section className="mb-8" aria-label="Audience and performance">
+		<section className="mb-8" aria-label={strings("dashboard.facts.title")}>
 			<div className="mb-3 flex items-center justify-between">
-				<h2 className="text-lg font-medium text-slate-900">Audience &amp; performance</h2>
+				<h2 className="text-lg font-medium text-slate-900">{strings("dashboard.facts.title")}</h2>
 				<Link href="/analytics" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-					Full analytics →
+					{strings("dashboard.facts.full")} →
 				</Link>
 			</div>
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-				<Fact label="Buyers" value={(s.buyers ?? 0).toLocaleString()} info="Distinct customers with at least one successful purchase." />
+				<Fact label={strings("page.analytics.stat.buyers")} value={(s.buyers ?? 0).toLocaleString()} info={strings("dashboard.facts.buyersInfo")} />
 				<Fact
-					label="Top segment"
-					value={top ? `${SEGMENT_LABEL[top.segment] ?? top.segment}` : "-"}
-					info="Your largest behavioral buyer group."
+					label={strings("dashboard.facts.topSegment")}
+					value={top ? segmentLabel(top.segment) : "-"}
+					info={strings("dashboard.facts.topSegmentInfo")}
 				/>
 				<Fact
-					label="Win-back"
+					label={strings("page.analytics.stat.winback")}
 					value={`${s.winback?.ratePct ?? 0}%`}
 					tone={s.winback?.ratePct >= 10 ? "text-emerald-600" : "text-slate-900"}
-					info="Share of churned leads who later purchased - remarketing effectiveness."
+					info={strings("dashboard.facts.winbackInfo")}
 				/>
 				<Fact
-					label="No-show"
+					label={strings("page.analytics.stat.noShow")}
 					value={`${s.sales?.noShowPct ?? 0}%`}
 					tone={s.sales?.noShowPct >= 20 ? "text-amber-600" : "text-slate-900"}
-					info="Sold tickets never scanned at the gate, for ended events. Needs door scanning to be meaningful."
+					info={strings("dashboard.facts.noShowInfo")}
 				/>
-				<Fact label="Sell-through" value={`${s.sales?.sellThroughPct ?? 0}%`} info="Tickets sold vs total capacity." />
+				<Fact label={strings("page.analytics.stat.sellThrough")} value={`${s.sales?.sellThroughPct ?? 0}%`} info={strings("dashboard.facts.sellThroughInfo")} />
 			</div>
 		</section>
 	);

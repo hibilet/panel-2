@@ -293,7 +293,7 @@ const Invoice = () => {
 										<thead className="bg-slate-50 text-xs uppercase text-slate-500">
 											<tr>
 												<th className="px-3 py-2 text-left">{strings("page.invoices.description")}</th>
-												<th className="px-3 py-2 text-right">Qty</th>
+												<th className="px-3 py-2 text-right">{strings("page.invoice.qty")}</th>
 												<th className="px-3 py-2 text-right">{strings("page.invoices.unit")}</th>
 												<th className="px-3 py-2 text-right">{strings("page.invoices.amount")}</th>
 												{canEdit && <th className="px-3 py-2"></th>}

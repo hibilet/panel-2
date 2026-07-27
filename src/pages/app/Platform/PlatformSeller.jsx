@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import strings from "../../../localization";
 
 import { get, put } from "../../../lib/client";
 
@@ -78,7 +79,7 @@ const PlatformSeller = () => {
 					</div>
 					<div className="mt-3 flex items-center justify-end gap-3">
 						{status === "saved" && (
-							<span className="text-xs text-green-600">Saved</span>
+							<span className="text-xs text-green-600">{strings("common.saved")}</span>
 						)}
 						{status && status !== "saved" && (
 							<span className="text-xs text-red-600">{status}</span>
@@ -89,7 +90,7 @@ const PlatformSeller = () => {
 							disabled={saving}
 							className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
 						>
-							{saving ? "Saving…" : "Save seller"}
+							{saving ? strings("common.saving") : strings("page.platform.seller.save")}
 						</button>
 					</div>
 				</div>

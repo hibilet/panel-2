@@ -11,13 +11,8 @@ const STATUS_OPTIONS = [
 ];
 
 const CATEGORY_OPTIONS = [
-	{ value: "event-hall", label: "Event Hall" },
-	{ value: "club", label: "Club" },
-	{ value: "theater", label: "Theater" },
-	{ value: "arena", label: "Arena" },
-	{ value: "stadium", label: "Stadium" },
-	{ value: "other", label: "Other" },
-];
+	"event-hall", "club", "theater", "arena", "stadium", "other",
+].map((value) => ({ value, label: strings(`venueCategory.${value}`) }));
 
 const defaultValues = {
 	name: "",

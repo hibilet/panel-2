@@ -520,7 +520,7 @@ const Navbar = () => {
 						<NotificationsBell />
 					</div>
 				</div>
-				<nav aria-label="Main navigation" className="relative mt-4">
+				<nav aria-label={strings("nav.main")} className="relative mt-4">
 					<div className="hidden md:flex md:flex-nowrap md:overflow-x-auto md:scroll-smooth items-center gap-2">
 						{barItems.map(({ path, labelKey, icon, tourId, liveOnly }) => {
 							const isActive =

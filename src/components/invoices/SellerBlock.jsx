@@ -4,9 +4,9 @@ import strings from "../../localization";
 import { Input, Select, Textarea } from "../inputs";
 
 const TAX_PROFILE_OPTIONS = [
-	{ value: "", label: "auto" },
-	{ value: "eu", label: "eu" },
-	{ value: "simple", label: "simple" },
+	{ value: "", label: strings("taxProfile.auto") },
+	{ value: "eu", label: strings("taxProfile.eu") },
+	{ value: "simple", label: strings("taxProfile.simple") },
 ];
 
 const COUNTRY_OPTIONS = [{ value: "", label: "-" }, ...COUNTRIES];
@@ -67,7 +67,7 @@ const SellerBlock = ({ register, errors, needsSetup = false }) => {
 						<Input
 							label={strings("form.realm.sellerInvoicePrefix")}
 							{...register("seller.invoiceNumberPrefix")}
-							placeholder="HIB"
+							placeholder={strings("form.realm.sellerInvoicePrefixPlaceholder")}
 						/>
 					</div>
 
@@ -75,39 +75,39 @@ const SellerBlock = ({ register, errors, needsSetup = false }) => {
 						<Input
 							label={strings("form.realm.sellerLegalName")}
 							{...register("seller.legalName")}
-							placeholder="Hibilet B.V."
+							placeholder={strings("form.realm.sellerLegalNamePlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerTradeName")}
 							{...register("seller.tradeName")}
-							placeholder="Hibilet"
+							placeholder={strings("form.realm.sellerTradeNamePlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerVatId")}
 							{...register("seller.vatId")}
-							placeholder="NL999999B01"
+							placeholder={strings("form.realm.sellerVatIdPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerRegistry")}
 							{...register("seller.registry")}
-							placeholder="KVK12345678"
+							placeholder={strings("form.realm.sellerRegistryPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerIban")}
 							{...register("seller.iban")}
-							placeholder="NL00 INGB 0000 0000 00"
+							placeholder={strings("form.realm.sellerIbanPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerEmail")}
 							type="email"
 							{...register("seller.email")}
-							placeholder="billing@example.com"
+							placeholder={strings("form.realm.sellerEmailPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerPhone")}
 							type="tel"
 							{...register("seller.phone")}
-							placeholder="+31 20 000 0000"
+							placeholder={strings("page.settings.phonePlaceholder")}
 						/>
 					</div>
 
@@ -115,17 +115,17 @@ const SellerBlock = ({ register, errors, needsSetup = false }) => {
 						<Input
 							label={strings("form.realm.sellerAddressStreet")}
 							{...register("seller.address.street")}
-							placeholder="Damrak 1"
+							placeholder={strings("form.realm.sellerStreetPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerAddressCity")}
 							{...register("seller.address.city")}
-							placeholder="Amsterdam"
+							placeholder={strings("form.realm.sellerCityPlaceholder")}
 						/>
 						<Input
 							label={strings("form.realm.sellerAddressZip")}
 							{...register("seller.address.zip")}
-							placeholder="1011AA"
+							placeholder={strings("form.realm.sellerZipPlaceholder")}
 						/>
 						<Select
 							label={strings("form.realm.sellerAddressCountry")}
@@ -138,7 +138,7 @@ const SellerBlock = ({ register, errors, needsSetup = false }) => {
 						label={strings("form.realm.sellerInvoiceFooter")}
 						{...register("seller.invoiceFooter")}
 						rows={2}
-						placeholder="Thanks for using Hibilet."
+						placeholder={strings("form.realm.sellerInvoiceFooterPlaceholder")}
 					/>
 				</div>
 			)}

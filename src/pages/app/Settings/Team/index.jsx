@@ -18,21 +18,14 @@ import strings from "../../../../localization";
  */
 
 const ROLES = [
-	{
-		value: "finance",
-		label: "Finance",
-		blurb: "Dashboard and transactions, including amounts.",
-	},
-	{
-		value: "event-manager",
-		label: "Event Manager",
-		blurb:
-			"Events, venues and links. No revenue figures, transactions or invoices.",
-	},
+	{ value: "finance" },
+	{ value: "event-manager" },
 ];
 
 const roleLabel = (value) =>
-	ROLES.find((r) => r.value === value)?.label ?? value;
+	ROLES.some((r) => r.value === value) ? strings(`staffRole.${value}`) : value;
+const roleBlurb = (value) =>
+	ROLES.some((r) => r.value === value) ? strings(`staffRole.${value}.blurb`) : "";
 
 const Team = () => {
 	const { account } = useApp();
@@ -126,8 +119,7 @@ const Team = () => {
 	if (isDelegated) {
 		return (
 			<div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-				You are signed in as {account.staff.name || account.staff.email}. Team
-				management is available to the account owner.
+				{strings("page.team.delegated", [account.staff.name || account.staff.email])}
 			</div>
 		);
 	}
@@ -135,10 +127,9 @@ const Team = () => {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-lg font-semibold text-slate-900">Team</h2>
+				<h2 className="text-lg font-semibold text-slate-900">{strings("page.team.title")}</h2>
 				<p className="mt-1 text-sm text-slate-500">
-					People who work on this account. Each sees only what their role
-					allows.
+					{strings("page.team.subtitle")}
 				</p>
 			</div>
 
@@ -153,54 +144,52 @@ const Team = () => {
 				className="grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:grid-cols-4 sm:items-end"
 			>
 				<Input
-					label="Name"
+					label={strings("common.name")}
 					value={form.name}
 					onChange={(e) => setForm({ ...form, name: e.target.value })}
-					placeholder="Jane Doe"
+					placeholder={strings("page.team.namePlaceholder")}
 				/>
 				<Input
-					label="Email"
+					label={strings("page.accounts.email")}
 					type="email"
 					value={form.email}
 					onChange={(e) => setForm({ ...form, email: e.target.value })}
-					placeholder="jane@example.com"
+					placeholder={strings("page.settings.emailPlaceholder")}
 				/>
 				<Select
-					label="Role"
+					label={strings("page.team.role")}
 					value={form.staffRole}
 					onChange={(e) => setForm({ ...form, staffRole: e.target.value })}
-					options={ROLES.map(({ value, label }) => ({ value, label }))}
+					options={ROLES.map(({ value }) => ({ value, label: roleLabel(value) }))}
 				/>
 				<button
 					type="submit"
 					disabled={creating || !form.email.trim()}
 					className="h-10 rounded-lg bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
 				>
-					{creating ? "Adding..." : "Add"}
+					{creating ? strings("page.team.adding") : strings("page.team.add")}
 				</button>
 				<p className="sm:col-span-4 text-xs text-slate-500">
-					{ROLES.find((r) => r.value === form.staffRole)?.blurb}{" "}
-					They sign in with a one-time code sent to this address, so it must be
-					a mailbox they can read.
+					{roleBlurb(form.staffRole)} {strings("page.team.inviteNote")}
 				</p>
 			</form>
 
 			<div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
 				{loading ? (
-					<div className="p-4 text-sm text-slate-500">Loading...</div>
+					<div className="p-4 text-sm text-slate-500">{strings("common.loading")}</div>
 				) : staff.length === 0 ? (
 					<div className="p-4 text-sm text-slate-500">
-						No team members yet.
+						{strings("page.team.empty")}
 					</div>
 				) : (
 					<table className="w-full text-sm">
 						<thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
 							<tr>
-								<th className="px-4 py-3">Name</th>
-								<th className="px-4 py-3">Email</th>
-								<th className="px-4 py-3">Role</th>
-								<th className="px-4 py-3">Status</th>
-								<th className="px-4 py-3 text-right">Actions</th>
+								<th className="px-4 py-3">{strings("common.name")}</th>
+								<th className="px-4 py-3">{strings("page.accounts.email")}</th>
+								<th className="px-4 py-3">{strings("page.team.role")}</th>
+								<th className="px-4 py-3">{strings("common.status")}</th>
+								<th className="px-4 py-3 text-right">{strings("common.actions")}</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-100">
@@ -224,7 +213,7 @@ const Team = () => {
 														: "bg-slate-100 text-slate-600"
 												}`}
 											>
-												{m.status}
+												{strings(m.status === "active" ? "common.active" : "common.inactive")}
 											</span>
 										</td>
 										<td className="px-4 py-3 text-right whitespace-nowrap">
@@ -234,12 +223,12 @@ const Team = () => {
 												disabled={busy || m.status !== "active"}
 												title={
 													m.status !== "active"
-														? "Only active members can be used"
-														: "See the panel as this person"
+														? strings("page.team.workAsDisabled")
+														: strings("page.team.workAsHint")
 												}
 												className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-40"
 											>
-												Work as
+												{strings("page.team.workAs")}
 											</button>
 											<button
 												type="button"
@@ -247,7 +236,7 @@ const Team = () => {
 												disabled={busy}
 												className="ml-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-40"
 											>
-												{m.status === "active" ? "Deactivate" : "Activate"}
+												{strings(m.status === "active" ? "page.team.deactivate" : "page.team.activate")}
 											</button>
 										</td>
 									</tr>

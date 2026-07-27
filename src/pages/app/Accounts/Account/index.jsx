@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormSection, Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
-import { CAPABILITIES, UNLIMITED } from "../../../../lib/capabilities";
+import { CAPABILITIES, UNLIMITED, capabilityLabel } from "../../../../lib/capabilities";
 import { get, patch, post, put } from "../../../../lib/client";
 import { getToken, pushToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
@@ -52,17 +52,16 @@ const AclOverrideEditor = ({ accountId, initialAcl, onSaved }) => {
 			setMsg("Saved.");
 			onSaved?.(res?.data ?? null);
 		} catch (e) {
-			setError(e?.message ?? "Save failed");
+			setError(e?.message ?? strings("error.failedSave"));
 		} finally {
 			setSaving(false);
 		}
 	};
 
 	return (
-		<FormSection title="ACL override (admin)" gridClassName="space-y-3">
+		<FormSection title={strings("page.accounts.aclTitle")} gridClassName="space-y-3">
 			<p className="text-xs text-slate-500">
-				Per-account override beats the tier value. Realm family disables still
-				win. Choose Inherit to fall back to the tier default.
+				{strings("page.accounts.aclHint")}
 			</p>
 			{error && (
 				<div className="rounded-md border border-red-200 bg-red-50 p-2 text-xs text-red-700">{error}</div>
@@ -81,7 +80,7 @@ const AclOverrideEditor = ({ accountId, initialAcl, onSaved }) => {
 							className="flex flex-wrap items-center gap-3 rounded-md border border-slate-100 px-3 py-2"
 						>
 							<span className="flex-1 text-sm text-slate-700">
-								<span className="font-medium">{spec.label}</span>
+								<span className="font-medium">{capabilityLabel(key)}</span>
 								<span className="ml-2 text-xs text-slate-400">{key}</span>
 							</span>
 							{spec.type === "bool" ? (
@@ -149,9 +148,9 @@ const AclOverrideEditor = ({ accountId, initialAcl, onSaved }) => {
 					className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 disabled:opacity-50"
 				>
 					{saving ? (
-						<><i className="fa-solid fa-spinner fa-spin" aria-hidden />Saving</>
+						<><i className="fa-solid fa-spinner fa-spin" aria-hidden />{strings("common.saving")}</>
 					) : (
-						<><i className="fa-solid fa-floppy-disk" aria-hidden />Save ACL</>
+						<><i className="fa-solid fa-floppy-disk" aria-hidden />{strings("page.accounts.saveAcl")}</>
 					)}
 				</button>
 			</div>
@@ -169,11 +168,11 @@ const defaultValues = {
 };
 
 const ACCOUNT_TYPE_OPTIONS = [
-	{ value: "account.merchant", label: "Merchant" },
-	{ value: "account.admin", label: "Admin" },
-	{ value: "account.customer", label: "Customer" },
-	{ value: "account.reader", label: "Reader" },
-	{ value: "account.3rdparty", label: "3rd party" },
+	{ value: "account.merchant", label: strings("accountType.merchant") },
+	{ value: "account.admin", label: strings("accountType.admin") },
+	{ value: "account.customer", label: strings("accountType.customer") },
+	{ value: "account.reader", label: strings("accountType.reader") },
+	{ value: "account.3rdparty", label: strings("accountType.3rdparty") },
 ];
 
 const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
@@ -411,7 +410,7 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 						<Input
 							label={strings("page.settings.phone")}
 							{...register("phone")}
-							placeholder="+90 555 555 5555"
+							placeholder={strings("page.settings.phonePlaceholder")}
 						/>
 						<Select
 							label={strings("common.status")}

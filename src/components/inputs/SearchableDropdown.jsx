@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { matchesQuery, normalize } from "../../utils/search";
+import strings from "../../localization";
 
 const labelClass = "block text-sm font-medium text-slate-700";
 const triggerBase =
@@ -25,7 +26,7 @@ const SearchableDropdown = ({
 	renderOption,
 	placeholder,
 	searchPlaceholder,
-	emptyText = "No results",
+	emptyText = strings("common.noResults"),
 	disabled,
 	error,
 	className = "",
@@ -222,7 +223,7 @@ const SearchableDropdown = ({
 								{!disabled && (
 									<button
 										type="button"
-										aria-label="Remove"
+										aria-label={strings("common.remove")}
 										onClick={(e) => {
 											e.stopPropagation();
 											handleRemoveChip(id);
@@ -283,7 +284,7 @@ const SearchableDropdown = ({
 					{!multi && value && !disabled && (
 						<button
 							type="button"
-							aria-label="Clear"
+							aria-label={strings("common.clearInput")}
 							onClick={(e) => {
 								e.stopPropagation();
 								onChange?.("");

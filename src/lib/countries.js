@@ -12,20 +12,7 @@ export const NUMERIC_TO_A2 = {
 	156: "CN", 356: "IN", 784: "AE", 682: "SA", 818: "EG", 710: "ZA", 504: "MA",
 };
 
-export const A2_NAME = {
-	DE: "Germany", AT: "Austria", CH: "Switzerland", NL: "Netherlands", FR: "France",
-	BE: "Belgium", GB: "United Kingdom", IT: "Italy", ES: "Spain", PT: "Portugal",
-	IE: "Ireland", LU: "Luxembourg", DK: "Denmark", SE: "Sweden", NO: "Norway",
-	FI: "Finland", IS: "Iceland", PL: "Poland", CZ: "Czechia", SK: "Slovakia",
-	HU: "Hungary", RO: "Romania", BG: "Bulgaria", GR: "Greece", HR: "Croatia",
-	SI: "Slovenia", RS: "Serbia", TR: "Turkey", US: "United States", CA: "Canada",
-	BA: "Bosnia & Herz.", MK: "North Macedonia", AL: "Albania", ME: "Montenegro",
-	MT: "Malta", CY: "Cyprus", EE: "Estonia", LV: "Latvia", LT: "Lithuania",
-	UA: "Ukraine", BY: "Belarus", RU: "Russia", LI: "Liechtenstein", MC: "Monaco",
-	AD: "Andorra", SM: "San Marino", XK: "Kosovo", MD: "Moldova", GE: "Georgia",
-	AE: "UAE", SA: "Saudi Arabia", IL: "Israel", MA: "Morocco", EG: "Egypt",
-	AU: "Australia", NZ: "New Zealand", JP: "Japan", KR: "South Korea", CN: "China",
-	IN: "India", BR: "Brazil", AR: "Argentina", MX: "Mexico", ZA: "South Africa",
-};
-
-export const countryName = (a2) => A2_NAME[a2] ?? a2;
+// Names come from Intl (see localization/index.js) so the map legend, the
+// billing forms and the country tables all read in the panel's language
+// instead of an English lookup table.
+export { countryName } from "../localization";

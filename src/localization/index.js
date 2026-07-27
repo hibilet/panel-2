@@ -69,5 +69,25 @@ const formatCurrency = (value, currency = DEFAULT_CURRENCY) => {
 	}).format(value);
 };
 
+// Country names come from the platform rather than the dictionary: ~60 codes
+// across 5 locales is 300 entries that Intl already knows, and keeps in step
+// with the browser. Falls back to the code itself where Intl is unavailable.
+let regionNames = null;
+try {
+	regionNames = new Intl.DisplayNames([locale], { type: "region" });
+} catch {
+	regionNames = null;
+}
+
+export const countryName = (code) => {
+	if (!code) return "";
+	const upper = String(code).toUpperCase();
+	try {
+		return regionNames?.of(upper) ?? upper;
+	} catch {
+		return upper;
+	}
+};
+
 export default strings;
-export { DEFAULT_CURRENCY, dictionary, formatCurrency, locales };
+export { DEFAULT_CURRENCY, dictionary, formatCurrency, locale, locales };

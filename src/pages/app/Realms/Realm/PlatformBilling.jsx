@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { get, post, put } from "../../../../lib/client";
-import { formatCurrency } from "../../../../localization";
+import strings, { formatCurrency } from "../../../../localization";
 
 // Superadmin-only: what the PLATFORM operator charges THIS realm - the second
 // billing layer, above realm -> merchant. Fixed + per-ticket + % of net, any
@@ -141,7 +141,7 @@ const PlatformBilling = ({ realmId, platform }) => {
 
 			<div className="mt-4 border-t border-slate-200 pt-3">
 				<div className="mb-2 flex items-center justify-between">
-					<span className="text-sm font-semibold text-slate-700">Invoices</span>
+					<span className="text-sm font-semibold text-slate-700">{strings("page.invoices.title")}</span>
 					<button
 						type="button"
 						onClick={issueNow}
@@ -149,22 +149,22 @@ const PlatformBilling = ({ realmId, platform }) => {
 						className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
 					>
 						<i className="fa-solid fa-plus" aria-hidden />
-						{issuing ? "Issuing…" : "Issue now (last month)"}
+						{issuing ? strings("page.platformBilling.issuing") : strings("page.platformBilling.issueNow")}
 					</button>
 				</div>
 
 				{invoices.length === 0 ? (
-					<p className="text-xs text-slate-500">No platform invoices yet.</p>
+					<p className="text-xs text-slate-500">{strings("page.platformBilling.empty")}</p>
 				) : (
 					<div className="overflow-x-auto">
 						<table className="w-full text-left text-sm">
 							<thead>
 								<tr className="text-xs text-slate-500">
-									<th className="py-1 pr-3">Number</th>
-									<th className="py-1 pr-3">Period</th>
-									<th className="py-1 pr-3">Tickets</th>
-									<th className="py-1 pr-3">Total</th>
-									<th className="py-1 pr-3">Status</th>
+									<th className="py-1 pr-3">{strings("page.platformBilling.col.number")}</th>
+									<th className="py-1 pr-3">{strings("page.platformBilling.col.period")}</th>
+									<th className="py-1 pr-3">{strings("page.platformBilling.col.tickets")}</th>
+									<th className="py-1 pr-3">{strings("page.platformBilling.col.total")}</th>
+									<th className="py-1 pr-3">{strings("common.status")}</th>
 								</tr>
 							</thead>
 							<tbody>
