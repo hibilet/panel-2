@@ -61,7 +61,9 @@ const formatCurrency = (value, currency = DEFAULT_CURRENCY) => {
 	if (!viewerSeesMoney()) return MONEY_MASK;
 	if (value == null) return "—";
 	const curr = typeof currency === "string" ? currency : DEFAULT_CURRENCY;
-	return new Intl.NumberFormat("en", {
+	// Format in the viewer's locale, not "en" - a German panel must read
+	// "1.234,00 €", not "€1,234.00".
+	return new Intl.NumberFormat(locale, {
 		style: "currency",
 		currency: curr.toUpperCase(),
 	}).format(value);

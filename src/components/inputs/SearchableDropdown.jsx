@@ -235,10 +235,14 @@ const SearchableDropdown = ({
 							</span>
 						))}
 
-					<div className="relative flex flex-1 items-center">
+					<div className="relative flex min-w-0 flex-1 items-center">
 						{showSingleOverlay && (
-							<span className="pointer-events-none absolute inset-y-0 left-0 flex items-center truncate text-sm text-slate-900">
-								{singleSelectedLabel}
+							// right-0 is load-bearing: without a right bound the absolutely
+							// positioned overlay sizes to its content and `truncate` never
+							// clips, so a long selection (eg "Verkaufsvertrag ...") spills
+							// out of the trigger and over the next grid column.
+							<span className="pointer-events-none absolute inset-y-0 left-0 right-0 flex items-center overflow-hidden whitespace-nowrap text-ellipsis text-sm text-slate-900">
+								<span className="truncate">{singleSelectedLabel}</span>
 							</span>
 						)}
 						<input

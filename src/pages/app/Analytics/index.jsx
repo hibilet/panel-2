@@ -627,10 +627,29 @@ const Analytics = () => {
 		};
 	}, [daily, rangeDays, isScoped]);
 
-	const currency = useMemo(
-		() => (daily ?? []).find((r) => r.currency)?.currency ?? "eur",
-		[daily],
-	);
+	// The page totals every event together, so one currency has to win. Picking
+	// the FIRST row's currency let a single CHF event relabel the whole panel
+	// (and every EUR figure on it) as CHF - pick the one carrying the most
+	// revenue instead.
+	const currency = useMemo(() => {
+		const byCurrency = new Map();
+		for (const r of daily ?? []) {
+			if (!r.currency) continue;
+			byCurrency.set(
+				r.currency,
+				(byCurrency.get(r.currency) ?? 0) + Math.abs(r.netCents ?? 0),
+			);
+		}
+		let best = null;
+		let bestWeight = -1;
+		for (const [code, weight] of byCurrency) {
+			if (weight > bestWeight) {
+				best = code;
+				bestWeight = weight;
+			}
+		}
+		return best ?? "eur";
+	}, [daily]);
 	const cur = useMemo(() => aggregate(curRows), [curRows]);
 	const prev = useMemo(() => aggregate(prevRows), [prevRows]);
 	const hasPrev = !isScoped && prevRows.length > 0;

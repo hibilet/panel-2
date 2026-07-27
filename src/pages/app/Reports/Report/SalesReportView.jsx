@@ -186,7 +186,9 @@ const SalesReportView = ({ report }) => {
 	// A single channel makes the channel breakdown redundant - hide it.
 	const showsChannels = channels.length > 1;
 
-	const currency = report?.params?.currency;
+	// The generator does not stamp a currency into params, so the sale's own
+	// currency is the authority; EUR is only the last resort.
+	const currency = report?.params?.currency ?? report?.sale?.currency;
 	const breakdown = report?.breakdown ?? [];
 	// A single ticket type makes the breakdown redundant - hide it.
 	const showsTicketTypes = breakdown.length > 1;

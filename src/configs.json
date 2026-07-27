@@ -6,11 +6,21 @@
     },
     "panel.tixcore.de": {
       "title": "Tixcore Panel",
-      "favicon": "tixcore-favicon.png"
+      "favicon": "tixcore-favicon.svg"
     },
     "dashboard.tixcore.de": {
       "title": "Tixcore Panel",
-      "favicon": "tixcore-favicon.png"
+      "favicon": "tixcore-favicon.svg"
+    }
+  },
+  "domains": {
+    "tixcore.de": {
+      "title": "Tixcore Panel",
+      "favicon": "tixcore-favicon.svg"
+    },
+    "hibilet.com": {
+      "title": "HIBilet Panel",
+      "favicon": "hibilet-favicon.svg"
     }
   }
 }

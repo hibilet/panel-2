@@ -160,7 +160,7 @@ const SalesPrint = ({ report }) => {
 	const raw = report?.raw_data ?? [];
 	const leads = report?.leads_data ?? [];
 	const breakdown = report?.breakdown ?? [];
-	const currency = report?.params?.currency;
+	const currency = report?.params?.currency ?? report?.sale?.currency;
 
 	const chartData = isHourly
 		? buildHourly(raw, leads)

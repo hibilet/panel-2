@@ -245,7 +245,10 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 			<h2 className="text-lg font-medium text-slate-900">
 				{strings("form.sale.paymentInformation")}
 			</h2>
-			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-4">
+			{/* Four columns only from lg: at md the German labels ("Transaktions-
+			    anbieter", "Verkaufsvertrag") and the selected values do not fit a
+			    quarter-width cell. */}
+			<section className="rounded-xl border border-slate-200 bg-white p-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Controller
 					name="provider"
 					control={control}

@@ -4,11 +4,34 @@ import "./lib/firebase";
 import profiles from "./configs.json";
 
 const host = typeof window !== "undefined" ? window.location.hostname : "";
-const profile = profiles.profiles[host] ?? profiles.profiles["panel.hibilet.com"];
+
+// Exact host first, then the registrable domain, so any tixcore.de host
+// (panel., dashboard., a preview subdomain) still gets the Tixcore branding
+// instead of silently falling back to HIBilet.
+const resolveProfile = (hostname) => {
+	if (profiles.profiles[hostname]) return profiles.profiles[hostname];
+	const parts = hostname.split(".");
+	for (let i = 0; i < parts.length - 1; i += 1) {
+		const suffix = parts.slice(i).join(".");
+		if (profiles.domains?.[suffix]) return profiles.domains[suffix];
+	}
+	return profiles.profiles["panel.hibilet.com"];
+};
+
+const profile = resolveProfile(host);
 if (typeof document !== "undefined") {
 	document.title = profile.title;
-	const link = document.querySelector('link[rel="icon"]');
-	if (link) link.href = `/${profile.favicon}`;
+	// The <link rel="icon"> may not exist yet (index.html ships one, but a
+	// stripped host page might not) - create it rather than skipping, which is
+	// how the favicon silently never got applied before.
+	let link = document.querySelector('link[rel="icon"]');
+	if (!link) {
+		link = document.createElement("link");
+		link.rel = "icon";
+		document.head.appendChild(link);
+	}
+	link.type = profile.favicon.endsWith(".svg") ? "image/svg+xml" : "image/png";
+	link.href = `/${profile.favicon}`;
 }
 
 import { TourProvider } from "@reactour/tour";
