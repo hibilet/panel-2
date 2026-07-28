@@ -467,8 +467,8 @@ const Analytics = () => {
 		(async () => {
 			try {
 				const [w, sa, past] = await Promise.all([
-					get("/analytics/winback"),
-					get("/analytics/sales"),
+					get("/facts/winback"),
+					get("/facts/sales"),
 					get("/sales?past=true").catch(() => ({ data: [] })),
 				]);
 				if (!alive) return;
@@ -503,15 +503,15 @@ const Analytics = () => {
 			: `days=${effectiveDays}`;
 		const saleQs = scoped ? `&sale=${saleCsv}` : "";
 		Promise.all([
-			get(`/analytics/segments?${saleParam}`),
-			get(`/analytics/sales-daily?${dailyRange}${saleQs}`),
-			get(`/analytics/channels?${saleParam}`),
-			get(`/analytics/coupons?${saleParam}`),
-			get(`/analytics/timing?${saleParam}`),
-			get(`/analytics/affinity?${saleParam}`),
-			get(`/analytics/friction?${saleParam}`),
-			get(`/analytics/engagement?${saleParam}`),
-			get(`/analytics/events?${saleParam}`),
+			get(`/facts/segments?${saleParam}`),
+			get(`/facts/sales-daily?${dailyRange}${saleQs}`),
+			get(`/facts/channels?${saleParam}`),
+			get(`/facts/coupons?${saleParam}`),
+			get(`/facts/timing?${saleParam}`),
+			get(`/facts/affinity?${saleParam}`),
+			get(`/facts/friction?${saleParam}`),
+			get(`/facts/engagement?${saleParam}`),
+			get(`/facts/events?${saleParam}`),
 		])
 			.then(([s, d, ch, co, tm, af, fr, en, ev]) => {
 				if (!alive) return;
@@ -548,8 +548,8 @@ const Analytics = () => {
 		const pp = new URLSearchParams(p);
 		pp.delete("payment");
 		Promise.all([
-			get(`/analytics/demographics?${p}`),
-			get(`/analytics/payments?${pp}`),
+			get(`/facts/demographics?${p}`),
+			get(`/facts/payments?${pp}`),
 		])
 			.then(([dm, pm]) => {
 				if (!alive) return;

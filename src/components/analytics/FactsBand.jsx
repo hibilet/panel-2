@@ -26,7 +26,7 @@ const FactsBand = () => {
 
 	useEffect(() => {
 		let alive = true;
-		get("/analytics/summary")
+		get("/facts/summary")
 			.then((r) => alive && setS(r.data))
 			.catch(() => alive && setHidden(true));
 		return () => {
