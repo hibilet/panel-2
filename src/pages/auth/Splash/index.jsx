@@ -7,7 +7,7 @@ import { setToken } from "../../../lib/storage";
 import strings from "../../../localization";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-const SHOW_STRIPE = (import.meta.env.VITE_AUTH_MODE ?? "").toLowerCase() !== "off";
+const SHOW_STRIPE = false;
 // dev:local runs `vite --mode loc`; only then expose the one-click dev login.
 const DEV_LOGIN = import.meta.env.MODE === "loc";
 
