@@ -30,7 +30,18 @@ export const salesColumns = (extended, onDelete) => [
 		key: "name",
 		header: strings("table.sale.name"),
 		headerCell: true,
-		render: (r) => r.name ?? "—",
+		// A cancelled event still lists (its refunds and reports live on), so it
+		// has to say so here - otherwise it reads as any other upcoming event.
+		render: (r) => (
+			<span className="inline-flex items-center gap-2">
+				{r.name ?? "—"}
+				{r.status === "cancelled" && (
+					<span className="inline-flex rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold text-red-700">
+						{strings("common.cancelled")}
+					</span>
+				)}
+			</span>
+		),
 	},
 	{
 		key: "venue",

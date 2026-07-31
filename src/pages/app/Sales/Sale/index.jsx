@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
+import SaleCancelZone from "../../../../components/sales/SaleCancelZone";
 import DangerZone from "../../../../components/shared/DangerZone";
 import { useApp } from "../../../../context";
 import { API_BASE_URL, del, get } from "../../../../lib/client";
@@ -174,7 +175,15 @@ const Sale = () => {
 				{strings("back.sales")}
 			</Link>
 			<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-				<h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
+				<h1 className="flex items-center gap-3 text-2xl font-semibold text-slate-900">
+					{title}
+					{sale?.status === "cancelled" && (
+						<span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-3 py-1 text-xs font-semibold text-red-700">
+							<i className="fa-solid fa-ban" aria-hidden />
+							{strings("common.cancelled")}
+						</span>
+					)}
+				</h1>
 				{!isNew && sale && (
 					<button
 						type="button"
@@ -261,6 +270,15 @@ const Sale = () => {
 							<Route path="/sales/:id/report" component={SaleReport} />
 						</Switch>
 					</main>
+
+					{/* Cancelling is money, so it is merchant/admin only - the same
+					    gate the API puts on POST /sales/:id/cancel. */}
+					{isTabActive("basic") &&
+						!isNew &&
+						sale &&
+						["account.admin", "account.merchant"].includes(account?.type) && (
+							<SaleCancelZone sale={sale} onChanged={fetchSale} />
+						)}
 
 					{isTabActive("basic") &&
 						["account.admin", "account.merchant"].includes(account?.type) && (

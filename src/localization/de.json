@@ -1908,5 +1908,21 @@
 	"form.realm.sellerEmailPlaceholder": "rechnung@beispiel.de",
 	"form.realm.sellerStreetPlaceholder": "Musterstraße 1",
 	"form.realm.sellerCityPlaceholder": "Berlin",
-	"form.realm.sellerZipPlaceholder": "10115"
+	"form.realm.sellerZipPlaceholder": "10115",
+	"common.cancelled": "Abgesagt",
+	"page.sale.cancel.title": "Veranstaltung absagen",
+	"page.sale.cancel.desc": "Stoppt den Verkauf, erstattet jede bezahlte Bestellung und storniert alle verbleibenden Tickets. Alle Inhaber werden per E-Mail informiert.",
+	"page.sale.cancel.button": "Veranstaltung absagen",
+	"page.sale.cancel.confirmTitle": "Diese Veranstaltung absagen?",
+	"page.sale.cancel.confirmBody": "Der Verkauf stoppt sofort. Die Erstattungen laufen im Hintergrund und können hier nicht rückgängig gemacht werden.",
+	"page.sale.cancel.impact": "$0 bezahlte Bestellung(en) werden erstattet und $1 Ticket(s) storniert.",
+	"page.sale.cancel.reason": "Grund (optional)",
+	"page.sale.cancel.reasonPlaceholder": "z. B. Wetter",
+	"page.sale.cancel.cancelledTitle": "Veranstaltung abgesagt",
+	"page.sale.cancel.cancelledDesc": "Der Verkauf ist gestoppt. Erstattungen und Ticketstornierungen laufen im Hintergrund.",
+	"page.sale.cancel.running": "Erstattung läuft ...",
+	"page.sale.cancel.done": "Abgeschlossen",
+	"page.sale.cancel.refunded": "$0 erstattet",
+	"page.sale.cancel.voided": "$0 Ticket(s) storniert",
+	"page.sale.cancel.failed": "$0 fehlgeschlagen"
 }

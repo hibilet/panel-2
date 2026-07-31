@@ -1908,5 +1908,21 @@
 	"form.realm.sellerEmailPlaceholder": "facturatie@voorbeeld.nl",
 	"form.realm.sellerStreetPlaceholder": "Damrak 1",
 	"form.realm.sellerCityPlaceholder": "Amsterdam",
-	"form.realm.sellerZipPlaceholder": "1011AA"
+	"form.realm.sellerZipPlaceholder": "1011AA",
+	"common.cancelled": "Geannuleerd",
+	"page.sale.cancel.title": "Evenement annuleren",
+	"page.sale.cancel.desc": "Stopt de verkoop, betaalt elke betaalde bestelling terug en annuleert alle resterende tickets. Elke houder krijgt een e-mail.",
+	"page.sale.cancel.button": "Evenement annuleren",
+	"page.sale.cancel.confirmTitle": "Dit evenement annuleren?",
+	"page.sale.cancel.confirmBody": "De verkoop stopt onmiddellijk. Terugbetalingen lopen op de achtergrond en kunnen hier niet ongedaan worden gemaakt.",
+	"page.sale.cancel.impact": "$0 betaalde bestelling(en) worden terugbetaald en $1 ticket(s) geannuleerd.",
+	"page.sale.cancel.reason": "Reden (optioneel)",
+	"page.sale.cancel.reasonPlaceholder": "bijv. weer",
+	"page.sale.cancel.cancelledTitle": "Evenement geannuleerd",
+	"page.sale.cancel.cancelledDesc": "De verkoop is gestopt. Terugbetalingen en ticketannuleringen lopen op de achtergrond.",
+	"page.sale.cancel.running": "Bezig met terugbetalen...",
+	"page.sale.cancel.done": "Klaar",
+	"page.sale.cancel.refunded": "$0 terugbetaald",
+	"page.sale.cancel.voided": "$0 ticket(s) geannuleerd",
+	"page.sale.cancel.failed": "$0 mislukt"
 }

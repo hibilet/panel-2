@@ -1908,5 +1908,21 @@
 	"form.realm.sellerEmailPlaceholder": "fatura@ornek.com",
 	"form.realm.sellerStreetPlaceholder": "Örnek Cadde 1",
 	"form.realm.sellerCityPlaceholder": "İstanbul",
-	"form.realm.sellerZipPlaceholder": "34000"
+	"form.realm.sellerZipPlaceholder": "34000",
+	"common.cancelled": "İptal edildi",
+	"page.sale.cancel.title": "Etkinliği iptal et",
+	"page.sale.cancel.desc": "Satışı durdurur, ödenmiş tüm siparişleri iade eder ve kalan tüm biletleri iptal eder. Tüm bilet sahiplerine e-posta gönderilir.",
+	"page.sale.cancel.button": "Etkinliği iptal et",
+	"page.sale.cancel.confirmTitle": "Bu etkinlik iptal edilsin mi?",
+	"page.sale.cancel.confirmBody": "Satış hemen durur. İadeler arka planda çalışır ve buradan geri alınamaz.",
+	"page.sale.cancel.impact": "$0 ödenmiş sipariş iade edilecek ve $1 bilet iptal edilecek.",
+	"page.sale.cancel.reason": "Sebep (opsiyonel)",
+	"page.sale.cancel.reasonPlaceholder": "örn. hava durumu",
+	"page.sale.cancel.cancelledTitle": "Etkinlik iptal edildi",
+	"page.sale.cancel.cancelledDesc": "Satış durduruldu. İadeler ve bilet iptalleri arka planda çalışıyor.",
+	"page.sale.cancel.running": "İade ediliyor...",
+	"page.sale.cancel.done": "Tamamlandı",
+	"page.sale.cancel.refunded": "$0 iade edildi",
+	"page.sale.cancel.voided": "$0 bilet iptal edildi",
+	"page.sale.cancel.failed": "$0 başarısız"
 }

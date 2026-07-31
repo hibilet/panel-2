@@ -1908,5 +1908,21 @@
 	"form.realm.sellerEmailPlaceholder": "facturation@exemple.fr",
 	"form.realm.sellerStreetPlaceholder": "1 rue de l'Exemple",
 	"form.realm.sellerCityPlaceholder": "Paris",
-	"form.realm.sellerZipPlaceholder": "75001"
+	"form.realm.sellerZipPlaceholder": "75001",
+	"common.cancelled": "Annulé",
+	"page.sale.cancel.title": "Annuler l'événement",
+	"page.sale.cancel.desc": "Arrête la vente, rembourse chaque commande payée et annule tous les billets restants. Chaque détenteur reçoit un e-mail.",
+	"page.sale.cancel.button": "Annuler l'événement",
+	"page.sale.cancel.confirmTitle": "Annuler cet événement ?",
+	"page.sale.cancel.confirmBody": "La vente s'arrête immédiatement. Les remboursements s'exécutent en arrière-plan et sont irréversibles depuis cette page.",
+	"page.sale.cancel.impact": "$0 commande(s) payée(s) seront remboursées et $1 billet(s) annulés.",
+	"page.sale.cancel.reason": "Motif (facultatif)",
+	"page.sale.cancel.reasonPlaceholder": "p. ex. météo",
+	"page.sale.cancel.cancelledTitle": "Événement annulé",
+	"page.sale.cancel.cancelledDesc": "La vente est arrêtée. Les remboursements et annulations de billets s'exécutent en arrière-plan.",
+	"page.sale.cancel.running": "Remboursement en cours...",
+	"page.sale.cancel.done": "Terminé",
+	"page.sale.cancel.refunded": "$0 remboursé(s)",
+	"page.sale.cancel.voided": "$0 billet(s) annulés",
+	"page.sale.cancel.failed": "$0 en échec"
 }

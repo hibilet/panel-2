@@ -1908,5 +1908,21 @@
 	"form.realm.sellerEmailPlaceholder": "billing@example.com",
 	"form.realm.sellerStreetPlaceholder": "1 High Street",
 	"form.realm.sellerCityPlaceholder": "London",
-	"form.realm.sellerZipPlaceholder": "SW1A 1AA"
+	"form.realm.sellerZipPlaceholder": "SW1A 1AA",
+	"common.cancelled": "Cancelled",
+	"page.sale.cancel.title": "Cancel event",
+	"page.sale.cancel.desc": "Stops sales, refunds every paid order and voids every remaining ticket. Each holder is emailed.",
+	"page.sale.cancel.button": "Cancel event",
+	"page.sale.cancel.confirmTitle": "Cancel this event?",
+	"page.sale.cancel.confirmBody": "The event stops selling immediately. Refunds run in the background and cannot be undone from here.",
+	"page.sale.cancel.impact": "$0 paid order(s) will be refunded and $1 ticket(s) voided.",
+	"page.sale.cancel.reason": "Reason (optional)",
+	"page.sale.cancel.reasonPlaceholder": "e.g. weather",
+	"page.sale.cancel.cancelledTitle": "Event cancelled",
+	"page.sale.cancel.cancelledDesc": "Sales are stopped. Refunds and ticket cancellations run in the background.",
+	"page.sale.cancel.running": "Refunding...",
+	"page.sale.cancel.done": "Finished",
+	"page.sale.cancel.refunded": "$0 refunded",
+	"page.sale.cancel.voided": "$0 ticket(s) voided",
+	"page.sale.cancel.failed": "$0 failed"
 }
