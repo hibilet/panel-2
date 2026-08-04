@@ -46,6 +46,8 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 	const [refunds, setRefunds] = useState([]);
 	const [refundsLoading, setRefundsLoading] = useState(false);
 	const [polling, setPolling] = useState(false);
+	const [checking, setChecking] = useState(false);
+	const [checkResult, setCheckResult] = useState(null);
 
 	const loadRefunds = (silent = false) => {
 		if (!silent) setRefundsLoading(true);
@@ -108,6 +110,25 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 
 	const handleSendToAnotherEmail = () => {
 		setEmailDialogOpen(true);
+	};
+
+	// Pending transaction: ask the gateway what really happened. Paid means the
+	// API confirmed it and sent the ticket, so reload the panel and the list.
+	const handleCheckStatus = () => {
+		if (checking) return;
+		setChecking(true);
+		setCheckResult(null);
+		post(`/transactions/${id}/check-status`, {})
+			.then(async (res) => {
+				const result = res?.data ?? null;
+				setCheckResult(result);
+				if (result?.paid) {
+					await reloadTransaction();
+					onRefunded?.();
+				}
+			})
+			.catch(() => {})
+			.finally(() => setChecking(false));
 	};
 
 	const reservations = data?.reservations ?? [];
@@ -221,8 +242,42 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 									<i className="fa-solid fa-rotate-left" aria-hidden />
 									{strings("form.transaction.refundAll")}
 								</button>
+								{data?.status === "pending" && (
+									<button
+										type="button"
+										onClick={handleCheckStatus}
+										disabled={checking}
+										className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+									>
+										{checking ? (
+											<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+										) : (
+											<i className="fa-solid fa-magnifying-glass-dollar" aria-hidden />
+										)}
+										{strings("form.transaction.checkStatus")}
+									</button>
+								)}
 							</div>
 						</section>
+
+						{checkResult && (
+							<div
+								className={`rounded-lg border p-3 text-sm ${
+									checkResult.paid
+										? "border-emerald-200 bg-emerald-50 text-emerald-800"
+										: "border-amber-200 bg-amber-50 text-amber-800"
+								}`}
+								role="status"
+							>
+								{checkResult.paid
+									? strings(
+											checkResult.changed
+												? "form.transaction.checkStatusConfirmed"
+												: "form.transaction.checkStatusAlreadyPaid",
+										)
+									: strings("form.transaction.checkStatusUnpaid")}
+							</div>
+						)}
 
 						<section>
 							<h3 className="mb-3 text-sm font-semibold text-slate-700">

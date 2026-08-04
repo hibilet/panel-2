@@ -773,6 +773,10 @@
 	"form.attendees.product": "Ürün",
 	"form.attendees.printTitle": "Katılımcılar - $0",
 	"form.transaction.sendEmailAgain": "E-postayı Tekrar Gönder",
+	"form.transaction.checkStatus": "Ödeme Durumunu Kontrol Et",
+	"form.transaction.checkStatusConfirmed": "Ödeme sağlayıcıda onaylandı. İşlem başarılı duruma geçti ve bilet gönderildi.",
+	"form.transaction.checkStatusAlreadyPaid": "Ödeme sağlayıcıda onaylı. Bu işlem zaten işlenmişti.",
+	"form.transaction.checkStatusUnpaid": "Sağlayıcı henüz tamamlanmış bir ödeme bildirmiyor. İşlem beklemede kalıyor.",
 	"form.transaction.sendToAnotherMail": "Başka E-postaya Gönder",
 	"form.transaction.cancelAll": "Tümünü İptal Et",
 	"form.transaction.reservations": "Rezervasyonlar",
@@ -1924,5 +1928,8 @@
 	"page.sale.cancel.done": "Tamamlandı",
 	"page.sale.cancel.refunded": "$0 iade edildi",
 	"page.sale.cancel.voided": "$0 bilet iptal edildi",
-	"page.sale.cancel.failed": "$0 başarısız"
+	"page.sale.cancel.failed": "$0 başarısız",
+	"error.not-a-stripe-provider": "Bu işlem Stripe üzerinden ödenmedi, durumu kontrol edilemez.",
+	"error.no-gateway-reference": "Bu işlemin kontrol edilecek bir sağlayıcı ödeme referansı yok.",
+	"error.cant-check-status": "Ödeme durumu kontrol edilemedi."
 }

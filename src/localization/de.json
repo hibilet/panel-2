@@ -774,6 +774,10 @@
 	"form.attendees.product": "Produkt",
 	"form.attendees.printTitle": "Teilnehmer - $0",
 	"form.transaction.sendEmailAgain": "E-Mail erneut senden",
+	"form.transaction.checkStatus": "Zahlungsstatus prüfen",
+	"form.transaction.checkStatusConfirmed": "Zahlung beim Zahlungsanbieter bestätigt. Die Transaktion ist jetzt erfolgreich und das Ticket wurde versendet.",
+	"form.transaction.checkStatusAlreadyPaid": "Die Zahlung ist beim Anbieter bestätigt. Diese Transaktion wurde bereits verarbeitet.",
+	"form.transaction.checkStatusUnpaid": "Der Anbieter meldet noch keine abgeschlossene Zahlung. Die Transaktion bleibt ausstehend.",
 	"form.transaction.sendToAnotherMail": "An eine andere E-Mail senden",
 	"form.transaction.cancelAll": "Alle stornieren",
 	"form.transaction.reservations": "Reservierungen",
@@ -1924,5 +1928,8 @@
 	"page.sale.cancel.done": "Abgeschlossen",
 	"page.sale.cancel.refunded": "$0 erstattet",
 	"page.sale.cancel.voided": "$0 Ticket(s) storniert",
-	"page.sale.cancel.failed": "$0 fehlgeschlagen"
+	"page.sale.cancel.failed": "$0 fehlgeschlagen",
+	"error.not-a-stripe-provider": "Diese Transaktion wurde nicht über Stripe bezahlt, der Status kann nicht geprüft werden.",
+	"error.no-gateway-reference": "Diese Transaktion hat keine Zahlungsreferenz beim Anbieter, die geprüft werden könnte.",
+	"error.cant-check-status": "Zahlungsstatus konnte nicht geprüft werden."
 }

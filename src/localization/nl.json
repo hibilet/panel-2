@@ -774,6 +774,10 @@
 	"form.attendees.product": "Product",
 	"form.attendees.printTitle": "Deelnemers - $0",
 	"form.transaction.sendEmailAgain": "E-mail opnieuw verzenden",
+	"form.transaction.checkStatus": "Betaalstatus controleren",
+	"form.transaction.checkStatusConfirmed": "Betaling bevestigd bij de provider. De transactie is nu geslaagd en het ticket is verzonden.",
+	"form.transaction.checkStatusAlreadyPaid": "De betaling is bevestigd bij de provider. Deze transactie was al verwerkt.",
+	"form.transaction.checkStatusUnpaid": "De provider meldt nog geen voltooide betaling. De transactie blijft in behandeling.",
 	"form.transaction.sendToAnotherMail": "Verzenden naar ander e-mailadres",
 	"form.transaction.cancelAll": "Alles annuleren",
 	"form.transaction.reservations": "Reserveringen",
@@ -1924,5 +1928,8 @@
 	"page.sale.cancel.done": "Klaar",
 	"page.sale.cancel.refunded": "$0 terugbetaald",
 	"page.sale.cancel.voided": "$0 ticket(s) geannuleerd",
-	"page.sale.cancel.failed": "$0 mislukt"
+	"page.sale.cancel.failed": "$0 mislukt",
+	"error.not-a-stripe-provider": "Deze transactie is niet via Stripe betaald, de status kan niet worden gecontroleerd.",
+	"error.no-gateway-reference": "Deze transactie heeft geen betaalreferentie om te controleren.",
+	"error.cant-check-status": "Betaalstatus kon niet worden gecontroleerd."
 }

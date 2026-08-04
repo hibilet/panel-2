@@ -776,6 +776,10 @@
 	"form.attendees.product": "Product",
 	"form.attendees.printTitle": "Attendees - $0",
 	"form.transaction.sendEmailAgain": "Send Email Again",
+	"form.transaction.checkStatus": "Check Payment Status",
+	"form.transaction.checkStatusConfirmed": "Payment confirmed at the gateway. The transaction is now successful and the ticket has been sent.",
+	"form.transaction.checkStatusAlreadyPaid": "Payment is confirmed at the gateway. This transaction was already processed.",
+	"form.transaction.checkStatusUnpaid": "The gateway reports no completed payment yet. The transaction stays pending.",
 	"form.transaction.sendToAnotherMail": "Send To Another Mail",
 	"form.transaction.cancelAll": "Cancel All",
 	"form.transaction.reservations": "Reservations",
@@ -1924,5 +1928,8 @@
 	"page.sale.cancel.done": "Finished",
 	"page.sale.cancel.refunded": "$0 refunded",
 	"page.sale.cancel.voided": "$0 ticket(s) voided",
-	"page.sale.cancel.failed": "$0 failed"
+	"page.sale.cancel.failed": "$0 failed",
+	"error.not-a-stripe-provider": "This transaction was not paid through Stripe, so its status cannot be checked.",
+	"error.no-gateway-reference": "This transaction has no gateway payment reference to check.",
+	"error.cant-check-status": "Payment status could not be checked."
 }

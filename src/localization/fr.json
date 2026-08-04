@@ -774,6 +774,10 @@
 	"form.attendees.product": "Produit",
 	"form.attendees.printTitle": "Participants - $0",
 	"form.transaction.sendEmailAgain": "Renvoyer l'e-mail",
+	"form.transaction.checkStatus": "Vérifier le statut du paiement",
+	"form.transaction.checkStatusConfirmed": "Paiement confirmé auprès du prestataire. La transaction est désormais réussie et le billet a été envoyé.",
+	"form.transaction.checkStatusAlreadyPaid": "Le paiement est confirmé auprès du prestataire. Cette transaction avait déjà été traitée.",
+	"form.transaction.checkStatusUnpaid": "Le prestataire ne signale aucun paiement abouti pour l'instant. La transaction reste en attente.",
 	"form.transaction.sendToAnotherMail": "Envoyer à une autre adresse",
 	"form.transaction.cancelAll": "Tout annuler",
 	"form.transaction.reservations": "Réservations",
@@ -1924,5 +1928,8 @@
 	"page.sale.cancel.done": "Terminé",
 	"page.sale.cancel.refunded": "$0 remboursé(s)",
 	"page.sale.cancel.voided": "$0 billet(s) annulés",
-	"page.sale.cancel.failed": "$0 en échec"
+	"page.sale.cancel.failed": "$0 en échec",
+	"error.not-a-stripe-provider": "Cette transaction n'a pas été payée via Stripe, son statut ne peut pas être vérifié.",
+	"error.no-gateway-reference": "Cette transaction n'a aucune référence de paiement à vérifier.",
+	"error.cant-check-status": "Le statut du paiement n'a pas pu être vérifié."
 }
