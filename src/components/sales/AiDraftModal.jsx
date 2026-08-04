@@ -19,7 +19,8 @@ const formatDateTimeLocal = (iso) => {
 const toApiDateTime = (local) => {
 	if (!local) return undefined;
 	const d = dayjs(local);
-	return d.isValid() ? d.format("YYYY-MM-DD HH:mm") : undefined;
+	// ISO with offset - a naive string would be reparsed in server TZ and shift.
+	return d.isValid() ? d.toISOString() : undefined;
 };
 
 const blankInputs = { text: "", csv: "", file: null };

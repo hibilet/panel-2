@@ -306,12 +306,8 @@ const ProductPanel = ({
 				: undefined,
 			price: formData.price ? Number(formData.price) : undefined,
 			status: formData.status || "active",
-			startAt: formData.startAt
-				? dayjs(formData.startAt).format("YYYY-MM-DD HH:mm")
-				: undefined,
-			endAt: formData.endAt
-				? dayjs(formData.endAt).format("YYYY-MM-DD HH:mm")
-				: undefined,
+			startAt: formData.startAt ? dayjs(formData.startAt).toISOString() : undefined,
+			endAt: formData.endAt ? dayjs(formData.endAt).toISOString() : undefined,
 		};
 		onSave(product, payload);
 	};

@@ -66,10 +66,12 @@ const SaleBasic = ({ sale, setSale, params: { id } }) => {
 		});
 		return compact({
 			...fd,
-			start: fd.start ? dayjs(fd.start).format("YYYY-MM-DD HH:mm") : undefined,
-			end: fd.end ? dayjs(fd.end).format("YYYY-MM-DD HH:mm") : undefined,
+			// datetime-local values are browser-local; send ISO with offset so the
+			// API stores the intended instant instead of reparsing as server TZ.
+			start: fd.start ? dayjs(fd.start).toISOString() : undefined,
+			end: fd.end ? dayjs(fd.end).toISOString() : undefined,
 			stopSaleAt: fd.stopSaleAt
-				? dayjs(fd.stopSaleAt).format("YYYY-MM-DD HH:mm")
+				? dayjs(fd.stopSaleAt).toISOString()
 				: undefined,
 			...(Object.keys(tracking).length > 0 && { tracking }),
 		});

@@ -330,7 +330,7 @@ const CouponPanel = ({
 			stock: formData.stock ? Number(formData.stock) : undefined,
 			discount: discountValue,
 			status: formData.status || "active",
-			expirationDate: exp ? dayjs(exp).format("YYYY-MM-DD HH:mm") : null,
+			expirationDate: exp ? dayjs(exp).toISOString() : null,
 		};
 		onSave(coupon, payload);
 	};
