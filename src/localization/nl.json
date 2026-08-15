@@ -1693,6 +1693,7 @@
 	"form.realm.sellerInvoiceFooterPlaceholder": "Bedankt voor uw opdracht.",
 	"dashboard.facts.title": "Publiek en prestaties",
 	"dashboard.facts.full": "Volledige analyses",
+	"dashboard.facts.asOf": "per $0",
 	"dashboard.facts.buyersInfo": "Unieke klanten met minstens één geslaagde aankoop.",
 	"dashboard.facts.topSegment": "Grootste segment",
 	"dashboard.facts.topSegmentInfo": "Uw grootste gedragsgebaseerde kopersgroep.",

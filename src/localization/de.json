@@ -1693,6 +1693,7 @@
 	"form.realm.sellerInvoiceFooterPlaceholder": "Vielen Dank für Ihren Auftrag.",
 	"dashboard.facts.title": "Publikum & Performance",
 	"dashboard.facts.full": "Alle Analysen",
+	"dashboard.facts.asOf": "Stand $0",
 	"dashboard.facts.buyersInfo": "Einzelne Kunden mit mindestens einem erfolgreichen Kauf.",
 	"dashboard.facts.topSegment": "Größtes Segment",
 	"dashboard.facts.topSegmentInfo": "Ihre größte verhaltensbasierte Käufergruppe.",

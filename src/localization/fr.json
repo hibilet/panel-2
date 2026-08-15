@@ -1693,6 +1693,7 @@
 	"form.realm.sellerInvoiceFooterPlaceholder": "Merci de votre confiance.",
 	"dashboard.facts.title": "Audience et performance",
 	"dashboard.facts.full": "Analyses complètes",
+	"dashboard.facts.asOf": "au $0",
 	"dashboard.facts.buyersInfo": "Clients distincts ayant effectué au moins un achat réussi.",
 	"dashboard.facts.topSegment": "Segment principal",
 	"dashboard.facts.topSegmentInfo": "Votre plus grand groupe d'acheteurs par comportement.",

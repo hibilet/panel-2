@@ -1693,6 +1693,7 @@
 	"form.realm.sellerInvoiceFooterPlaceholder": "İşbirliğiniz için teşekkürler.",
 	"dashboard.facts.title": "Kitle ve performans",
 	"dashboard.facts.full": "Tüm analizler",
+	"dashboard.facts.asOf": "$0 itibarıyla",
 	"dashboard.facts.buyersInfo": "En az bir başarılı satın alma yapmış benzersiz müşteriler.",
 	"dashboard.facts.topSegment": "En büyük segment",
 	"dashboard.facts.topSegmentInfo": "Davranışa göre en büyük alıcı grubunuz.",

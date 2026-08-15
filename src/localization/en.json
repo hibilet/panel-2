@@ -1693,6 +1693,7 @@
 	"form.realm.sellerInvoiceFooterPlaceholder": "Thank you for your business.",
 	"dashboard.facts.title": "Audience & performance",
 	"dashboard.facts.full": "Full analytics",
+	"dashboard.facts.asOf": "as of $0",
 	"dashboard.facts.buyersInfo": "Distinct customers with at least one successful purchase.",
 	"dashboard.facts.topSegment": "Top segment",
 	"dashboard.facts.topSegmentInfo": "Your largest behavioral buyer group.",

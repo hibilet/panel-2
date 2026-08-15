@@ -1,8 +1,17 @@
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { get } from "../../lib/client";
 import Info from "../shared/Info";
 import strings from "../../localization";
+
+// These figures come from the analytics facts, which only move when the
+// `analytics.rollup` job runs - every 4h, and only in the worker. Where the
+// worker is held down (any host on a production clone) the facts freeze, and
+// the band went on showing weeks-old numbers beside live sales figures. A day
+// covers several missed runs without flapping; past that, show nothing rather
+// than something contradicting the rest of the dashboard.
+const STALE_AFTER_MS = 24 * 60 * 60 * 1000;
 
 const SEGMENT_KEYS = ["whale", "fan", "repeat", "hesitant", "direct", "one_time"];
 const segmentLabel = (key) =>
@@ -37,12 +46,22 @@ const FactsBand = () => {
 	if (hidden) return null;
 	if (!s) return null;
 	if (!s.buyers && !s.sales?.sold) return null; // nothing rolled up yet
+	// No timestamp at all means the rollup predates this field, so its age is
+	// unknown - treat that as stale too rather than vouching for it.
+	const rolledUpAt = s.rolledUpAt ? dayjs(s.rolledUpAt) : null;
+	if (!rolledUpAt || dayjs().diff(rolledUpAt) > STALE_AFTER_MS) return null;
 
 	const top = s.topSegment;
 	return (
 		<section className="mb-8" aria-label={strings("dashboard.facts.title")}>
 			<div className="mb-3 flex items-center justify-between">
-				<h2 className="text-lg font-medium text-slate-900">{strings("dashboard.facts.title")}</h2>
+				<div className="flex items-baseline gap-2">
+					<h2 className="text-lg font-medium text-slate-900">{strings("dashboard.facts.title")}</h2>
+					{/* Even inside the window these lag live sales by up to 4h. */}
+					<span className="text-xs text-slate-500">
+						{strings("dashboard.facts.asOf", [rolledUpAt.format("D MMM, HH:mm")])}
+					</span>
+				</div>
 				<Link href="/analytics" className="text-sm font-medium text-blue-600 hover:text-blue-700">
 					{strings("dashboard.facts.full")} →
 				</Link>
