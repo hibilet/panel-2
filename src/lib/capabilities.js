@@ -5,6 +5,20 @@ import strings from "../localization";
 
 export const UNLIMITED = 9999;
 
+// Panel-wide AI kill switch. Every ai.* capability reads false, so all the
+// Can-gated AI surfaces stay hidden whatever a realm or account has stored.
+// FAMILIES deliberately still lists "ai": the realm form builds its features
+// payload from it, and dropping the key there would blank stored realm data
+// on every save. Flip to false to bring the AI tools back.
+export const AI_HIDDEN = true;
+
+const isAiKey = (key) => key === "ai" || key.startsWith("ai.");
+
+// Render-time filter for the editors that list CAPABILITIES/FAMILIES. Those
+// lists stay canonical so the save paths keep posting stored ai.* values back
+// untouched - only the rows stop being drawn.
+export const hiddenKey = (key) => AI_HIDDEN && isAiKey(key);
+
 // Capability display names live in the dictionary (capability.<key>) rather
 // than on the spec, so the permission editors read in the panel's language.
 export const capabilityLabel = (key) => strings(`capability.${key}`);
@@ -78,6 +92,7 @@ const offValueFor = (type) => (type === "number" ? 0 : false);
 export const can = (account, key) => {
 	const spec = CAPABILITIES[key];
 	if (!spec) return false;
+	if (AI_HIDDEN && isAiKey(key)) return false;
 	const caps = account?.capabilities;
 	if (!caps) return spec.default;
 	const value = caps[key];
@@ -117,6 +132,7 @@ export const canSee = (account, area) => {
 export const canSeeMoney = (account) => canSee(account, "money");
 
 export const familyEnabled = (account, family) => {
+	if (AI_HIDDEN && family === "ai") return false;
 	for (const key of Object.keys(CAPABILITIES)) {
 		if (familyOf(key) === family && can(account, key)) return true;
 	}

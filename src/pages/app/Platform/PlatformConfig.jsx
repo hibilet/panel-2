@@ -31,12 +31,16 @@ const GROUP_OF = {
 	XAI_MODEL: "ai",
 	OPEN_ROUTER_API_KEY: "ai",
 	XAI_API_KEY: "ai",
-	IMGBB_API_KEY: "ai",
+	// Image host, not an AI provider - kept out of the "ai" group so it stays
+	// reachable while the AI group is hidden.
+	IMGBB_API_KEY: "other",
 	CLOUDFLARE_ZONE_ID: "other",
 	CLOUDFLARE_API_TOKEN: "other",
 	IPGEO_URL: "other",
 };
-const GROUP_ORDER = ["urls", "stripe", "email", "ai", "other"];
+// "ai" is omitted, which drops the whole group from the editor. The keys are
+// still served and saved by the API - only this screen stops showing them.
+const GROUP_ORDER = ["urls", "stripe", "email", "other"];
 const groupOf = (k) => GROUP_OF[k] ?? "other";
 // An unknown key (added server-side, not yet listed here) falls back to the
 // raw env name rather than rendering a missing-translation placeholder.

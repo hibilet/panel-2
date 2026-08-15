@@ -4,7 +4,7 @@ import { Input } from "../../../../components/inputs";
 import SellerBlock from "../../../../components/invoices/SellerBlock";
 import PlatformBilling from "./PlatformBilling";
 import { Modal } from "../../../../components/shared";
-import { FAMILIES } from "../../../../lib/capabilities";
+import { AI_HIDDEN, FAMILIES, hiddenKey } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
 import { DOMAIN_SERVICES, urlsFromDomains } from "../../../../lib/realm";
 import ImageUpload from "../../../../components/shared/ImageUpload";
@@ -481,7 +481,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								account override.
 							</p>
 							<div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-								{FAMILIES.map((f) => (
+								{FAMILIES.filter((f) => !hiddenKey(f)).map((f) => (
 									<label
 										key={f}
 										className="inline-flex items-center gap-2 rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
@@ -656,7 +656,7 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 						)}
 
 						{/* AI keys - shown when the AI feature is enabled */}
-						{watch("features.ai") && (
+						{!AI_HIDDEN && watch("features.ai") && (
 							<div className="rounded-lg border border-slate-200 p-4">
 								<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
 									<i className="fa-solid fa-wand-magic-sparkles text-slate-500" aria-hidden />

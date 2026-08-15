@@ -3,6 +3,7 @@ import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 import SaleCancelZone from "../../../../components/sales/SaleCancelZone";
 import DangerZone from "../../../../components/shared/DangerZone";
 import { useApp } from "../../../../context";
+import { AI_HIDDEN } from "../../../../lib/capabilities";
 import { API_BASE_URL, del, get } from "../../../../lib/client";
 import { getToken } from "../../../../lib/storage";
 import { showToast } from "../../../../lib/toastStore";
@@ -166,7 +167,9 @@ const Sale = () => {
 
 	return (
 		<div className="mx-auto max-w-5xl">
-			{isNew && isGuided && <SaleGuidedForm onClose={handleCloseGuided} />}
+			{!AI_HIDDEN && isNew && isGuided && (
+				<SaleGuidedForm onClose={handleCloseGuided} />
+			)}
 			<Link
 				href="/sales"
 				className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-slate-900"

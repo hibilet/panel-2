@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
-import { CAPABILITIES, UNLIMITED, capabilityLabel } from "../../../../lib/capabilities";
+import { CAPABILITIES, UNLIMITED, capabilityLabel, hiddenKey } from "../../../../lib/capabilities";
 import { del, get, post, put } from "../../../../lib/client";
 import strings from "../../../../localization";
 
@@ -480,7 +480,7 @@ const TierPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								{strings("form.tier.capabilitiesHint")}
 							</p>
 							<div className="space-y-2">
-								{ACL_KEYS.map((key) => {
+								{ACL_KEYS.filter((key) => !hiddenKey(key)).map((key) => {
 									const spec = CAPABILITIES[key];
 									const value = readAcl(aclValues, key);
 									const isReporting =

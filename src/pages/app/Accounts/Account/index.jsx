@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormSection, Input, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
-import { CAPABILITIES, UNLIMITED, capabilityLabel } from "../../../../lib/capabilities";
+import { CAPABILITIES, UNLIMITED, capabilityLabel, hiddenKey } from "../../../../lib/capabilities";
 import { get, patch, post, put } from "../../../../lib/client";
 import { getToken, pushToken, setToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
@@ -70,7 +70,7 @@ const AclOverrideEditor = ({ accountId, initialAcl, onSaved }) => {
 				<div className="rounded-md border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-700">{msg}</div>
 			)}
 			<div className="space-y-2">
-				{ACL_KEYS.map((key) => {
+				{ACL_KEYS.filter((key) => !hiddenKey(key)).map((key) => {
 					const spec = CAPABILITIES[key];
 					const current = overrides[key];
 					const overridden = isOverridden(key);
