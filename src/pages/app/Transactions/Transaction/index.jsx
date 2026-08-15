@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "wouter";
 import { Modal } from "../../../../components/shared";
-import { get, post } from "../../../../lib/client";
+import { API_BASE_URL, get, post } from "../../../../lib/client";
+import { getToken } from "../../../../lib/storage";
 import strings, { formatCurrency } from "../../../../localization";
 
 const STATUS_LABELS = {
@@ -42,6 +43,8 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 	const [sending, setSending] = useState(false);
 	const [emailDialogOpen, setEmailDialogOpen] = useState(false);
 	const [refundConfirm, setRefundConfirm] = useState(null);
+	const [downloadingTickets, setDownloadingTickets] = useState(false);
+	const [ticketsError, setTicketsError] = useState(false);
 	const [refundSubmitting, setRefundSubmitting] = useState(false);
 	const [refunds, setRefunds] = useState([]);
 	const [refundsLoading, setRefundsLoading] = useState(false);
@@ -140,6 +143,39 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 		(s, r) => s + reservationFinalPrice(r),
 		0,
 	);
+
+	// Only success/read reservations are issued tickets; the API refuses the
+	// rest, so a fully refunded order offers no download at all.
+	const issuedTickets = reservations.filter(
+		(r) => r.status === "success" || r.status === "read",
+	);
+
+	// Authed binary stream, so fetch as a blob rather than going through the
+	// JSON client - same shape as the settlement report download on the sale
+	// page.
+	const downloadTickets = async () => {
+		setDownloadingTickets(true);
+		try {
+			const res = await fetch(
+				`${API_BASE_URL}/reservations/tickets.pdf?basket=${data.basket}`,
+				{ headers: { authorization: getToken() } },
+			);
+			if (!res.ok) throw new Error("tickets-failed");
+			const blob = await res.blob();
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = `tickets-${(data?.sale?.name || "event").replace(/[^\w.-]+/g, "_")}.pdf`;
+			document.body.appendChild(a);
+			a.click();
+			a.remove();
+			URL.revokeObjectURL(url);
+		} catch {
+			setTicketsError(true);
+		} finally {
+			setDownloadingTickets(false);
+		}
+	};
 
 	const startRefundAll = () => {
 		setRefundConfirm({ type: "all", amount: totalAmount });
@@ -298,9 +334,34 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 									</div>
 								</div>
 							</Link>
-							<h3 className="mb-3 text-sm font-semibold text-slate-700">
-								{strings("form.transaction.reservations")}
-							</h3>
+							<div className="mb-3 flex items-center justify-between gap-3">
+								<h3 className="text-sm font-semibold text-slate-700">
+									{strings("form.transaction.reservations")}
+								</h3>
+								{issuedTickets.length > 0 && data?.basket && (
+									<button
+										type="button"
+										onClick={downloadTickets}
+										disabled={downloadingTickets}
+										className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50"
+									>
+										<i
+											className={`fa-solid ${downloadingTickets ? "fa-spinner fa-spin" : "fa-file-arrow-down"}`}
+											aria-hidden
+										/>
+										{strings(
+											downloadingTickets
+												? "form.transaction.downloadingTickets"
+												: "form.transaction.downloadTickets",
+										)}
+									</button>
+								)}
+							</div>
+							{ticketsError && (
+								<p className="mb-3 text-sm text-red-600">
+									{strings("form.transaction.downloadTicketsFailed")}
+								</p>
+							)}
 							{reservations.length === 0 ? (
 								<p className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
 									{strings("form.transaction.noReservations")}
