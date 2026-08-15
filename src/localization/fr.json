@@ -793,6 +793,7 @@
 	"form.transaction.sendToAnotherMail": "Envoyer à une autre adresse",
 	"form.transaction.cancelAll": "Tout annuler",
 	"form.transaction.reservations": "Réservations",
+	"form.transaction.openTicketsLink": "Ouvrir le lien des billets",
 	"form.transaction.downloadTickets": "Télécharger les billets",
 	"form.transaction.downloadingTickets": "Préparation...",
 	"form.transaction.downloadTicketsFailed": "Impossible de générer le PDF des billets.",

@@ -338,24 +338,39 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 								<h3 className="text-sm font-semibold text-slate-700">
 									{strings("form.transaction.reservations")}
 								</h3>
-								{issuedTickets.length > 0 && data?.basket && (
-									<button
-										type="button"
-										onClick={downloadTickets}
-										disabled={downloadingTickets}
-										className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50"
-									>
-										<i
-											className={`fa-solid ${downloadingTickets ? "fa-spinner fa-spin" : "fa-file-arrow-down"}`}
-											aria-hidden
-										/>
-										{strings(
-											downloadingTickets
-												? "form.transaction.downloadingTickets"
-												: "form.transaction.downloadTickets",
-										)}
-									</button>
-								)}
+								<div className="flex items-center gap-4">
+									{/* The buyer's own ticket page - the exact link the confirmation
+									    email sent, so support sees what the customer sees. */}
+									{data?.ticketsUrl && (
+										<a
+											href={data.ticketsUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700"
+										>
+											<i className="fa-solid fa-arrow-up-right-from-square" aria-hidden />
+											{strings("form.transaction.openTicketsLink")}
+										</a>
+									)}
+									{issuedTickets.length > 0 && data?.basket && (
+										<button
+											type="button"
+											onClick={downloadTickets}
+											disabled={downloadingTickets}
+											className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50"
+										>
+											<i
+												className={`fa-solid ${downloadingTickets ? "fa-spinner fa-spin" : "fa-file-arrow-down"}`}
+												aria-hidden
+											/>
+											{strings(
+												downloadingTickets
+													? "form.transaction.downloadingTickets"
+													: "form.transaction.downloadTickets",
+											)}
+										</button>
+									)}
+								</div>
 							</div>
 							{ticketsError && (
 								<p className="mb-3 text-sm text-red-600">

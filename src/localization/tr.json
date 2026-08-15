@@ -792,6 +792,7 @@
 	"form.transaction.sendToAnotherMail": "Başka E-postaya Gönder",
 	"form.transaction.cancelAll": "Tümünü İptal Et",
 	"form.transaction.reservations": "Rezervasyonlar",
+	"form.transaction.openTicketsLink": "Bilet bağlantısını aç",
 	"form.transaction.downloadTickets": "Biletleri indir",
 	"form.transaction.downloadingTickets": "Hazırlanıyor...",
 	"form.transaction.downloadTicketsFailed": "Bilet PDF'i oluşturulamadı.",

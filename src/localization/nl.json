@@ -793,6 +793,7 @@
 	"form.transaction.sendToAnotherMail": "Verzenden naar ander e-mailadres",
 	"form.transaction.cancelAll": "Alles annuleren",
 	"form.transaction.reservations": "Reserveringen",
+	"form.transaction.openTicketsLink": "Ticketlink openen",
 	"form.transaction.downloadTickets": "Tickets downloaden",
 	"form.transaction.downloadingTickets": "Bezig met voorbereiden...",
 	"form.transaction.downloadTicketsFailed": "Kon de ticket-PDF niet maken.",

@@ -793,6 +793,7 @@
 	"form.transaction.sendToAnotherMail": "An eine andere E-Mail senden",
 	"form.transaction.cancelAll": "Alle stornieren",
 	"form.transaction.reservations": "Reservierungen",
+	"form.transaction.openTicketsLink": "Ticket-Link öffnen",
 	"form.transaction.downloadTickets": "Tickets herunterladen",
 	"form.transaction.downloadingTickets": "Wird erstellt...",
 	"form.transaction.downloadTicketsFailed": "Ticket-PDF konnte nicht erstellt werden.",

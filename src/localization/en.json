@@ -795,6 +795,7 @@
 	"form.transaction.sendToAnotherMail": "Send To Another Mail",
 	"form.transaction.cancelAll": "Cancel All",
 	"form.transaction.reservations": "Reservations",
+	"form.transaction.openTicketsLink": "Open tickets link",
 	"form.transaction.downloadTickets": "Download tickets",
 	"form.transaction.downloadingTickets": "Preparing...",
 	"form.transaction.downloadTicketsFailed": "Could not build the ticket PDF.",
