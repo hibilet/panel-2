@@ -41,7 +41,7 @@ const defaultFeatures = FAMILIES.reduce((acc, f) => {
 const defaultValues = {
 	name: "",
 	domainHosts: emptyDomainHosts,
-	branding: { logo: "" },
+	branding: { logo: "", primaryColor: "", secondaryColor: "" },
 	enableSmtp: false,
 	smtp: { host: "", port: "", user: "", pass: "", from: "" },
 	enableStripe: false,
@@ -111,7 +111,11 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 					reset({
 						name: d.name ?? "",
 						domainHosts: hosts,
-						branding: { logo: d.branding?.logo ?? "" },
+						branding: {
+							logo: d.branding?.logo ?? "",
+							primaryColor: d.branding?.primaryColor ?? "",
+							secondaryColor: d.branding?.secondaryColor ?? "",
+						},
 						enableSmtp: Boolean(d.smtp?.host || d.smtp?.passSet),
 						smtp: {
 							host: d.smtp?.host ?? "",
@@ -241,6 +245,8 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				urls: urlsFromDomains(cleanDomains),
 				branding: {
 					logo: formData.branding?.logo?.trim() || undefined,
+					primaryColor: formData.branding?.primaryColor?.trim() || undefined,
+					secondaryColor: formData.branding?.secondaryColor?.trim() || undefined,
 				},
 				smtp: {
 					host: formData.smtp?.host?.trim() || undefined,
@@ -430,6 +436,38 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 									setValue("branding.logo", "", { shouldDirty: true })
 								}
 							/>
+						</div>
+
+						<div className="grid gap-4 sm:grid-cols-2">
+							{["primaryColor", "secondaryColor"].map((field) => (
+								<div key={field}>
+									<span className="mb-1 block text-sm font-medium text-slate-700">
+										{strings(`form.realm.${field}`)}
+									</span>
+									<div className="flex items-center gap-2">
+										<input
+											type="color"
+											aria-label={strings(`form.realm.${field}`)}
+											value={/^#[0-9a-f]{6}$/i.test(watch(`branding.${field}`) ?? "")
+												? watch(`branding.${field}`)
+												: "#312783"}
+											onChange={(e) =>
+												setValue(`branding.${field}`, e.target.value, { shouldDirty: true })
+											}
+											className="h-9 w-12 shrink-0 cursor-pointer rounded border border-slate-300 bg-white p-1"
+										/>
+										<input
+											type="text"
+											placeholder="#312783"
+											{...register(`branding.${field}`)}
+											className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400"
+										/>
+									</div>
+								</div>
+							))}
+							<p className="text-xs text-slate-500 sm:col-span-2">
+								{strings("form.realm.secondaryColorHint")}
+							</p>
 						</div>
 
 						<div className="rounded-lg border border-slate-200 p-4">
