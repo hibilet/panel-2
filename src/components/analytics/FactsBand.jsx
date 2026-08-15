@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "wouter";
-import { get } from "../../lib/client";
+import { get, post } from "../../lib/client";
+import { isSuperadmin } from "../../lib/capabilities";
+import { useApp } from "../../context";
 import Info from "../shared/Info";
 import strings from "../../localization";
 
@@ -30,18 +32,62 @@ const Fact = ({ label, value, tone, info }) => (
 // Compact audience + performance snapshot from the analytics facts. Deep views
 // live on /analytics; this is the glanceable band for the dashboard.
 const FactsBand = () => {
+	const { account } = useApp();
 	const [s, setS] = useState(null);
 	const [hidden, setHidden] = useState(false);
+	const [refreshing, setRefreshing] = useState(false);
+	const [refreshError, setRefreshError] = useState(false);
+
+	// The rollup is a platform-wide system job (owner: null), so the API's
+	// ownerScope only lets a superadmin trigger it. Showing the button to a
+	// realm admin would just hand them a job-not-found.
+	const canRefresh = isSuperadmin(account);
+
+	const load = useCallback(
+		() => get("/facts/summary").then((r) => r.data),
+		[],
+	);
 
 	useEffect(() => {
 		let alive = true;
-		get("/facts/summary")
-			.then((r) => alive && setS(r.data))
+		load()
+			.then((d) => alive && setS(d))
 			.catch(() => alive && setHidden(true));
 		return () => {
 			alive = false;
 		};
-	}, []);
+	}, [load]);
+
+	// Runs the rollup inline in the API process (~1.5s platform-wide), which is
+	// why this works on hosts where the worker is held down - the case that
+	// makes the figures go stale in the first place.
+	const refresh = async () => {
+		setRefreshing(true);
+		setRefreshError(false);
+		try {
+			const jobs = await get("/jobs/search?type=analytics.rollup");
+			const id = jobs?.data?.[0]?.id;
+			if (!id) throw new Error("no-rollup-job");
+			await post(`/jobs/${id}/run`);
+			setS(await load());
+		} catch {
+			setRefreshError(true);
+		} finally {
+			setRefreshing(false);
+		}
+	};
+
+	const RefreshButton = () => (
+		<button
+			type="button"
+			onClick={refresh}
+			disabled={refreshing}
+			className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 disabled:opacity-50"
+		>
+			<i className={`fa-solid fa-arrows-rotate ${refreshing ? "fa-spin" : ""}`} aria-hidden />
+			{strings(refreshing ? "dashboard.facts.refreshing" : "dashboard.facts.refresh")}
+		</button>
+	);
 
 	if (hidden) return null;
 	if (!s) return null;
@@ -49,7 +95,23 @@ const FactsBand = () => {
 	// No timestamp at all means the rollup predates this field, so its age is
 	// unknown - treat that as stale too rather than vouching for it.
 	const rolledUpAt = s.rolledUpAt ? dayjs(s.rolledUpAt) : null;
-	if (!rolledUpAt || dayjs().diff(rolledUpAt) > STALE_AFTER_MS) return null;
+	const stale = !rolledUpAt || dayjs().diff(rolledUpAt) > STALE_AFTER_MS;
+
+	// Hiding the band would take the refresh button with it, leaving the one
+	// person who can fix it with no way to. Operators get a bare prompt in its
+	// place; everyone else gets nothing rather than numbers that contradict
+	// the live sales tiles above.
+	if (stale) {
+		if (!canRefresh) return null;
+		return (
+			<section className="mb-8 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
+				<p className="text-sm text-slate-500">
+					{refreshError ? strings("dashboard.facts.refreshFailed") : strings("dashboard.facts.stale")}
+				</p>
+				<RefreshButton />
+			</section>
+		);
+	}
 
 	const top = s.topSegment;
 	return (
@@ -62,9 +124,12 @@ const FactsBand = () => {
 						{strings("dashboard.facts.asOf", [rolledUpAt.format("D MMM, HH:mm")])}
 					</span>
 				</div>
-				<Link href="/analytics" className="text-sm font-medium text-blue-600 hover:text-blue-700">
-					{strings("dashboard.facts.full")} →
-				</Link>
+				<div className="flex items-center gap-4">
+					{canRefresh && <RefreshButton />}
+					<Link href="/analytics" className="text-sm font-medium text-blue-600 hover:text-blue-700">
+						{strings("dashboard.facts.full")} →
+					</Link>
+				</div>
 			</div>
 			<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
 				<Fact label={strings("page.analytics.stat.buyers")} value={(s.buyers ?? 0).toLocaleString()} info={strings("dashboard.facts.buyersInfo")} />
