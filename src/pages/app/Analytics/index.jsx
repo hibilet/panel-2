@@ -366,7 +366,7 @@ const Analytics = () => {
 			tab: TABS.includes(t) ? t : "audience",
 			// Comma-separated ids; empty array = all events.
 			scope: saleParam ? saleParam.split(",").filter(Boolean) : [],
-			days: RANGES.some((r) => r.days === d) ? d : 365,
+			days: RANGES.some((r) => r.days === d) ? d : 7,
 			start: q.get("start") ?? "",
 			end: q.get("end") ?? "",
 		};
@@ -515,14 +515,14 @@ const Analytics = () => {
 		const rangeEnd = isCustomRange ? customEnd : dayjs().format("YYYY-MM-DD");
 		const rangeQs = `&start=${rangeStart}&end=${rangeEnd}`;
 		Promise.all([
-			get(`/facts/segments?${saleParam}`),
+			get(`/facts/segments?${saleParam}${rangeQs}`),
 			get(`/facts/sales-daily?${dailyRange}${saleQs}`),
 			get(`/facts/channels?${saleParam}`),
 			get(`/facts/coupons?${saleParam}`),
 			get(`/facts/timing?${saleParam}${rangeQs}`),
 			get(`/facts/affinity?${saleParam}${rangeQs}`),
 			get(`/facts/friction?${saleParam}${rangeQs}`),
-			get(`/facts/engagement?${saleParam}`),
+			get(`/facts/engagement?${saleParam}${rangeQs}`),
 			get(`/facts/events?${saleParam}${rangeQs}`),
 		])
 			.then(([s, d, ch, co, tm, af, fr, en, ev]) => {
