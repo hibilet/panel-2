@@ -377,6 +377,10 @@ const Analytics = () => {
 	// When both are set, a custom date range overrides the rolling `days`.
 	const [customStart, setCustomStart] = useState(initial.start);
 	const [customEnd, setCustomEnd] = useState(initial.end);
+	// Drafts, so the range is applied deliberately rather than on every keystroke
+	// of a native date input - a half-typed year would otherwise fire a reload.
+	const [draftStart, setDraftStart] = useState(initial.start);
+	const [draftEnd, setDraftEnd] = useState(initial.end);
 	const [saleSearch, setSaleSearch] = useState("");
 	const [salePickerOpen, setSalePickerOpen] = useState(false);
 	const [customOpen, setCustomOpen] = useState(Boolean(initial.start && initial.end));
@@ -502,16 +506,20 @@ const Analytics = () => {
 			? `start=${customStart}&end=${customEnd}`
 			: `days=${effectiveDays}`;
 		const saleQs = scoped ? `&sale=${saleCsv}` : "";
+		// Handlers that aggregate live collections honour a date range; the
+		// lifetime fact rollups (channels, coupons, segments) ignore it, which
+		// is what the "lifetime" note under the picker is telling the operator.
+		const rangeQs = isCustomRange ? `&start=${customStart}&end=${customEnd}` : "";
 		Promise.all([
 			get(`/facts/segments?${saleParam}`),
 			get(`/facts/sales-daily?${dailyRange}${saleQs}`),
 			get(`/facts/channels?${saleParam}`),
 			get(`/facts/coupons?${saleParam}`),
-			get(`/facts/timing?${saleParam}`),
-			get(`/facts/affinity?${saleParam}`),
-			get(`/facts/friction?${saleParam}`),
+			get(`/facts/timing?${saleParam}${rangeQs}`),
+			get(`/facts/affinity?${saleParam}${rangeQs}`),
+			get(`/facts/friction?${saleParam}${rangeQs}`),
 			get(`/facts/engagement?${saleParam}`),
-			get(`/facts/events?${saleParam}`),
+			get(`/facts/events?${saleParam}${rangeQs}`),
 		])
 			.then(([s, d, ch, co, tm, af, fr, en, ev]) => {
 				if (!alive) return;
@@ -543,6 +551,12 @@ const Analytics = () => {
 		setDemoLoading(true);
 		const p = new URLSearchParams();
 		if (saleCsv) p.set("sale", saleCsv);
+		// Payments aggregates live transactions, so it narrows to the range.
+		// Demographics reads the lifetime buyer fact and ignores it.
+		if (isCustomRange) {
+			p.set("start", customStart);
+			p.set("end", customEnd);
+		}
 		for (const [k, v] of Object.entries(demoFilter)) if (v) p.set(k, v);
 		// The payment breakdown must not filter itself out of existence.
 		const pp = new URLSearchParams(p);
@@ -561,7 +575,7 @@ const Analytics = () => {
 		return () => {
 			alive = false;
 		};
-	}, [saleCsv, demoFilter]);
+	}, [saleCsv, demoFilter, isCustomRange, customStart, customEnd]);
 
 	const saleName = useMemo(
 		() => Object.fromEntries([...(allSales ?? []), ...(pastSales ?? [])].map((s) => [String(saleIdOf(s)), s.name])),
@@ -873,6 +887,8 @@ const Analytics = () => {
 									setCustomOpen(false);
 									setCustomStart("");
 									setCustomEnd("");
+									setDraftStart("");
+									setDraftEnd("");
 									setRangeDays(r.days);
 								}}
 								className={`px-2.5 py-1.5 text-xs font-medium ${rangeDays === r.days && !isCustomRange ? "bg-slate-900 text-white" : "bg-white text-slate-600 hover:bg-slate-50"}`}
@@ -892,23 +908,66 @@ const Analytics = () => {
 						<span className="inline-flex items-center gap-1 text-sm">
 							<input
 								type="date"
-								value={customStart}
-								max={customEnd || undefined}
-								onChange={(e) => setCustomStart(e.target.value)}
+								value={draftStart}
+								max={draftEnd || undefined}
+								onChange={(e) => setDraftStart(e.target.value)}
+								aria-label={strings("page.analytics.range.from")}
 								className="rounded-md border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
 							/>
 							<span className="text-slate-400">→</span>
 							<input
 								type="date"
-								value={customEnd}
-								min={customStart || undefined}
-								onChange={(e) => setCustomEnd(e.target.value)}
+								value={draftEnd}
+								min={draftStart || undefined}
+								onChange={(e) => setDraftEnd(e.target.value)}
+								aria-label={strings("page.analytics.range.to")}
 								className="rounded-md border border-slate-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
 							/>
+							<button
+								type="button"
+								disabled={!draftStart || !draftEnd || (draftStart === customStart && draftEnd === customEnd)}
+								onClick={() => {
+									setCustomStart(draftStart);
+									setCustomEnd(draftEnd);
+								}}
+								className="rounded-md bg-slate-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								{strings("page.analytics.range.apply")}
+							</button>
+							{isCustomRange && (
+								<button
+									type="button"
+									onClick={() => {
+										setCustomStart("");
+										setCustomEnd("");
+										setDraftStart("");
+										setDraftEnd("");
+									}}
+									className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-600 hover:bg-slate-50"
+								>
+									{strings("page.analytics.range.clear")}
+								</button>
+							)}
 						</span>
 					)}
 				</div>
 			</div>
+
+			{isCustomRange && (
+				<p className="text-xs text-slate-500">
+					{strings("page.analytics.range.appliesTo")}
+				</p>
+			)}
+
+			{/* One busy line for the whole page. The panels below keep their last
+			    figures while a range or scope change is in flight, so without
+			    this the numbers look settled when they are about to move. */}
+			{(scopeLoading || demoLoading) && (
+				<p className="flex items-center gap-2 text-sm text-slate-500" role="status" aria-live="polite">
+					<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+					{strings("page.analytics.updating")}
+				</p>
+			)}
 
 			{error && (
 				<div
