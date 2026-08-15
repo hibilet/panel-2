@@ -2,8 +2,6 @@ import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "wouter";
 import { get, post } from "../../lib/client";
-import { isSuperadmin } from "../../lib/capabilities";
-import { useApp } from "../../context";
 import Info from "../shared/Info";
 import strings from "../../localization";
 
@@ -32,22 +30,37 @@ const Fact = ({ label, value, tone, info }) => (
 // Compact audience + performance snapshot from the analytics facts. Deep views
 // live on /analytics; this is the glanceable band for the dashboard.
 const FactsBand = () => {
-	const { account } = useApp();
 	const [s, setS] = useState(null);
 	const [hidden, setHidden] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const [refreshError, setRefreshError] = useState(false);
-
-	// The rollup is a platform-wide system job (owner: null), so the API's
-	// ownerScope only lets a superadmin trigger it. Showing the button to a
-	// realm admin would just hand them a job-not-found.
-	const canRefresh = isSuperadmin(account);
 
 	const load = useCallback(
 		() => get("/facts/summary").then((r) => r.data),
 		[],
 	);
 
+	// Runs the rollup inline in the API process, which is why this works on
+	// hosts where the worker is held down - the case that makes the figures go
+	// stale in the first place. The endpoint is a no-op if the facts moved in
+	// the last two minutes, so calling it freely costs nothing.
+	const refresh = useCallback(async () => {
+		setRefreshing(true);
+		setRefreshError(false);
+		try {
+			const r = await post("/facts/refresh");
+			if (r?.data) setS(r.data);
+			return true;
+		} catch {
+			setRefreshError(true);
+			return false;
+		} finally {
+			setRefreshing(false);
+		}
+	}, []);
+
+	// Paint from whatever is stored, so the band appears with the rest of the
+	// dashboard rather than waiting on a rollup.
 	useEffect(() => {
 		let alive = true;
 		load()
@@ -58,24 +71,12 @@ const FactsBand = () => {
 		};
 	}, [load]);
 
-	// Runs the rollup inline in the API process (~1.5s platform-wide), which is
-	// why this works on hosts where the worker is held down - the case that
-	// makes the figures go stale in the first place.
-	const refresh = async () => {
-		setRefreshing(true);
-		setRefreshError(false);
-		try {
-			const jobs = await get("/jobs/search?type=analytics.rollup");
-			const id = jobs?.data?.[0]?.id;
-			if (!id) throw new Error("no-rollup-job");
-			await post(`/jobs/${id}/run`);
-			setS(await load());
-		} catch {
-			setRefreshError(true);
-		} finally {
-			setRefreshing(false);
-		}
-	};
+	// Then bring it level with the sales tiles beside it. Separate from the
+	// load above so a failed refresh leaves the stored figures on screen
+	// instead of hiding a band that read fine.
+	useEffect(() => {
+		refresh();
+	}, [refresh]);
 
 	const RefreshButton = () => (
 		<button
@@ -97,12 +98,10 @@ const FactsBand = () => {
 	const rolledUpAt = s.rolledUpAt ? dayjs(s.rolledUpAt) : null;
 	const stale = !rolledUpAt || dayjs().diff(rolledUpAt) > STALE_AFTER_MS;
 
-	// Hiding the band would take the refresh button with it, leaving the one
-	// person who can fix it with no way to. Operators get a bare prompt in its
-	// place; everyone else gets nothing rather than numbers that contradict
-	// the live sales tiles above.
+	// Still stale after the refresh above means the rollup could not run at all.
+	// Hiding the band outright would take the retry with it, so show the prompt
+	// rather than numbers that contradict the live sales tiles.
 	if (stale) {
-		if (!canRefresh) return null;
 		return (
 			<section className="mb-8 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3">
 				<p className="text-sm text-slate-500">
@@ -125,7 +124,7 @@ const FactsBand = () => {
 					</span>
 				</div>
 				<div className="flex items-center gap-4">
-					{canRefresh && <RefreshButton />}
+					<RefreshButton />
 					<Link href="/analytics" className="text-sm font-medium text-blue-600 hover:text-blue-700">
 						{strings("dashboard.facts.full")} →
 					</Link>
