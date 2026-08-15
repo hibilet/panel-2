@@ -195,6 +195,9 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 	const [selectedTierUuid, setSelectedTierUuid] = useState("");
 	const [changingTier, setChangingTier] = useState(false);
 	const [tierChangeMsg, setTierChangeMsg] = useState(null);
+	const [billingStart, setBillingStart] = useState("");
+	const [savingAnchor, setSavingAnchor] = useState(false);
+	const [anchorMsg, setAnchorMsg] = useState(null);
 
 	const { register, handleSubmit, reset, getValues } = useForm({
 		defaultValues,
@@ -207,6 +210,13 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 				.catch(() => {});
 		}
 	}, [isMerchant, isNew]);
+
+	// Seed the picker with where the term starts today: nextInvoiceAt closes the
+	// running period, so it began a month before it.
+	useEffect(() => {
+		const next = data?.subscription?.nextInvoiceAt;
+		setBillingStart(next ? dayjs(next).subtract(1, "month").format("YYYY-MM-DD") : "");
+	}, [data?.subscription?.nextInvoiceAt]);
 
 	useEffect(() => {
 		if (superadmin && isNew) {
@@ -352,6 +362,56 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 		}
 	};
 
+	const handleChangeBillingTerm = async () => {
+		if (!billingStart) return;
+		setSavingAnchor(true);
+		setAnchorMsg(null);
+		setError(null);
+		try {
+			const res = await post("/tiers/admin/billing-start", { merchantId: id, periodStart: billingStart });
+			const { subscription, stub } = res?.data ?? {};
+			const term = `${dayjs(billingStart).format("D MMM YYYY")} - ${
+				subscription?.nextInvoiceAt ? dayjs(subscription.nextInvoiceAt).format("D MMM YYYY") : "-"
+			}`;
+			// The stub is the money question, so name it rather than just
+			// reporting the new term: it is an invoice the merchant now owes.
+			setAnchorMsg(
+				stub
+					? strings("form.account.billingStartChangedWithStub", [
+							term,
+							dayjs(stub.period.start).format("D MMM"),
+							dayjs(stub.period.end).format("D MMM"),
+							formatCurrency(stub.total, stub.currency),
+						])
+					: strings("form.account.billingStartChanged", [term]),
+			);
+			const refreshed = await get(`/accounts/${id}`);
+			if (refreshed.data) setData(refreshed.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setSavingAnchor(false);
+		}
+	};
+
+	const currentPeriodStart = data?.subscription?.nextInvoiceAt
+		? dayjs(data.subscription.nextInvoiceAt).subtract(1, "month").format("YYYY-MM-DD")
+		: null;
+	// Say what the change will DO before it is made: a later start means the
+	// merchant gets an extra short invoice for the stretch left behind.
+	const billingStartWarning = (() => {
+		if (!billingStart || !currentPeriodStart) return null;
+		if (dayjs(billingStart).date() > 28) return strings("form.account.billingStartTooLate");
+		if (billingStart < currentPeriodStart) return strings("form.account.billingStartBackwards");
+		if (billingStart > currentPeriodStart) {
+			return strings("form.account.billingStartStubPreview", [
+				dayjs(currentPeriodStart).format("D MMM"),
+				dayjs(billingStart).format("D MMM"),
+			]);
+		}
+		return null;
+	})();
+
 	return (
 		<div className="flex h-full flex-col">
 			<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
@@ -457,6 +517,26 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 														</span>
 													</div>
 												)}
+												{data.subscription.billingAnchorDay && (
+													<div className="flex justify-between">
+														<span className="text-slate-500">
+															{strings("form.account.billingTerm")}
+														</span>
+														<span className="text-slate-700">
+															{strings("form.account.billingTermCurrent", [data.subscription.billingAnchorDay])}
+														</span>
+													</div>
+												)}
+												{data.subscription.nextInvoiceAt && (
+													<div className="flex justify-between">
+														<span className="text-slate-500">
+															{strings("form.account.billingTermNextInvoice")}
+														</span>
+														<span className="text-slate-700">
+															{dayjs(data.subscription.nextInvoiceAt).format("D MMM YYYY")}
+														</span>
+													</div>
+												)}
 												{data.subscription.nextTierUuid && (
 													<p className="text-xs text-amber-600">
 														{strings("page.subscription.upgradeQueued")}
@@ -496,6 +576,44 @@ const AccountPanel = ({ id, accountType, onClose, onSaved }) => {
 													<><i className="fa-solid fa-spinner fa-spin" aria-hidden />{strings("form.account.changingTier")}</>
 												) : (
 													<><i className="fa-solid fa-arrows-rotate" aria-hidden />{strings("form.account.changeTier")}</>
+												)}
+											</button>
+										</div>
+									</div>
+								)}
+								{isAdmin && data?.subscription && (
+									<div className="space-y-2 border-t border-slate-200 pt-3">
+										<Input
+											label={strings("form.account.billingStart")}
+											type="date"
+											value={billingStart}
+											onChange={(e) => { setBillingStart(e.target.value); setAnchorMsg(null); }}
+										/>
+										<p className="text-xs text-slate-500">
+											{strings("form.account.billingStartHint")}
+										</p>
+										{billingStartWarning && (
+											<p className="text-xs text-amber-600">{billingStartWarning}</p>
+										)}
+										{anchorMsg && (
+											<p className="text-sm text-emerald-600">{anchorMsg}</p>
+										)}
+										<div className="flex justify-end">
+											<button
+												type="button"
+												onClick={handleChangeBillingTerm}
+												disabled={
+													!billingStart
+													|| dayjs(billingStart).date() > 28
+													|| billingStart <= currentPeriodStart
+													|| savingAnchor
+												}
+												className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+											>
+												{savingAnchor ? (
+													<><i className="fa-solid fa-spinner fa-spin" aria-hidden />{strings("form.account.applyingBillingTerm")}</>
+												) : (
+													<><i className="fa-solid fa-calendar-day" aria-hidden />{strings("form.account.applyBillingTerm")}</>
 												)}
 											</button>
 										</div>
