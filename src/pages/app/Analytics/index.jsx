@@ -509,7 +509,11 @@ const Analytics = () => {
 		// Handlers that aggregate live collections honour a date range; the
 		// lifetime fact rollups (channels, coupons, segments) ignore it, which
 		// is what the "lifetime" note under the picker is telling the operator.
-		const rangeQs = isCustomRange ? `&start=${customStart}&end=${customEnd}` : "";
+		// Both custom and preset ranges supply start/end so that timing, friction,
+		// affinity, and events all filter to the selected window - not just custom.
+		const rangeStart = isCustomRange ? customStart : dayjs().subtract(rangeDays, "day").format("YYYY-MM-DD");
+		const rangeEnd = isCustomRange ? customEnd : dayjs().format("YYYY-MM-DD");
+		const rangeQs = `&start=${rangeStart}&end=${rangeEnd}`;
 		Promise.all([
 			get(`/facts/segments?${saleParam}`),
 			get(`/facts/sales-daily?${dailyRange}${saleQs}`),
