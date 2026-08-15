@@ -517,8 +517,8 @@ const Analytics = () => {
 		Promise.all([
 			get(`/facts/segments?${saleParam}${rangeQs}`),
 			get(`/facts/sales-daily?${dailyRange}${saleQs}`),
-			get(`/facts/channels?${saleParam}`),
-			get(`/facts/coupons?${saleParam}`),
+			get(`/facts/channels?${saleParam}${rangeQs}`),
+			get(`/facts/coupons?${saleParam}${rangeQs}`),
 			get(`/facts/timing?${saleParam}${rangeQs}`),
 			get(`/facts/affinity?${saleParam}${rangeQs}`),
 			get(`/facts/friction?${saleParam}${rangeQs}`),
@@ -1636,7 +1636,9 @@ const Analytics = () => {
 											<th className="py-2 pr-4">{strings("page.analytics.col.views")}</th>
 											<th className="py-2 pr-4">{strings("page.analytics.col.baskets")}</th>
 											<th className="py-2 pr-4">{strings("page.analytics.col.sales")}</th>
-											<th className="py-2 pr-4">{strings("page.analytics.col.viewToBasket")}</th>
+											{channels.some((c) => c.viewToBasketPct != null) && (
+												<th className="py-2 pr-4">{strings("page.analytics.col.viewToBasket")}</th>
+											)}
 											<th className="py-2">{strings("page.analytics.col.basketToSale")}</th>
 										</tr>
 									</thead>
@@ -1648,7 +1650,9 @@ const Analytics = () => {
 												<td className="py-2 pr-4 text-slate-700">{(c.views ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.baskets ?? 0).toLocaleString()}</td>
 												<td className="py-2 pr-4 text-slate-700">{(c.success ?? 0).toLocaleString()}</td>
-												<td className="py-2 pr-4 text-slate-500">{c.viewToBasketPct ?? 0}%</td>
+												{channels.some((c) => c.viewToBasketPct != null) && (
+													<td className="py-2 pr-4 text-slate-500">{c.viewToBasketPct ?? 0}%</td>
+												)}
 												<td className="py-2">
 													<span className={c.basketToSuccessPct >= 50 ? "font-medium text-emerald-600" : "text-slate-700"}>{c.basketToSuccessPct ?? 0}%</span>
 												</td>
