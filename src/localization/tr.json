@@ -1491,6 +1491,8 @@
 	"page.invoices.amount": "Tutar",
 	"page.invoices.addItem": "Kalem ekle",
 	"page.invoices.addItemDesc": "Aciklama",
+	"page.invoices.recalculate": "Yeniden hesapla",
+	"page.invoices.recalculateHint": "Kullanim ucretlerini yeniden hesapla ve satici bilgilerini guncelle.",
 	"page.invoices.finalize": "Kesinlestir ve Stripe'a gonder",
 	"page.invoices.locked": "Kilitli - plan veya sistem kalemi",
 	"page.invoices.stripeLocked": "Stripe'a gonderildi. Degistirmek icin kredi notu kes.",

@@ -1491,6 +1491,8 @@
 	"page.invoices.amount": "Amount",
 	"page.invoices.addItem": "Add item",
 	"page.invoices.addItemDesc": "Description",
+	"page.invoices.recalculate": "Recalculate",
+	"page.invoices.recalculateHint": "Recompute usage fees and refresh seller details from the current realm configuration.",
 	"page.invoices.finalize": "Finalize & push to Stripe",
 	"page.invoices.locked": "Locked - tier or system item",
 	"page.invoices.stripeLocked": "Pushed to Stripe. To change, issue a credit note.",

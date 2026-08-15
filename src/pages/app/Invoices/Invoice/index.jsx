@@ -73,6 +73,7 @@ const Invoice = () => {
 	const [fetchedId, setFetchedId] = useState(null);
 	const [error, setError] = useState(null);
 	const [syncing, setSyncing] = useState(false);
+	const [recalculating, setRecalculating] = useState(false);
 	const [finalizing, setFinalizing] = useState(false);
 	const [confirmFinalize, setConfirmFinalize] = useState(false);
 	const [adding, setAdding] = useState(false);
@@ -127,6 +128,19 @@ const Invoice = () => {
 			setError(err?.message ?? strings("error.failedSave"));
 		} finally {
 			setFinalizing(false);
+		}
+	};
+
+	const onRecalculate = async () => {
+		if (!id) return;
+		setRecalculating(true);
+		try {
+			const res = await post(`/invoices/${id}/refresh`, {});
+			if (res?.data) setInvoice(res.data);
+		} catch (err) {
+			setError(err?.message ?? strings("error.failedSave"));
+		} finally {
+			setRecalculating(false);
 		}
 	};
 
@@ -443,6 +457,21 @@ const Invoice = () => {
 						)}
 
 						<div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+							{isAdmin && invoice.status === "draft" && (
+								<button
+									type="button"
+									onClick={onRecalculate}
+									disabled={recalculating}
+									className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 disabled:opacity-50"
+									title={strings("page.invoices.recalculateHint")}
+								>
+									<i
+										className={`fa-solid ${recalculating ? "fa-spinner fa-spin" : "fa-calculator"}`}
+										aria-hidden
+									/>
+									{strings("page.invoices.recalculate")}
+								</button>
+							)}
 							{isAdmin && invoice.status === "draft" && (
 								<button
 									type="button"
