@@ -53,6 +53,10 @@ const defaultValues = {
 	},
 	features: defaultFeatures,
 	ai: { openrouterKey: "", grokImageKey: "" },
+	wallet: {
+		apple: { passTypeId: "", teamId: "", p12: "", p12Password: "" },
+		google: { issuerId: "", saEmail: "", saKey: "" },
+	},
 	seller: emptySeller,
 };
 
@@ -131,6 +135,19 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							return acc;
 						}, {}),
 						ai: { openrouterKey: "", grokImageKey: "" },
+						wallet: {
+							apple: {
+								passTypeId: d.wallet?.apple?.passTypeId ?? "",
+								teamId: d.wallet?.apple?.teamId ?? "",
+								p12: "",
+								p12Password: "",
+							},
+							google: {
+								issuerId: d.wallet?.google?.issuerId ?? "",
+								saEmail: d.wallet?.google?.saEmail ?? "",
+								saKey: "",
+							},
+						},
 						seller: {
 							legalName: d.seller?.legalName ?? "",
 							tradeName: d.seller?.tradeName ?? "",
@@ -164,6 +181,9 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 							d.stripe?.transactionWebhookSecretSet,
 						),
 						smtpPass: Boolean(d.smtp?.passSet),
+						appleP12: Boolean(d.wallet?.apple?.p12Set),
+						appleP12Password: Boolean(d.wallet?.apple?.p12PasswordSet),
+						googleSaKey: Boolean(d.wallet?.google?.saKeySet),
 						openrouterKey: Boolean(d.ai?.openrouterKeySet),
 						grokImageKey: Boolean(d.ai?.grokImageKeySet),
 					});
@@ -247,6 +267,22 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 				ai: {
 					openrouterKey: formData.ai?.openrouterKey?.trim() || undefined,
 					grokImageKey: formData.ai?.grokImageKey?.trim() || undefined,
+				},
+				// Wallet: blank means "inherit the platform value", and a blank
+				// secret means "keep what is stored" - the panel is never shown
+				// the value it would otherwise post back as empty.
+				wallet: {
+					apple: {
+						passTypeId: formData.wallet?.apple?.passTypeId?.trim() || undefined,
+						teamId: formData.wallet?.apple?.teamId?.trim() || undefined,
+						p12: formData.wallet?.apple?.p12?.trim() || undefined,
+						p12Password: formData.wallet?.apple?.p12Password || undefined,
+					},
+					google: {
+						issuerId: formData.wallet?.google?.issuerId?.trim() || undefined,
+						saEmail: formData.wallet?.google?.saEmail?.trim() || undefined,
+						saKey: formData.wallet?.google?.saKey?.trim() || undefined,
+					},
 				},
 				seller: sellerPayload,
 			};
@@ -467,6 +503,77 @@ const RealmPanel = ({ id, onClose, onSaved, onDeleted }) => {
 								</div>
 							</div>
 						)}
+
+						{/* Wallet passes. Every field is optional: empty falls back to the
+						    platform credentials, so a single-brand deployment leaves this
+						    alone. Apple binds one certificate to one Pass Type ID, so a
+						    second brand MUST fill this in - it cannot share another's. */}
+						<div className="rounded-lg border border-slate-200 p-4">
+							<div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-700">
+								<i className="fa-solid fa-wallet text-slate-500" aria-hidden />
+								{strings("form.realm.wallet")}
+							</div>
+							<p className="mb-3 text-xs text-slate-500">
+								{strings("form.realm.walletHint")}
+							</p>
+
+							<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+								{strings("form.realm.walletApple")}
+							</p>
+							<div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<Input
+									label={strings("form.realm.walletApplePassTypeId")}
+									{...register("wallet.apple.passTypeId")}
+									placeholder="pass.wallet.example.com"
+									autoComplete="off"
+								/>
+								<Input
+									label={strings("form.realm.walletAppleTeamId")}
+									{...register("wallet.apple.teamId")}
+									placeholder="ABCDE12345"
+									autoComplete="off"
+								/>
+								<Input
+									label={strings("form.realm.walletAppleP12")}
+									type="password"
+									{...register("wallet.apple.p12")}
+									placeholder={secretsSet.appleP12 ? strings("form.realm.secretConfigured") : strings("form.realm.walletAppleP12Placeholder")}
+									autoComplete="off"
+								/>
+								<Input
+									label={strings("form.realm.walletAppleP12Password")}
+									type="password"
+									{...register("wallet.apple.p12Password")}
+									placeholder={secretsSet.appleP12Password ? strings("form.realm.secretConfigured") : ""}
+									autoComplete="off"
+								/>
+							</div>
+
+							<p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+								{strings("form.realm.walletGoogle")}
+							</p>
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+								<Input
+									label={strings("form.realm.walletGoogleIssuerId")}
+									{...register("wallet.google.issuerId")}
+									placeholder="3388000000000000000"
+									autoComplete="off"
+								/>
+								<Input
+									label={strings("form.realm.walletGoogleSaEmail")}
+									{...register("wallet.google.saEmail")}
+									placeholder="passes@project.iam.gserviceaccount.com"
+									autoComplete="off"
+								/>
+								<Input
+									label={strings("form.realm.walletGoogleSaKey")}
+									type="password"
+									{...register("wallet.google.saKey")}
+									placeholder={secretsSet.googleSaKey ? strings("form.realm.secretConfigured") : strings("form.realm.walletGoogleSaKeyPlaceholder")}
+									autoComplete="off"
+								/>
+							</div>
+						</div>
 
 						{/* Stripe fields - shown when the Stripe toggle above is checked */}
 						{watch("enableStripe") && (
