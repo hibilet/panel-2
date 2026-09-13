@@ -7,7 +7,8 @@ import { EmptyState, SearchBar, SlidePanel } from "../../../../components/shared
 import { guestColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
-import { del, get, post, put } from "../../../../lib/client";
+import { API_BASE_URL, del, get, post, put } from "../../../../lib/client";
+import { getToken } from "../../../../lib/storage";
 import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 import { matchesQuery } from "../../../../utils/search";
@@ -21,6 +22,23 @@ const formatDate = (iso) => {
 		month: "short",
 		day: "numeric",
 	});
+};
+
+// Authed binary streams (PDF, .pkpasses), so fetch as a blob with the session
+// header rather than through the JSON client - same shape as the ticket
+// download on the transaction panel.
+const downloadAuthed = async (url, filename) => {
+	const res = await fetch(url, { headers: { authorization: getToken() } });
+	if (!res.ok) throw new Error("download-failed");
+	const blob = await res.blob();
+	const href = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = href;
+	a.download = filename;
+	document.body.appendChild(a);
+	a.click();
+	a.remove();
+	URL.revokeObjectURL(href);
 };
 
 const getInitialForm = (guest, products = []) => {
@@ -62,6 +80,7 @@ const SaleGuests = ({ sale }) => {
 	const [saving, setSaving] = useState(null);
 	const [deleting, setDeleting] = useState(null);
 	const [query, setQuery] = useState("");
+	const [wallet, setWallet] = useState({ google: false, apple: false });
 
 	const filteredGuests = useMemo(
 		() => guests.filter((g) => matchesQuery(g.name, query)),
@@ -110,6 +129,17 @@ const SaleGuests = ({ sale }) => {
 		if (isNew) return;
 		fetchGuests();
 	}, [fetchGuests, isNew]);
+
+	// Wallet buttons only render where a pass can actually be produced - a
+	// deployment with no Apple/Google credentials shows none. Platform-level
+	// support; a realm with its own certificate is the uncommon case.
+	useEffect(() => {
+		get("/wallet/support")
+			.then((r) =>
+				setWallet({ google: !!r.data?.google, apple: !!r.data?.apple }),
+			)
+			.catch(() => setWallet({ google: false, apple: false }));
+	}, []);
 
 	const closePanel = useCallback(() => setPanelGuest(null), []);
 
@@ -376,6 +406,7 @@ const SaleGuests = ({ sale }) => {
 					key={isAdding ? "new" : (panelGuest?._id ?? panelGuest?.id ?? "edit")}
 					guest={isAdding ? null : panelGuest}
 					products={products}
+					wallet={wallet}
 					onSave={handleSave}
 					onDelete={handleDelete}
 					onClose={closePanel}
@@ -390,6 +421,7 @@ const SaleGuests = ({ sale }) => {
 const GuestPanel = ({
 	guest,
 	products,
+	wallet,
 	onSave,
 	onDelete,
 	onClose,
@@ -397,12 +429,52 @@ const GuestPanel = ({
 	deleting,
 }) => {
 	const isNew = guest === null;
+	const guestId = guest?._id ?? guest?.id;
 	const defaultValues = getInitialForm(guest, products);
 	const { register, handleSubmit, reset } = useForm({ defaultValues });
+	const [ticketBusy, setTicketBusy] = useState(null);
+	const [ticketError, setTicketError] = useState(false);
 
 	useEffect(() => {
 		reset(getInitialForm(guest, products));
 	}, [guest, products, reset]);
+
+	const safeName = (guest?.name || "guest").replace(/[^\w.-]+/g, "_");
+
+	const runTicketAction = (kind, fn) => async () => {
+		setTicketBusy(kind);
+		setTicketError(false);
+		try {
+			await fn();
+		} catch {
+			setTicketError(true);
+		} finally {
+			setTicketBusy(null);
+		}
+	};
+
+	const downloadPdf = runTicketAction("pdf", () =>
+		downloadAuthed(
+			`${API_BASE_URL}/giveaways/${guestId}/tickets.pdf`,
+			`guest-tickets-${safeName}.pdf`,
+		),
+	);
+
+	const addApple = runTicketAction("apple", () =>
+		downloadAuthed(
+			`${API_BASE_URL}/giveaways/${guestId}/wallet/apple`,
+			(guest?.count ?? 1) > 1
+				? "guest-tickets.pkpasses"
+				: "guest-ticket.pkpass",
+		),
+	);
+
+	const addGoogle = runTicketAction("google", async () => {
+		const r = await get(`/giveaways/${guestId}/wallet/google`);
+		const url = r?.data?.saveUrl;
+		if (!url) throw new Error("no-save-url");
+		window.open(url, "_blank", "noopener");
+	});
 
 	const onFormSubmit = (formData) => {
 		const productId = formData.product || (products[0]?.id ?? "");
@@ -472,6 +544,61 @@ const GuestPanel = ({
 								placeholder={strings("form.guest.tableQuantity")}
 							/>
 						</div>
+
+						{!isNew && guestId && (
+							<div className="space-y-3 border-t border-slate-200 pt-5">
+								<h4 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+									{strings("form.guest.ticketsSection")}
+								</h4>
+								<div className="flex flex-wrap gap-2">
+									<button
+										type="button"
+										onClick={downloadPdf}
+										disabled={ticketBusy !== null}
+										className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+									>
+										<i
+											className={`fa-solid ${ticketBusy === "pdf" ? "fa-spinner fa-spin" : "fa-file-arrow-down"}`}
+											aria-hidden
+										/>
+										{strings("form.guest.downloadTickets")}
+									</button>
+									{wallet?.apple && (
+										<button
+											type="button"
+											onClick={addApple}
+											disabled={ticketBusy !== null}
+											className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+										>
+											<i
+												className={`fa-brands ${ticketBusy === "apple" ? "fa-solid fa-spinner fa-spin" : "fa-apple"}`}
+												aria-hidden
+											/>
+											{strings("form.guest.addAppleWallet")}
+										</button>
+									)}
+									{wallet?.google && (
+										<button
+											type="button"
+											onClick={addGoogle}
+											disabled={ticketBusy !== null}
+											className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-50"
+										>
+											<i
+												className={`fa-brands ${ticketBusy === "google" ? "fa-solid fa-spinner fa-spin" : "fa-google"}`}
+												aria-hidden
+											/>
+											{strings("form.guest.addGoogleWallet")}
+										</button>
+									)}
+								</div>
+								{ticketError && (
+									<p className="text-sm text-red-600">
+										{strings("form.guest.ticketActionFailed")}
+									</p>
+								)}
+							</div>
+						)}
 					</div>
 				</div>
 

@@ -1,7 +1,8 @@
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "wouter";
+import { SearchableDropdown, Select } from "../../../../components/inputs";
 import { Modal } from "../../../../components/shared";
 import { API_BASE_URL, get, post } from "../../../../lib/client";
 import { getToken } from "../../../../lib/storage";
@@ -51,6 +52,7 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 	const [polling, setPolling] = useState(false);
 	const [checking, setChecking] = useState(false);
 	const [checkResult, setCheckResult] = useState(null);
+	const [transferOpen, setTransferOpen] = useState(false);
 
 	const loadRefunds = (silent = false) => {
 		if (!silent) setRefundsLoading(true);
@@ -149,6 +151,12 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 	const issuedTickets = reservations.filter(
 		(r) => r.status === "success" || r.status === "read",
 	);
+
+	// Transfer moves the success tickets only, and the API refuses the whole
+	// order once any ticket has been scanned - mirror both here so the button
+	// is not offered for an order that would be rejected.
+	const movableTickets = reservations.filter((r) => r.status === "success");
+	const hasScannedTicket = reservations.some((r) => r.status === "read");
 
 	// Authed binary stream, so fetch as a blob rather than going through the
 	// JSON client - same shape as the settlement report download on the sale
@@ -277,6 +285,26 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 								>
 									<i className="fa-solid fa-rotate-left" aria-hidden />
 									{strings("form.transaction.refundAll")}
+								</button>
+								<button
+									type="button"
+									onClick={() => setTransferOpen(true)}
+									disabled={
+										sending ||
+										refundSubmitting ||
+										data?.status !== "success" ||
+										hasScannedTicket ||
+										movableTickets.length === 0
+									}
+									title={
+										hasScannedTicket
+											? strings("form.transaction.transferScannedBlocked")
+											: undefined
+									}
+									className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									<i className="fa-solid fa-right-left" aria-hidden />
+									{strings("form.transaction.transfer")}
 								</button>
 								{data?.status === "pending" && (
 									<button
@@ -597,6 +625,17 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 				</p>
 			</Modal>
 
+			{transferOpen && (
+				<TransferDialog
+					transactionId={id}
+					onClose={() => setTransferOpen(false)}
+					onDone={async () => {
+						await Promise.all([reloadTransaction(), loadRefunds()]);
+						onRefunded?.();
+					}}
+				/>
+			)}
+
 			{emailDialogOpen && (
 				<SendEmailDialog
 					transactionId={id}
@@ -606,6 +645,207 @@ const TransactionPanel = ({ id, onClose, onRefunded }) => {
 				/>
 			)}
 		</div>
+	);
+};
+
+// The API answers a dry run with slugs rather than sentences, so the wording
+// stays translatable in the panel.
+const TRANSFER_WARNINGS = {
+	"seats-cleared": "form.transaction.transferWarnSeats",
+	"confirmation-email-resent": "form.transaction.transferWarnEmail",
+	"issued-wallet-passes-stale": "form.transaction.transferWarnWallet",
+	"answers-orphaned": "form.transaction.transferWarnAnswers",
+};
+
+// Move a whole paid order to another event, keeping the money as it was.
+// Eligibility (same owner, currency, provider, future start, ...) is decided by
+// GET /transfer-targets, so the dropdown can only offer events the transfer
+// endpoint accepts - the panel never re-implements those rules.
+const TransferDialog = ({ transactionId, onClose, onDone }) => {
+	const [targets, setTargets] = useState([]);
+	const [sourceProducts, setSourceProducts] = useState([]);
+	const [target, setTarget] = useState(null);
+	const [productMap, setProductMap] = useState({});
+	const [preview, setPreview] = useState(null);
+	const [busy, setBusy] = useState(false);
+
+	// Stable identity is required: SearchableDropdown lists searchFn in its
+	// effect dependencies, so an inline arrow would re-run the search on every
+	// render. The response carries the target's products and the source ticket
+	// types, so picking an event costs no extra request.
+	const searchFn = useCallback(
+		async (q) => {
+			const res = await get(
+				`/transactions/${transactionId}/transfer-targets?q=${encodeURIComponent(q ?? "")}&limit=20`,
+			);
+			const list = res?.data ?? [];
+			setTargets(list);
+			setSourceProducts(res?.extra?.sourceProducts ?? []);
+			return list;
+		},
+		[transactionId],
+	);
+
+	const selectTarget = (id) => {
+		setTarget(targets.find((t) => String(t.id) === String(id)) ?? null);
+		setProductMap({});
+		setPreview(null);
+	};
+
+	// A seated target product needs a seat per ticket and nothing assigns one,
+	// so the API refuses it - keep it out of the options entirely.
+	const productOptions = (target?.products ?? [])
+		.filter((p) => !p.seated)
+		.map((p) => ({
+			value: p.id,
+			label: `${p.name} (${p.available == null ? 0 : p.available})`,
+		}));
+
+	const mapped =
+		sourceProducts.length > 0 && sourceProducts.every((p) => productMap[p.id]);
+
+	const run = (dryRun) => {
+		if (!target || !mapped || busy) return;
+		setBusy(true);
+		post(`/transactions/${transactionId}/transfer`, {
+			targetSale: target.id,
+			productMap,
+			...(dryRun ? { dryRun: true } : null),
+		})
+			.then(async (res) => {
+				if (dryRun) {
+					setPreview(res?.data ?? null);
+					return;
+				}
+				await onDone?.();
+				onClose();
+			})
+			.catch(() => {})
+			.finally(() => setBusy(false));
+	};
+
+	return (
+		<Modal
+			isOpen
+			onClose={() => (busy ? null : onClose())}
+			title={strings("form.transaction.transferTitle")}
+			maxWidth="2xl"
+			minHeight="50vh"
+			footer={
+				<div className="flex justify-end gap-2">
+					<button
+						type="button"
+						onClick={onClose}
+						disabled={busy}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:opacity-50"
+					>
+						{strings("common.cancel")}
+					</button>
+					<button
+						type="button"
+						onClick={() => run(true)}
+						disabled={busy || !target || !mapped}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition-colors hover:bg-slate-50 active:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{busy && !preview && (
+							<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+						)}
+						{strings("form.transaction.transferPreview")}
+					</button>
+					<button
+						type="button"
+						onClick={() => run(false)}
+						disabled={busy || !preview}
+						className="inline-flex items-center justify-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-colors hover:bg-slate-800 active:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{busy && preview && (
+							<i className="fa-solid fa-spinner fa-spin" aria-hidden />
+						)}
+						{strings("form.transaction.transferConfirm")}
+					</button>
+				</div>
+			}
+		>
+			<div className="space-y-4">
+				<SearchableDropdown
+					label={strings("form.transaction.transferTarget")}
+					name="targetSale"
+					value={target?.id ?? ""}
+					onChange={selectTarget}
+					searchFn={searchFn}
+					getOptionLabel={(s) =>
+						`${s.name} - ${s.start ? dayjs(s.start).format("D MMM YYYY, HH:mm") : "—"}${
+							s.venue?.name ? ` - ${s.venue.name}` : ""
+						}`
+					}
+					placeholder={strings("form.transaction.transferTargetPlaceholder")}
+					searchPlaceholder={strings("form.transaction.transferSearch")}
+					disabled={busy}
+				/>
+
+				{target && (
+					<div className="space-y-3">
+						<h4 className="text-sm font-semibold text-slate-700">
+							{strings("form.transaction.transferMapping")}
+						</h4>
+						{sourceProducts.map((p) => (
+							<Select
+								key={p.id}
+								name={`map-${p.id}`}
+								label={`${p.name ?? "—"} (${p.count})`}
+								value={productMap[p.id] ?? ""}
+								onChange={(e) => {
+									const next = e.target.value;
+									setProductMap((prev) => ({ ...prev, [p.id]: next }));
+									setPreview(null);
+								}}
+								options={productOptions}
+								placeholder={strings("form.transaction.transferSelectProduct")}
+								disabled={busy}
+							/>
+						))}
+					</div>
+				)}
+
+				{preview && (
+					<div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+						<p className="font-medium text-slate-900">
+							{strings("form.transaction.transferSummary", [
+								preview.movingCount,
+								preview.target?.name ?? "—",
+							])}
+						</p>
+						{preview.stayingCount > 0 && (
+							<p className="mt-1">
+								{strings("form.transaction.transferStaying", [
+									preview.stayingCount,
+								])}
+							</p>
+						)}
+						<ul className="mt-2 list-inside list-disc space-y-1">
+							{(preview.plan ?? []).map((row) => (
+								<li key={row.productId}>
+									{strings("form.transaction.transferPlanRow", [
+										row.tickets,
+										row.product,
+										row.available,
+									])}
+								</li>
+							))}
+						</ul>
+						{(preview.warnings ?? []).length > 0 && (
+							<ul className="mt-3 list-inside list-disc space-y-1 text-amber-700">
+								{preview.warnings
+									.filter((w) => TRANSFER_WARNINGS[w])
+									.map((w) => (
+										<li key={w}>{strings(TRANSFER_WARNINGS[w])}</li>
+									))}
+							</ul>
+						)}
+					</div>
+				)}
+			</div>
+		</Modal>
 	);
 };
 

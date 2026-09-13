@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "wouter";
 import * as XLSX from "xlsx";
-import { PageHeader, SearchBar } from "../../../../components/shared";
+import { Modal, PageHeader, SearchBar } from "../../../../components/shared";
 import { attendeeColumns } from "../../../../components/tables/columns";
 import DataTable from "../../../../components/tables/DataTable";
 import Pagination from "../../../../components/tables/Pagination";
-import { get } from "../../../../lib/client";
+import { get, post } from "../../../../lib/client";
 import { showToast } from "../../../../lib/toastStore";
 import strings from "../../../../localization";
 import { matchesQuery } from "../../../../utils/search";
@@ -233,37 +233,73 @@ const SaleAttendees = ({ sale }) => {
 		return () => clearTimeout(t);
 	}, [expandedRowKeys, sale?.name]);
 
-	const handleDownloadExcel = () => {
-		const headers = [
-			strings("table.transaction.owner"),
-			strings("form.transaction.email"),
-			strings("form.attendees.product"),
-			strings("page.sale.tab.tickets"),
-			"Gender",
-			"Age",
-			strings("common.status"),
-			strings("page.transactions.transactionId"),
-			strings("form.question.question") + "s",
-		];
-		const rows = reservations.map((r) => [
-			r.owner ?? "",
-			r.email ?? "",
-			r.product ?? "",
-			r.tickets ?? "",
-			r.gender
-				? String(r.gender).charAt(0).toUpperCase() + String(r.gender).slice(1)
-				: "",
-			r.age ?? getAge(r.birthday) ?? "",
-			STATUS_LABELS[r.status] ?? r.status ?? "",
-			r.transaction ? String(r.transaction).slice(-6) : "",
-			formatAnswers(r.answers, sale?.questions ?? []),
-		]);
-		const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-		const wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, "Attendees");
-		const safeName = (sale?.name ?? id).replace(/[^a-zA-Z0-9-_]/g, "_");
-		XLSX.writeFile(wb, `attendees-${safeName}.xlsx`);
+	const [exporting, setExporting] = useState(false);
+	const [resendOpen, setResendOpen] = useState(false);
+
+	// Export one row per ticket (reservation), not one row per attendee block, so
+	// each seat/ticket is importable elsewhere. Pulls the flat endpoint which
+	// carries seat + price the grouped attendee view drops.
+	const handleDownloadExcel = async () => {
+		setExporting(true);
+		try {
+			// The API caps every list page at 500 rows, so page through until a
+			// short page - a large event has thousands of tickets and the export
+			// must carry all of them, not the first 500.
+			const PAGE = 500;
+			const data = [];
+			for (let skipRows = 0; ; skipRows += PAGE) {
+				const r = await get(
+					`/sales/${id}/reservations/export?status=success,read&limit=${PAGE}&skip=${skipRows}`,
+				);
+				const page = r.data ?? [];
+				data.push(...page);
+				if (page.length < PAGE) break;
+			}
+			const headers = [
+				"Ticket ID",
+				strings("table.transaction.owner"),
+				strings("form.transaction.email"),
+				strings("form.attendees.product"),
+				"Seat",
+				"Price",
+				"Gender",
+				"Age",
+				strings("common.status"),
+				strings("page.transactions.transactionId"),
+				strings("form.question.question") + "s",
+			];
+			const rows = data.map((res) => [
+				res.id ? String(res.id) : "",
+				res.owner ?? "",
+				res.email ?? "",
+				res.product ?? "",
+				res.seat ?? "",
+				res.price ?? "",
+				res.gender
+					? String(res.gender).charAt(0).toUpperCase() +
+						String(res.gender).slice(1)
+					: "",
+				res.age ?? getAge(res.birthday) ?? "",
+				STATUS_LABELS[res.status] ?? res.status ?? "",
+				res.transaction ? String(res.transaction) : "",
+				formatAnswers(res.answers, sale?.questions ?? []),
+			]);
+			const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+			const wb = XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(wb, ws, "Tickets");
+			const safeName = (sale?.name ?? id).replace(/[^a-zA-Z0-9-_]/g, "_");
+			XLSX.writeFile(wb, `tickets-${safeName}.xlsx`);
+		} catch (err) {
+			showToast("error", err?.message ?? strings("error.failedLoadAttendees"));
+		} finally {
+			setExporting(false);
+		}
 	};
+
+	// The batch runs as a background job (25 baskets per tick); the modal
+	// confirms, kicks it off, then polls resend-status so the operator watches it
+	// drain instead of firing blind from a toast.
+	const handleResendTickets = () => setResendOpen(true);
 
 	const handleRowClick = (row) => {
 		if (row.transaction) {
@@ -310,12 +346,26 @@ const SaleAttendees = ({ sale }) => {
 			<button
 				type="button"
 				onClick={handleDownloadExcel}
-				disabled={loading || reservations.length === 0}
+				disabled={loading || exporting || reservations.length === 0}
 				className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
 				aria-label={strings("form.attendees.ariaDownload")}
 			>
-				<i className="fa-solid fa-file-excel" aria-hidden />
+				<i
+					className={`fa-solid ${exporting ? "fa-spinner fa-spin" : "fa-file-excel"}`}
+					aria-hidden
+				/>
 				{strings("form.attendees.downloadExcel")}
+			</button>
+			<button
+				type="button"
+				onClick={handleResendTickets}
+				disabled={loading || reservations.length === 0}
+				className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+				aria-label="Resend all tickets"
+				title="Resend all tickets"
+			>
+				<i className="fa-solid fa-paper-plane" aria-hidden />
+				Resend tickets
 			</button>
 		</div>
 	);
@@ -371,7 +421,234 @@ const SaleAttendees = ({ sale }) => {
 					onPageChange={setPage}
 				/>
 			</div>
+
+			{resendOpen && (
+				<ResendTicketsModal
+					saleId={id}
+					total={total}
+					onClose={() => setResendOpen(false)}
+				/>
+			)}
 		</div>
+	);
+};
+
+// Confirms, kicks off the background resend job, then polls resend-status so the
+// batch drains visibly. The job runs server-side regardless of this modal, so
+// closing mid-run does not stop the send - it just stops watching.
+const ResendTicketsModal = ({ saleId, total, onClose }) => {
+	const [phase, setPhase] = useState("confirm"); // confirm | running | done | error
+	const [status, setStatus] = useState(null);
+	const [errMsg, setErrMsg] = useState(null);
+	const timer = useRef(null);
+
+	const stopPoll = () => {
+		if (timer.current) {
+			clearInterval(timer.current);
+			timer.current = null;
+		}
+	};
+
+	const poll = useCallback(async () => {
+		try {
+			const r = await get(`/sales/${saleId}/resend-status`);
+			const data = r?.data ?? null;
+			setStatus(data);
+			// Our POST armed the job (running=true); it clears nextRunAt once the
+			// final empty page finishes. running===false with a job present is done.
+			if (data?.job && data.job.running === false) {
+				stopPoll();
+				setPhase("done");
+			}
+		} catch {
+			// Transient network blip - keep polling.
+		}
+	}, [saleId]);
+
+	// Attach to an already-running resend on open, so reopening shows live
+	// progress instead of offering to start a second one.
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const r = await get(`/sales/${saleId}/resend-status`);
+				const data = r?.data ?? null;
+				if (cancelled) return;
+				setStatus(data);
+				if (data?.job?.running) {
+					setPhase("running");
+					timer.current = setInterval(poll, 1500);
+				}
+			} catch {
+				/* stay on the confirm step */
+			}
+		})();
+		return () => {
+			cancelled = true;
+			stopPoll();
+		};
+	}, [saleId, poll]);
+
+	const start = async () => {
+		setPhase("running");
+		setErrMsg(null);
+		try {
+			await post(`/sales/${saleId}/resend-tickets`, {});
+			await poll();
+			timer.current = setInterval(poll, 1500);
+		} catch (err) {
+			stopPoll();
+			setErrMsg(err?.message ?? "Failed to start resend.");
+			setPhase("error");
+		}
+	};
+
+	const p = status?.job?.progress ?? null;
+	const totalCount = status?.total ?? total ?? 0;
+	const processed = p?.processed ?? 0;
+	const pct = totalCount
+		? Math.min(100, Math.round((processed / totalCount) * 100))
+		: 0;
+
+	const Stat = ({ label, value, tone = "text-slate-900" }) => (
+		<div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-center">
+			<div className={`text-lg font-semibold tabular-nums ${tone}`}>{value}</div>
+			<div className="text-xs text-slate-500">{label}</div>
+		</div>
+	);
+
+	const footer = (
+		<div className="flex justify-end gap-2">
+			{phase === "confirm" ? (
+				<>
+					<button
+						type="button"
+						onClick={onClose}
+						className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+					>
+						{strings("common.cancel")}
+					</button>
+					<button
+						type="button"
+						onClick={start}
+						className="inline-flex items-center gap-2 rounded-lg border border-transparent bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+					>
+						<i className="fa-solid fa-paper-plane" aria-hidden />
+						Start resend
+					</button>
+				</>
+			) : (
+				<button
+					type="button"
+					onClick={onClose}
+					className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+				>
+					{phase === "running" ? "Close (keeps running)" : strings("common.close")}
+				</button>
+			)}
+		</div>
+	);
+
+	return (
+		<Modal isOpen onClose={onClose} title="Resend tickets" maxWidth="md" footer={footer}>
+			{phase === "confirm" && (
+				<p className="text-sm text-slate-600">
+					Resend the ticket email to all{" "}
+					<span className="font-semibold text-slate-900">{totalCount}</span>{" "}
+					attendees of this event? Each attendee gets their tickets again.
+				</p>
+			)}
+
+			{phase === "error" && (
+				<div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600">
+					{errMsg}
+				</div>
+			)}
+
+			{(phase === "running" || phase === "done") && (
+				<div className="space-y-4">
+					<div className="flex items-center justify-between text-sm">
+						<span className="font-medium text-slate-700">
+							{phase === "done" ? (
+								<span className="text-emerald-700">
+									<i className="fa-solid fa-circle-check mr-1.5" aria-hidden />
+									Resend complete
+								</span>
+							) : (
+								<span>
+									<i className="fa-solid fa-spinner fa-spin mr-1.5" aria-hidden />
+									Sending…
+								</span>
+							)}
+						</span>
+						<span className="tabular-nums text-slate-500">
+							{processed}/{totalCount}
+						</span>
+					</div>
+
+					<div className="h-2 overflow-hidden rounded-full bg-slate-100">
+						<div
+							className={`h-full rounded-full transition-all duration-500 ${
+								phase === "done" ? "bg-emerald-500" : "bg-slate-900"
+							}`}
+							style={{ width: `${pct}%` }}
+						/>
+					</div>
+
+					<div className="grid grid-cols-3 gap-2">
+						<Stat label="Sent" value={p?.sent ?? 0} tone="text-emerald-700" />
+						<Stat label="Skipped" value={p?.skipped ?? 0} tone="text-slate-500" />
+						<Stat
+							label="Failed"
+							value={p?.failed ?? 0}
+							tone={(p?.failed ?? 0) > 0 ? "text-red-600" : "text-slate-900"}
+						/>
+					</div>
+
+					{(p?.errors?.length ?? 0) > 0 && (
+						<details className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm">
+							<summary className="cursor-pointer font-medium text-red-700">
+								{p.errors.length} error{p.errors.length > 1 ? "s" : ""}
+							</summary>
+							<ul className="mt-2 max-h-40 space-y-1 overflow-auto text-xs text-red-600">
+								{p.errors.slice(0, 50).map((e) => (
+									<li key={e.basket} className="truncate">
+										{e.basket}: {e.error}
+									</li>
+								))}
+							</ul>
+						</details>
+					)}
+
+					{(p?.skippedList?.length ?? 0) > 0 && (
+						<details className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-sm">
+							<summary className="cursor-pointer font-medium text-slate-600">
+								{p.skippedList.length} skipped
+							</summary>
+							<ul className="mt-2 max-h-40 space-y-1 overflow-auto text-xs text-slate-500">
+								{p.skippedList.slice(0, 50).map((s) => (
+									<li key={s.basket} className="truncate">
+										{s.basket}:{" "}
+										{s.reason === "no-basket"
+											? "order data missing (orphaned basket)"
+											: s.reason === "no-email"
+												? "no email on order"
+												: "no tickets to send (refunded/transferred)"}
+									</li>
+								))}
+							</ul>
+						</details>
+					)}
+
+					{phase === "running" && (
+						<p className="text-xs text-slate-400">
+							Runs in the background (25 at a time). Safe to close - it keeps
+							going, and reopening shows progress.
+						</p>
+					)}
+				</div>
+			)}
+		</Modal>
 	);
 };
 

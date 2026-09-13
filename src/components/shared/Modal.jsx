@@ -21,6 +21,7 @@ const Modal = ({
 	footer,
 	bodyRef,
 	maxWidth = "md",
+	minHeight,
 	"aria-label": ariaLabel,
 	"aria-labelledby": ariaLabelledBy,
 }) => {
@@ -53,6 +54,7 @@ const Modal = ({
 			/>
 			<div
 				className={`relative z-10 flex max-h-[90vh] w-full ${MAX_WIDTH_CLASS[maxWidth] ?? MAX_WIDTH_CLASS.md} flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xl animate-slide-up`}
+				style={minHeight ? { minHeight } : undefined}
 			>
 				{(title || headerActions) && (
 					<header className="flex shrink-0 items-center justify-between gap-4 border-b border-slate-200 px-6 py-4">
