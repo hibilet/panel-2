@@ -79,6 +79,7 @@ const SaleGuests = ({ sale }) => {
 	const [panelGuest, setPanelGuest] = useState(null);
 	const [saving, setSaving] = useState(null);
 	const [deleting, setDeleting] = useState(null);
+	const [exporting, setExporting] = useState(false);
 	const [query, setQuery] = useState("");
 	const [wallet, setWallet] = useState({ google: false, apple: false });
 
@@ -228,26 +229,48 @@ const SaleGuests = ({ sale }) => {
 		}, 250);
 	};
 
-	const handleDownloadExcel = () => {
-		const headers = [
-			strings("form.guest.tableName"),
-			strings("form.guest.tableEmail"),
-			strings("form.guest.tableProduct"),
-			strings("form.guest.tableQuantity"),
-			strings("form.guest.tableCreated"),
-		];
-		const rows = guests.map((g) => [
-			g.name ?? "",
-			g.email ?? "",
-			g.product ?? "",
-			g.count ?? 0,
-			formatDate(g.createdAt),
-		]);
-		const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
-		const wb = XLSX.utils.book_new();
-		XLSX.utils.book_append_sheet(wb, ws, "Guests");
-		const safeName = (sale?.name ?? id).replace(/[^a-zA-Z0-9-_]/g, "_");
-		XLSX.writeFile(wb, `guests-${safeName}.xlsx`);
+	// Export one row per guest TICKET, not one row per recipient, so each
+	// ticket's id (the giveaway product uuid - the value scanned at the gate)
+	// is in the sheet, mirroring the attendees export. Pulls the flat endpoint.
+	const handleDownloadExcel = async () => {
+		setExporting(true);
+		try {
+			const PAGE = 1000;
+			const data = [];
+			for (let skipRows = 0; ; skipRows += PAGE) {
+				const r = await get(
+					`/sales/${id}/guests/export?limit=${PAGE}&skip=${skipRows}`,
+				);
+				const page = r.data ?? [];
+				data.push(...page);
+				if (page.length < PAGE) break;
+			}
+			const headers = [
+				"Ticket ID",
+				strings("form.guest.tableName"),
+				strings("form.guest.tableEmail"),
+				strings("form.guest.tableProduct"),
+				strings("common.status"),
+				strings("form.guest.tableCreated"),
+			];
+			const rows = data.map((t) => [
+				t.id ? String(t.id) : "",
+				t.owner ?? "",
+				t.email ?? "",
+				t.product ?? "",
+				t.status ?? "",
+				formatDate(t.createdAt),
+			]);
+			const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+			const wb = XLSX.utils.book_new();
+			XLSX.utils.book_append_sheet(wb, ws, "Guests");
+			const safeName = (sale?.name ?? id).replace(/[^a-zA-Z0-9-_]/g, "_");
+			XLSX.writeFile(wb, `guests-${safeName}.xlsx`);
+		} catch (_e) {
+			showToast(strings("form.guest.exportFailed"), "error");
+		} finally {
+			setExporting(false);
+		}
 	};
 
 	const totalQuantity = guests.reduce((sum, g) => sum + (g.count ?? 0), 0);
@@ -323,11 +346,14 @@ const SaleGuests = ({ sale }) => {
 						<button
 							type="button"
 							onClick={handleDownloadExcel}
-							disabled={loading || guests.length === 0}
+							disabled={loading || exporting || guests.length === 0}
 							className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
 							aria-label={strings("form.guest.ariaDownload")}
 						>
-							<i className="fa-solid fa-file-excel" aria-hidden />
+							<i
+								className={`fa-solid ${exporting ? "fa-spinner fa-spin" : "fa-file-excel"}`}
+								aria-hidden
+							/>
 							{strings("form.guest.downloadExcel")}
 						</button>
 					</div>

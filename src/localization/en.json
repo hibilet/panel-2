@@ -952,6 +952,7 @@
 	"form.guest.addAppleWallet": "Add to Apple Wallet",
 	"form.guest.addGoogleWallet": "Add to Google Wallet",
 	"form.guest.ticketActionFailed": "Could not produce the ticket. Try again.",
+	"form.guest.exportFailed": "Could not export guests. Try again.",
 	"form.guest.ariaPrint": "Print guests",
 	"form.guest.ariaDownload": "Download Excel",
 	"form.guest.tableName": "Name",
