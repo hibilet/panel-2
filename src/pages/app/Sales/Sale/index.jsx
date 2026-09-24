@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link, Route, Switch, useLocation, useParams, useSearch } from "wouter";
 import SaleCancelZone from "../../../../components/sales/SaleCancelZone";
+import SalePauseZone from "../../../../components/sales/SalePauseZone";
 import DangerZone from "../../../../components/shared/DangerZone";
 import { useApp } from "../../../../context";
 import { AI_HIDDEN } from "../../../../lib/capabilities";
@@ -186,6 +187,12 @@ const Sale = () => {
 							{strings("common.cancelled")}
 						</span>
 					)}
+					{sale?.status === "paused" && (
+						<span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+							<i className="fa-solid fa-pause" aria-hidden />
+							{strings("page.sale.paused")}
+						</span>
+					)}
 				</h1>
 				{!isNew && sale && (
 					<button
@@ -276,6 +283,14 @@ const Sale = () => {
 
 					{/* Cancelling is money, so it is merchant/admin only - the same
 					    gate the API puts on POST /sales/:id/cancel. */}
+					{isTabActive("basic") &&
+						!isNew &&
+						sale &&
+						sale?.status !== "cancelled" &&
+						["account.admin", "account.merchant"].includes(account?.type) && (
+							<SalePauseZone sale={sale} onChanged={fetchSale} />
+						)}
+
 					{isTabActive("basic") &&
 						!isNew &&
 						sale &&
