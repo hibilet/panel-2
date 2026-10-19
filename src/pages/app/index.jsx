@@ -34,6 +34,7 @@ import SettingsProviders from "./Settings/Providers";
 import SettingsRealm from "./Settings/Realm";
 import SettingsSubscription from "./Settings/Subscription";
 import SettingsTeam from "./Settings/Team";
+import SettingsTracking from "./Settings/Tracking";
 import Tiers from "./Tiers";
 import Transactions from "./Transactions";
 import Venues from "./Venues";
@@ -174,6 +175,7 @@ const App = () => {
 							/>
 							<Route path="/settings/mailing" component={SettingsMailing} />
 							<Route path="/settings/billing" component={SettingsBilling} />
+							<Route path="/settings/tracking" component={SettingsTracking} />
 							<Route
 								path="/settings/mailing/template"
 								component={SettingsMailTemplate}
